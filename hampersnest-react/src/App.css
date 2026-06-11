@@ -309,12 +309,13 @@ header.scrolled {
 }
 
 .brand-name {
-  font-size: 30px;
-  font-weight: 600;
-  letter-spacing: 0.3px;
+  font-size: 22px;
+  font-weight: 500;
+  letter-spacing: -0.5px;
   color: var(--color-purple-dark);
-  font-family: var(--font-serif);
+  font-family: var(--font-display);
   white-space: nowrap;
+  line-height: 1;
 }
 
 .nav-menu {
