@@ -111,10 +111,17 @@
         <span class="brand-name">Hampers Nest</span>
       </a>
 
-      <!-- Mobile Actions (Cart Icon) -->
-      <a href="#collections" class="mobile-cart-icon" aria-label="View Collections / Cart">
-        <i class="fa-solid fa-cart-shopping"></i>
-      </a>
+      <!-- Navbar Actions: Wishlist + Cart -->
+      <div class="hn-nav-actions">
+        <button id="hn-wishlist-btn" class="hn-nav-icon-btn" aria-label="View Wishlist">
+          <i class="fa-regular fa-heart"></i>
+          <span class="hn-wishlist-badge" style="display:none;">0</span>
+        </button>
+        <button id="hn-cart-btn-mobile" class="hn-nav-icon-btn" aria-label="View Cart">
+          <i class="fa-solid fa-cart-shopping"></i>
+          <span class="hn-cart-badge" style="display:none;">0</span>
+        </button>
+      </div>
 
       <button id="menuToggle" class="menu-toggle" aria-label="Toggle navigation menu">
         <span></span>
@@ -130,6 +137,17 @@
         <a href="#about">About Us</a>
         <a href="#contact">Contact</a>
       </nav>
+      <!-- Desktop Cart + Wishlist -->
+      <div class="hn-nav-desktop-actions">
+        <button id="hn-wishlist-btn-desktop" class="hn-nav-icon-btn hn-desktop-only" aria-label="View Wishlist">
+          <i class="fa-regular fa-heart"></i>
+          <span class="hn-wishlist-badge" style="display:none;">0</span>
+        </button>
+        <button id="hn-cart-btn" class="hn-nav-icon-btn hn-desktop-only" aria-label="View Cart">
+          <i class="fa-solid fa-cart-shopping"></i>
+          <span class="hn-cart-badge" style="display:none;">0</span>
+        </button>
+      </div>
     </div>
   </header>
   
@@ -235,116 +253,146 @@
       <div class="collections-grid reveal" style="margin-top: 3.5rem;">
 
         <!-- Wedding Gifts -->
-        <div class="collection-card">
+        <div class="collection-card" data-card-id="wedding-gift-hamper">
           <div class="card-img-wrapper">
             <div class="card-actions-top">
-              <button class="action-icon-btn wishlist-btn" aria-label="Add to Wishlist"><i class="fa-regular fa-heart"></i></button>
+              <button class="action-icon-btn wishlist-btn" data-product-id="wedding-gift-hamper" aria-label="Add to Wishlist"><i class="fa-regular fa-heart"></i></button>
             </div>
-            <img src="assets/wedding_gift.png" alt="Wedding Return Gifts Collection">
+            <img src="assets/wedding_gift.png" alt="Wedding Return Gifts Collection" data-card-id="wedding-gift-hamper" style="cursor:pointer">
+            <span class="hn-stock-badge-card hn-stock-in">✓ In Stock</span>
             <div class="card-overlay">
-              <button class="card-overlay-btn"><i class="fa-solid fa-cart-shopping"></i> Add To Cart</button>
+              <button class="card-overlay-btn" data-atc-id="wedding-gift-hamper"><i class="fa-solid fa-cart-shopping"></i> Add To Cart</button>
             </div>
           </div>
           <div class="card-content">
-            <h3 class="card-title">Wedding Gift Hamper</h3>
+            <h3 class="card-title" data-card-id="wedding-gift-hamper" style="cursor:pointer">Wedding Gift Hamper</h3>
             <p class="card-price"><span class="price-prefix">From </span>₹499</p>
+            <p class="card-price-usd">≈ $6 USD</p>
             <p class="card-desc">Exquisite traditional brass items and luxury gift packs styled for premium weddings.</p>
-            <a href="#contact" class="card-link btn btn-secondary btn-quick-enquiry">View Details <i class="fa-solid fa-chevron-right"></i></a>
+            <div class="card-btn-group">
+              <button class="card-link btn btn-secondary" data-detail-id="wedding-gift-hamper">View Details <i class="fa-solid fa-chevron-right"></i></button>
+              <button class="card-link btn btn-primary-sm" data-atc-id="wedding-gift-hamper"><i class="fa-solid fa-cart-shopping"></i> Add To Cart</button>
+            </div>
           </div>
         </div>
 
         <!-- Baby Shower -->
-        <div class="collection-card">
+        <div class="collection-card" data-card-id="baby-shower-hamper">
           <div class="card-img-wrapper">
             <div class="card-actions-top">
-              <button class="action-icon-btn wishlist-btn" aria-label="Add to Wishlist"><i class="fa-regular fa-heart"></i></button>
+              <button class="action-icon-btn wishlist-btn" data-product-id="baby-shower-hamper" aria-label="Add to Wishlist"><i class="fa-regular fa-heart"></i></button>
             </div>
-            <img src="assets/baby_shower.png" alt="Baby Shower Collections">
+            <img src="assets/baby_shower.png" alt="Baby Shower Collections" data-card-id="baby-shower-hamper" style="cursor:pointer">
+            <span class="hn-stock-badge-card hn-stock-in">✓ In Stock</span>
             <div class="card-overlay">
-              <button class="card-overlay-btn"><i class="fa-solid fa-cart-shopping"></i> Add To Cart</button>
+              <button class="card-overlay-btn" data-atc-id="baby-shower-hamper"><i class="fa-solid fa-cart-shopping"></i> Add To Cart</button>
             </div>
           </div>
           <div class="card-content">
-            <h3 class="card-title">Baby Shower Hamper</h3>
+            <h3 class="card-title" data-card-id="baby-shower-hamper" style="cursor:pointer">Baby Shower Hamper</h3>
             <p class="card-price"><span class="price-prefix">From </span>₹399</p>
+            <p class="card-price-usd">≈ $5 USD</p>
             <p class="card-desc">Sweet, elegant lavender and pastel-themed hampers filled with custom keepsakes.</p>
-            <a href="#contact" class="card-link btn btn-secondary btn-quick-enquiry">View Details <i class="fa-solid fa-chevron-right"></i></a>
+            <div class="card-btn-group">
+              <button class="card-link btn btn-secondary" data-detail-id="baby-shower-hamper">View Details <i class="fa-solid fa-chevron-right"></i></button>
+              <button class="card-link btn btn-primary-sm" data-atc-id="baby-shower-hamper"><i class="fa-solid fa-cart-shopping"></i> Add To Cart</button>
+            </div>
           </div>
         </div>
 
         <!-- Housewarming -->
-        <div class="collection-card">
+        <div class="collection-card" data-card-id="housewarming-hamper">
           <div class="card-img-wrapper">
             <div class="card-actions-top">
-              <button class="action-icon-btn wishlist-btn" aria-label="Add to Wishlist"><i class="fa-regular fa-heart"></i></button>
+              <button class="action-icon-btn wishlist-btn" data-product-id="housewarming-hamper" aria-label="Add to Wishlist"><i class="fa-regular fa-heart"></i></button>
             </div>
-            <img src="assets/housewarming.png" alt="Housewarming Hampers">
+            <img src="assets/housewarming.png" alt="Housewarming Hampers" data-card-id="housewarming-hamper" style="cursor:pointer">
+            <span class="hn-stock-badge-card hn-stock-in">✓ In Stock</span>
             <div class="card-overlay">
-              <button class="card-overlay-btn"><i class="fa-solid fa-cart-shopping"></i> Add To Cart</button>
+              <button class="card-overlay-btn" data-atc-id="housewarming-hamper"><i class="fa-solid fa-cart-shopping"></i> Add To Cart</button>
             </div>
           </div>
           <div class="card-content">
-            <h3 class="card-title">Housewarming Hamper</h3>
+            <h3 class="card-title" data-card-id="housewarming-hamper" style="cursor:pointer">Housewarming Hamper</h3>
             <p class="card-price"><span class="price-prefix">From </span>₹799</p>
+            <p class="card-price-usd">≈ $10 USD</p>
             <p class="card-desc">Charming home decor, brass diyas, incense holders, and premium dry fruit setups.</p>
-            <a href="#contact" class="card-link btn btn-secondary btn-quick-enquiry">View Details <i class="fa-solid fa-chevron-right"></i></a>
+            <div class="card-btn-group">
+              <button class="card-link btn btn-secondary" data-detail-id="housewarming-hamper">View Details <i class="fa-solid fa-chevron-right"></i></button>
+              <button class="card-link btn btn-primary-sm" data-atc-id="housewarming-hamper"><i class="fa-solid fa-cart-shopping"></i> Add To Cart</button>
+            </div>
           </div>
         </div>
 
         <!-- Corporate Hampers -->
-        <div class="collection-card">
+        <div class="collection-card" data-card-id="corporate-executive-hamper">
           <div class="card-img-wrapper">
             <div class="card-actions-top">
-              <button class="action-icon-btn wishlist-btn" aria-label="Add to Wishlist"><i class="fa-regular fa-heart"></i></button>
+              <button class="action-icon-btn wishlist-btn" data-product-id="corporate-executive-hamper" aria-label="Add to Wishlist"><i class="fa-regular fa-heart"></i></button>
             </div>
-            <img src="assets/corporate.png" alt="Corporate Gifting Collection">
+            <img src="assets/corporate.png" alt="Corporate Gifting Collection" data-card-id="corporate-executive-hamper" style="cursor:pointer">
+            <span class="hn-stock-badge-card hn-stock-mto">⏳ Made To Order</span>
             <div class="card-overlay">
-              <button class="card-overlay-btn"><i class="fa-solid fa-cart-shopping"></i> Add To Cart</button>
+              <button class="card-overlay-btn" data-atc-id="corporate-executive-hamper"><i class="fa-solid fa-cart-shopping"></i> Add To Cart</button>
             </div>
           </div>
           <div class="card-content">
-            <h3 class="card-title">Corporate Executive Hamper</h3>
+            <h3 class="card-title" data-card-id="corporate-executive-hamper" style="cursor:pointer">Corporate Executive Hamper</h3>
             <p class="card-price"><span class="price-prefix">From </span>₹999</p>
+            <p class="card-price-usd">≈ $12 USD</p>
             <p class="card-desc">Sleek corporate presentation boxes containing leather goods, flask, and fine chocolates.</p>
-            <a href="#contact" class="card-link btn btn-secondary btn-quick-enquiry">View Details <i class="fa-solid fa-chevron-right"></i></a>
+            <div class="card-btn-group">
+              <button class="card-link btn btn-secondary" data-detail-id="corporate-executive-hamper">View Details <i class="fa-solid fa-chevron-right"></i></button>
+              <button class="card-link btn btn-primary-sm" data-atc-id="corporate-executive-hamper"><i class="fa-solid fa-cart-shopping"></i> Add To Cart</button>
+            </div>
           </div>
         </div>
 
         <!-- Customized Gifts -->
-        <div class="collection-card">
+        <div class="collection-card" data-card-id="customized-luxury-box">
           <div class="card-img-wrapper">
             <div class="card-actions-top">
-              <button class="action-icon-btn wishlist-btn" aria-label="Add to Wishlist"><i class="fa-regular fa-heart"></i></button>
+              <button class="action-icon-btn wishlist-btn" data-product-id="customized-luxury-box" aria-label="Add to Wishlist"><i class="fa-regular fa-heart"></i></button>
             </div>
-            <img src="assets/hero_banner.png" alt="Customized Hampers Collection">
+            <img src="assets/hero_banner.png" alt="Customized Hampers Collection" data-card-id="customized-luxury-box" style="cursor:pointer">
+            <span class="hn-stock-badge-card hn-stock-mto">⏳ Made To Order</span>
             <div class="card-overlay">
-              <button class="card-overlay-btn"><i class="fa-solid fa-cart-shopping"></i> Add To Cart</button>
+              <button class="card-overlay-btn" data-atc-id="customized-luxury-box"><i class="fa-solid fa-cart-shopping"></i> Request Quote</button>
             </div>
           </div>
           <div class="card-content">
-            <h3 class="card-title">Customized Luxury Box</h3>
-            <p class="card-price"><span class="price-prefix">From </span>₹1299</p>
+            <h3 class="card-title" data-card-id="customized-luxury-box" style="cursor:pointer">Customized Luxury Box</h3>
+            <p class="card-price">Price On Request</p>
+            <p class="card-price-usd">Custom pricing</p>
             <p class="card-desc">Bespoke luxury hampers tailored precisely with the gifts and packaging of your choice.</p>
-            <a href="#contact" class="card-link btn btn-secondary btn-quick-enquiry">View Details <i class="fa-solid fa-chevron-right"></i></a>
+            <div class="card-btn-group">
+              <button class="card-link btn btn-secondary" data-detail-id="customized-luxury-box">View Details <i class="fa-solid fa-chevron-right"></i></button>
+              <button class="card-link btn btn-primary-sm" data-atc-id="customized-luxury-box"><i class="fa-brands fa-whatsapp"></i> Request Quote</button>
+            </div>
           </div>
         </div>
 
         <!-- Brass Gift Collections -->
-        <div class="collection-card">
+        <div class="collection-card" data-card-id="brass-bowl-gift-set">
           <div class="card-img-wrapper">
             <div class="card-actions-top">
-              <button class="action-icon-btn wishlist-btn" aria-label="Add to Wishlist"><i class="fa-regular fa-heart"></i></button>
+              <button class="action-icon-btn wishlist-btn" data-product-id="brass-bowl-gift-set" aria-label="Add to Wishlist"><i class="fa-regular fa-heart"></i></button>
             </div>
-            <img src="assets/brass_cup.png" alt="Brass Gift Collections">
+            <img src="assets/brass_cup.png" alt="Brass Gift Collections" data-card-id="brass-bowl-gift-set" style="cursor:pointer">
+            <span class="hn-stock-badge-card hn-stock-limited">⚠ Limited Stock</span>
             <div class="card-overlay">
-              <button class="card-overlay-btn"><i class="fa-solid fa-cart-shopping"></i> Add To Cart</button>
+              <button class="card-overlay-btn" data-atc-id="brass-bowl-gift-set"><i class="fa-solid fa-cart-shopping"></i> Add To Cart</button>
             </div>
           </div>
           <div class="card-content">
-            <h3 class="card-title">Brass Bowl Gift Set</h3>
+            <h3 class="card-title" data-card-id="brass-bowl-gift-set" style="cursor:pointer">Brass Bowl Gift Set</h3>
             <p class="card-price"><span class="price-prefix">From </span>₹299</p>
+            <p class="card-price-usd">≈ $4 USD</p>
             <p class="card-desc">Timeless, intricately engraved brass bowls, cups, and custom decorative items.</p>
-            <a href="#contact" class="card-link btn btn-secondary btn-quick-enquiry">View Details <i class="fa-solid fa-chevron-right"></i></a>
+            <div class="card-btn-group">
+              <button class="card-link btn btn-secondary" data-detail-id="brass-bowl-gift-set">View Details <i class="fa-solid fa-chevron-right"></i></button>
+              <button class="card-link btn btn-primary-sm" data-atc-id="brass-bowl-gift-set"><i class="fa-solid fa-cart-shopping"></i> Add To Cart</button>
+            </div>
           </div>
         </div>
 
@@ -357,124 +405,150 @@
     <span class="section-subtitle">Exquisite Creations</span>
     <h2 class="section-title">Product Showcase</h2>
 
-    <div class="gallery-masonry reveal" style="margin-top: 3.5rem;">
+    <div class="gallery-search" style="display:flex;justify-content:center;gap:10px;margin:2rem auto;max-width:500px;">
+      <input type="text" id="searchInput" class="form-input" placeholder="Search products..." style="flex:1;">
+      <button id="searchBtn" class="btn btn-primary" style="padding:0 1.5rem;height:auto;">Search</button>
+    </div>
+
+    <div class="gallery-masonry reveal" style="margin-top:1rem;">
 
       <!-- Item 1 -->
       <div class="gallery-item" data-title="Luxury Brass Bowl Gift Set"
-        data-desc="Intricately carved pure brass bowls matched with traditional boxes for wedding celebrations.">
+        data-desc="Intricately carved pure brass bowls matched with traditional boxes for wedding celebrations."
+        data-card-id="wedding-gift-hamper">
         <div class="card-actions-top">
-          <button class="action-icon-btn wishlist-btn" aria-label="Add to Wishlist"><i class="fa-regular fa-heart"></i></button>
+          <button class="action-icon-btn wishlist-btn" data-product-id="wedding-gift-hamper" aria-label="Add to Wishlist"><i class="fa-regular fa-heart"></i></button>
         </div>
+        <span class="hn-stock-badge-card hn-stock-in">✓ In Stock</span>
         <img class="gallery-item-img" src="assets/wedding_gift.png" alt="Luxury Brass Bowl Gift Set">
         <div class="gallery-overlay">
-          <button class="card-overlay-btn"><i class="fa-solid fa-cart-shopping"></i> Add To Cart</button>
+          <button class="card-overlay-btn" data-atc-id="wedding-gift-hamper"><i class="fa-solid fa-cart-shopping"></i> Add To Cart</button>
         </div>
         <div class="gallery-item-info">
-          <h4>Wedding Brass Bowl</h4>
+          <h4 data-detail-id="wedding-gift-hamper" style="cursor:pointer">Wedding Brass Bowl</h4>
           <p class="card-price"><span class="price-prefix">From </span>₹499</p>
-          <a href="#contact" class="btn btn-quick-enquiry">ADD TO CART</a>
+          <p class="card-price-usd">≈ $6 USD</p>
+          <button class="btn btn-quick-enquiry" data-atc-id="wedding-gift-hamper">ADD TO CART</button>
         </div>
       </div>
 
       <!-- Item 2 -->
       <div class="gallery-item" data-title="Bespoke Customized Lavender Hamper"
-        data-desc="An elegant purple-hued customized basket curated with high-end fragrances, sweets, and premium cards.">
+        data-desc="An elegant purple-hued customized basket curated with high-end fragrances, sweets, and premium cards."
+        data-card-id="customized-luxury-box">
         <div class="card-actions-top">
-          <button class="action-icon-btn wishlist-btn" aria-label="Add to Wishlist"><i class="fa-regular fa-heart"></i></button>
+          <button class="action-icon-btn wishlist-btn" data-product-id="customized-luxury-box" aria-label="Add to Wishlist"><i class="fa-regular fa-heart"></i></button>
         </div>
+        <span class="hn-stock-badge-card hn-stock-mto">⏳ Made To Order</span>
         <img class="gallery-item-img" src="assets/hero_banner.png" alt="Bespoke Customized Lavender Hamper">
         <div class="gallery-overlay">
-          <button class="card-overlay-btn"><i class="fa-solid fa-cart-shopping"></i> Add To Cart</button>
+          <button class="card-overlay-btn" data-atc-id="customized-luxury-box"><i class="fa-brands fa-whatsapp"></i> Request Quote</button>
         </div>
         <div class="gallery-item-info">
-          <h4>Custom Lavender Hamper</h4>
-          <p class="card-price"><span class="price-prefix">From </span>₹899</p>
-          <a href="#contact" class="btn btn-quick-enquiry">ADD TO CART</a>
+          <h4 data-detail-id="customized-luxury-box" style="cursor:pointer">Custom Lavender Hamper</h4>
+          <p class="card-price">Price On Request</p>
+          <p class="card-price-usd">Custom pricing</p>
+          <button class="btn btn-quick-enquiry" data-atc-id="customized-luxury-box">REQUEST QUOTE</button>
         </div>
       </div>
 
       <!-- Item 3 -->
       <div class="gallery-item" data-title="Royal Baby Shower Keepsake Box"
-        data-desc="Curated lavender pastel box with designer ribbons, customized chocolates, and silver-plated baby accessories.">
+        data-desc="Curated lavender pastel box with designer ribbons, customized chocolates, and silver-plated baby accessories."
+        data-card-id="baby-shower-hamper">
         <div class="card-actions-top">
-          <button class="action-icon-btn wishlist-btn" aria-label="Add to Wishlist"><i class="fa-regular fa-heart"></i></button>
+          <button class="action-icon-btn wishlist-btn" data-product-id="baby-shower-hamper" aria-label="Add to Wishlist"><i class="fa-regular fa-heart"></i></button>
         </div>
+        <span class="hn-stock-badge-card hn-stock-in">✓ In Stock</span>
         <img class="gallery-item-img" src="assets/baby_shower.png" alt="Royal Baby Shower Keepsake Box">
         <div class="gallery-overlay">
-          <button class="card-overlay-btn"><i class="fa-solid fa-cart-shopping"></i> Add To Cart</button>
+          <button class="card-overlay-btn" data-atc-id="baby-shower-hamper"><i class="fa-solid fa-cart-shopping"></i> Add To Cart</button>
         </div>
         <div class="gallery-item-info">
-          <h4>Baby Shower Hamper</h4>
-          <p class="card-price"><span class="price-prefix">From </span>₹449</p>
-          <a href="#contact" class="btn btn-quick-enquiry">ADD TO CART</a>
+          <h4 data-detail-id="baby-shower-hamper" style="cursor:pointer">Baby Shower Hamper</h4>
+          <p class="card-price"><span class="price-prefix">From </span>₹399</p>
+          <p class="card-price-usd">≈ $5 USD</p>
+          <button class="btn btn-quick-enquiry" data-atc-id="baby-shower-hamper">ADD TO CART</button>
         </div>
       </div>
 
       <!-- Item 4 -->
       <div class="gallery-item" data-title="Traditional Brass Home Decor Set"
-        data-desc="Polished brass incense holders and diyas arranged perfectly with silver boxes for griha pravesham return gifts.">
+        data-desc="Polished brass incense holders and diyas arranged perfectly with silver boxes for griha pravesham return gifts."
+        data-card-id="housewarming-hamper">
         <div class="card-actions-top">
-          <button class="action-icon-btn wishlist-btn" aria-label="Add to Wishlist"><i class="fa-regular fa-heart"></i></button>
+          <button class="action-icon-btn wishlist-btn" data-product-id="housewarming-hamper" aria-label="Add to Wishlist"><i class="fa-regular fa-heart"></i></button>
         </div>
+        <span class="hn-stock-badge-card hn-stock-in">✓ In Stock</span>
         <img class="gallery-item-img" src="assets/housewarming.png" alt="Traditional Brass Home Decor Set">
         <div class="gallery-overlay">
-          <button class="card-overlay-btn"><i class="fa-solid fa-cart-shopping"></i> Add To Cart</button>
+          <button class="card-overlay-btn" data-atc-id="housewarming-hamper"><i class="fa-solid fa-cart-shopping"></i> Add To Cart</button>
         </div>
         <div class="gallery-item-info">
-          <h4>Housewarming Brass Set</h4>
+          <h4 data-detail-id="housewarming-hamper" style="cursor:pointer">Housewarming Brass Set</h4>
           <p class="card-price"><span class="price-prefix">From </span>₹799</p>
-          <a href="#contact" class="btn btn-quick-enquiry">ADD TO CART</a>
+          <p class="card-price-usd">≈ $10 USD</p>
+          <button class="btn btn-quick-enquiry" data-atc-id="housewarming-hamper">ADD TO CART</button>
         </div>
       </div>
 
       <!-- Item 5 -->
       <div class="gallery-item" data-title="Artisan Engraved Brass Cups"
-        data-desc="Exquisite handcrafted brass mugs showing custom traditional Indian engraving on silk backing.">
+        data-desc="Exquisite handcrafted brass mugs showing custom traditional Indian engraving on silk backing."
+        data-card-id="brass-bowl-gift-set">
         <div class="card-actions-top">
-          <button class="action-icon-btn wishlist-btn" aria-label="Add to Wishlist"><i class="fa-regular fa-heart"></i></button>
+          <button class="action-icon-btn wishlist-btn" data-product-id="brass-bowl-gift-set" aria-label="Add to Wishlist"><i class="fa-regular fa-heart"></i></button>
         </div>
+        <span class="hn-stock-badge-card hn-stock-limited">⚠ Limited Stock</span>
         <img class="gallery-item-img" src="assets/brass_cup.png" alt="Artisan Engraved Brass Cups">
         <div class="gallery-overlay">
-          <button class="card-overlay-btn"><i class="fa-solid fa-cart-shopping"></i> Add To Cart</button>
+          <button class="card-overlay-btn" data-atc-id="brass-bowl-gift-set"><i class="fa-solid fa-cart-shopping"></i> Add To Cart</button>
         </div>
         <div class="gallery-item-info">
-          <h4>Engraved Brass Cups</h4>
+          <h4 data-detail-id="brass-bowl-gift-set" style="cursor:pointer">Engraved Brass Cups</h4>
           <p class="card-price"><span class="price-prefix">From </span>₹299</p>
-          <a href="#contact" class="btn btn-quick-enquiry">ADD TO CART</a>
+          <p class="card-price-usd">≈ $4 USD</p>
+          <button class="btn btn-quick-enquiry" data-atc-id="brass-bowl-gift-set">ADD TO CART</button>
         </div>
       </div>
 
       <!-- Item 6 -->
       <div class="gallery-item" data-title="Half Saree Traditional Accent Bag"
-        data-desc="A return gifting combination featuring high-end brass diyas and silk bangle pouch with custom detailing.">
+        data-desc="A return gifting combination featuring high-end brass diyas and silk bangle pouch with custom detailing."
+        data-card-id="half-saree-return-gift">
         <div class="card-actions-top">
-          <button class="action-icon-btn wishlist-btn" aria-label="Add to Wishlist"><i class="fa-regular fa-heart"></i></button>
+          <button class="action-icon-btn wishlist-btn" data-product-id="half-saree-return-gift" aria-label="Add to Wishlist"><i class="fa-regular fa-heart"></i></button>
         </div>
+        <span class="hn-stock-badge-card hn-stock-in">✓ In Stock</span>
         <img class="gallery-item-img" src="assets/half_saree.png" alt="Half Saree Traditional Accent Bag">
         <div class="gallery-overlay">
-          <button class="card-overlay-btn"><i class="fa-solid fa-cart-shopping"></i> Add To Cart</button>
+          <button class="card-overlay-btn" data-atc-id="half-saree-return-gift"><i class="fa-solid fa-cart-shopping"></i> Add To Cart</button>
         </div>
         <div class="gallery-item-info">
-          <h4>Half Saree Return Gift</h4>
+          <h4 data-detail-id="half-saree-return-gift" style="cursor:pointer">Half Saree Return Gift</h4>
           <p class="card-price"><span class="price-prefix">From </span>₹349</p>
-          <a href="#contact" class="btn btn-quick-enquiry">ADD TO CART</a>
+          <p class="card-price-usd">≈ $4 USD</p>
+          <button class="btn btn-quick-enquiry" data-atc-id="half-saree-return-gift">ADD TO CART</button>
         </div>
       </div>
 
       <!-- Item 7 -->
       <div class="gallery-item" data-title="Premium Executive Corporate Pack"
-        data-desc="High-end corporate box featuring a customized metallic bottle, notebook, and handcrafted dry fruit assortments.">
+        data-desc="High-end corporate box featuring a customized metallic bottle, notebook, and handcrafted dry fruit assortments."
+        data-card-id="corporate-executive-hamper">
         <div class="card-actions-top">
-          <button class="action-icon-btn wishlist-btn" aria-label="Add to Wishlist"><i class="fa-regular fa-heart"></i></button>
+          <button class="action-icon-btn wishlist-btn" data-product-id="corporate-executive-hamper" aria-label="Add to Wishlist"><i class="fa-regular fa-heart"></i></button>
         </div>
+        <span class="hn-stock-badge-card hn-stock-mto">⏳ Made To Order</span>
         <img class="gallery-item-img" src="assets/corporate.png" alt="Premium Executive Corporate Pack">
         <div class="gallery-overlay">
-          <button class="card-overlay-btn"><i class="fa-solid fa-cart-shopping"></i> Add To Cart</button>
+          <button class="card-overlay-btn" data-atc-id="corporate-executive-hamper"><i class="fa-solid fa-cart-shopping"></i> Add To Cart</button>
         </div>
         <div class="gallery-item-info">
-          <h4>Corporate Executive Hamper</h4>
-          <p class="card-price"><span class="price-prefix">From </span>₹1499</p>
-          <a href="#contact" class="btn btn-quick-enquiry">ADD TO CART</a>
+          <h4 data-detail-id="corporate-executive-hamper" style="cursor:pointer">Corporate Executive Hamper</h4>
+          <p class="card-price"><span class="price-prefix">From </span>₹999</p>
+          <p class="card-price-usd">≈ $12 USD</p>
+          <button class="btn btn-quick-enquiry" data-atc-id="corporate-executive-hamper">ADD TO CART</button>
         </div>
       </div>
 
@@ -797,7 +871,110 @@
     </button>
   </div>
 
+  <!-- ==========================================
+       ECOMMERCE DRAWERS, MODALS & OVERLAYS
+       ========================================== -->
+
+  <!-- Overlays -->
+  <div id="hn-cart-overlay" class="hn-overlay"></div>
+  <div id="hn-wishlist-overlay" class="hn-overlay"></div>
+  <div id="hn-modal-overlay" class="hn-overlay"></div>
+
+  <!-- CART DRAWER -->
+  <div id="hn-cart-drawer" class="hn-drawer hn-cart-drawer" role="dialog" aria-label="Shopping Cart">
+    <div class="hn-drawer-header">
+      <div class="hn-drawer-title"><i class="fa-solid fa-cart-shopping"></i> My Cart</div>
+      <button class="hn-drawer-close" id="hn-cart-close" aria-label="Close Cart"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="hn-drawer-body" id="hn-cart-list"></div>
+    <div class="hn-drawer-footer" id="hn-cart-summary"></div>
+  </div>
+
+  <!-- WISHLIST DRAWER -->
+  <div id="hn-wishlist-drawer" class="hn-drawer hn-wishlist-drawer" role="dialog" aria-label="Wishlist">
+    <div class="hn-drawer-header">
+      <div class="hn-drawer-title"><i class="fa-solid fa-heart"></i> My Wishlist</div>
+      <button class="hn-drawer-close" id="hn-wishlist-close" aria-label="Close Wishlist"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="hn-drawer-body" id="hn-wishlist-list"></div>
+  </div>
+
+  <!-- PRODUCT DETAIL MODAL -->
+  <div id="hn-product-modal" class="hn-product-modal" role="dialog" aria-label="Product Details"></div>
+
+  <!-- CUSTOMER DETAILS OVERLAY -->
+  <div id="hn-customer-overlay" class="hn-customer-overlay">
+    <div class="hn-customer-card">
+      <button class="hn-modal-close" id="hn-customer-close" aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
+      <div class="hn-customer-header">
+        <i class="fa-brands fa-whatsapp"></i>
+        <h3>Complete Your Order</h3>
+        <p>Your details will be shared via WhatsApp</p>
+      </div>
+      <div id="hn-order-summary-detail" class="hn-order-summary-preview"></div>
+      <form id="hn-customer-form" class="hn-customer-form" novalidate>
+        <div class="hn-form-row">
+          <div class="hn-form-group">
+            <label>Your Name <span class="hn-req">*</span></label>
+            <input type="text" name="hn_name" placeholder="e.g. Priya Sharma" required>
+          </div>
+          <div class="hn-form-group">
+            <label>Phone Number <span class="hn-req">*</span></label>
+            <input type="tel" name="hn_phone" placeholder="e.g. 9876543210" required>
+          </div>
+        </div>
+        <div class="hn-form-row">
+          <div class="hn-form-group">
+            <label>Email Address</label>
+            <input type="email" name="hn_email" placeholder="e.g. priya@email.com">
+          </div>
+          <div class="hn-form-group">
+            <label>City <span class="hn-req">*</span></label>
+            <input type="text" name="hn_city" placeholder="e.g. Hyderabad" required>
+          </div>
+        </div>
+        <div class="hn-form-row">
+          <div class="hn-form-group">
+            <label>Event Type <span class="hn-req">*</span></label>
+            <select name="hn_event" required>
+              <option value="" disabled selected>Select Event</option>
+              <option value="Wedding">Wedding</option>
+              <option value="Baby Shower">Baby Shower</option>
+              <option value="Housewarming">Housewarming</option>
+              <option value="Corporate">Corporate</option>
+              <option value="Half Saree Function">Half Saree Function</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+          <div class="hn-form-group">
+            <label>Expected Delivery Date</label>
+            <input type="date" name="hn_delivery">
+          </div>
+        </div>
+        <div class="hn-form-group hn-form-full">
+          <label>Special Notes / Customization</label>
+          <textarea name="hn_notes" rows="3" placeholder="E.g. Custom name on box, specific color theme, bulk discount needed..."></textarea>
+        </div>
+        <button type="submit" class="hn-btn-submit-order">
+          <i class="fa-brands fa-whatsapp"></i> Send Order on WhatsApp
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ORDER SUCCESS POPUP -->
+  <div id="hn-order-success" class="hn-order-success">
+    <div class="hn-order-success-inner">
+      <div class="hn-success-icon"><i class="fa-solid fa-circle-check"></i></div>
+      <h3>Thank You! 🎉</h3>
+      <p>Your order details have been prepared.</p>
+      <small>Please complete your order through WhatsApp.</small>
+    </div>
+  </div>
+
   <!-- JS Scripts -->
+  <script src="products.js"></script>
+  <script src="cart.js"></script>
   <script src="script.js"></script>
 </body>
 
