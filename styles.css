@@ -1406,7 +1406,7 @@ header.scrolled {
   font-size: 15px !important;
   font-weight: 600 !important;
   color: var(--color-gold-dark) !important;
-  margin-bottom: 16px !important;
+  margin-bottom: 2px !important;
   margin-top: 0 !important;
 }
 
@@ -1524,7 +1524,7 @@ header.scrolled {
   font-size: 15px !important;
   font-weight: 600 !important;
   color: var(--color-gold-dark) !important;
-  margin-bottom: 16px !important;
+  margin-bottom: 2px !important;
   margin-top: 0 !important;
 }
 
@@ -3944,7 +3944,7 @@ footer h4,
   margin: 0 0 8px;
   font-family: 'Poppins', sans-serif;
 }
-.card-btn-group { display: flex; gap: 8px; flex-wrap: wrap; }
+.card-btn-group { display: flex; gap: 8px; flex-wrap: wrap; margin-top: auto; }
 .card-btn-group .btn {
   flex: 1;
   min-width: 0;
@@ -4471,3 +4471,5 @@ footer h4,
 /* ---------- POSITION FIX FOR BADGE ---------- */
 .card-img-wrapper,
 .gallery-item { position: relative; }
+
+
