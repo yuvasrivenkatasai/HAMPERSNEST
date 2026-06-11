@@ -1,3 +1,15 @@
+// USD conversion constant — update this single value to change all USD prices
+export const USD_RATE = 83; // ₹83 = $1 USD
+
+export const MASTER_CATEGORIES = [
+  { id: 'All',        label: 'All',                  emoji: '' },
+  { id: 'Weddings',   label: 'Weddings',             emoji: '💍' },
+  { id: 'Baby',       label: 'Baby Celebrations',    emoji: '👶' },
+  { id: 'Traditional',label: 'Traditional',          emoji: '🏡' },
+  { id: 'Festivals',  label: 'Festivals & Seasonal', emoji: '🎉' },
+  { id: 'Corporate',  label: 'Corporate & Bulk',     emoji: '🏢' },
+];
+
 export const products = [
   {
     id: "wedding-hamper",
@@ -5,6 +17,7 @@ export const products = [
     price: 499,
     image: "/assets/wedding_gift.png",
     category: "Wedding",
+    masterCategory: "Weddings",
     rating: 4.9,
     description: "Exquisite traditional brass items and luxury gift packs styled for premium weddings.",
     details: [
@@ -14,6 +27,8 @@ export const products = [
       "Luxury custom-made rigid cardboard hamper box with silk lining",
       "Personalized thank-you gift card with gold foil lettering"
     ],
+    customization: ["Name Personalization", "Custom Packaging", "Custom Message Card", "Bulk Order Support"],
+    shipping: ["Pan India Delivery", "Safe Packaging", "Bulk Shipping Available"],
     isFeatured: true
   },
   {
@@ -22,6 +37,7 @@ export const products = [
     price: 399,
     image: "/assets/baby_shower.png",
     category: "Baby Shower",
+    masterCategory: "Baby",
     rating: 4.8,
     description: "Sweet, elegant lavender and pastel-themed hampers filled with custom keepsakes.",
     details: [
@@ -31,6 +47,8 @@ export const products = [
       "Pastel purple theme box decorated with premium satin ribbons",
       "Customized baby announcement card"
     ],
+    customization: ["Name Personalization", "Custom Packaging", "Custom Message Card", "Bulk Order Support"],
+    shipping: ["Pan India Delivery", "Safe Packaging", "Bulk Shipping Available"],
     isFeatured: true
   },
   {
@@ -39,6 +57,7 @@ export const products = [
     price: 799,
     image: "/assets/housewarming.png",
     category: "Housewarming",
+    masterCategory: "Traditional",
     rating: 4.7,
     description: "Charming home decor, brass diyas, incense holders, and premium dry fruit setups.",
     details: [
@@ -48,6 +67,8 @@ export const products = [
       "Hand-woven bamboo storage basket with gold lace wrapping",
       "Griha pravesham traditional greeting card"
     ],
+    customization: ["Name Personalization", "Custom Packaging", "Custom Message Card", "Bulk Order Support"],
+    shipping: ["Pan India Delivery", "Safe Packaging", "Bulk Shipping Available"],
     isFeatured: true
   },
   {
@@ -56,6 +77,7 @@ export const products = [
     price: 999,
     image: "/assets/corporate.png",
     category: "Corporate",
+    masterCategory: "Corporate",
     rating: 4.9,
     description: "Sleek corporate presentation boxes containing leather goods, flask, and fine chocolates.",
     details: [
@@ -65,6 +87,8 @@ export const products = [
       "Elite presentation drawer-box in textured navy blue coating",
       "Branded corporate note card with custom embossing options"
     ],
+    customization: ["Logo Branding", "Custom Packaging", "Bulk Order Support", "Custom Message Card"],
+    shipping: ["Pan India Delivery", "Safe Packaging", "Bulk Shipping Available"],
     isFeatured: true
   },
   {
@@ -73,6 +97,7 @@ export const products = [
     price: 1299,
     image: "/assets/hero_banner.png",
     category: "Customized",
+    masterCategory: "Traditional",
     rating: 5.0,
     description: "Bespoke luxury hampers tailored precisely with the gifts and packaging of your choice.",
     details: [
@@ -82,6 +107,8 @@ export const products = [
       "Embossed names/logo print on the box cover",
       "Custom handwritten calligraphy message card"
     ],
+    customization: ["Name Personalization", "Custom Packaging", "Custom Message Card", "Bulk Order Support"],
+    shipping: ["Pan India Delivery", "Safe Packaging", "Bulk Shipping Available"],
     isFeatured: true
   },
   {
@@ -90,6 +117,7 @@ export const products = [
     price: 299,
     image: "/assets/brass_cup.png",
     category: "Brass",
+    masterCategory: "Traditional",
     rating: 4.6,
     description: "Timeless, intricately engraved brass bowls, cups, and custom decorative items.",
     details: [
@@ -98,6 +126,8 @@ export const products = [
       "Matching brass spoons with floral detailing",
       "Eco-friendly handmade paper packaging envelope"
     ],
+    customization: ["Name Personalization", "Custom Packaging", "Custom Message Card", "Bulk Order Support"],
+    shipping: ["Pan India Delivery", "Safe Packaging", "Bulk Shipping Available"],
     isFeatured: true
   },
   {
@@ -106,6 +136,7 @@ export const products = [
     price: 299,
     image: "/assets/brass_cup.png",
     category: "Brass",
+    masterCategory: "Traditional",
     rating: 4.8,
     description: "Exquisite handcrafted brass mugs showing custom traditional Indian engraving on silk backing.",
     details: [
@@ -114,6 +145,8 @@ export const products = [
       "Instruction card for brass care and longevity",
       "Gold thread decoration bow ribbon"
     ],
+    customization: ["Name Personalization", "Custom Packaging", "Custom Message Card", "Bulk Order Support"],
+    shipping: ["Pan India Delivery", "Safe Packaging", "Bulk Shipping Available"],
     isFeatured: false
   },
   {
@@ -122,6 +155,7 @@ export const products = [
     price: 349,
     image: "/assets/half_saree.png",
     category: "Wedding",
+    masterCategory: "Weddings",
     rating: 4.7,
     description: "A return gifting combination featuring high-end brass diyas and silk bangle pouch with custom detailing.",
     details: [
@@ -130,6 +164,8 @@ export const products = [
       "Scented dhoop sticks package",
       "Elegant custom-designed wedding envelope"
     ],
+    customization: ["Name Personalization", "Custom Packaging", "Custom Message Card", "Bulk Order Support"],
+    shipping: ["Pan India Delivery", "Safe Packaging", "Bulk Shipping Available"],
     isFeatured: false
   },
   {
@@ -138,6 +174,7 @@ export const products = [
     price: 899,
     image: "/assets/hero_banner.png",
     category: "Customized",
+    masterCategory: "Festivals",
     rating: 4.9,
     description: "An elegant purple-hued customized basket curated with high-end fragrances, sweets, and premium cards.",
     details: [
@@ -146,6 +183,8 @@ export const products = [
       "Gourmet French lavender macarons box (4 pcs)",
       "Woven white wicker basket with lavender ribbon lining"
     ],
+    customization: ["Name Personalization", "Custom Packaging", "Custom Message Card", "Bulk Order Support"],
+    shipping: ["Pan India Delivery", "Safe Packaging", "Bulk Shipping Available"],
     isFeatured: false
   },
   {
@@ -154,6 +193,7 @@ export const products = [
     price: 1499,
     image: "/assets/corporate.png",
     category: "Corporate",
+    masterCategory: "Corporate",
     rating: 5.0,
     description: "High-end corporate box featuring a customized metallic bottle, notebook, and handcrafted dry fruit assortments.",
     details: [
@@ -162,6 +202,8 @@ export const products = [
       "Metal executive signature ballpoint pen",
       "Premium glass jars containing pistachios and walnuts (150g each)"
     ],
+    customization: ["Logo Branding", "Custom Packaging", "Bulk Order Support", "Custom Message Card"],
+    shipping: ["Pan India Delivery", "Safe Packaging", "Bulk Shipping Available"],
     isFeatured: false
   }
 ];

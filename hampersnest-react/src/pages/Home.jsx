@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useCart } from '../context/CartContext';
 
 const testimonials = [
   {
@@ -24,6 +25,7 @@ const testimonials = [
 
 export default function Home() {
   const navigate = useNavigate();
+  const { addToCart } = useCart();
   const [activeSlide, setActiveSlide] = useState(0);
 
   // Testimonial slider auto-slide
@@ -162,49 +164,161 @@ export default function Home() {
         </div>
       </section>
 
-      {/* QUICK CATEGORIES OVERVIEW */}
-      <section className="collections" style={{ background: 'var(--color-lavender)' }}>
+      {/* SHOP OUR COLLECTIONS — 6 Product Cards */}
+      <section className="shop-collections-section" style={{ background: 'var(--color-lavender)' }}>
         <div className="container">
           <span className="section-subtitle">Browse By Celebration</span>
           <h2 className="section-title">Shop Our Collections</h2>
-          
-          <div className="collections-grid reveal" style={{ marginTop: '2rem' }}>
-            {/* Wedding */}
-            <div className="collection-card" style={{ minHeight: 'auto' }}>
-              <div className="card-img-wrapper">
-                <img src="/assets/wedding_gift.png" alt="Wedding Gifting" />
+
+          <div className="shop-collections-grid reveal" style={{ marginTop: '2.5rem' }}>
+
+            {/* Product 1 — Wedding */}
+            <div className="shop-product-card">
+              <div className="shop-card-img">
+                <img src="/assets/wedding_gift.png" alt="Wedding Gift Hamper" />
               </div>
-              <div className="card-content" style={{ textAlign: 'center' }}>
-                <h3 className="card-title">Wedding Celebrations</h3>
-                <p style={{ fontSize: '0.8rem', color: '#666', margin: '8px 0 16px 0' }}>Traditional luxury brass pairings and elegant hampers.</p>
-                <Link to="/collections?category=Wedding" className="btn btn-primary" style={{ width: '100%', padding: '0.6rem 0' }}>View Collection</Link>
+              <div className="shop-card-content">
+                <h3 className="shop-card-name">Wedding Gift Hamper</h3>
+                <p className="shop-card-inr">₹499</p>
+                <p className="shop-card-usd">≈ $6 USD</p>
+                <button
+                  className="shop-card-btn"
+                  onClick={() => addToCart({ id: 'wedding-hamper', name: 'Wedding Gift Hamper', price: 499, image: '/assets/wedding_gift.png', category: 'Wedding' }, 1, { giftTag: '', wrappingStyle: 'Standard', ribbonColor: 'None' })}
+                >
+                  <i className="fa-solid fa-cart-shopping"></i> Add To Cart
+                </button>
               </div>
             </div>
 
-            {/* Baby Shower */}
-            <div className="collection-card" style={{ minHeight: 'auto' }}>
-              <div className="card-img-wrapper">
-                <img src="/assets/baby_shower.png" alt="Baby Showers" />
+            {/* Product 2 — Baby Shower */}
+            <div className="shop-product-card">
+              <div className="shop-card-img">
+                <img src="/assets/baby_shower.png" alt="Baby Shower Hamper" />
               </div>
-              <div className="card-content" style={{ textAlign: 'center' }}>
-                <h3 className="card-title">Baby Showers</h3>
-                <p style={{ fontSize: '0.8rem', color: '#666', margin: '8px 0 16px 0' }}>Sweet pastel arrangements and customizable keepsakes.</p>
-                <Link to="/collections?category=Baby Shower" className="btn btn-primary" style={{ width: '100%', padding: '0.6rem 0' }}>View Collection</Link>
+              <div className="shop-card-content">
+                <h3 className="shop-card-name">Baby Shower Hamper</h3>
+                <p className="shop-card-inr">₹399</p>
+                <p className="shop-card-usd">≈ $5 USD</p>
+                <button
+                  className="shop-card-btn"
+                  onClick={() => addToCart({ id: 'baby-shower-hamper', name: 'Baby Shower Hamper', price: 399, image: '/assets/baby_shower.png', category: 'Baby Shower' }, 1, { giftTag: '', wrappingStyle: 'Standard', ribbonColor: 'None' })}
+                >
+                  <i className="fa-solid fa-cart-shopping"></i> Add To Cart
+                </button>
               </div>
             </div>
 
-            {/* Corporate */}
-            <div className="collection-card" style={{ minHeight: 'auto' }}>
-              <div className="card-img-wrapper">
-                <img src="/assets/corporate.png" alt="Corporate Hampers" />
+            {/* Product 3 — Housewarming */}
+            <div className="shop-product-card">
+              <div className="shop-card-img">
+                <img src="/assets/housewarming.png" alt="Housewarming Hamper" />
               </div>
-              <div className="card-content" style={{ textAlign: 'center' }}>
-                <h3 className="card-title">Corporate Events</h3>
-                <p style={{ fontSize: '0.8rem', color: '#666', margin: '8px 0 16px 0' }}>Sleek, textured corporate boxes for modern organizations.</p>
-                <Link to="/collections?category=Corporate" className="btn btn-primary" style={{ width: '100%', padding: '0.6rem 0' }}>View Collection</Link>
+              <div className="shop-card-content">
+                <h3 className="shop-card-name">Housewarming Hamper</h3>
+                <p className="shop-card-inr">₹799</p>
+                <p className="shop-card-usd">≈ $10 USD</p>
+                <button
+                  className="shop-card-btn"
+                  onClick={() => addToCart({ id: 'housewarming-hamper', name: 'Housewarming Hamper', price: 799, image: '/assets/housewarming.png', category: 'Housewarming' }, 1, { giftTag: '', wrappingStyle: 'Standard', ribbonColor: 'None' })}
+                >
+                  <i className="fa-solid fa-cart-shopping"></i> Add To Cart
+                </button>
               </div>
             </div>
+
+            {/* Product 4 — Corporate */}
+            <div className="shop-product-card">
+              <div className="shop-card-img">
+                <img src="/assets/corporate.png" alt="Corporate Executive Hamper" />
+              </div>
+              <div className="shop-card-content">
+                <h3 className="shop-card-name">Corporate Executive Hamper</h3>
+                <p className="shop-card-inr">₹999</p>
+                <p className="shop-card-usd">≈ $12 USD</p>
+                <button
+                  className="shop-card-btn"
+                  onClick={() => addToCart({ id: 'corporate-exec', name: 'Corporate Executive Hamper', price: 999, image: '/assets/corporate.png', category: 'Corporate' }, 1, { giftTag: '', wrappingStyle: 'Standard', ribbonColor: 'None' })}
+                >
+                  <i className="fa-solid fa-cart-shopping"></i> Add To Cart
+                </button>
+              </div>
+            </div>
+
+            {/* Product 5 — Customized Luxury */}
+            <div className="shop-product-card">
+              <div className="shop-card-img">
+                <img src="/assets/hero_banner.png" alt="Customized Luxury Box" />
+              </div>
+              <div className="shop-card-content">
+                <h3 className="shop-card-name">Customized Luxury Box</h3>
+                <p className="shop-card-inr">₹1299</p>
+                <p className="shop-card-usd">≈ $16 USD</p>
+                <button
+                  className="shop-card-btn"
+                  onClick={() => addToCart({ id: 'custom-luxury', name: 'Customized Luxury Box', price: 1299, image: '/assets/hero_banner.png', category: 'Customized' }, 1, { giftTag: '', wrappingStyle: 'Standard', ribbonColor: 'None' })}
+                >
+                  <i className="fa-solid fa-cart-shopping"></i> Add To Cart
+                </button>
+              </div>
+            </div>
+
+            {/* Product 6 — Brass Bowl */}
+            <div className="shop-product-card">
+              <div className="shop-card-img">
+                <img src="/assets/brass_cup.png" alt="Brass Bowl Gift Set" />
+              </div>
+              <div className="shop-card-content">
+                <h3 className="shop-card-name">Brass Bowl Gift Set</h3>
+                <p className="shop-card-inr">₹299</p>
+                <p className="shop-card-usd">≈ $4 USD</p>
+                <button
+                  className="shop-card-btn"
+                  onClick={() => addToCart({ id: 'brass-bowl-set', name: 'Brass Bowl Gift Set', price: 299, image: '/assets/brass_cup.png', category: 'Brass' }, 1, { giftTag: '', wrappingStyle: 'Standard', ribbonColor: 'None' })}
+                >
+                  <i className="fa-solid fa-cart-shopping"></i> Add To Cart
+                </button>
+              </div>
+            </div>
+
           </div>
+
+          {/* Explore All Collections CTA */}
+          <div className="explore-all-cta">
+            <Link to="/collections" className="explore-all-btn">
+              Explore All Collections <i className="fa-solid fa-arrow-right"></i>
+            </Link>
+          </div>
+
+        </div>
+      </section>
+
+      {/* BULK & CORPORATE ORDERS */}
+      <section className="bulk-order-section">
+        <div className="bulk-order-inner reveal">
+          <span className="bulk-order-icon">💼</span>
+          <span className="bulk-order-subtitle">Bulk & Corporate Orders</span>
+          <h2 className="bulk-order-title">Need 50, 100 or 500 Gifts?</h2>
+          <p className="bulk-order-desc">
+            We specialize in luxury gifting solutions for weddings, events, corporates
+            and celebrations — crafted at scale without compromising on quality.
+          </p>
+          <div className="bulk-order-tags">
+            <span className="bulk-tag">Wedding Gifting</span>
+            <span className="bulk-tag">Corporate Events</span>
+            <span className="bulk-tag">Employee Gifts</span>
+            <span className="bulk-tag">Client Hampers</span>
+            <span className="bulk-tag">Festival Gifting</span>
+            <span className="bulk-tag">Custom Branding</span>
+          </div>
+          <a
+            href="https://api.whatsapp.com/send?phone=917989202194&text=Hi%20Hampers%20Nest!%20I%20am%20interested%20in%20a%20Bulk%20or%20Corporate%20Order.%20Please%20share%20details%20and%20pricing."
+            target="_blank"
+            rel="noopener noreferrer"
+            className="bulk-order-btn"
+          >
+            <i className="fa-brands fa-whatsapp"></i>
+            Request Bulk Quote
+          </a>
         </div>
       </section>
 
@@ -212,6 +326,7 @@ export default function Home() {
       <section id="testimonials" className="testimonials container">
         <span className="section-subtitle">Heartfelt Reviews</span>
         <h2 className="section-title">Client Testimonials</h2>
+
 
         <div className="testimonial-slider-container reveal" style={{ marginTop: '3.5rem' }}>
           <div className="testimonial-track">

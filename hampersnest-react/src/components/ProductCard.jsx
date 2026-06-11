@@ -1,11 +1,11 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
+import { USD_RATE } from '../data/products';
 
 export default function ProductCard({ product }) {
-  const navigate = useNavigate();
-  const { addToCart, toggleWishlist, isInWishlist } = useCart();
+  const { addToCart, toggleWishlist, isInWishlist, setSelectedProductForModal } = useCart();
   const isWishlisted = isInWishlist(product.id);
+  const usdPrice = Math.round(product.price / USD_RATE);
 
   const handleAddToCart = (e) => {
     e.stopPropagation();
@@ -25,7 +25,7 @@ export default function ProductCard({ product }) {
 
   const handleViewDetails = (e) => {
     e.preventDefault();
-    navigate(`/product/${product.id}`);
+    setSelectedProductForModal(product);
   };
 
   return (
@@ -48,12 +48,14 @@ export default function ProductCard({ product }) {
         </div>
       </div>
       <div className="card-content">
-        <h3 className="card-title" onClick={handleViewDetails} style={{ cursor: 'pointer' }}>{product.name}</h3>
+        <h3 className="card-title" onClick={handleViewDetails} style={{ cursor: 'pointer' }}>
+          {product.name}
+        </h3>
         <p className="card-price">
           <span className="price-prefix">From </span>₹{product.price}
         </p>
-        <p className="card-desc" style={{ fontSize: '0.8rem', minHeight: '40px' }}>{product.description}</p>
-        <div style={{ display: 'flex', gap: '8px', marginTop: '10px' }}>
+        <p className="card-usd-price">≈ ${usdPrice} USD</p>
+        <div style={{ display: 'flex', gap: '8px', marginTop: '4px' }}>
           <button
             onClick={handleViewDetails}
             className="card-link btn btn-secondary btn-quick-enquiry"

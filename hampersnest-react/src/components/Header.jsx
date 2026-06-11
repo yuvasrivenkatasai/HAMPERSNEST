@@ -44,11 +44,12 @@ export default function Header() {
     <>
       <header id="header" className={scrolled ? 'scrolled' : ''}>
         <div className="nav-container">
-          {/* Logo container - image only, NO text branding */}
+          {/* Logo container - image + brand name */}
           <Link to="/" className="logo-container" onClick={closeMobileMenu}>
             <div className="logo-circle">
               <img src="/assets/logo.png" alt="Hampers Nest Logo" />
             </div>
+            <span className="brand-name">Hampers Nest</span>
           </Link>
 
           {/* Navigation Links */}

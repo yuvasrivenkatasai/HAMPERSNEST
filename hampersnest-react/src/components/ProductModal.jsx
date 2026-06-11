@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useCart } from '../context/CartContext';
+import { USD_RATE } from '../data/products';
 
 export default function ProductModal() {
   const {
@@ -46,6 +47,7 @@ export default function ProductModal() {
 
   const product = selectedProductForModal;
   const isWishlisted = isInWishlist(product.id);
+  const usdPrice = Math.round(product.price / USD_RATE);
 
   const handleClose = () => {
     setSelectedProductForModal(null);
@@ -59,11 +61,23 @@ export default function ProductModal() {
 
   const handleAddToCartSubmit = (e) => {
     e.preventDefault();
-    addToCart(product, quantity, {
-      giftTag,
-      wrappingStyle,
-      ribbonColor
-    });
+    addToCart(product, quantity, { giftTag, wrappingStyle, ribbonColor });
+    handleClose();
+  };
+
+  const handleWhatsappOrder = () => {
+    const whatsappNumber = '917989202194';
+    const message = encodeURIComponent(
+      `Hi Hampers Nest! I would like to order:\n\n` +
+      `*${product.name}*\n` +
+      `Qty: ${quantity}\n` +
+      `Price: ₹${product.price * quantity} (≈ $${Math.round((product.price * quantity) / USD_RATE)} USD)\n\n` +
+      (giftTag ? `Gift Tag Message: "${giftTag}"\n` : '') +
+      (wrappingStyle !== 'Standard' ? `Wrapping: ${wrappingStyle}\n` : '') +
+      (ribbonColor !== 'None' ? `Ribbon: ${ribbonColor}\n` : '') +
+      `\nPlease confirm availability and delivery details. Thank you!`
+    );
+    window.open(`https://api.whatsapp.com/send?phone=${whatsappNumber}&text=${message}`, '_blank');
     handleClose();
   };
 
@@ -76,7 +90,7 @@ export default function ProductModal() {
       <div
         className="inquiry-modal-content"
         style={{
-          maxWidth: '900px',
+          maxWidth: '940px',
           width: '100%',
           margin: 'auto',
           transform: 'none',
@@ -102,31 +116,40 @@ export default function ProductModal() {
           {/* Right Column: Details and Customization Form */}
           <div className="product-info-block">
             <div>
-              <span className="section-subtitle" style={{ textAlign: 'left', margin: 0, fontSize: '0.7rem' }}>
-                {product.category} COLLECTION
-              </span>
+              {/* Category + Availability */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', marginBottom: '4px' }}>
+                <span className="section-subtitle" style={{ textAlign: 'left', margin: 0, fontSize: '0.7rem' }}>
+                  {product.category} COLLECTION
+                </span>
+                <span className="modal-availability">
+                  <i className="fa-solid fa-circle-check"></i> In Stock
+                </span>
+              </div>
+
               <h2 className="product-modal-title">{product.name}</h2>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', margin: '4px 0 12px 0' }}>
+
+              {/* Star Rating */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', margin: '4px 0 10px 0' }}>
                 <div style={{ color: 'var(--color-gold)', fontSize: '0.9rem' }}>
                   {Array.from({ length: 5 }).map((_, i) => (
                     <i
                       key={i}
-                      className={
-                        i < Math.floor(product.rating)
-                          ? 'fa-solid fa-star'
-                          : 'fa-regular fa-star'
-                      }
+                      className={i < Math.floor(product.rating) ? 'fa-solid fa-star' : 'fa-regular fa-star'}
                       style={{ marginRight: '2px' }}
                     ></i>
                   ))}
                 </div>
                 <span style={{ fontSize: '0.8rem', color: '#666' }}>({product.rating} / 5.0)</span>
               </div>
+
+              {/* INR + USD Price */}
               <p className="product-modal-price">₹{product.price}</p>
+              <p className="modal-usd-price">≈ ${usdPrice} USD</p>
+
               <p className="product-modal-desc">{product.description}</p>
             </div>
 
-            {/* Inclusions */}
+            {/* Hamper Inclusions */}
             {product.details && product.details.length > 0 && (
               <ul className="product-modal-spec">
                 <li style={{ fontWeight: 600, listStyle: 'none', paddingLeft: 0, color: 'var(--color-purple)' }}>
@@ -138,10 +161,41 @@ export default function ProductModal() {
               </ul>
             )}
 
+            {/* Customization Features */}
+            {product.customization && (
+              <div>
+                <h5 style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--color-purple)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '0.5rem' }}>
+                  Customization Available:
+                </h5>
+                <div className="modal-features-grid">
+                  {product.customization.map((feat, idx) => (
+                    <span key={idx} className="modal-feature-tag">
+                      <i className="fa-solid fa-check"></i> {feat}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Shipping Info */}
+            {product.shipping && (
+              <div style={{ borderTop: '1px solid var(--color-beige)', paddingTop: '0.8rem' }}>
+                <h5 style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--color-purple)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '0.5rem' }}>
+                  Delivery Information:
+                </h5>
+                {product.shipping.map((item, idx) => (
+                  <div key={idx} className="modal-shipping-row">
+                    <i className="fa-solid fa-truck"></i>
+                    {item}
+                  </div>
+                ))}
+              </div>
+            )}
+
             {/* Customization Form */}
             <form onSubmit={handleAddToCartSubmit} className="customization-section">
               <h4 className="customization-title">Personalize Your Hamper</h4>
-              
+
               <div className="form-group" style={{ marginBottom: '0.8rem' }}>
                 <label className="form-label" htmlFor="m-gift-tag">
                   Custom Gift Tag Message (Optional)
@@ -158,9 +212,7 @@ export default function ProductModal() {
 
               <div className="form-row" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '0.8rem' }}>
                 <div className="form-group" style={{ marginBottom: 0 }}>
-                  <label className="form-label" htmlFor="m-wrap">
-                    Wrapping Style
-                  </label>
+                  <label className="form-label" htmlFor="m-wrap">Wrapping Style</label>
                   <select
                     id="m-wrap"
                     className="form-select"
@@ -175,9 +227,7 @@ export default function ProductModal() {
                 </div>
 
                 <div className="form-group" style={{ marginBottom: 0 }}>
-                  <label className="form-label" htmlFor="m-ribbon">
-                    Satin Ribbon Color
-                  </label>
+                  <label className="form-label" htmlFor="m-ribbon">Satin Ribbon Color</label>
                   <select
                     id="m-ribbon"
                     className="form-select"
@@ -193,18 +243,20 @@ export default function ProductModal() {
                 </div>
               </div>
 
-              {/* Quantity Selector and Add Button */}
+              {/* Quantity + Action Buttons */}
               <div
                 style={{
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '15px',
+                  gap: '10px',
                   borderTop: '1px solid var(--color-beige)',
                   paddingTop: '1.2rem',
-                  marginTop: '0.5rem'
+                  marginTop: '0.5rem',
+                  flexWrap: 'wrap'
                 }}
               >
-                <div className="cart-item-qty" style={{ height: '44px', border: '1px solid var(--color-gold)' }}>
+                {/* Quantity Selector */}
+                <div className="cart-item-qty" style={{ height: '44px', border: '1px solid var(--color-gold)', flexShrink: 0 }}>
                   <button
                     type="button"
                     onClick={() => setQuantity(Math.max(1, quantity - 1))}
@@ -213,7 +265,7 @@ export default function ProductModal() {
                   >
                     <i className="fa-solid fa-minus"></i>
                   </button>
-                  <span style={{ fontSize: '1rem', minWidth: '24px', textAlign: 'center' }}>{quantity}</span>
+                  <span style={{ fontSize: '1rem', minWidth: '28px', textAlign: 'center' }}>{quantity}</span>
                   <button
                     type="button"
                     onClick={() => setQuantity(quantity + 1)}
@@ -224,14 +276,27 @@ export default function ProductModal() {
                   </button>
                 </div>
 
+                {/* Add To Cart */}
                 <button
                   type="submit"
                   className="btn btn-primary"
-                  style={{ flex: 1, height: '44px', padding: 0 }}
+                  style={{ flex: 1, height: '44px', padding: 0, minWidth: '130px' }}
                 >
-                  Add To Basket <i className="fa-solid fa-cart-shopping" style={{ marginLeft: '6px' }}></i>
+                  Add To Cart <i className="fa-solid fa-cart-shopping" style={{ marginLeft: '6px' }}></i>
                 </button>
 
+                {/* Order on WhatsApp */}
+                <button
+                  type="button"
+                  onClick={handleWhatsappOrder}
+                  className="modal-whatsapp-btn"
+                  style={{ flexShrink: 0 }}
+                >
+                  <i className="fa-brands fa-whatsapp"></i>
+                  Order on WhatsApp
+                </button>
+
+                {/* Wishlist */}
                 <button
                   type="button"
                   onClick={() => toggleWishlist(product.id)}
@@ -245,9 +310,10 @@ export default function ProductModal() {
                     alignItems: 'center',
                     justifyContent: 'center',
                     borderColor: isWishlisted ? '#e24e4e' : 'var(--color-gold)',
-                    color: isWishlisted ? '#e24e4e' : 'var(--color-gold)'
+                    color: isWishlisted ? '#e24e4e' : 'var(--color-gold)',
+                    flexShrink: 0
                   }}
-                  aria-label="Add to Wishlist"
+                  aria-label="Toggle Wishlist"
                 >
                   <i className={isWishlisted ? 'fa-solid fa-heart' : 'fa-regular fa-heart'}></i>
                 </button>

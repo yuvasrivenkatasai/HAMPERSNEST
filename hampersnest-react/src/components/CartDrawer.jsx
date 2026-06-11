@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useCart } from '../context/CartContext';
+import { USD_RATE } from '../data/products';
 
 export default function CartDrawer() {
   const {
@@ -264,6 +265,7 @@ export default function CartDrawer() {
               <span>Subtotal:</span>
               <span>₹{cartTotal}</span>
             </div>
+            <p className="cart-usd-total">≈ ${Math.round(cartTotal / USD_RATE)} USD</p>
 
             {checkoutStep === 1 ? (
               <button
