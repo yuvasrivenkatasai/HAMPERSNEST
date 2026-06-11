@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hampers Nest | Premium Return Gifts & Customized Hampers Hyderabad</title>
+
+  <!-- SEO Meta Tags -->
+  <meta name="description"
+    content="Hampers Nest offers premium customized return gifts & luxury hampers in Hyderabad for Weddings, Baby Showers, Housewarming, and Corporate events. Pan-India shipping.">
+  <meta name="keywords"
+    content="return gifts hyderabad, customized hampers hyderabad, premium return gifts, wedding return gifts, baby shower gifts hyderabad, brass return gifts, corporate gifting hyderabad">
+  <meta name="author" content="Hampers Nest">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Hampers Nest | Premium Return Gifts & Customized Hampers">
+  <meta property="og:description"
+    content="Discover exquisite customized return gifts for weddings, baby showers, housewarmings, and special celebrations. Handcrafted with love in Hyderabad.">
+  <meta property="og:image" content="assets/hero_banner.png">
+
+  <!-- Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <!-- CSS Stylesheet -->
+  <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+
+
+
+  <!-- QUICK INQUIRY MODAL (DRAWER) -->
+  <div id="inquiryModal" class="inquiry-modal">
+    <div class="inquiry-modal-content">
+      <button id="inquiryModalClose" class="inquiry-modal-close" aria-label="Close Inquiry Modal">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+      <h3 class="section-title" style="font-size: 1.8rem; margin-bottom: 0.5rem;">Quick Inquiry</h3>
+      <p style="text-align: center; color: #666; font-size: 0.85rem; margin-bottom: 2rem;">Get custom prices for bulk
+        requirements</p>
+
+      <form id="modalInquiryForm">
+        <div class="form-group">
+          <label class="form-label" for="m-name">Your Name *</label>
+          <input type="text" id="m-name" name="name" class="form-input" placeholder="Enter your full name" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="m-phone">Phone Number *</label>
+          <input type="tel" id="m-phone" name="phone" class="form-input" placeholder="e.g. +91 9876543210" required>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="m-event-type">Event Type *</label>
+            <select id="m-event-type" name="event-type" class="form-select" required>
+              <option value="" disabled selected>Select Celebration</option>
+              <option value="Wedding">Wedding Ceremony</option>
+              <option value="Baby Shower">Baby Shower</option>
+              <option value="Housewarming">Housewarming Ceremony</option>
+              <option value="Half Saree Function">Half Saree Function</option>
+              <option value="Corporate Event">Corporate Gifting</option>
+              <option value="Other Special Occasion">Other Celebration</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="m-quantity">Est. Quantity *</label>
+            <input type="number" id="m-quantity" name="quantity" class="form-input" placeholder="e.g. 50" min="10"
+              required>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="m-message">Special Customization details</label>
+          <textarea id="m-message" name="message" class="form-textarea"
+            placeholder="E.g. Prefer brass products, custom boxes needed..."></textarea>
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="width: 100%;">
+          Get A Custom Quote <i class="fa-solid fa-paper-plane"></i>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- LIGHTBOX PREVIEW -->
+  <div id="lightbox" class="lightbox">
+    <button id="lightboxClose" class="lightbox-close" aria-label="Close Gallery Lightbox">
+      <i class="fa-solid fa-xmark"></i>
+    </button>
+    <div class="lightbox-content-wrapper">
+      <div class="lightbox-img-box">
+        <img id="lightboxImg" class="lightbox-img" src="" alt="High-end Return Gift Preview">
+      </div>
+      <div class="lightbox-caption">
+        <h4 id="lightboxTitle">Luxury Custom Gift</h4>
+        <p id="lightboxDesc">Curated meticulously using elite traditional items and premium wrapping.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- HEADER / NAVIGATION -->
+  <header id="header">
+    <div class="nav-container">
+      <a href="#" class="logo-container">
+        <div class="logo-circle">
+          <img src="assets/logo.png" alt="Hampers Nest Logo">
+        </div>
+        <span class="brand-name">Hampers Nest</span>
+      </a>
+
+      <!-- Mobile Actions (Cart Icon) -->
+      <a href="#collections" class="mobile-cart-icon" aria-label="View Collections / Cart">
+        <i class="fa-solid fa-cart-shopping"></i>
+      </a>
+
+      <button id="menuToggle" class="menu-toggle" aria-label="Toggle navigation menu">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+
+      <nav id="navMenu" class="nav-menu">
+        <a href="#hero">Home</a>
+        <a href="#collections">Collections</a>
+        <a href="#featured">Featured Gifts</a>
+        <a href="#gallery">Gallery</a>
+        <a href="#about">About Us</a>
+        <a href="#contact">Contact</a>
+      </nav>
+    </div>
+  </header>
+  
+  <!-- Mobile Menu Overlay -->
+  <div id="menuOverlay" class="menu-overlay"></div>
+
+  <!-- LUXURY HERO -->
+  <section class="luxury-hero" id="hero">
+    <div class="hero-particles" aria-hidden="true">
+      <span class="particle"></span>
+      <span class="particle"></span>
+      <span class="particle"></span>
+      <span class="particle"></span>
+      <span class="particle"></span>
+      <span class="particle"></span>
+      <span class="particle"></span>
+      <span class="particle"></span>
+    </div>
+
+    <div class="hero-inner">
+
+      <!-- LEFT COLUMN: text content -->
+      <div class="hero-left">
+        <h1 class="hero-headline hero-fade" style="--delay: 0.2s;">
+          Luxury Gifts That Leave<br>
+          A Lasting Impression
+        </h1>
+
+        <p class="hero-desc hero-fade" style="--delay: 0.4s;">
+          Thoughtfully crafted hampers for weddings, celebrations and memorable occasions.
+        </p>
+
+        <div class="hero-cta hero-fade" style="--delay: 0.6s;">
+          <a href="#collections" class="btn-hero btn-hero-primary hero-shimmer-btn">Explore Collections</a>
+          <a href="#" class="btn-hero btn-hero-secondary whatsapp-direct">
+            <i class="fa-brands fa-whatsapp"></i> WhatsApp Consultation
+          </a>
+        </div>
+      </div>
+
+      <!-- RIGHT COLUMN: image block -->
+      <div class="hero-right">
+        <div class="hero-visual hero-fade" style="--delay: 0.5s;">
+          <div class="hero-image-glow" aria-hidden="true"></div>
+          <div class="hero-image-frame">
+            <img src="assets/hero_banner.png" alt="Premium luxury curated gift hamper by Hampers Nest">
+          </div>
+          <div class="hero-product-card hero-product-wedding">
+            <img src="assets/wedding_gift.png" alt="Elegant wedding hamper gift">
+          </div>
+          <div class="hero-product-card hero-product-brass">
+            <img src="assets/brass_cup.png" alt="Handcrafted brass return gift">
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ABOUT / STORY SECTION -->
+  <section id="about" class="about container">
+    <div class="about-grid">
+      <div class="about-left reveal">
+        <span class="section-subtitle" style="text-align: left; margin-bottom: 0.8rem;">About Hampers Nest</span>
+        <h3>Thoughtfully Curated <br>Luxury Gifts</h3>
+        <p class="about-text">
+          Hampers Nest specializes in premium customized return gifts designed to leave a lasting impression. Every
+          hamper is thoughtfully curated with attention to quality, aesthetics, and deep personalization. We merge
+          traditional Hyderabad artistry with modern premium packaging to build return gifts worth cherishing.
+        </p>
+
+        <div class="about-services-tags">
+          <div class="service-tag"><i class="fa-solid fa-heart"></i> Wedding Curation</div>
+          <div class="service-tag"><i class="fa-solid fa-child"></i> Baby Showers</div>
+          <div class="service-tag"><i class="fa-solid fa-house-chimney"></i> Housewarmings</div>
+          <div class="service-tag"><i class="fa-solid fa-briefcase"></i> Corporate Gifting</div>
+        </div>
+      </div>
+
+      <div class="about-right reveal" style="transition-delay: 0.2s;">
+        <div class="about-img-box">
+          <img src="assets/wedding_gift.png" alt="Premium Wedding return gift">
+        </div>
+        <div class="about-img-box">
+          <img src="assets/baby_shower.png" alt="Baby shower return gift set">
+        </div>
+        <div class="about-img-box">
+          <img src="assets/housewarming.png" alt="Housewarming gift hamper">
+        </div>
+        <div class="about-img-box">
+          <img src="assets/half_saree.png" alt="Half Saree function return gift">
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FEATURED COLLECTIONS SECTION -->
+  <section id="collections" class="collections">
+    <div class="container">
+      <span class="section-subtitle">Exquisite Categories</span>
+      <h2 class="section-title">Featured Collections</h2>
+
+      <div class="collections-grid reveal" style="margin-top: 3.5rem;">
+
+        <!-- Wedding Gifts -->
+        <div class="collection-card">
+          <div class="card-img-wrapper">
+            <div class="card-actions-top">
+              <button class="action-icon-btn wishlist-btn" aria-label="Add to Wishlist"><i class="fa-regular fa-heart"></i></button>
+            </div>
+            <img src="assets/wedding_gift.png" alt="Wedding Return Gifts Collection">
+            <div class="card-overlay">
+              <button class="card-overlay-btn"><i class="fa-solid fa-cart-shopping"></i> Add To Cart</button>
+            </div>
+          </div>
+          <div class="card-content">
+            <h3 class="card-title">Wedding Gift Hamper</h3>
+            <p class="card-price"><span class="price-prefix">From </span>₹499</p>
+            <p class="card-desc">Exquisite traditional brass items and luxury gift packs styled for premium weddings.</p>
+            <a href="#contact" class="card-link btn btn-secondary btn-quick-enquiry">View Details <i class="fa-solid fa-chevron-right"></i></a>
+          </div>
+        </div>
+
+        <!-- Baby Shower -->
+        <div class="collection-card">
+          <div class="card-img-wrapper">
+            <div class="card-actions-top">
+              <button class="action-icon-btn wishlist-btn" aria-label="Add to Wishlist"><i class="fa-regular fa-heart"></i></button>
+            </div>
+            <img src="assets/baby_shower.png" alt="Baby Shower Collections">
+            <div class="card-overlay">
+              <button class="card-overlay-btn"><i class="fa-solid fa-cart-shopping"></i> Add To Cart</button>
+            </div>
+          </div>
+          <div class="card-content">
+            <h3 class="card-title">Baby Shower Hamper</h3>
+            <p class="card-price"><span class="price-prefix">From </span>₹399</p>
+            <p class="card-desc">Sweet, elegant lavender and pastel-themed hampers filled with custom keepsakes.</p>
+            <a href="#contact" class="card-link btn btn-secondary btn-quick-enquiry">View Details <i class="fa-solid fa-chevron-right"></i></a>
+          </div>
+        </div>
+
+        <!-- Housewarming -->
+        <div class="collection-card">
+          <div class="card-img-wrapper">
+            <div class="card-actions-top">
+              <button class="action-icon-btn wishlist-btn" aria-label="Add to Wishlist"><i class="fa-regular fa-heart"></i></button>
+            </div>
+            <img src="assets/housewarming.png" alt="Housewarming Hampers">
+            <div class="card-overlay">
+              <button class="card-overlay-btn"><i class="fa-solid fa-cart-shopping"></i> Add To Cart</button>
+            </div>
+          </div>
+          <div class="card-content">
+            <h3 class="card-title">Housewarming Hamper</h3>
+            <p class="card-price"><span class="price-prefix">From </span>₹799</p>
+            <p class="card-desc">Charming home decor, brass diyas, incense holders, and premium dry fruit setups.</p>
+            <a href="#contact" class="card-link btn btn-secondary btn-quick-enquiry">View Details <i class="fa-solid fa-chevron-right"></i></a>
+          </div>
+        </div>
+
+        <!-- Corporate Hampers -->
+        <div class="collection-card">
+          <div class="card-img-wrapper">
+            <div class="card-actions-top">
+              <button class="action-icon-btn wishlist-btn" aria-label="Add to Wishlist"><i class="fa-regular fa-heart"></i></button>
+            </div>
+            <img src="assets/corporate.png" alt="Corporate Gifting Collection">
+            <div class="card-overlay">
+              <button class="card-overlay-btn"><i class="fa-solid fa-cart-shopping"></i> Add To Cart</button>
+            </div>
+          </div>
+          <div class="card-content">
+            <h3 class="card-title">Corporate Executive Hamper</h3>
+            <p class="card-price"><span class="price-prefix">From </span>₹999</p>
+            <p class="card-desc">Sleek corporate presentation boxes containing leather goods, flask, and fine chocolates.</p>
+            <a href="#contact" class="card-link btn btn-secondary btn-quick-enquiry">View Details <i class="fa-solid fa-chevron-right"></i></a>
+          </div>
+        </div>
+
+        <!-- Customized Gifts -->
+        <div class="collection-card">
+          <div class="card-img-wrapper">
+            <div class="card-actions-top">
+              <button class="action-icon-btn wishlist-btn" aria-label="Add to Wishlist"><i class="fa-regular fa-heart"></i></button>
+            </div>
+            <img src="assets/hero_banner.png" alt="Customized Hampers Collection">
+            <div class="card-overlay">
+              <button class="card-overlay-btn"><i class="fa-solid fa-cart-shopping"></i> Add To Cart</button>
+            </div>
+          </div>
+          <div class="card-content">
+            <h3 class="card-title">Customized Luxury Box</h3>
+            <p class="card-price"><span class="price-prefix">From </span>₹1299</p>
+            <p class="card-desc">Bespoke luxury hampers tailored precisely with the gifts and packaging of your choice.</p>
+            <a href="#contact" class="card-link btn btn-secondary btn-quick-enquiry">View Details <i class="fa-solid fa-chevron-right"></i></a>
+          </div>
+        </div>
+
+        <!-- Brass Gift Collections -->
+        <div class="collection-card">
+          <div class="card-img-wrapper">
+            <div class="card-actions-top">
+              <button class="action-icon-btn wishlist-btn" aria-label="Add to Wishlist"><i class="fa-regular fa-heart"></i></button>
+            </div>
+            <img src="assets/brass_cup.png" alt="Brass Gift Collections">
+            <div class="card-overlay">
+              <button class="card-overlay-btn"><i class="fa-solid fa-cart-shopping"></i> Add To Cart</button>
+            </div>
+          </div>
+          <div class="card-content">
+            <h3 class="card-title">Brass Bowl Gift Set</h3>
+            <p class="card-price"><span class="price-prefix">From </span>₹299</p>
+            <p class="card-desc">Timeless, intricately engraved brass bowls, cups, and custom decorative items.</p>
+            <a href="#contact" class="card-link btn btn-secondary btn-quick-enquiry">View Details <i class="fa-solid fa-chevron-right"></i></a>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- PRODUCT GALLERY SECTION (Masonry & Lightbox) -->
+  <section id="gallery" class="gallery container">
+    <span class="section-subtitle">Exquisite Creations</span>
+    <h2 class="section-title">Product Showcase</h2>
+
+    <div class="gallery-masonry reveal" style="margin-top: 3.5rem;">
+
+      <!-- Item 1 -->
+      <div class="gallery-item" data-title="Luxury Brass Bowl Gift Set"
+        data-desc="Intricately carved pure brass bowls matched with traditional boxes for wedding celebrations.">
+        <div class="card-actions-top">
+          <button class="action-icon-btn wishlist-btn" aria-label="Add to Wishlist"><i class="fa-regular fa-heart"></i></button>
+        </div>
+        <img class="gallery-item-img" src="assets/wedding_gift.png" alt="Luxury Brass Bowl Gift Set">
+        <div class="gallery-overlay">
+          <button class="card-overlay-btn"><i class="fa-solid fa-cart-shopping"></i> Add To Cart</button>
+        </div>
+        <div class="gallery-item-info">
+          <h4>Wedding Brass Bowl</h4>
+          <p class="card-price"><span class="price-prefix">From </span>₹499</p>
+          <a href="#contact" class="btn btn-quick-enquiry">ADD TO CART</a>
+        </div>
+      </div>
+
+      <!-- Item 2 -->
+      <div class="gallery-item" data-title="Bespoke Customized Lavender Hamper"
+        data-desc="An elegant purple-hued customized basket curated with high-end fragrances, sweets, and premium cards.">
+        <div class="card-actions-top">
+          <button class="action-icon-btn wishlist-btn" aria-label="Add to Wishlist"><i class="fa-regular fa-heart"></i></button>
+        </div>
+        <img class="gallery-item-img" src="assets/hero_banner.png" alt="Bespoke Customized Lavender Hamper">
+        <div class="gallery-overlay">
+          <button class="card-overlay-btn"><i class="fa-solid fa-cart-shopping"></i> Add To Cart</button>
+        </div>
+        <div class="gallery-item-info">
+          <h4>Custom Lavender Hamper</h4>
+          <p class="card-price"><span class="price-prefix">From </span>₹899</p>
+          <a href="#contact" class="btn btn-quick-enquiry">ADD TO CART</a>
+        </div>
+      </div>
+
+      <!-- Item 3 -->
+      <div class="gallery-item" data-title="Royal Baby Shower Keepsake Box"
+        data-desc="Curated lavender pastel box with designer ribbons, customized chocolates, and silver-plated baby accessories.">
+        <div class="card-actions-top">
+          <button class="action-icon-btn wishlist-btn" aria-label="Add to Wishlist"><i class="fa-regular fa-heart"></i></button>
+        </div>
+        <img class="gallery-item-img" src="assets/baby_shower.png" alt="Royal Baby Shower Keepsake Box">
+        <div class="gallery-overlay">
+          <button class="card-overlay-btn"><i class="fa-solid fa-cart-shopping"></i> Add To Cart</button>
+        </div>
+        <div class="gallery-item-info">
+          <h4>Baby Shower Hamper</h4>
+          <p class="card-price"><span class="price-prefix">From </span>₹449</p>
+          <a href="#contact" class="btn btn-quick-enquiry">ADD TO CART</a>
+        </div>
+      </div>
+
+      <!-- Item 4 -->
+      <div class="gallery-item" data-title="Traditional Brass Home Decor Set"
+        data-desc="Polished brass incense holders and diyas arranged perfectly with silver boxes for griha pravesham return gifts.">
+        <div class="card-actions-top">
+          <button class="action-icon-btn wishlist-btn" aria-label="Add to Wishlist"><i class="fa-regular fa-heart"></i></button>
+        </div>
+        <img class="gallery-item-img" src="assets/housewarming.png" alt="Traditional Brass Home Decor Set">
+        <div class="gallery-overlay">
+          <button class="card-overlay-btn"><i class="fa-solid fa-cart-shopping"></i> Add To Cart</button>
+        </div>
+        <div class="gallery-item-info">
+          <h4>Housewarming Brass Set</h4>
+          <p class="card-price"><span class="price-prefix">From </span>₹799</p>
+          <a href="#contact" class="btn btn-quick-enquiry">ADD TO CART</a>
+        </div>
+      </div>
+
+      <!-- Item 5 -->
+      <div class="gallery-item" data-title="Artisan Engraved Brass Cups"
+        data-desc="Exquisite handcrafted brass mugs showing custom traditional Indian engraving on silk backing.">
+        <div class="card-actions-top">
+          <button class="action-icon-btn wishlist-btn" aria-label="Add to Wishlist"><i class="fa-regular fa-heart"></i></button>
+        </div>
+        <img class="gallery-item-img" src="assets/brass_cup.png" alt="Artisan Engraved Brass Cups">
+        <div class="gallery-overlay">
+          <button class="card-overlay-btn"><i class="fa-solid fa-cart-shopping"></i> Add To Cart</button>
+        </div>
+        <div class="gallery-item-info">
+          <h4>Engraved Brass Cups</h4>
+          <p class="card-price"><span class="price-prefix">From </span>₹299</p>
+          <a href="#contact" class="btn btn-quick-enquiry">ADD TO CART</a>
+        </div>
+      </div>
+
+      <!-- Item 6 -->
+      <div class="gallery-item" data-title="Half Saree Traditional Accent Bag"
+        data-desc="A return gifting combination featuring high-end brass diyas and silk bangle pouch with custom detailing.">
+        <div class="card-actions-top">
+          <button class="action-icon-btn wishlist-btn" aria-label="Add to Wishlist"><i class="fa-regular fa-heart"></i></button>
+        </div>
+        <img class="gallery-item-img" src="assets/half_saree.png" alt="Half Saree Traditional Accent Bag">
+        <div class="gallery-overlay">
+          <button class="card-overlay-btn"><i class="fa-solid fa-cart-shopping"></i> Add To Cart</button>
+        </div>
+        <div class="gallery-item-info">
+          <h4>Half Saree Return Gift</h4>
+          <p class="card-price"><span class="price-prefix">From </span>₹349</p>
+          <a href="#contact" class="btn btn-quick-enquiry">ADD TO CART</a>
+        </div>
+      </div>
+
+      <!-- Item 7 -->
+      <div class="gallery-item" data-title="Premium Executive Corporate Pack"
+        data-desc="High-end corporate box featuring a customized metallic bottle, notebook, and handcrafted dry fruit assortments.">
+        <div class="card-actions-top">
+          <button class="action-icon-btn wishlist-btn" aria-label="Add to Wishlist"><i class="fa-regular fa-heart"></i></button>
+        </div>
+        <img class="gallery-item-img" src="assets/corporate.png" alt="Premium Executive Corporate Pack">
+        <div class="gallery-overlay">
+          <button class="card-overlay-btn"><i class="fa-solid fa-cart-shopping"></i> Add To Cart</button>
+        </div>
+        <div class="gallery-item-info">
+          <h4>Corporate Executive Hamper</h4>
+          <p class="card-price"><span class="price-prefix">From </span>₹1499</p>
+          <a href="#contact" class="btn btn-quick-enquiry">ADD TO CART</a>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- CUSTOMER REVIEWS (Slider) -->
+  <section id="testimonials" class="testimonials container">
+    <span class="section-subtitle">Heartfelt Reviews</span>
+    <h2 class="section-title">Client Testimonials</h2>
+
+    <div class="testimonial-slider-container reveal" style="margin-top: 3.5rem;">
+      <div class="testimonial-track">
+
+        <!-- Slide 1 -->
+        <div class="testimonial-slide active">
+          <div class="testimonial-rating">
+            <i class="fa-solid fa-star"></i>
+            <i class="fa-solid fa-star"></i>
+            <i class="fa-solid fa-star"></i>
+            <i class="fa-solid fa-star"></i>
+            <i class="fa-solid fa-star"></i>
+          </div>
+          <p class="testimonial-quote">
+            "Hampers Nest curated the return gifts for my daughter's wedding in Hyderabad. The brass bowls were
+            gorgeous, and our guests absolutely loved the customized packaging. Highly professional!"
+          </p>
+          <div class="testimonial-user">
+            <div class="testimonial-avatar">
+              <svg viewBox="0 0 100 100">
+                <circle cx="50" cy="35" r="20" />
+                <path d="M50 60 C25 60 15 80 15 90 L85 90 C85 80 75 60 50 60 Z" />
+              </svg>
+            </div>
+            <div class="testimonial-meta">
+              <h5 class="testimonial-name">Priya Ramaswamy</h5>
+              <span class="testimonial-event">Daughter's Wedding Celebration</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Slide 2 -->
+        <div class="testimonial-slide">
+          <div class="testimonial-rating">
+            <i class="fa-solid fa-star"></i>
+            <i class="fa-solid fa-star"></i>
+            <i class="fa-solid fa-star"></i>
+            <i class="fa-solid fa-star"></i>
+            <i class="fa-solid fa-star"></i>
+          </div>
+          <p class="testimonial-quote">
+            "We ordered 150 customized lavender-themed return gifts for our baby shower. The attention to detail on the
+            boxes, ribbons, and custom cards was outstanding. Hampers Nest made our occasion look so premium."
+          </p>
+          <div class="testimonial-user">
+            <div class="testimonial-avatar">
+              <svg viewBox="0 0 100 100">
+                <circle cx="50" cy="35" r="20" />
+                <path d="M50 60 C25 60 15 80 15 90 L85 90 C85 80 75 60 50 60 Z" />
+              </svg>
+            </div>
+            <div class="testimonial-meta">
+              <h5 class="testimonial-name">Sneha Reddy</h5>
+              <span class="testimonial-event">Baby Shower Ceremony</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Slide 3 -->
+        <div class="testimonial-slide">
+          <div class="testimonial-rating">
+            <i class="fa-solid fa-star"></i>
+            <i class="fa-solid fa-star"></i>
+            <i class="fa-solid fa-star"></i>
+            <i class="fa-solid fa-star"></i>
+            <i class="fa-solid fa-star"></i>
+          </div>
+          <p class="testimonial-quote">
+            "The corporate gifting hampers we ordered for our executives were stellar. Perfect leatherette packaging and
+            neat branding. Delivery was right on time. Will definitely order from Hampers Nest again."
+          </p>
+          <div class="testimonial-user">
+            <div class="testimonial-avatar">
+              <svg viewBox="0 0 100 100">
+                <circle cx="50" cy="35" r="20" />
+                <path d="M50 60 C25 60 15 80 15 90 L85 90 C85 80 75 60 50 60 Z" />
+              </svg>
+            </div>
+            <div class="testimonial-meta">
+              <h5 class="testimonial-name">Aditya Verma</h5>
+              <span class="testimonial-event">Corporate Annual Gifting</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Slider dots indicators -->
+      <div id="sliderDots" class="slider-dots"></div>
+    </div>
+  </section>
+
+  <!-- INSTAGRAM FEED SHOWCASE -->
+  <section class="instagram">
+    <div class="container">
+      <span class="section-subtitle">Social Showcase</span>
+      <h2 class="section-title">Follow Our Latest Creations</h2>
+
+      <div class="instagram-grid reveal" style="margin-top: 3.5rem;">
+        <!-- Card 1 -->
+        <a href="https://instagram.com" target="_blank" class="instagram-card">
+          <img src="assets/wedding_gift.png" alt="Instagram Post return gift detail">
+          <div class="instagram-overlay">
+            <i class="fa-brands fa-instagram"></i>
+          </div>
+        </a>
+        <!-- Card 2 -->
+        <a href="https://instagram.com" target="_blank" class="instagram-card">
+          <img src="assets/baby_shower.png" alt="Instagram Post lavender hamper">
+          <div class="instagram-overlay">
+            <i class="fa-brands fa-instagram"></i>
+          </div>
+        </a>
+        <!-- Card 3 -->
+        <a href="https://instagram.com" target="_blank" class="instagram-card">
+          <img src="assets/housewarming.png" alt="Instagram Post housewarming diyas">
+          <div class="instagram-overlay">
+            <i class="fa-brands fa-instagram"></i>
+          </div>
+        </a>
+        <!-- Card 4 -->
+        <a href="https://instagram.com" target="_blank" class="instagram-card">
+          <img src="assets/corporate.png" alt="Instagram Post corporate hampers">
+          <div class="instagram-overlay">
+            <i class="fa-brands fa-instagram"></i>
+          </div>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- CALL TO ACTION BANNER -->
+  <section class="cta-banner">
+    <div class="container cta-container reveal">
+      <h2 class="cta-title">Let's Create <br class="mobile-br">Something Beautiful</h2>
+      <p class="cta-desc">
+        Contact our curation expert team today in Hyderabad. Let's customize beautiful hampers that suit your theme,
+        budget, and celebration style.
+      </p>
+      <div class="cta-buttons">
+        <a href="#" class="btn btn-primary btn-whatsapp whatsapp-direct">
+          <i class="fa-brands fa-whatsapp"></i> Chat On WhatsApp
+        </a>
+        <button id="quickInquiryBtn" class="btn btn-secondary">
+          Request A Quote <i class="fa-solid fa-arrow-right"></i>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTACT & INQUIRY FORM SECTION -->
+  <section id="contact" class="contact container">
+    <div class="contact-grid">
+
+      <div class="contact-info reveal">
+        <span class="section-subtitle" style="text-align: left; margin-bottom: 0.8rem;">Get In Touch</span>
+        <h2 class="contact-info-title">Plan Your Return Gifts</h2>
+        <p class="contact-info-desc">
+          Drop us your custom request details, and our Hyderabad team will get back to you with custom catalog designs,
+          pricing options, and shipping estimates within a few hours.
+        </p>
+
+        <div class="contact-details">
+          <div class="contact-detail-item">
+            <div class="contact-icon-box">
+              <i class="fa-solid fa-location-dot"></i>
+            </div>
+            <div class="contact-detail-text">
+              <h5>Location</h5>
+              <p>Hyderabad, Telangana, India</p>
+            </div>
+          </div>
+
+          <div class="contact-detail-item">
+            <div class="contact-icon-box">
+              <i class="fa-solid fa-gift"></i>
+            </div>
+            <div class="contact-detail-text">
+              <h5>Services</h5>
+              <p>Premium Return Gifts & Customized Hampers</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="contact-socials">
+          <a href="#" class="social-circle" aria-label="Facebook Page"><i class="fa-brands fa-facebook-f"></i></a>
+          <a href="#" class="social-circle" aria-label="Instagram Page"><i class="fa-brands fa-instagram"></i></a>
+          <a href="#" class="social-circle whatsapp-direct" aria-label="WhatsApp Chat"><i
+              class="fa-brands fa-whatsapp"></i></a>
+        </div>
+      </div>
+
+      <div class="contact-form-box reveal" style="transition-delay: 0.2s;">
+        <h3 style="font-size: 1.8rem; margin-bottom: 1.5rem; text-align: center;">Request Details Quote</h3>
+        <form id="mainInquiryForm">
+          <div class="form-group">
+            <label class="form-label" for="name">Full Name *</label>
+            <input type="text" id="name" name="name" class="form-input" placeholder="Your complete name" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="phone">Phone Number *</label>
+            <input type="tel" id="phone" name="phone" class="form-input" placeholder="Your active WhatsApp number"
+              required>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="event-type">Celebration *</label>
+              <select id="event-type" name="event-type" class="form-select" required>
+                <option value="" disabled selected>Select event</option>
+                <option value="Wedding">Wedding</option>
+                <option value="Baby Shower">Baby Shower</option>
+                <option value="Housewarming">Housewarming</option>
+                <option value="Half Saree Function">Half Saree Function</option>
+                <option value="Corporate Gifting">Corporate Gifting</option>
+                <option value="Special Celebration">Special Celebration</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="quantity">Order Size *</label>
+              <input type="number" id="quantity" name="quantity" class="form-input" placeholder="Min 10 pieces" min="10"
+                required>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="message">Detailed customization requirements</label>
+            <textarea id="message" name="message" class="form-textarea"
+              placeholder="E.g. Let us know if you need specific box colors, brass items, card text, etc."></textarea>
+          </div>
+
+          <button type="submit" class="btn btn-primary" style="width: 100%;">
+            Send Inquiry Via WhatsApp <i class="fa-solid fa-paper-plane"></i>
+          </button>
+        </form>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="container footer-grid">
+      <div class="footer-col">
+        <div
+          style="background: var(--color-white); padding: 8px 12px; border-radius: 8px; display: inline-block; margin-bottom: 1.5rem; border: 1px solid var(--color-gold);">
+          <a href="#" class="logo footer-logo" style="display: block;">
+            <img src="assets/logo.png" alt="Hampers Nest Logo">
+          </a>
+        </div>
+        <p class="footer-about-text">
+          Hampers Nest curation studio crafts exceptional Customized Hampers & traditional/modern return gifts for
+          life's most precious occasions. Based out of Hyderabad, shipping premium bundles across India.
+        </p>
+      </div>
+
+      <div class="footer-col">
+        <h4 class="footer-title">Quick Links</h4>
+        <ul class="footer-links">
+          <li><a href="#">Home</a></li>
+          <li><a href="#about">Our Story</a></li>
+          <li><a href="#collections">Featured Collections</a></li>
+          <li><a href="#gallery">Product Gallery</a></li>
+          <li><a href="#contact">Get Quote</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h4 class="footer-title">Collections</h4>
+        <ul class="footer-links">
+          <li><a href="#collections">Wedding Gifting</a></li>
+          <li><a href="#collections">Baby Shower Boxes</a></li>
+          <li><a href="#collections">Housewarming Kits</a></li>
+          <li><a href="#collections">Corporate Hampers</a></li>
+          <li><a href="#collections">Customized Gifts</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h4 class="footer-title">Follow Us</h4>
+        <div class="footer-insta-grid">
+          <div class="footer-insta-img"><img src="assets/wedding_gift.png" alt="Instagram Showcase image 1"></div>
+          <div class="footer-insta-img"><img src="assets/baby_shower.png" alt="Instagram Showcase image 2"></div>
+          <div class="footer-insta-img"><img src="assets/housewarming.png" alt="Instagram Showcase image 3"></div>
+          <div class="footer-insta-img"><img src="assets/corporate.png" alt="Instagram Showcase image 4"></div>
+          <div class="footer-insta-img"><img src="assets/hero_banner.png" alt="Instagram Showcase image 5"></div>
+          <div class="footer-insta-img"><img src="assets/brass_cup.png" alt="Instagram Showcase image 6"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="container footer-bottom">
+      <p>&copy; 2026 Hampers Nest. All Rights Reserved. Crafted with love for Hyderabad's premium celebrations.</p>
+      <div class="footer-socials">
+        <a href="#" style="margin-right: 15px;"><i class="fa-brands fa-facebook-f"></i></a>
+        <a href="#" style="margin-right: 15px;"><i class="fa-brands fa-instagram"></i></a>
+        <a href="#" class="whatsapp-direct"><i class="fa-brands fa-whatsapp"></i></a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- FLOATING QUICK CONVERSION CONTROL BUTTONS -->
+  <div class="floating-container-right">
+    <a href="tel:+917989202194" class="call-float" aria-label="Quick Call contact">
+      <i class="fa-solid fa-phone"></i>
+    </a>
+    <button class="whatsapp-float whatsapp-direct" aria-label="Quick WhatsApp chat">
+      <i class="fa-brands fa-whatsapp"></i>
+    </button>
+  </div>
+
+  <!-- JS Scripts -->
+  <script src="script.js"></script>
+</body>
+
+</html>
