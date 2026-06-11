@@ -1,5 +1,19 @@
 .vscode/
 .DS_Store
 Thumbs.db
+
+# Dependencies
+node_modules/
 hampersnest-react/node_modules/
+hampersnest-admin/node_modules/
+hampersnest-backend/node_modules/
+
+# Compiled Builds
+dist/
 hampersnest-react/dist/
+hampersnest-admin/dist/
+
+# Local Uploads & Environment Files
+hampersnest-backend/public/uploads/
+hampersnest-backend/.env
+.env

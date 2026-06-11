@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { products as fallbackProducts } from '../data/products';
 
 const CartContext = createContext();
 
@@ -22,9 +23,55 @@ export const CartProvider = ({ children }) => {
     return savedWishlist ? JSON.parse(savedWishlist) : [];
   });
 
+  const [products, setProducts] = useState(fallbackProducts);
   const [cartOpen, setCartOpen] = useState(false);
   const [inquiryOpen, setInquiryOpen] = useState(false);
   const [selectedProductForModal, setSelectedProductForModal] = useState(null);
+  const [settings, setSettings] = useState({
+    announcementText: 'Welcome to HampersNest! Premium Customized Gift Hampers & Return Gifts Hyderabad.',
+    announcementActive: false,
+    activeTheme: 'theme-default'
+  });
+
+  // Fetch products and settings from backend on mount
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const API_BASE = window.location.hostname === 'localhost' || window.location.hostname.endsWith('.localhost')
+          ? 'http://localhost:5000'
+          : '';
+        const response = await fetch(`${API_BASE}/api/products`);
+        if (response.ok) {
+          const data = await response.json();
+          if (data && data.length > 0) {
+            setProducts(data);
+          }
+        }
+      } catch (err) {
+        console.warn('Backend products API offline, using fallback static data:', err);
+      }
+    };
+
+    const fetchSettings = async () => {
+      try {
+        const API_BASE = window.location.hostname === 'localhost' || window.location.hostname.endsWith('.localhost')
+          ? 'http://localhost:5000'
+          : '';
+        const response = await fetch(`${API_BASE}/api/settings`);
+        if (response.ok) {
+          const data = await response.json();
+          setSettings(data);
+          // Apply theme directly to storefront body
+          document.body.className = data.activeTheme || 'theme-default';
+        }
+      } catch (err) {
+        console.warn('Backend settings API offline:', err);
+      }
+    };
+
+    fetchProducts();
+    fetchSettings();
+  }, []);
 
   // Sync to localStorage
   useEffect(() => {
@@ -84,6 +131,21 @@ export const CartProvider = ({ children }) => {
 
     // Automatically open the cart drawer when item is added
     setCartOpen(true);
+
+    // Record click analytics to backend
+    const recordClick = async () => {
+      try {
+        const API_BASE = window.location.hostname === 'localhost' || window.location.hostname.endsWith('.localhost')
+          ? 'http://localhost:5000'
+          : '';
+        await fetch(`${API_BASE}/api/products/${product.id}/click`, {
+          method: 'POST'
+        });
+      } catch (err) {
+        console.warn('Click tracking server connection failed:', err);
+      }
+    };
+    recordClick();
   };
 
   const removeFromCart = (cartItemId) => {
@@ -126,7 +188,7 @@ export const CartProvider = ({ children }) => {
   const cartTotal = cart.reduce((total, item) => total + (item.price * item.quantity), 0);
 
   // Generate Whatsapp Checkout Message
-  const getWhatsappCheckoutUrl = (userDetails = {}) => {
+  const getWhatsappCheckoutUrl = (userDetails = {}, orderId = null) => {
     const whatsappBaseNumber = '917989202194';
     
     let orderDetailsText = cart.map((item, idx) => {
@@ -146,14 +208,14 @@ export const CartProvider = ({ children }) => {
       return `${idx + 1}. *${item.name}* x ${item.quantity} (₹${item.price} each) ${customStr}`;
     }).join('\n\n');
 
+    const orderRefStr = orderId ? `*Order Reference:* ${orderId}\n` : '';
     const nameStr = userDetails.name ? `*Name:* ${userDetails.name}\n` : '';
     const phoneStr = userDetails.phone ? `*Phone:* ${userDetails.phone}\n` : '';
     const eventStr = userDetails.eventType ? `*Event:* ${userDetails.eventType}\n` : '';
     const dateStr = userDetails.deliveryDate ? `*Required Date:* ${userDetails.deliveryDate}\n` : '';
     const notesStr = userDetails.notes ? `*Notes:* ${userDetails.notes}\n` : '';
 
-    const usdTotal = Math.round(cartTotal / 83);
-    const message = `Hi Hampers Nest!\n\nI would like to place an order / get a quote for the following hampers:\n\n${orderDetailsText}\n\n*Total Items:* ${cartCount}\n*Estimated Subtotal:* ₹${cartTotal} (≈ $${usdTotal} USD)\n\n${nameStr}${phoneStr}${eventStr}${dateStr}${notesStr}Please confirm availability and share the catalog. Thank you!`;
+    const message = `Hi Hampers Nest!\n\nI would like to place an order / get a quote for the following hampers:\n\n${orderDetailsText}\n\n*Total Items:* ${cartCount}\n*Estimated Subtotal:* ₹${cartTotal}\n\n${nameStr}${phoneStr}${eventStr}${dateStr}${notesStr}Please confirm availability and share the catalog. Thank you!`;
 
     return `https://api.whatsapp.com/send?phone=${whatsappBaseNumber}&text=${encodeURIComponent(message)}`;
   };
@@ -161,6 +223,7 @@ export const CartProvider = ({ children }) => {
   return (
     <CartContext.Provider
       value={{
+        products,
         cart,
         wishlist,
         cartOpen,
@@ -177,7 +240,8 @@ export const CartProvider = ({ children }) => {
         isInWishlist,
         cartCount,
         cartTotal,
-        getWhatsappCheckoutUrl
+        getWhatsappCheckoutUrl,
+        settings
       }}
     >
       {children}

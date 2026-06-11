@@ -1,26 +1,56 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { Link } from 'react-router-dom';
-import { products, MASTER_CATEGORIES, USD_RATE } from '../data/products';
+import { Link, useSearchParams } from 'react-router-dom';
+import { MASTER_CATEGORIES, USD_RATE } from '../data/products';
 import { useCart } from '../context/CartContext';
 
-const PAGE_SIZE = 12;
-
 export default function Collections() {
-  const { addToCart, setSelectedProductForModal } = useCart();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const queryCategory = searchParams.get('category');
+  const { products, addToCart, setSelectedProductForModal } = useCart();
 
   const [activeCategory, setActiveCategory] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('featured');
-  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
-  const [isLoading, setIsLoading] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
 
-  // Reset pagination when filters change
+  // Sync category from URL search parameter
   useEffect(() => {
-    setVisibleCount(PAGE_SIZE);
-  }, [activeCategory, searchQuery, sortBy]);
+    if (queryCategory) {
+      const match = MASTER_CATEGORIES.find(
+        c => c.id.toLowerCase() === queryCategory.toLowerCase() || 
+             c.label.toLowerCase() === queryCategory.toLowerCase()
+      );
+      if (match) {
+        setActiveCategory(match.id);
+      } else {
+        setActiveCategory('All');
+      }
+    } else {
+      setActiveCategory('All');
+    }
+    setCurrentPage(1);
+  }, [queryCategory]);
+
+  // Reset page when search or sort changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, sortBy]);
+
+  // Handle category tab click & update URL params
+  const handleCategoryChange = (category) => {
+    setActiveCategory(category);
+    setCurrentPage(1);
+    if (category === 'All') {
+      searchParams.delete('category');
+    } else {
+      searchParams.set('category', category);
+    }
+    setSearchParams(searchParams);
+  };
 
   // Filter & Sort Logic
   const filteredProducts = useMemo(() => {
+    if (!products) return [];
     let result = [...products];
 
     // 1. Master Category Filter
@@ -33,8 +63,8 @@ export default function Collections() {
       const q = searchQuery.toLowerCase().trim();
       result = result.filter(
         p => p.name.toLowerCase().includes(q) ||
-             p.description.toLowerCase().includes(q) ||
-             p.category.toLowerCase().includes(q)
+             (p.description && p.description.toLowerCase().includes(q)) ||
+             (p.category && p.category.toLowerCase().includes(q))
       );
     }
 
@@ -50,18 +80,16 @@ export default function Collections() {
     }
 
     return result;
-  }, [activeCategory, searchQuery, sortBy]);
+  }, [activeCategory, searchQuery, sortBy, products]);
 
-  const visibleProducts = filteredProducts.slice(0, visibleCount);
-  const hasMore = visibleCount < filteredProducts.length;
+  // Pagination Logic
+  const itemsPerPage = 8;
+  const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
 
-  const handleLoadMore = useCallback(() => {
-    setIsLoading(true);
-    setTimeout(() => {
-      setVisibleCount(prev => prev + PAGE_SIZE);
-      setIsLoading(false);
-    }, 300);
-  }, []);
+  const paginatedProducts = useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    return filteredProducts.slice(startIndex, startIndex + itemsPerPage);
+  }, [filteredProducts, currentPage]);
 
   // Scroll animations observer
   useEffect(() => {
@@ -79,7 +107,7 @@ export default function Collections() {
     );
     revealElements.forEach((el) => observer.observe(el));
     return () => observer.disconnect();
-  }, [visibleProducts]);
+  }, [paginatedProducts]);
 
   const handleAddToCart = (e, product) => {
     e.stopPropagation();
@@ -104,11 +132,11 @@ export default function Collections() {
           {/* Top Banner SEO Tags */}
           <div className="trending-tags-banner">
             <span className="trending-label">Popular Searches:</span>
-            <button onClick={() => setActiveCategory('Weddings')} className="trending-tag-btn">#WeddingReturnGifts</button>
-            <button onClick={() => setActiveCategory('Baby')} className="trending-tag-btn">#BabyShowerHampers</button>
-            <button onClick={() => setActiveCategory('Corporate')} className="trending-tag-btn">#CorporateGifts</button>
-            <button onClick={() => setActiveCategory('Traditional')} className="trending-tag-btn">#BrassReturnGifts</button>
-            <button onClick={() => setActiveCategory('Festivals')} className="trending-tag-btn">#FestivalGifts</button>
+            <button onClick={() => handleCategoryChange('Weddings')} className="trending-tag-btn">#WeddingReturnGifts</button>
+            <button onClick={() => handleCategoryChange('Baby')} className="trending-tag-btn">#BabyShowerHampers</button>
+            <button onClick={() => handleCategoryChange('Corporate')} className="trending-tag-btn">#CorporateGifts</button>
+            <button onClick={() => handleCategoryChange('Traditional')} className="trending-tag-btn">#BrassReturnGifts</button>
+            <button onClick={() => handleCategoryChange('Festivals')} className="trending-tag-btn">#FestivalGifts</button>
           </div>
         </div>
       </div>
@@ -120,7 +148,7 @@ export default function Collections() {
           {MASTER_CATEGORIES.map((cat) => (
             <button
               key={cat.id}
-              onClick={() => setActiveCategory(cat.id)}
+              onClick={() => handleCategoryChange(cat.id)}
               className={`master-tab ${activeCategory === cat.id ? 'active' : ''}`}
             >
               {cat.emoji && <span className="master-tab-emoji">{cat.emoji}</span>}
@@ -160,7 +188,7 @@ export default function Collections() {
           style={{ marginBottom: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', color: '#666', fontSize: '0.85rem' }}
           className="reveal-heading"
         >
-          <span>Showing {visibleProducts.length} of {filteredProducts.length} products</span>
+          <span>Showing {paginatedProducts.length} of {filteredProducts.length} products</span>
           {searchQuery && (
             <button
               onClick={() => setSearchQuery('')}
@@ -188,37 +216,95 @@ export default function Collections() {
             </button>
           </div>
         ) : (
-          <div className="collections-grid-4col">
-            {visibleProducts.map((product, idx) => (
-              <CollectionCard
-                key={product.id}
-                product={product}
-                animationDelay={idx >= visibleCount - PAGE_SIZE ? (idx % PAGE_SIZE) * 60 : 0}
-                onAddToCart={(e) => handleAddToCart(e, product)}
-                onViewDetails={() => handleViewDetails(product)}
-              />
-            ))}
-          </div>
-        )}
+          <>
+            <div className="collections-grid-4col reveal">
+              {paginatedProducts.map((product, idx) => (
+                <CollectionCard
+                  key={product.id}
+                  product={product}
+                  animationDelay={(idx % 8) * 60}
+                  onAddToCart={(e) => handleAddToCart(e, product)}
+                  onViewDetails={() => handleViewDetails(product)}
+                />
+              ))}
+            </div>
 
-        {/* === LOAD MORE === */}
-        {hasMore && filteredProducts.length > 0 && (
-          <div className="load-more-wrapper">
-            <button
-              className="load-more-btn"
-              onClick={handleLoadMore}
-              disabled={isLoading}
-            >
-              {isLoading ? (
-                <>Loading... <i className="fa-solid fa-spinner fa-spin"></i></>
-              ) : (
-                <>Load More Products <i className="fa-solid fa-chevron-down"></i></>
-              )}
-            </button>
-            <p className="products-counter">
-              {visibleProducts.length} of {filteredProducts.length} products shown
-            </p>
-          </div>
+            {/* Pagination Controls */}
+            {totalPages > 1 && (
+              <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', marginTop: '3rem', marginBottom: '1rem' }} className="reveal">
+                {/* Prev Button */}
+                <button
+                  onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                  disabled={currentPage === 1}
+                  style={{
+                    padding: '8px 16px',
+                    border: '1px solid var(--color-beige)',
+                    background: currentPage === 1 ? '#F8F9FA' : 'var(--color-white)',
+                    color: currentPage === 1 ? '#ADB5BD' : 'var(--color-purple-dark)',
+                    borderRadius: '8px',
+                    cursor: currentPage === 1 ? 'not-allowed' : 'pointer',
+                    fontWeight: 600,
+                    fontSize: '0.85rem',
+                    transition: 'all 0.2s ease',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px'
+                  }}
+                >
+                  <i className="fa-solid fa-chevron-left"></i> Previous
+                </button>
+
+                {/* Page Numbers */}
+                {Array.from({ length: totalPages }).map((_, idx) => {
+                  const pageNum = idx + 1;
+                  const isActive = currentPage === pageNum;
+                  return (
+                    <button
+                      key={pageNum}
+                      onClick={() => setCurrentPage(pageNum)}
+                      style={{
+                        width: '38px',
+                        height: '38px',
+                        border: isActive ? 'none' : '1px solid var(--color-beige)',
+                        background: isActive ? 'var(--gold-gradient)' : 'var(--color-white)',
+                        color: isActive ? 'var(--color-white)' : 'var(--color-purple-dark)',
+                        borderRadius: '8px',
+                        cursor: 'pointer',
+                        fontWeight: 600,
+                        fontSize: '0.85rem',
+                        transition: 'all 0.2s ease',
+                        boxShadow: isActive ? 'var(--shadow-gold)' : 'none'
+                      }}
+                    >
+                      {pageNum}
+                    </button>
+                  );
+                })}
+
+                {/* Next Button */}
+                <button
+                  onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                  disabled={currentPage === totalPages}
+                  style={{
+                    padding: '8px 16px',
+                    border: '1px solid var(--color-beige)',
+                    background: currentPage === totalPages ? '#F8F9FA' : 'var(--color-white)',
+                    color: currentPage === totalPages ? '#ADB5BD' : 'var(--color-purple-dark)',
+                    borderRadius: '8px',
+                    cursor: currentPage === totalPages ? 'not-allowed' : 'pointer',
+                    fontWeight: 600,
+                    fontSize: '0.85rem',
+                    transition: 'all 0.2s ease',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px'
+                  }}
+                >
+                  Next <i className="fa-solid fa-chevron-right"></i>
+                </button>
+              </div>
+            )}
+          </>
         )}
 
         {/* SEO Related Keywords Grid Section */}
@@ -228,28 +314,28 @@ export default function Collections() {
             <div className="seo-keywords-col">
               <h5>Occasions</h5>
               <ul>
-                <li><button onClick={() => setActiveCategory('Weddings')} className="seo-keyword-link">Wedding Return Gifts Hyderabad</button></li>
-                <li><button onClick={() => setActiveCategory('Baby')} className="seo-keyword-link">Premium Baby Shower Gift Curations</button></li>
-                <li><button onClick={() => setActiveCategory('Traditional')} className="seo-keyword-link">Housewarming Ceremony Hampers</button></li>
-                <li><button onClick={() => setActiveCategory('Festivals')} className="seo-keyword-link">Festival & Seasonal Gift Boxes</button></li>
+                <li><button onClick={() => handleCategoryChange('Weddings')} className="seo-keyword-link">Wedding Return Gifts Hyderabad</button></li>
+                <li><button onClick={() => handleCategoryChange('Baby')} className="seo-keyword-link">Premium Baby Shower Gift Curations</button></li>
+                <li><button onClick={() => handleCategoryChange('Traditional')} className="seo-keyword-link">Housewarming Ceremony Hampers</button></li>
+                <li><button onClick={() => handleCategoryChange('Festivals')} className="seo-keyword-link">Festival & Seasonal Gift Boxes</button></li>
               </ul>
             </div>
             <div className="seo-keywords-col">
               <h5>Gift Styles</h5>
               <ul>
-                <li><button onClick={() => setActiveCategory('Traditional')} className="seo-keyword-link">Traditional Brass Item Return Gifts</button></li>
-                <li><button onClick={() => setActiveCategory('Traditional')} className="seo-keyword-link">Curated Luxury Dry Fruit Hampers</button></li>
-                <li><button onClick={() => setActiveCategory('Corporate')} className="seo-keyword-link">Premium Corporate Gift Sets</button></li>
-                <li><button onClick={() => setActiveCategory('Festivals')} className="seo-keyword-link">Handmade Gourmet Gift Trays</button></li>
+                <li><button onClick={() => handleCategoryChange('Traditional')} className="seo-keyword-link">Traditional Brass Item Return Gifts</button></li>
+                <li><button onClick={() => handleCategoryChange('Traditional')} className="seo-keyword-link">Curated Luxury Dry Fruit Hampers</button></li>
+                <li><button onClick={() => handleCategoryChange('Corporate')} className="seo-keyword-link">Premium Corporate Gift Sets</button></li>
+                <li><button onClick={() => handleCategoryChange('Festivals')} className="seo-keyword-link">Handmade Gourmet Gift Trays</button></li>
               </ul>
             </div>
             <div className="seo-keywords-col">
               <h5>Customization</h5>
               <ul>
-                <li><button onClick={() => setActiveCategory('All')} className="seo-keyword-link">Premium Ivory Lace Wrapping</button></li>
-                <li><button onClick={() => setActiveCategory('All')} className="seo-keyword-link">Royal Purple Silk Box Covers</button></li>
-                <li><button onClick={() => setActiveCategory('All')} className="seo-keyword-link">Personalized Gift Tags & Message Cards</button></li>
-                <li><button onClick={() => setActiveCategory('Corporate')} className="seo-keyword-link">Bulk Order Corporate Hampers</button></li>
+                <li><button onClick={() => handleCategoryChange('All')} className="seo-keyword-link">Premium Ivory Lace Wrapping</button></li>
+                <li><button onClick={() => handleCategoryChange('All')} className="seo-keyword-link">Royal Purple Silk Box Covers</button></li>
+                <li><button onClick={() => handleCategoryChange('All')} className="seo-keyword-link">Personalized Gift Tags & Message Cards</button></li>
+                <li><button onClick={() => handleCategoryChange('Corporate')} className="seo-keyword-link">Bulk Order Corporate Hampers</button></li>
               </ul>
             </div>
           </div>

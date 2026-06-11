@@ -53,6 +53,11 @@ export default function ProductCard({ product }) {
         </h3>
         <p className="card-price">
           <span className="price-prefix">From </span>₹{product.price}
+          {product.originalPrice > 0 && product.originalPrice > product.price && (
+            <span style={{ textDecoration: 'line-through', color: '#888', fontSize: '0.8rem', marginLeft: '6px', fontWeight: 'normal' }}>
+              ₹{product.originalPrice}
+            </span>
+          )}
         </p>
         <p className="card-usd-price">≈ ${usdPrice} USD</p>
         <div style={{ display: 'flex', gap: '8px', marginTop: '4px' }}>

@@ -38,7 +38,7 @@ export default function Contact() {
     }));
   };
 
-  const handleFormSubmit = (e) => {
+  const handleFormSubmit = async (e) => {
     e.preventDefault();
     if (!formData.name || !formData.phone || !formData.eventType || !formData.quantity) {
       alert('Please fill out all required fields.');
@@ -62,6 +62,28 @@ export default function Contact() {
     const whatsappURL = `https://api.whatsapp.com/send?phone=${whatsappBaseNumber}&text=${encodedText}`;
 
     setShowSuccessToast(true);
+
+    // POST inquiry details to backend
+    const inquiryPayload = {
+      name: formData.name,
+      phone: formData.phone,
+      eventType: formData.eventType,
+      quantity: Number(formData.quantity),
+      message: formData.message || ''
+    };
+
+    try {
+      const API_BASE = window.location.hostname === 'localhost' || window.location.hostname.endsWith('.localhost')
+        ? 'http://localhost:5000'
+        : '';
+      await fetch(`${API_BASE}/api/inquiries`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(inquiryPayload)
+      });
+    } catch (err) {
+      console.error('Failed to save inquiry to database:', err);
+    }
 
     setTimeout(() => {
       window.open(whatsappURL, '_blank');

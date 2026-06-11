@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
+import ProductCard from '../components/ProductCard';
 
 const testimonials = [
   {
@@ -27,6 +28,7 @@ export default function Home() {
   const navigate = useNavigate();
   const { addToCart } = useCart();
   const [activeSlide, setActiveSlide] = useState(0);
+  const { products } = useCart();
 
   // Testimonial slider auto-slide
   useEffect(() => {
@@ -319,6 +321,27 @@ export default function Home() {
             <i className="fa-brands fa-whatsapp"></i>
             Request Bulk Quote
           </a>
+        </div>
+      </section>
+
+      {/* POPULAR HAMPERS SECTION */}
+      <section className="featured-products container" style={{ paddingTop: '4rem', paddingBottom: '4rem' }}>
+        <span className="section-subtitle">Curator's Choice</span>
+        <h2 className="section-title">Popular Gift Hampers</h2>
+        <p style={{ textAlign: 'center', color: '#666', fontSize: '0.9rem', marginBottom: '2.5rem', maxWidth: '600px', margin: '0 auto 2.5rem auto' }}>
+          Explore our most loved customized gift hampers. Handpicked and tailored perfectly for premium weddings, baby showers, and celebrations.
+        </p>
+
+        <div className="collections-grid reveal active">
+          {products && products.slice(0, 4).map((product) => (
+            <ProductCard key={product.id} product={product} />
+          ))}
+        </div>
+
+        <div style={{ display: 'flex', justifyContent: 'center', marginTop: '3rem' }}>
+          <Link to="/collections" className="btn btn-primary" style={{ padding: '0.8rem 2.5rem', fontWeight: 600, letterSpacing: '0.5px' }}>
+            View All Products <i className="fa-solid fa-arrow-right" style={{ marginLeft: '8px' }}></i>
+          </Link>
         </div>
       </section>
 

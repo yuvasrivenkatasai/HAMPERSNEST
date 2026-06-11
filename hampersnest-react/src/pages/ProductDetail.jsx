@@ -1,16 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
-import { products } from '../data/products';
 import ProductCard from '../components/ProductCard';
 
 export default function ProductDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { addToCart, toggleWishlist, isInWishlist } = useCart();
+  const { products, addToCart, toggleWishlist, isInWishlist } = useCart();
 
   // Find current product
-  const product = products.find((p) => p.id === id);
+  const product = products ? products.find((p) => p.id === id) : null;
 
   // Customization States
   const [giftTag, setGiftTag] = useState('');
@@ -46,6 +45,23 @@ export default function ProductDetail() {
       calligraphy: false,
     });
     setQuantity(1);
+
+    // Track product view in backend database
+    if (id) {
+      const recordView = async () => {
+        try {
+          const API_BASE = window.location.hostname === 'localhost' || window.location.hostname.endsWith('.localhost')
+            ? 'http://localhost:5000'
+            : '';
+          await fetch(`${API_BASE}/api/products/${id}/view`, {
+            method: 'POST'
+          });
+        } catch (err) {
+          console.warn('View tracking server connection failed:', err);
+        }
+      };
+      recordView();
+    }
   }, [id]);
 
   // IntersectionObserver for scroll animations
@@ -152,6 +168,21 @@ export default function ProductDetail() {
     e.preventDefault();
     const whatsappBaseNumber = '917989202194';
 
+    // Record direct WhatsApp click analytics to backend
+    const recordDirectClick = async () => {
+      try {
+        const API_BASE = window.location.hostname === 'localhost' || window.location.hostname.endsWith('.localhost')
+          ? 'http://localhost:5000'
+          : '';
+        await fetch(`${API_BASE}/api/products/${product.id}/click`, {
+          method: 'POST'
+        });
+      } catch (err) {
+        console.warn('Click tracking server connection failed:', err);
+      }
+    };
+    recordDirectClick();
+
     // Build custom description
     let detailsStr = `*${product.name}* (Qty: ${quantity})\n`;
     detailsStr += `• Base Price: ₹${product.price} each\n`;
@@ -180,14 +211,14 @@ export default function ProductDetail() {
   };
 
   // Filter Related Products (Same category, excluding current)
-  const relatedProducts = products
+  const relatedProducts = products ? products
     .filter((p) => p.category === product.category && p.id !== product.id)
-    .slice(0, 3);
+    .slice(0, 3) : [];
 
   // Fallback to featured products if no same-category items
   const displayRelated = relatedProducts.length > 0 
     ? relatedProducts 
-    : products.filter((p) => p.id !== product.id).slice(0, 3);
+    : (products ? products.filter((p) => p.id !== product.id).slice(0, 3) : []);
 
   return (
     <div className="page-container">
@@ -251,8 +282,14 @@ export default function ProductDetail() {
 
               <div className="product-price-block">
                 <span className="current-price">₹{unitPrice}</span>
-                <span className="original-price">₹{Math.round(unitPrice * 1.15)}</span>
-                <span className="save-badge">Save 15%</span>
+                {product.originalPrice > 0 && product.originalPrice > product.price && (
+                  <>
+                    <span className="original-price">₹{product.originalPrice + addedPrice}</span>
+                    <span className="save-badge">
+                      Save {Math.round((((product.originalPrice + addedPrice) - unitPrice) / (product.originalPrice + addedPrice)) * 100)}%
+                    </span>
+                  </>
+                )}
               </div>
 
               <p className="product-detail-short-desc">{product.description}</p>

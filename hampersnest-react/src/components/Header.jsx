@@ -3,7 +3,7 @@ import { Link, NavLink } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 
 export default function Header() {
-  const { cartCount, setCartOpen } = useCart();
+  const { cartCount, setCartOpen, settings } = useCart();
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -42,7 +42,11 @@ export default function Header() {
 
   return (
     <>
-      <header id="header" className={scrolled ? 'scrolled' : ''}>
+      <header 
+        id="header" 
+        className={scrolled ? 'scrolled' : ''}
+        style={{ top: (settings && settings.announcementActive && !scrolled) ? '38px' : '0px' }}
+      >
         <div className="nav-container">
           {/* Logo container - image + brand name */}
           <Link to="/" className="logo-container" onClick={closeMobileMenu}>

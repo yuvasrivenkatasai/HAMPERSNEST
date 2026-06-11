@@ -56,14 +56,54 @@ export default function CartDrawer() {
     }));
   };
 
-  const handleCheckoutSubmit = (e) => {
+  const handleCheckoutSubmit = async (e) => {
     e.preventDefault();
     if (!formData.name || !formData.phone || !formData.eventType) {
       alert('Please fill out all required fields (Name, Phone, Event Type).');
       return;
     }
 
-    const whatsappUrl = getWhatsappCheckoutUrl(formData);
+    const orderPayload = {
+      customer: {
+        name: formData.name,
+        phone: formData.phone
+      },
+      items: cart.map(item => ({
+        productId: item.id,
+        name: item.name,
+        price: item.price,
+        quantity: item.quantity,
+        customizations: {
+          wrappingStyle: item.customizations.wrappingStyle || 'Standard',
+          ribbonColor: item.customizations.ribbonColor || 'None',
+          giftTag: item.customizations.giftTag || ''
+        }
+      })),
+      totalAmount: cartTotal,
+      eventType: formData.eventType,
+      deliveryDate: formData.deliveryDate || null,
+      notes: formData.notes || ''
+    };
+
+    let orderId = null;
+    try {
+      const API_BASE = window.location.hostname === 'localhost' || window.location.hostname.endsWith('.localhost')
+        ? 'http://localhost:5000'
+        : '';
+      const response = await fetch(`${API_BASE}/api/orders`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(orderPayload)
+      });
+      if (response.ok) {
+        const data = await response.json();
+        orderId = data.orderId;
+      }
+    } catch (err) {
+      console.error('Failed to submit order to database:', err);
+    }
+
+    const whatsappUrl = getWhatsappCheckoutUrl(formData, orderId);
     window.open(whatsappUrl, '_blank');
     setCartOpen(false);
   };
