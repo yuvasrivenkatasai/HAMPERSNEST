@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useCart } from '../context/CartContext';
-import { USD_RATE } from '../data/products';
+import { USD_RATE } from '../data/constants';
 
 export default function ProductModal() {
   const {
@@ -8,7 +8,8 @@ export default function ProductModal() {
     setSelectedProductForModal,
     addToCart,
     toggleWishlist,
-    isInWishlist
+    isInWishlist,
+    settings
   } = useCart();
 
   const [quantity, setQuantity] = useState(1);
@@ -48,6 +49,7 @@ export default function ProductModal() {
   const product = selectedProductForModal;
   const isWishlisted = isInWishlist(product.id);
   const usdPrice = Math.round(product.price / USD_RATE);
+  const categoryLabel = (settings?.categories || []).find(category => category.id === product.category)?.label || product.category;
 
   const handleClose = () => {
     setSelectedProductForModal(null);
@@ -109,7 +111,7 @@ export default function ProductModal() {
               {/* Category + Availability */}
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', marginBottom: '4px' }}>
                 <span className="section-subtitle" style={{ textAlign: 'left', margin: 0, fontSize: '0.7rem' }}>
-                  {product.category} COLLECTION
+                  {categoryLabel} COLLECTION
                 </span>
                 <span className="modal-availability">
                   <i className="fa-solid fa-circle-check"></i> In Stock

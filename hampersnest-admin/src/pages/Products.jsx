@@ -3,6 +3,7 @@ import { apiRequest, API_BASE } from '../utils/api';
 
 export default function Products() {
   const [products, setProducts] = useState([]);
+  const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   
@@ -15,13 +16,12 @@ export default function Products() {
   const [formData, setFormData] = useState({
     name: '',
     price: '',
-    category: 'Wedding',
+    category: '',
     image: '',
     description: '',
     detailsText: '', // text area split by newlines
     isFeatured: false,
     originalPrice: '',
-    customCategory: '',
     isActive: true
   });
   const [formSubmitting, setFormSubmitting] = useState(false);
@@ -65,8 +65,12 @@ export default function Products() {
 
   const fetchProducts = async () => {
     try {
-      const data = await apiRequest('/api/products?all=true');
-      setProducts(data);
+      const [productsData, categoriesData] = await Promise.all([
+        apiRequest('/api/products?all=true'),
+        apiRequest('/api/categories')
+      ]);
+      setProducts(productsData);
+      setCategories(Array.isArray(categoriesData) ? categoriesData : []);
     } catch (err) {
       console.error(err);
       setError('Failed to fetch products catalogue');
@@ -81,36 +85,37 @@ export default function Products() {
 
   const openAddModal = () => {
     setEditingProduct(null);
+    const defaultCategory = categories[0]?.id || '';
     setFormData({
       name: '',
       price: '',
-      category: 'Wedding',
+      category: defaultCategory,
       image: '',
       description: '',
       detailsText: '',
       isFeatured: false,
       originalPrice: '',
-      customCategory: '',
       isActive: true
     });
     setModalOpen(true);
   };
 
+  const getCategoryLabel = (categoryId) => {
+    return categories.find(category => category.id === categoryId)?.name || categoryId || 'Uncategorized';
+  };
+
   const openEditModal = (product) => {
     setEditingProduct(product);
-    const standardCategories = ['Wedding', 'Baby Shower', 'Housewarming', 'Brass', 'Corporate', 'Customized'];
-    const isStandardCat = standardCategories.includes(product.category);
     
     setFormData({
       name: product.name,
       price: product.price.toString(),
-      category: isStandardCat ? product.category : 'custom',
+      category: product.category,
       image: product.image,
       description: product.description || '',
       detailsText: product.details ? product.details.join('\n') : '',
       isFeatured: !!product.isFeatured,
       originalPrice: product.originalPrice ? product.originalPrice.toString() : '',
-      customCategory: isStandardCat ? '' : product.category,
       isActive: product.isActive !== false
     });
     setModalOpen(true);
@@ -160,7 +165,7 @@ export default function Products() {
     const payload = {
       name: formData.name,
       price: finalPrice,
-      category: formData.category === 'custom' ? formData.customCategory.trim() : formData.category,
+      category: formData.category,
       image: formData.image,
       description: formData.description,
       details,
@@ -209,14 +214,18 @@ export default function Products() {
   };
 
   // Get distinct categories dynamically
-  const categoriesList = ['All', ...new Set(products.map(p => p.category))];
+  const categoriesList = ['All', ...new Set([
+    ...categories.map(category => category.id),
+    ...products.map(p => p.category)
+  ].filter(Boolean))];
 
   // Filter products
   const filteredProducts = products.filter(product => {
     const matchesCategory = categoryFilter === 'All' || product.category === categoryFilter;
+    const categoryLabel = getCategoryLabel(product.category).toLowerCase();
     const matchesSearch = 
       product.name.toLowerCase().includes(search.toLowerCase()) ||
-      product.category.toLowerCase().includes(search.toLowerCase());
+      categoryLabel.includes(search.toLowerCase());
     return matchesCategory && matchesSearch;
   });
 
@@ -242,7 +251,7 @@ export default function Products() {
             style={{ width: '180px', padding: '0.5rem 1rem' }}
           >
             {categoriesList.map(cat => (
-              <option key={cat} value={cat}>{cat} Category</option>
+              <option key={cat} value={cat}>{cat === 'All' ? 'All' : getCategoryLabel(cat)} Category</option>
             ))}
           </select>
 
@@ -313,7 +322,7 @@ export default function Products() {
                         />
                       </td>
                       <td className="font-semibold" style={{ color: 'var(--color-purple-dark)' }}>{product.name}</td>
-                      <td>{product.category}</td>
+                      <td>{getCategoryLabel(product.category)}</td>
                       <td className="font-semibold">
                         ₹{product.price.toLocaleString()}
                         {product.originalPrice > 0 && product.originalPrice > product.price && (
@@ -480,14 +489,15 @@ export default function Products() {
                       onChange={handleInputChange}
                       required
                     >
-                      <option value="Wedding">Wedding</option>
-                      <option value="Baby Shower">Baby Shower</option>
-                      <option value="Housewarming">Housewarming</option>
-                      <option value="Brass">Brass Gifting</option>
-                      <option value="Corporate">Corporate Gifting</option>
-                      <option value="Customized">Customized Hampers</option>
-                      <option value="custom">✍️ Custom Category (Write-in)...</option>
+                      {categories.map(category => (
+                        <option key={category.id} value={category.id}>{category.name}</option>
+                      ))}
                     </select>
+                    {categories.length === 0 && (
+                      <small style={{ color: '#E53E3E', fontSize: '0.75rem', marginTop: '4px', display: 'block' }}>
+                        Please create at least one category before adding products.
+                      </small>
+                    )}
                   </div>
 
                   <div className="form-group">
@@ -560,21 +570,7 @@ export default function Products() {
                   </div>
                 </div>
 
-                {formData.category === 'custom' && (
-                  <div className="form-group" style={{ marginTop: '5px', marginBottom: '15px' }}>
-                    <label className="form-label" htmlFor="prod-custom-cat">Custom Category Name *</label>
-                    <input
-                      type="text"
-                      id="prod-custom-cat"
-                      name="customCategory"
-                      className="form-input"
-                      placeholder="e.g. Diwali Specials"
-                      value={formData.customCategory}
-                      onChange={handleInputChange}
-                      required
-                    />
-                  </div>
-                )}
+
 
                 <div className="form-group">
                   <label className="form-label" htmlFor="prod-desc">Brief Description</label>

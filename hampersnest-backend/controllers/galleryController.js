@@ -1,4 +1,5 @@
-import { GalleryItem } from '../database/models.js';
+import { Op } from 'sequelize';
+import { GalleryItem, Category } from '../database/models.js';
 
 // Helper to generate clean URL slug/ID
 const slugify = (text) => {
@@ -12,13 +13,26 @@ const slugify = (text) => {
     .replace(/-+$/, ''); // Trim - from end
 };
 
+const ensureCategoryExists = async (categoryId) => {
+  const category = await Category.findByPk(categoryId);
+  if (!category) {
+    const error = new Error('Please select a valid category');
+    error.statusCode = 400;
+    throw error;
+  }
+  return category;
+};
+
 // @desc    Get all gallery showcase items
 // @route   GET /api/gallery
 // @access  Public
 export const getGalleryItems = async (req, res) => {
   try {
-    const filter = req.query.all === 'true' ? {} : { isActive: { $ne: false } };
-    const items = await GalleryItem.find(filter).sort({ createdAt: -1 });
+    const filter = req.query.all === 'true' ? {} : { isActive: { [Op.ne]: false } };
+    const items = await GalleryItem.findAll({
+      where: filter,
+      order: [['createdAt', 'DESC']]
+    });
     res.json(items);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -39,12 +53,14 @@ export const createGalleryItem = async (req, res) => {
     let baseId = slugify(title);
     let uniqueId = baseId || 'gallery-item';
     let count = 1;
-    while (await GalleryItem.findOne({ id: uniqueId })) {
+    while (await GalleryItem.findOne({ where: { id: uniqueId } })) {
       uniqueId = `${baseId}-${count}`;
       count++;
     }
 
-    const item = new GalleryItem({
+    await ensureCategoryExists(category);
+
+    const createdItem = await GalleryItem.create({
       id: uniqueId,
       title,
       image,
@@ -53,7 +69,6 @@ export const createGalleryItem = async (req, res) => {
       isActive: isActive !== undefined ? !!isActive : true
     });
 
-    const createdItem = await item.save();
     res.status(201).json(createdItem);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -67,9 +82,13 @@ export const updateGalleryItem = async (req, res) => {
   const { title, image, category, description, isActive } = req.body;
 
   try {
-    const item = await GalleryItem.findOne({ id: req.params.id });
+    const item = await GalleryItem.findOne({ where: { id: req.params.id } });
 
     if (item) {
+      if (category !== undefined) {
+        await ensureCategoryExists(category);
+      }
+
       item.title = title !== undefined ? title : item.title;
       item.image = image !== undefined ? image : item.image;
       item.category = category !== undefined ? category : item.category;
@@ -80,7 +99,7 @@ export const updateGalleryItem = async (req, res) => {
         let baseId = slugify(title);
         let uniqueId = baseId || 'gallery-item';
         let count = 1;
-        while (await GalleryItem.findOne({ id: uniqueId, _id: { $ne: item._id } })) {
+        while (await GalleryItem.findOne({ where: { id: uniqueId, id: { [Op.ne]: item.id } } })) {
           uniqueId = `${baseId}-${count}`;
           count++;
         }
@@ -93,7 +112,7 @@ export const updateGalleryItem = async (req, res) => {
       res.status(404).json({ message: 'Gallery item not found' });
     }
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(error.statusCode || 500).json({ message: error.message });
   }
 };
 
@@ -102,12 +121,11 @@ export const updateGalleryItem = async (req, res) => {
 // @access  Private/Admin
 export const deleteGalleryItem = async (req, res) => {
   try {
-    const item = await GalleryItem.findOne({ id: req.params.id });
+    const item = await GalleryItem.findOne({ where: { id: req.params.id } });
 
     if (item) {
-      item.isActive = false;
-      await item.save();
-      res.json({ message: 'Gallery item deactivated successfully' });
+      await item.destroy();
+      res.json({ message: 'Gallery item deleted successfully' });
     } else {
       res.status(404).json({ message: 'Gallery item not found' });
     }

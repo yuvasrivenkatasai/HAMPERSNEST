@@ -10,6 +10,7 @@ import Products from './pages/Products';
 import Inquiries from './pages/Inquiries';
 import Promotions from './pages/Promotions';
 import Gallery from './pages/Gallery';
+import Categories from './pages/Categories';
 
 function NavigationMenu() {
   const location = useLocation();
@@ -46,6 +47,11 @@ function NavigationMenu() {
           </Link>
         </li>
         <li>
+          <Link to="/categories" className={`sidebar-link ${location.pathname === '/categories' ? 'active' : ''}`}>
+            <i className="fa-solid fa-folder-open"></i> Categories
+          </Link>
+        </li>
+        <li>
           <Link to="/inquiries" className={`sidebar-link ${location.pathname === '/inquiries' ? 'active' : ''}`}>
             <i className="fa-solid fa-envelope-open-text"></i> Inquiries
           </Link>
@@ -61,7 +67,7 @@ function NavigationMenu() {
           </Link>
         </li>
       </ul>
-
+      
       {/* Logout button */}
       <div className="sidebar-footer">
         <button onClick={handleLogout} className="btn-logout">
@@ -81,6 +87,7 @@ function AdminLayout({ children }) {
       case '/': return 'Dashboard Analytics';
       case '/orders': return 'Orders Management';
       case '/products': return 'Hampers Catalogue';
+      case '/categories': return 'Categories Management';
       case '/inquiries': return 'Customer Inquiries';
       case '/promotions': return 'Promotions & Themes';
       case '/gallery': return 'Showcase Gallery';
@@ -166,6 +173,7 @@ export default function App() {
                   <Route path="/" element={<Dashboard />} />
                   <Route path="/orders" element={<Orders />} />
                   <Route path="/products" element={<Products />} />
+                  <Route path="/categories" element={<Categories />} />
                   <Route path="/inquiries" element={<Inquiries />} />
                   <Route path="/promotions" element={<Promotions />} />
                   <Route path="/gallery" element={<Gallery />} />

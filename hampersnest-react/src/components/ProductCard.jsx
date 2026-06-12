@@ -1,6 +1,6 @@
 import React from 'react';
 import { useCart } from '../context/CartContext';
-import { USD_RATE } from '../data/products';
+import { USD_RATE } from '../data/constants';
 
 export default function ProductCard({ product }) {
   const { addToCart, toggleWishlist, isInWishlist, setSelectedProductForModal } = useCart();

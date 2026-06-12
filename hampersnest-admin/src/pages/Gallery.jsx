@@ -3,6 +3,7 @@ import { apiRequest, API_BASE } from '../utils/api';
 
 export default function Gallery() {
   const [galleryItems, setGalleryItems] = useState([]);
+  const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   
@@ -14,10 +15,9 @@ export default function Gallery() {
 
   const [formData, setFormData] = useState({
     title: '',
-    category: 'Wedding',
+    category: '',
     image: '',
     description: '',
-    customCategory: '',
     isActive: true
   });
   const [formSubmitting, setFormSubmitting] = useState(false);
@@ -61,8 +61,12 @@ export default function Gallery() {
 
   const fetchGalleryItems = async () => {
     try {
-      const data = await apiRequest('/api/gallery?all=true');
-      setGalleryItems(data);
+      const [galleryData, categoriesData] = await Promise.all([
+        apiRequest('/api/gallery?all=true'),
+        apiRequest('/api/categories')
+      ]);
+      setGalleryItems(galleryData);
+      setCategories(Array.isArray(categoriesData) ? categoriesData : []);
     } catch (err) {
       console.error(err);
       setError('Failed to fetch gallery items');
@@ -75,14 +79,18 @@ export default function Gallery() {
     fetchGalleryItems();
   }, []);
 
+  const getCategoryLabel = (categoryId) => {
+    return categories.find(category => category.id === categoryId)?.name || categoryId || 'Uncategorized';
+  };
+
   const openAddModal = () => {
     setEditingItem(null);
+    const defaultCategory = categories[0]?.id || '';
     setFormData({
       title: '',
-      category: 'Wedding',
+      category: defaultCategory,
       image: '',
       description: '',
-      customCategory: '',
       isActive: true
     });
     setModalOpen(true);
@@ -90,15 +98,12 @@ export default function Gallery() {
 
   const openEditModal = (item) => {
     setEditingItem(item);
-    const standardCategories = ['Wedding', 'Baby Shower', 'Housewarming', 'Brass', 'Corporate', 'Customized'];
-    const isStandardCat = standardCategories.includes(item.category);
     
     setFormData({
       title: item.title,
-      category: isStandardCat ? item.category : 'custom',
+      category: item.category,
       image: item.image,
       description: item.description || '',
-      customCategory: isStandardCat ? '' : item.category,
       isActive: item.isActive !== false
     });
     setModalOpen(true);
@@ -124,7 +129,7 @@ export default function Gallery() {
 
     const payload = {
       title: formData.title,
-      category: formData.category === 'custom' ? formData.customCategory.trim() : formData.category,
+      category: formData.category,
       image: formData.image,
       description: formData.description,
       isActive: formData.isActive
@@ -170,14 +175,18 @@ export default function Gallery() {
   };
 
   // Get distinct categories dynamically
-  const categoriesList = ['All', ...new Set(galleryItems.map(i => i.category))];
+  const categoriesList = ['All', ...new Set([
+    ...categories.map(category => category.id),
+    ...galleryItems.map(i => i.category)
+  ].filter(Boolean))];
 
   // Filter items
   const filteredItems = galleryItems.filter(item => {
     const matchesCategory = categoryFilter === 'All' || item.category === categoryFilter;
+    const categoryLabel = getCategoryLabel(item.category).toLowerCase();
     const matchesSearch = 
       item.title.toLowerCase().includes(search.toLowerCase()) ||
-      item.category.toLowerCase().includes(search.toLowerCase());
+      categoryLabel.includes(search.toLowerCase());
     return matchesCategory && matchesSearch;
   });
 
@@ -203,7 +212,7 @@ export default function Gallery() {
             style={{ width: '180px', padding: '0.5rem 1rem' }}
           >
             {categoriesList.map(cat => (
-              <option key={cat} value={cat}>{cat} Category</option>
+              <option key={cat} value={cat}>{cat === 'All' ? 'All' : getCategoryLabel(cat)} Category</option>
             ))}
           </select>
 
@@ -263,7 +272,7 @@ export default function Gallery() {
                       />
                     </td>
                     <td className="font-semibold" style={{ color: 'var(--color-purple-dark)' }}>{item.title}</td>
-                    <td>{item.category}</td>
+                    <td>{getCategoryLabel(item.category)}</td>
                     <td style={{ maxWidth: '300px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                       {item.description || <span style={{ color: '#aaa', fontSize: '0.8rem' }}>None</span>}
                     </td>
@@ -355,14 +364,15 @@ export default function Gallery() {
                       onChange={handleInputChange}
                       required
                     >
-                      <option value="Wedding">Wedding</option>
-                      <option value="Baby Shower">Baby Shower</option>
-                      <option value="Housewarming">Housewarming</option>
-                      <option value="Brass">Brass Gifting</option>
-                      <option value="Corporate">Corporate Gifting</option>
-                      <option value="Customized">Customized Hampers</option>
-                      <option value="custom">✍️ Custom Category (Write-in)...</option>
+                      {categories.map(category => (
+                        <option key={category.id} value={category.id}>{category.name}</option>
+                      ))}
                     </select>
+                    {categories.length === 0 && (
+                      <small style={{ color: '#E53E3E', fontSize: '0.75rem', marginTop: '4px', display: 'block' }}>
+                        Please create at least one category before adding showcase photos.
+                      </small>
+                    )}
                   </div>
 
                   <div className="form-group">
@@ -386,22 +396,6 @@ export default function Gallery() {
                     </div>
                   </div>
                 </div>
-
-                {formData.category === 'custom' && (
-                  <div className="form-group" style={{ marginBottom: '15px' }}>
-                    <label className="form-label" htmlFor="gallery-custom-cat">Custom Category Name *</label>
-                    <input
-                      type="text"
-                      id="gallery-custom-cat"
-                      name="customCategory"
-                      className="form-input"
-                      placeholder="e.g. Half Saree Ceremonies"
-                      value={formData.customCategory}
-                      onChange={handleInputChange}
-                      required
-                    />
-                  </div>
-                )}
 
                 <div className="form-group">
                   <label className="form-label" htmlFor="gallery-img-url">Image Path / URL *</label>

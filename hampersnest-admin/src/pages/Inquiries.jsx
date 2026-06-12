@@ -5,6 +5,44 @@ export default function Inquiries() {
   const [inquiries, setInquiries] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [selectedIds, setSelectedIds] = useState([]);
+
+  const handleSelectRow = (id) => {
+    setSelectedIds(prev => 
+      prev.includes(id) 
+        ? prev.filter(rowId => rowId !== id) 
+        : [...prev, id]
+    );
+  };
+
+  const handleSelectAll = () => {
+    const allIds = inquiries.map(inq => inq._id);
+    const allSelected = allIds.every(id => selectedIds.includes(id));
+    if (allSelected) {
+      setSelectedIds([]);
+    } else {
+      setSelectedIds(allIds);
+    }
+  };
+
+  const handleBulkDelete = async () => {
+    if (selectedIds.length === 0) return;
+    if (!window.confirm(`Are you sure you want to dismiss/delete the ${selectedIds.length} selected inquiries?`)) {
+      return;
+    }
+
+    try {
+      await Promise.all(selectedIds.map(id => apiRequest(`/api/inquiries/${id}`, {
+        method: 'DELETE'
+      })));
+      setInquiries(prev => prev.filter(inq => !selectedIds.includes(inq._id)));
+      setSelectedIds([]);
+      alert('Selected inquiries removed successfully.');
+    } catch (err) {
+      console.error(err);
+      alert(err.message || 'Failed to delete some inquiries');
+    }
+  };
 
   const fetchInquiries = async () => {
     try {
@@ -55,12 +93,28 @@ export default function Inquiries() {
         </div>
       )}
 
+      {selectedIds.length > 0 && (
+        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '1rem' }}>
+          <button className="btn-logout" onClick={handleBulkDelete} style={{ padding: '0.6rem 1.2rem', fontSize: '0.85rem' }}>
+            <i className="fa-solid fa-trash-can"></i> Dismiss/Delete Selected ({selectedIds.length})
+          </button>
+        </div>
+      )}
+
       <div className="dashboard-panel">
         <div className="table-responsive">
           {inquiries.length > 0 ? (
             <table className="data-table">
               <thead>
                 <tr>
+                  <th style={{ width: '40px', textAlign: 'center' }}>
+                    <input 
+                      type="checkbox" 
+                      checked={inquiries.length > 0 && inquiries.every(inq => selectedIds.includes(inq._id))}
+                      onChange={handleSelectAll} 
+                      style={{ cursor: 'pointer', width: '16px', height: '16px' }}
+                    />
+                  </th>
                   <th>Sender Info</th>
                   <th>Celebration Detail</th>
                   <th>Quantity</th>
@@ -72,6 +126,14 @@ export default function Inquiries() {
               <tbody>
                 {inquiries.map((inq) => (
                   <tr key={inq._id}>
+                    <td style={{ textAlign: 'center' }}>
+                      <input 
+                        type="checkbox" 
+                        checked={selectedIds.includes(inq._id)}
+                        onChange={() => handleSelectRow(inq._id)}
+                        style={{ cursor: 'pointer', width: '16px', height: '16px' }}
+                      />
+                    </td>
                     <td>
                       <div className="font-semibold" style={{ color: 'var(--color-purple-dark)' }}>{inq.name}</div>
                       <div style={{ fontSize: '0.8rem', color: 'var(--color-gray-text)' }}>Phone: {inq.phone}</div>

@@ -11,15 +11,15 @@ export const loginUser = async (req, res) => {
   const { username, password } = req.body;
 
   try {
-    const user = await User.findOne({ username });
+    const user = await User.findOne({ where: { username } });
 
     if (user && (await bcrypt.compare(password, user.password))) {
-      const token = jwt.sign({ id: user._id }, JWT_SECRET, {
+      const token = jwt.sign({ id: user.id }, JWT_SECRET, {
         expiresIn: '30d'
       });
 
       res.json({
-        _id: user._id,
+        _id: user.id,
         username: user.username,
         role: user.role,
         token
@@ -38,7 +38,7 @@ export const loginUser = async (req, res) => {
 export const verifyUser = async (req, res) => {
   try {
     res.json({
-      _id: req.user._id,
+      _id: req.user.id,
       username: req.user.username,
       role: req.user.role
     });

@@ -1,5 +1,4 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { products as fallbackProducts } from '../data/products';
 
 const CartContext = createContext();
 
@@ -23,14 +22,15 @@ export const CartProvider = ({ children }) => {
     return savedWishlist ? JSON.parse(savedWishlist) : [];
   });
 
-  const [products, setProducts] = useState(fallbackProducts);
+  const [products, setProducts] = useState([]);
   const [cartOpen, setCartOpen] = useState(false);
   const [inquiryOpen, setInquiryOpen] = useState(false);
   const [selectedProductForModal, setSelectedProductForModal] = useState(null);
   const [settings, setSettings] = useState({
     announcementText: 'Welcome to HampersNest! Premium Customized Gift Hampers & Return Gifts Hyderabad.',
     announcementActive: false,
-    activeTheme: 'theme-default'
+    activeTheme: 'theme-default',
+    categories: []
   });
 
   // Fetch products and settings from backend on mount
@@ -48,7 +48,7 @@ export const CartProvider = ({ children }) => {
           }
         }
       } catch (err) {
-        console.warn('Backend products API offline, using fallback static data:', err);
+        console.warn('Backend products API offline:', err);
       }
     };
 

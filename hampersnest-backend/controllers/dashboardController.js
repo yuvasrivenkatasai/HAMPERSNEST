@@ -5,10 +5,10 @@ import { Product, Order, Inquiry } from '../database/models.js';
 // @access  Private/Admin
 export const getDashboardStats = async (req, res) => {
   try {
-    const totalProducts = await Product.countDocuments();
-    const totalInquiries = await Inquiry.countDocuments();
+    const totalProducts = await Product.count();
+    const totalInquiries = await Inquiry.count();
     
-    const orders = await Order.find({});
+    const orders = await Order.findAll();
     
     let totalRevenue = 0;
     let pendingOrders = 0;
@@ -39,7 +39,9 @@ export const getDashboardStats = async (req, res) => {
       }
     });
 
-    const allProducts = await Product.find({}, 'id category');
+    const allProducts = await Product.findAll({
+      attributes: ['id', 'category']
+    });
     const productCategoryMap = {};
     allProducts.forEach(p => {
       productCategoryMap[p.id] = p.category;
@@ -47,7 +49,8 @@ export const getDashboardStats = async (req, res) => {
 
     orders.forEach(order => {
       if (order.status !== 'Pending') {
-        order.items.forEach(item => {
+        const itemsList = Array.isArray(order.items) ? order.items : [];
+        itemsList.forEach(item => {
           const category = productCategoryMap[item.productId] || 'Other';
           const itemSalesValue = item.price * item.quantity;
           salesByCategory[category] = (salesByCategory[category] || 0) + itemSalesValue;
@@ -60,11 +63,14 @@ export const getDashboardStats = async (req, res) => {
       value: salesByCategory[key]
     }));
 
-    const recentOrders = await Order.find({})
-      .sort({ createdAt: -1 })
-      .limit(5);
+    const recentOrders = await Order.findAll({
+      order: [['createdAt', 'DESC']],
+      limit: 5
+    });
 
-    const productsAnalytics = await Product.find({}, 'name views clicks');
+    const productsAnalytics = await Product.findAll({
+      attributes: ['name', 'views', 'clicks']
+    });
     let totalViews = 0;
     let totalClicks = 0;
     productsAnalytics.forEach(p => {

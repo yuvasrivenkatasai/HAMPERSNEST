@@ -175,115 +175,35 @@ export default function Home() {
           <h2 className="section-title">Shop Our Collections</h2>
 
           <div className="shop-collections-grid reveal" style={{ marginTop: '2.5rem' }}>
-
-            {/* Product 1 — Wedding */}
-            <div className="shop-product-card">
-              <div className="shop-card-img">
-                <img src="/assets/wedding_gift.png" alt="Wedding Gift Hamper" />
+            {products && products.length > 0 ? (
+              products.slice(0, 6).map((product) => {
+                const usdPrice = Math.round(product.price / 83);
+                return (
+                  <div className="shop-product-card" key={product.id}>
+                    <div className="shop-card-img" onClick={() => navigate(`/product/${product.id}`)} style={{ cursor: 'pointer' }}>
+                      <img src={product.image} alt={product.name} />
+                    </div>
+                    <div className="shop-card-content">
+                      <h3 className="shop-card-name" onClick={() => navigate(`/product/${product.id}`)} style={{ cursor: 'pointer' }}>
+                        {product.name}
+                      </h3>
+                      <p className="shop-card-inr">₹{product.price}</p>
+                      <p className="shop-card-usd">≈ ${usdPrice} USD</p>
+                      <button
+                        className="shop-card-btn"
+                        onClick={() => addToCart(product, 1, { giftTag: '', wrappingStyle: 'Standard', ribbonColor: 'None' })}
+                      >
+                        <i className="fa-solid fa-cart-shopping"></i> Add To Cart
+                      </button>
+                    </div>
+                  </div>
+                );
+              })
+            ) : (
+              <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '3rem 0', color: 'var(--color-gray-text)' }}>
+                <p>Loading curated collections...</p>
               </div>
-              <div className="shop-card-content">
-                <h3 className="shop-card-name">Wedding Gift Hamper</h3>
-                <p className="shop-card-inr">₹499</p>
-                <p className="shop-card-usd">≈ $6 USD</p>
-                <button
-                  className="shop-card-btn"
-                  onClick={() => addToCart({ id: 'wedding-hamper', name: 'Wedding Gift Hamper', price: 499, image: '/assets/wedding_gift.png', category: 'Wedding' }, 1, { giftTag: '', wrappingStyle: 'Standard', ribbonColor: 'None' })}
-                >
-                  <i className="fa-solid fa-cart-shopping"></i> Add To Cart
-                </button>
-              </div>
-            </div>
-
-            {/* Product 2 — Baby Shower */}
-            <div className="shop-product-card">
-              <div className="shop-card-img">
-                <img src="/assets/baby_shower.png" alt="Baby Shower Hamper" />
-              </div>
-              <div className="shop-card-content">
-                <h3 className="shop-card-name">Baby Shower Hamper</h3>
-                <p className="shop-card-inr">₹399</p>
-                <p className="shop-card-usd">≈ $5 USD</p>
-                <button
-                  className="shop-card-btn"
-                  onClick={() => addToCart({ id: 'baby-shower-hamper', name: 'Baby Shower Hamper', price: 399, image: '/assets/baby_shower.png', category: 'Baby Shower' }, 1, { giftTag: '', wrappingStyle: 'Standard', ribbonColor: 'None' })}
-                >
-                  <i className="fa-solid fa-cart-shopping"></i> Add To Cart
-                </button>
-              </div>
-            </div>
-
-            {/* Product 3 — Housewarming */}
-            <div className="shop-product-card">
-              <div className="shop-card-img">
-                <img src="/assets/housewarming.png" alt="Housewarming Hamper" />
-              </div>
-              <div className="shop-card-content">
-                <h3 className="shop-card-name">Housewarming Hamper</h3>
-                <p className="shop-card-inr">₹799</p>
-                <p className="shop-card-usd">≈ $10 USD</p>
-                <button
-                  className="shop-card-btn"
-                  onClick={() => addToCart({ id: 'housewarming-hamper', name: 'Housewarming Hamper', price: 799, image: '/assets/housewarming.png', category: 'Housewarming' }, 1, { giftTag: '', wrappingStyle: 'Standard', ribbonColor: 'None' })}
-                >
-                  <i className="fa-solid fa-cart-shopping"></i> Add To Cart
-                </button>
-              </div>
-            </div>
-
-            {/* Product 4 — Corporate */}
-            <div className="shop-product-card">
-              <div className="shop-card-img">
-                <img src="/assets/corporate.png" alt="Corporate Executive Hamper" />
-              </div>
-              <div className="shop-card-content">
-                <h3 className="shop-card-name">Corporate Executive Hamper</h3>
-                <p className="shop-card-inr">₹999</p>
-                <p className="shop-card-usd">≈ $12 USD</p>
-                <button
-                  className="shop-card-btn"
-                  onClick={() => addToCart({ id: 'corporate-exec', name: 'Corporate Executive Hamper', price: 999, image: '/assets/corporate.png', category: 'Corporate' }, 1, { giftTag: '', wrappingStyle: 'Standard', ribbonColor: 'None' })}
-                >
-                  <i className="fa-solid fa-cart-shopping"></i> Add To Cart
-                </button>
-              </div>
-            </div>
-
-            {/* Product 5 — Customized Luxury */}
-            <div className="shop-product-card">
-              <div className="shop-card-img">
-                <img src="/assets/hero_banner.png" alt="Customized Luxury Box" />
-              </div>
-              <div className="shop-card-content">
-                <h3 className="shop-card-name">Customized Luxury Box</h3>
-                <p className="shop-card-inr">₹1299</p>
-                <p className="shop-card-usd">≈ $16 USD</p>
-                <button
-                  className="shop-card-btn"
-                  onClick={() => addToCart({ id: 'custom-luxury', name: 'Customized Luxury Box', price: 1299, image: '/assets/hero_banner.png', category: 'Customized' }, 1, { giftTag: '', wrappingStyle: 'Standard', ribbonColor: 'None' })}
-                >
-                  <i className="fa-solid fa-cart-shopping"></i> Add To Cart
-                </button>
-              </div>
-            </div>
-
-            {/* Product 6 — Brass Bowl */}
-            <div className="shop-product-card">
-              <div className="shop-card-img">
-                <img src="/assets/brass_cup.png" alt="Brass Bowl Gift Set" />
-              </div>
-              <div className="shop-card-content">
-                <h3 className="shop-card-name">Brass Bowl Gift Set</h3>
-                <p className="shop-card-inr">₹299</p>
-                <p className="shop-card-usd">≈ $4 USD</p>
-                <button
-                  className="shop-card-btn"
-                  onClick={() => addToCart({ id: 'brass-bowl-set', name: 'Brass Bowl Gift Set', price: 299, image: '/assets/brass_cup.png', category: 'Brass' }, 1, { giftTag: '', wrappingStyle: 'Standard', ribbonColor: 'None' })}
-                >
-                  <i className="fa-solid fa-cart-shopping"></i> Add To Cart
-                </button>
-              </div>
-            </div>
-
+            )}
           </div>
 
           {/* Explore All Collections CTA */}

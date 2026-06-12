@@ -8,7 +8,7 @@ const API_BASE = window.location.hostname === 'localhost' || window.location.hos
 
 export default function Gallery() {
   const navigate = useNavigate();
-  const { products, addToCart, toggleWishlist, isInWishlist } = useCart();
+  const { products, addToCart, toggleWishlist, isInWishlist, settings } = useCart();
   const [galleryItems, setGalleryItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeCategory, setActiveCategory] = useState('All');
@@ -40,13 +40,28 @@ export default function Gallery() {
     return products || [];
   }, [galleryItems, products]);
 
+  // Helper to get category label from settings
+  const getCategoryLabel = (categoryId) => {
+    const configuredCategories = Array.isArray(settings?.categories) ? settings.categories : [];
+    const match = configuredCategories.find(c => c.id === categoryId);
+    return match ? match.label : categoryId;
+  };
+
   // Compute categories dynamically based on active dataset
   const categoriesList = useMemo(() => {
-    const distinct = [...new Set(activeDataset.map(item => item.category))];
-    // Filter out empty or null categories and sort standard ones first if possible
-    const cleanDistinct = distinct.filter(Boolean);
-    return ['All', ...cleanDistinct];
-  }, [activeDataset]);
+    const distinct = [...new Set(activeDataset.map(item => item.category))].filter(Boolean);
+    const configuredCategories = Array.isArray(settings?.categories) ? settings.categories : [];
+
+    const mapped = distinct.map(id => {
+      const match = configuredCategories.find(c => c.id === id);
+      return {
+        id,
+        label: match ? match.label : id
+      };
+    });
+
+    return [{ id: 'All', label: 'All' }, ...mapped];
+  }, [activeDataset, settings]);
 
   // Filter gallery items by category
   const filteredItems = useMemo(() => {
@@ -147,11 +162,11 @@ export default function Gallery() {
           <div className="category-tabs" style={{ display: 'inline-flex', justifyContent: 'center' }}>
             {categoriesList.map((cat) => (
               <button
-                key={cat}
-                onClick={() => setActiveCategory(cat)}
-                className={`category-tab ${activeCategory === cat ? 'active' : ''}`}
+                key={cat.id}
+                onClick={() => setActiveCategory(cat.id)}
+                className={`category-tab ${activeCategory === cat.id ? 'active' : ''}`}
               >
-                {cat}
+                {cat.label}
               </button>
             ))}
           </div>
@@ -284,7 +299,7 @@ export default function Gallery() {
               <div style={{ padding: '2rem', display: 'flex', flexDirection: 'column', gap: '1rem', justifyContent: 'center' }}>
                 <div>
                   <span className="section-subtitle" style={{ textAlign: 'left', margin: 0, fontSize: '0.7rem' }}>
-                    {lightboxItem.category.toUpperCase()} COLLECTION
+                    {(getCategoryLabel(lightboxItem.category) || '').toUpperCase()} COLLECTION
                   </span>
                   <h4 style={{ fontSize: '1.6rem', fontWeight: 600, color: 'var(--color-purple-dark)', marginTop: '0.2rem' }}>
                     {lightboxItem.title || lightboxItem.name}

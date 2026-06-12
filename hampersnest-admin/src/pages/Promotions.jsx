@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { apiRequest } from '../utils/api';
 
 export default function Promotions() {
@@ -162,6 +163,26 @@ export default function Promotions() {
                 <small style={{ color: '#777', fontSize: '0.75rem', marginTop: '4px' }}>Green & Orange</small>
               </label>
             </div>
+          </div>
+
+          <hr style={{ border: 'none', borderTop: '1px solid var(--color-gray-border)', margin: '2rem 0' }} />
+
+          {/* Categories Section Link */}
+          <div style={{ marginBottom: '2rem' }}>
+            <h4 style={{ color: 'var(--color-purple)', marginBottom: '0.5rem' }}>
+              <i className="fa-solid fa-layer-group" style={{ marginRight: '8px' }}></i>
+              Storefront Categories
+            </h4>
+            <p style={{ color: 'var(--color-gray-text)', fontSize: '0.85rem', marginBottom: '1.2rem', lineHeight: '1.4' }}>
+              Categories are now managed in their own dedicated panel. This allows adding, editing, and deleting categories with safety checks to ensure no catalog items are broken.
+            </p>
+            <Link 
+              to="/categories" 
+              className="btn-admin-secondary" 
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', textDecoration: 'none', padding: '0.55rem 1.2rem' }}
+            >
+              <i className="fa-solid fa-folder-open"></i> Go to Categories Manager
+            </Link>
           </div>
 
           <hr style={{ border: 'none', borderTop: '1px solid var(--color-gray-border)', margin: '2rem 0' }} />

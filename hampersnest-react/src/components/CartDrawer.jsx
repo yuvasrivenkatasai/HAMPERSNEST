@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useCart } from '../context/CartContext';
-import { USD_RATE } from '../data/products';
+import { USD_RATE } from '../data/constants';
 
 export default function CartDrawer() {
   const {

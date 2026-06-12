@@ -1,272 +1,260 @@
-import mongoose from 'mongoose';
+import { DataTypes } from 'sequelize';
+import { sequelize } from './db.js';
 
-// 1. User (Admin) Schema
-const userSchema = new mongoose.Schema({
+// 1. User (Admin) Model
+export const User = sequelize.define('User', {
+  id: {
+    type: DataTypes.INTEGER,
+    autoIncrement: true,
+    primaryKey: true
+  },
   username: {
-    type: String,
-    required: true,
-    unique: true,
-    trim: true
+    type: DataTypes.STRING,
+    allowNull: false,
+    unique: true
   },
   password: {
-    type: String,
-    required: true
+    type: DataTypes.STRING,
+    allowNull: false
   },
   role: {
-    type: String,
-    enum: ['admin'],
-    default: 'admin'
+    type: DataTypes.STRING,
+    defaultValue: 'admin'
   }
-}, { timestamps: true });
+}, {
+  tableName: 'users',
+  timestamps: true
+});
 
-// 2. Product Schema
-const productSchema = new mongoose.Schema({
+// 2. Product Model
+export const Product = sequelize.define('Product', {
   id: {
-    type: String,
-    required: true,
-    unique: true,
-    trim: true
+    type: DataTypes.STRING,
+    primaryKey: true
   },
   name: {
-    type: String,
-    required: true,
-    trim: true
+    type: DataTypes.STRING,
+    allowNull: false
   },
   price: {
-    type: Number,
-    required: true,
-    min: 0
+    type: DataTypes.INTEGER,
+    allowNull: false
   },
   image: {
-    type: String,
-    required: true
+    type: DataTypes.TEXT,
+    allowNull: false
   },
   category: {
-    type: String,
-    required: true,
-    trim: true
+    type: DataTypes.STRING,
+    allowNull: false
   },
   masterCategory: {
-    type: String,
-    trim: true,
-    default: 'Traditional'
+    type: DataTypes.STRING,
+    defaultValue: 'Traditional'
   },
   customization: {
-    type: [String],
-    default: []
+    type: DataTypes.JSON,
+    defaultValue: []
   },
   shipping: {
-    type: [String],
-    default: []
+    type: DataTypes.JSON,
+    defaultValue: []
   },
   rating: {
-    type: Number,
-    default: 4.5,
-    min: 0,
-    max: 5
+    type: DataTypes.DECIMAL(3, 2),
+    defaultValue: 4.5
   },
   description: {
-    type: String,
-    trim: true
+    type: DataTypes.TEXT
   },
   details: {
-    type: [String],
-    default: []
+    type: DataTypes.JSON,
+    defaultValue: []
   },
   isFeatured: {
-    type: Boolean,
-    default: false
+    type: DataTypes.BOOLEAN,
+    defaultValue: false
   },
   views: {
-    type: Number,
-    default: 0
+    type: DataTypes.INTEGER,
+    defaultValue: 0
   },
   clicks: {
-    type: Number,
-    default: 0
+    type: DataTypes.INTEGER,
+    defaultValue: 0
   },
   originalPrice: {
-    type: Number,
-    default: 0
+    type: DataTypes.INTEGER,
+    defaultValue: 0
   },
   isActive: {
-    type: Boolean,
-    default: true
+    type: DataTypes.BOOLEAN,
+    defaultValue: true
   }
-}, { timestamps: true });
+}, {
+  tableName: 'products',
+  timestamps: true
+});
 
-// 3. Order Schema
-const orderSchema = new mongoose.Schema({
+// 3. Order Model
+export const Order = sequelize.define('Order', {
+  id: {
+    type: DataTypes.INTEGER,
+    autoIncrement: true,
+    primaryKey: true
+  },
   orderId: {
-    type: String,
-    required: true,
+    type: DataTypes.STRING,
+    allowNull: false,
     unique: true
   },
   customer: {
-    name: {
-      type: String,
-      required: true,
-      trim: true
-    },
-    phone: {
-      type: String,
-      required: true,
-      trim: true
-    }
+    type: DataTypes.JSON,
+    allowNull: false
   },
-  items: [
-    {
-      productId: {
-        type: String,
-        required: true
-      },
-      name: {
-        type: String,
-        required: true
-      },
-      price: {
-        type: Number,
-        required: true
-      },
-      quantity: {
-        type: Number,
-        required: true,
-        min: 1
-      },
-      customizations: {
-        wrappingStyle: {
-          type: String,
-          default: 'Standard'
-        },
-        ribbonColor: {
-          type: String,
-          default: 'None'
-        },
-        giftTag: {
-          type: String,
-          default: ''
-        }
-      }
-    }
-  ],
+  items: {
+    type: DataTypes.JSON,
+    allowNull: false,
+    defaultValue: []
+  },
   totalAmount: {
-    type: Number,
-    required: true,
-    min: 0
+    type: DataTypes.INTEGER,
+    allowNull: false
   },
   eventType: {
-    type: String,
-    required: true
+    type: DataTypes.STRING,
+    allowNull: false
   },
   deliveryDate: {
-    type: Date
+    type: DataTypes.DATE
   },
   notes: {
-    type: String,
-    default: ''
+    type: DataTypes.TEXT,
+    defaultValue: ''
   },
   status: {
-    type: String,
-    enum: ['Pending', 'Confirmed', 'Shipped', 'Delivered'],
-    default: 'Pending'
+    type: DataTypes.STRING,
+    defaultValue: 'Pending'
   }
-}, { timestamps: true });
+}, {
+  tableName: 'orders',
+  timestamps: true
+});
 
-// 4. Inquiry (Contact Message) Schema
-const inquirySchema = new mongoose.Schema({
+// 4. Inquiry (Contact Message) Model
+export const Inquiry = sequelize.define('Inquiry', {
+  id: {
+    type: DataTypes.INTEGER,
+    autoIncrement: true,
+    primaryKey: true
+  },
   name: {
-    type: String,
-    required: true,
-    trim: true
+    type: DataTypes.STRING,
+    allowNull: false
   },
   phone: {
-    type: String,
-    required: true,
-    trim: true
+    type: DataTypes.STRING,
+    allowNull: false
   },
   email: {
-    type: String,
-    trim: true,
-    default: ''
+    type: DataTypes.STRING,
+    defaultValue: ''
   },
   eventType: {
-    type: String,
-    trim: true,
-    default: 'General'
+    type: DataTypes.STRING,
+    defaultValue: 'General'
   },
   quantity: {
-    type: Number,
-    default: 10
+    type: DataTypes.INTEGER,
+    defaultValue: 10
   },
   subject: {
-    type: String,
-    trim: true,
-    default: 'Custom Gifting Inquiry'
+    type: DataTypes.STRING,
+    defaultValue: 'Custom Gifting Inquiry'
   },
   message: {
-    type: String,
-    required: true,
-    trim: true
+    type: DataTypes.TEXT,
+    allowNull: false
   },
   status: {
-    type: String,
-    enum: ['Read', 'Unread'],
-    default: 'Unread'
+    type: DataTypes.STRING,
+    defaultValue: 'Unread'
   }
-}, { timestamps: true });
+}, {
+  tableName: 'inquiries',
+  timestamps: true
+});
 
-export const User = mongoose.model('User', userSchema);
-export const Product = mongoose.model('Product', productSchema);
-export const Order = mongoose.model('Order', orderSchema);
-export const Inquiry = mongoose.model('Inquiry', inquirySchema);
-
-// 5. Settings Schema
-const settingSchema = new mongoose.Schema({
+// 5. Setting Model
+export const Setting = sequelize.define('Setting', {
+  id: {
+    type: DataTypes.INTEGER,
+    autoIncrement: true,
+    primaryKey: true
+  },
   key: {
-    type: String,
-    required: true,
+    type: DataTypes.STRING,
+    allowNull: false,
     unique: true
   },
   value: {
-    type: mongoose.Schema.Types.Mixed,
-    required: true
+    type: DataTypes.JSON,
+    allowNull: false
   }
-}, { timestamps: true });
+}, {
+  tableName: 'settings',
+  timestamps: true
+});
 
-export const Setting = mongoose.model('Setting', settingSchema);
-
-// 6. Gallery Item Schema
-const galleryItemSchema = new mongoose.Schema({
+// 6. Gallery Item Model
+export const GalleryItem = sequelize.define('GalleryItem', {
   id: {
-    type: String,
-    required: true,
-    unique: true,
-    trim: true
+    type: DataTypes.STRING,
+    primaryKey: true
   },
   title: {
-    type: String,
-    required: true,
-    trim: true
+    type: DataTypes.STRING,
+    allowNull: false
   },
   image: {
-    type: String,
-    required: true
+    type: DataTypes.TEXT,
+    allowNull: false
   },
   category: {
-    type: String,
-    required: true,
-    trim: true
+    type: DataTypes.STRING,
+    allowNull: false
   },
   description: {
-    type: String,
-    trim: true,
-    default: ''
+    type: DataTypes.TEXT,
+    defaultValue: ''
   },
   isActive: {
-    type: Boolean,
-    default: true
+    type: DataTypes.BOOLEAN,
+    defaultValue: true
   }
-}, { timestamps: true });
+}, {
+  tableName: 'gallery_items',
+  timestamps: true
+});
 
-export const GalleryItem = mongoose.model('GalleryItem', galleryItemSchema);
+// 7. Category Model
+export const Category = sequelize.define('Category', {
+  id: {
+    type: DataTypes.STRING,
+    primaryKey: true
+  },
+  name: {
+    type: DataTypes.STRING,
+    allowNull: false
+  }
+}, {
+  tableName: 'categories',
+  timestamps: true
+});
 
+// Associations
+Category.hasMany(Product, { foreignKey: 'category', sourceKey: 'id', as: 'products' });
+Product.belongsTo(Category, { foreignKey: 'category', targetKey: 'id', as: 'categoryDetails' });
+
+Category.hasMany(GalleryItem, { foreignKey: 'category', sourceKey: 'id', as: 'galleryItems' });
+GalleryItem.belongsTo(Category, { foreignKey: 'category', targetKey: 'id', as: 'categoryDetails' });

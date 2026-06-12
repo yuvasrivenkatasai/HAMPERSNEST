@@ -1,22 +1,47 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { MASTER_CATEGORIES, USD_RATE } from '../data/products';
+import { USD_RATE } from '../data/constants';
 import { useCart } from '../context/CartContext';
 
 export default function Collections() {
   const [searchParams, setSearchParams] = useSearchParams();
   const queryCategory = searchParams.get('category');
-  const { products, addToCart, setSelectedProductForModal } = useCart();
+  const { products, addToCart, setSelectedProductForModal, settings } = useCart();
 
   const [activeCategory, setActiveCategory] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('featured');
   const [currentPage, setCurrentPage] = useState(1);
+  const storefrontCategories = useMemo(() => {
+    const configuredCategories = Array.isArray(settings?.categories) ? settings.categories : [];
+    const categoryOptions = configuredCategories
+      .map((category) => ({
+        id: String(category.id || category.label || '').trim(),
+        label: String(category.label || category.id || '').trim()
+      }))
+      .filter((category) => category.id);
+
+    return [{ id: 'All', label: 'All' }, ...categoryOptions];
+  }, [settings]);
+  const getCategoryLabel = (categoryId) => {
+    return storefrontCategories.find(category => category.id === categoryId)?.label || categoryId || '';
+  };
+
+  const getCategoryIdByLabel = (label) => {
+    const match = storefrontCategories.find(
+      category => category.label.toLowerCase() === label.toLowerCase()
+    );
+    return match?.id || label;
+  };
+
+  const handleCategoryLabelChange = (label) => {
+    handleCategoryChange(getCategoryIdByLabel(label));
+  };
 
   // Sync category from URL search parameter
   useEffect(() => {
     if (queryCategory) {
-      const match = MASTER_CATEGORIES.find(
+      const match = storefrontCategories.find(
         c => c.id.toLowerCase() === queryCategory.toLowerCase() || 
              c.label.toLowerCase() === queryCategory.toLowerCase()
       );
@@ -29,7 +54,7 @@ export default function Collections() {
       setActiveCategory('All');
     }
     setCurrentPage(1);
-  }, [queryCategory]);
+  }, [queryCategory, storefrontCategories]);
 
   // Reset page when search or sort changes
   useEffect(() => {
@@ -53,9 +78,9 @@ export default function Collections() {
     if (!products) return [];
     let result = [...products];
 
-    // 1. Master Category Filter
+    // 1. Category Filter
     if (activeCategory !== 'All') {
-      result = result.filter(p => p.masterCategory === activeCategory);
+      result = result.filter(p => p.category === activeCategory);
     }
 
     // 2. Search Filter
@@ -64,7 +89,7 @@ export default function Collections() {
       result = result.filter(
         p => p.name.toLowerCase().includes(q) ||
              (p.description && p.description.toLowerCase().includes(q)) ||
-             (p.category && p.category.toLowerCase().includes(q))
+             getCategoryLabel(p.category).toLowerCase().includes(q)
       );
     }
 
@@ -132,11 +157,11 @@ export default function Collections() {
           {/* Top Banner SEO Tags */}
           <div className="trending-tags-banner">
             <span className="trending-label">Popular Searches:</span>
-            <button onClick={() => handleCategoryChange('Weddings')} className="trending-tag-btn">#WeddingReturnGifts</button>
-            <button onClick={() => handleCategoryChange('Baby')} className="trending-tag-btn">#BabyShowerHampers</button>
-            <button onClick={() => handleCategoryChange('Corporate')} className="trending-tag-btn">#CorporateGifts</button>
-            <button onClick={() => handleCategoryChange('Traditional')} className="trending-tag-btn">#BrassReturnGifts</button>
-            <button onClick={() => handleCategoryChange('Festivals')} className="trending-tag-btn">#FestivalGifts</button>
+            <button onClick={() => handleCategoryLabelChange('Wedding')} className="trending-tag-btn">#WeddingReturnGifts</button>
+            <button onClick={() => handleCategoryLabelChange('Baby Shower')} className="trending-tag-btn">#BabyShowerHampers</button>
+            <button onClick={() => handleCategoryLabelChange('Corporate Gifting')} className="trending-tag-btn">#CorporateGifts</button>
+            <button onClick={() => handleCategoryLabelChange('Brass Gifting')} className="trending-tag-btn">#BrassReturnGifts</button>
+            <button onClick={() => handleCategoryLabelChange('Customized Hampers')} className="trending-tag-btn">#CustomGiftBoxes</button>
           </div>
         </div>
       </div>
@@ -145,7 +170,7 @@ export default function Collections() {
 
         {/* === MASTER CATEGORY TABS === */}
         <div className="category-tabs reveal" style={{ display: 'flex', justifyContent: 'center', marginBottom: '2rem' }}>
-          {MASTER_CATEGORIES.map((cat) => (
+          {storefrontCategories.map((cat) => (
             <button
               key={cat.id}
               onClick={() => handleCategoryChange(cat.id)}
@@ -313,19 +338,19 @@ export default function Collections() {
             <div className="seo-keywords-col">
               <h5>Occasions</h5>
               <ul>
-                <li><button onClick={() => handleCategoryChange('Weddings')} className="seo-keyword-link">Wedding Return Gifts Hyderabad</button></li>
-                <li><button onClick={() => handleCategoryChange('Baby')} className="seo-keyword-link">Premium Baby Shower Gift Curations</button></li>
-                <li><button onClick={() => handleCategoryChange('Traditional')} className="seo-keyword-link">Housewarming Ceremony Hampers</button></li>
-                <li><button onClick={() => handleCategoryChange('Festivals')} className="seo-keyword-link">Festival & Seasonal Gift Boxes</button></li>
+                <li><button onClick={() => handleCategoryLabelChange('Wedding')} className="seo-keyword-link">Wedding Return Gifts Hyderabad</button></li>
+                <li><button onClick={() => handleCategoryLabelChange('Baby Shower')} className="seo-keyword-link">Premium Baby Shower Gift Curations</button></li>
+                <li><button onClick={() => handleCategoryLabelChange('Housewarming')} className="seo-keyword-link">Housewarming Ceremony Hampers</button></li>
+                <li><button onClick={() => handleCategoryLabelChange('Customized Hampers')} className="seo-keyword-link">Festival & Seasonal Gift Boxes</button></li>
               </ul>
             </div>
             <div className="seo-keywords-col">
               <h5>Gift Styles</h5>
               <ul>
-                <li><button onClick={() => handleCategoryChange('Traditional')} className="seo-keyword-link">Traditional Brass Item Return Gifts</button></li>
-                <li><button onClick={() => handleCategoryChange('Traditional')} className="seo-keyword-link">Curated Luxury Dry Fruit Hampers</button></li>
-                <li><button onClick={() => handleCategoryChange('Corporate')} className="seo-keyword-link">Premium Corporate Gift Sets</button></li>
-                <li><button onClick={() => handleCategoryChange('Festivals')} className="seo-keyword-link">Handmade Gourmet Gift Trays</button></li>
+                <li><button onClick={() => handleCategoryLabelChange('Brass Gifting')} className="seo-keyword-link">Traditional Brass Item Return Gifts</button></li>
+                <li><button onClick={() => handleCategoryLabelChange('Customized Hampers')} className="seo-keyword-link">Curated Luxury Dry Fruit Hampers</button></li>
+                <li><button onClick={() => handleCategoryLabelChange('Corporate Gifting')} className="seo-keyword-link">Premium Corporate Gift Sets</button></li>
+                <li><button onClick={() => handleCategoryLabelChange('Customized Hampers')} className="seo-keyword-link">Handmade Gourmet Gift Trays</button></li>
               </ul>
             </div>
             <div className="seo-keywords-col">

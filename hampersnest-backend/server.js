@@ -12,6 +12,7 @@ import dashboardRoutes from './routes/dashboard.js';
 import settingsRoutes from './routes/settings.js';
 import uploadRoutes from './routes/upload.js';
 import galleryRoutes from './routes/gallery.js';
+import categoryRoutes from './routes/categories.js';
 
 dotenv.config();
 
@@ -35,6 +36,7 @@ app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/settings', settingsRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/gallery', galleryRoutes);
+app.use('/api/categories', categoryRoutes);
 
 
 // Subdomain and static serving configuration

@@ -11,7 +11,7 @@ export const createInquiry = async (req, res) => {
   }
 
   try {
-    const inquiry = new Inquiry({
+    const createdInquiry = await Inquiry.create({
       name,
       phone,
       email: email || '',
@@ -20,7 +20,6 @@ export const createInquiry = async (req, res) => {
       message
     });
 
-    const createdInquiry = await inquiry.save();
     res.status(201).json(createdInquiry);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -32,7 +31,7 @@ export const createInquiry = async (req, res) => {
 // @access  Private/Admin
 export const getInquiries = async (req, res) => {
   try {
-    const inquiries = await Inquiry.find({}).sort({ createdAt: -1 });
+    const inquiries = await Inquiry.findAll({ order: [['createdAt', 'DESC']] });
     res.json(inquiries);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -44,10 +43,10 @@ export const getInquiries = async (req, res) => {
 // @access  Private/Admin
 export const deleteInquiry = async (req, res) => {
   try {
-    const inquiry = await Inquiry.findById(req.params.id);
+    const inquiry = await Inquiry.findByPk(req.params.id);
 
     if (inquiry) {
-      await Inquiry.deleteOne({ _id: req.params.id });
+      await inquiry.destroy();
       res.json({ message: 'Inquiry removed successfully' });
     } else {
       res.status(404).json({ message: 'Inquiry not found' });

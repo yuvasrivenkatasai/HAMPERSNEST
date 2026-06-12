@@ -19,7 +19,7 @@ export const createOrder = async (req, res) => {
 
   try {
     const orderId = generateOrderId();
-    const order = new Order({
+    const createdOrder = await Order.create({
       orderId,
       customer,
       items,
@@ -30,7 +30,6 @@ export const createOrder = async (req, res) => {
       status: 'Pending'
     });
 
-    const createdOrder = await order.save();
     res.status(201).json(createdOrder);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -42,7 +41,7 @@ export const createOrder = async (req, res) => {
 // @access  Private/Admin
 export const getOrders = async (req, res) => {
   try {
-    const orders = await Order.find({}).sort({ createdAt: -1 });
+    const orders = await Order.findAll({ order: [['createdAt', 'DESC']] });
     res.json(orders);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -54,7 +53,7 @@ export const getOrders = async (req, res) => {
 // @access  Private/Admin
 export const getOrderById = async (req, res) => {
   try {
-    const order = await Order.findOne({ orderId: req.params.id });
+    const order = await Order.findOne({ where: { orderId: req.params.id } });
     if (order) {
       res.json(order);
     } else {
@@ -76,7 +75,7 @@ export const updateOrderStatus = async (req, res) => {
   }
 
   try {
-    const order = await Order.findOne({ orderId: req.params.id });
+    const order = await Order.findOne({ where: { orderId: req.params.id } });
 
     if (order) {
       order.status = status;
