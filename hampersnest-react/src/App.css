@@ -947,10 +947,10 @@ header.scrolled {
 
   /* Inner wrapper: 2-column flex row */
   .hero-inner {
-    max-width: 1400px !important;
+    max-width: 1200px !important;
     width: 100% !important;
     margin: 0 auto !important;
-    padding: 80px 60px !important;
+    padding: 80px 40px !important;
     display: flex !important;
     flex-direction: row !important;
     align-items: center !important;
@@ -1201,16 +1201,17 @@ header.scrolled {
 
   /* Section container */
   #about.about {
-    padding-top: 0 !important;
-    padding-bottom: 0 !important;
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
     background-color: var(--color-white);
   }
 
-  #about .container,
-  #about.about {
-    max-width: 1400px !important;
+  #about .container {
+    max-width: 1200px !important;
     width: 100% !important;
-    padding: 100px 60px !important;
+    padding: 80px 40px !important;
     margin: 0 auto !important;
     box-sizing: border-box !important;
   }
@@ -1327,6 +1328,12 @@ header.scrolled {
   gap: 2rem;
 }
 
+.collections-grid-4col {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 2rem;
+}
+
 .collection-card {
   background-color: var(--color-white);
   border-radius: 16px;
@@ -1439,6 +1446,7 @@ header.scrolled {
   text-align: left !important;
   display: flex !important;
   flex-direction: column !important;
+  flex-grow: 1 !important;
 }
 
 .card-title {
@@ -1646,6 +1654,119 @@ header.scrolled {
     grid-template-columns: repeat(3, 1fr);
     gap: 1.2rem;
   }
+}
+
+/* ==========================================
+   BULK & CORPORATE ORDERS SECTION
+   ========================================== */
+.bulk-order-section {
+  background: var(--bg-soft-gradient);
+  padding: 5rem 24px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+
+.bulk-order-inner {
+  max-width: 850px;
+  width: 100%;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  z-index: 2;
+}
+
+.bulk-order-icon {
+  font-size: 3rem;
+  margin-bottom: 0.5rem;
+  animation: floatSubtle 4s ease-in-out infinite;
+}
+
+.bulk-order-subtitle {
+  font-family: var(--font-sans);
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--color-gold);
+}
+
+.bulk-order-title {
+  font-family: var(--font-serif);
+  font-size: 2.2rem;
+  font-weight: 600;
+  color: var(--color-purple-dark);
+  line-height: 1.2;
+}
+
+.bulk-order-desc {
+  font-family: var(--font-sans);
+  font-size: 1rem;
+  color: var(--color-charcoal);
+  max-width: 600px;
+  line-height: 1.7;
+}
+
+.bulk-order-tags {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+  margin: 1rem 0;
+  max-width: 700px;
+}
+
+.bulk-tag {
+  background: var(--color-lavender);
+  color: var(--color-purple-dark);
+  padding: 8px 18px;
+  border-radius: 50px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  border: 1px solid rgba(74, 29, 95, 0.05);
+  transition: var(--transition-fast);
+}
+
+.bulk-tag:hover {
+  background: var(--color-white);
+  border-color: var(--color-gold);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+}
+
+.bulk-order-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background-color: var(--color-whatsapp);
+  color: var(--color-white);
+  font-family: var(--font-sans);
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding: 1rem 2.5rem;
+  border-radius: 50px;
+  box-shadow: 0 8px 20px rgba(37, 211, 102, 0.2);
+  transition: var(--transition-smooth);
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+  margin-top: 1rem;
+}
+
+.bulk-order-btn i {
+  font-size: 1.3rem;
+}
+
+.bulk-order-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 25px rgba(37, 211, 102, 0.35);
+  background-color: #20ba5a;
 }
 
 
@@ -2306,6 +2427,158 @@ header.scrolled {
   transform: scale(1.1);
 }
 
+/* ==========================================
+   PRODUCT DETAIL POPUP MODAL (Centered Dialog)
+   ========================================== */
+.product-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(47, 10, 61, 0.4);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 1600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+  padding: 20px 15px;
+  overflow-y: auto;
+}
+
+.product-modal.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.product-modal-content {
+  width: 100%;
+  max-width: 940px;
+  background-color: var(--color-white);
+  padding: 2.5rem;
+  border-radius: 18px;
+  box-shadow: var(--shadow-luxury);
+  position: relative;
+  max-height: 90vh;
+  overflow-y: auto;
+  transform: scale(0.9);
+  opacity: 0;
+  transition: transform 0.3s cubic-bezier(0.165, 0.84, 0.44, 1), opacity 0.3s ease;
+}
+
+.product-modal.active .product-modal-content {
+  transform: scale(1);
+  opacity: 1;
+}
+
+.product-modal-close {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: rgba(74, 29, 95, 0.05);
+  border: none;
+  font-size: 1.25rem;
+  color: var(--color-purple);
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: var(--transition-fast);
+  z-index: 10;
+}
+
+.product-modal-close:hover {
+  background: var(--color-purple);
+  color: var(--color-white);
+  transform: rotate(90deg);
+}
+
+.modal-availability {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: #E8F5E9;
+  color: #2E7D32;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.modal-usd-price {
+  font-size: 0.82rem;
+  color: #777;
+  margin-bottom: 1rem;
+}
+
+.modal-features-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 1rem;
+}
+
+.modal-feature-tag {
+  background-color: var(--color-lavender);
+  color: var(--color-purple);
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.modal-feature-tag i {
+  color: var(--color-gold);
+}
+
+.modal-shipping-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.8rem;
+  color: var(--color-charcoal);
+  margin-top: 0.4rem;
+}
+
+.modal-shipping-row i {
+  color: var(--color-gold-dark);
+}
+
+.modal-whatsapp-btn {
+  background-color: var(--color-whatsapp);
+  color: var(--color-white);
+  border: none;
+  border-radius: 50px;
+  height: 44px;
+  padding: 0 1.5rem;
+  font-family: var(--font-sans);
+  font-size: 0.8rem;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: var(--transition-smooth);
+  box-shadow: 0 4px 15px rgba(37, 211, 102, 0.2);
+}
+
+.modal-whatsapp-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(37, 211, 102, 0.35);
+}
+
 /* Success notification popup */
 .alert-popup {
   position: fixed;
@@ -2539,7 +2812,8 @@ footer {
   }
 
   /* Compact Collections Redesign */
-  .collections-grid {
+  .collections-grid,
+  .collections-grid-4col {
     grid-template-columns: 1fr !important;
     gap: 20px !important;
     margin-top: 16px !important;
@@ -2902,6 +3176,7 @@ footer {
   }
 
   .collections-grid,
+  .collections-grid-4col,
   .gallery-masonry {
     display: grid !important;
     grid-template-columns: repeat(2, 1fr) !important;
@@ -3103,6 +3378,28 @@ footer {
   .contact-form-box {
     padding: 20px !important;
     border-radius: 12px !important;
+  }
+
+  /* Bulk order mobile overrides */
+
+  .bulk-order-title {
+    font-size: 1.6rem !important;
+  }
+
+  .bulk-order-tags {
+    gap: 8px !important;
+  }
+
+  .bulk-tag {
+    padding: 6px 12px !important;
+    font-size: 0.75rem !important;
+  }
+
+  .bulk-order-btn {
+    padding: 0.8rem 2rem !important;
+    font-size: 0.8rem !important;
+    width: 100% !important;
+    max-width: 320px !important;
   }
 
   /* CTA section mobile adjustment */
@@ -3692,7 +3989,7 @@ footer h4,
   }
   
   /* About section container */
-  .about.container {
+  .about .container {
     width: 95% !important;
     max-width: 95% !important;
   }

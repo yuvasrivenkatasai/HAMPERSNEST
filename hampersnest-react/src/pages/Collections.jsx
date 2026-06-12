@@ -144,14 +144,14 @@ export default function Collections() {
       <div className="container" style={{ paddingTop: '1rem' }}>
 
         {/* === MASTER CATEGORY TABS === */}
-        <div className="master-category-tabs reveal">
+        <div className="category-tabs reveal" style={{ display: 'flex', justifyContent: 'center', marginBottom: '2rem' }}>
           {MASTER_CATEGORIES.map((cat) => (
             <button
               key={cat.id}
               onClick={() => handleCategoryChange(cat.id)}
-              className={`master-tab ${activeCategory === cat.id ? 'active' : ''}`}
+              className={`category-tab ${activeCategory === cat.id ? 'active' : ''}`}
             >
-              {cat.emoji && <span className="master-tab-emoji">{cat.emoji}</span>}
+              {cat.emoji && <span className="master-tab-emoji" style={{ marginRight: '6px' }}>{cat.emoji}</span>}
               {cat.label}
             </button>
           ))}
@@ -366,7 +366,7 @@ function CollectionCard({ product, animationDelay, onAddToCart, onViewDetails })
           <span className="price-prefix">From </span>₹{product.price}
         </p>
         <p className="card-usd-price">≈ ${usdPrice} USD</p>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '4px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: 'auto' }}>
           <button
             onClick={onViewDetails}
             className="card-link btn btn-secondary btn-quick-enquiry"

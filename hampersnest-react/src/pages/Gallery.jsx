@@ -2,6 +2,10 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 
+const API_BASE = window.location.hostname === 'localhost' || window.location.hostname.endsWith('.localhost')
+  ? 'http://localhost:5000'
+  : '';
+
 export default function Gallery() {
   const navigate = useNavigate();
   const { products, addToCart, toggleWishlist, isInWishlist } = useCart();
@@ -14,7 +18,7 @@ export default function Gallery() {
   useEffect(() => {
     const fetchGallery = async () => {
       try {
-        const response = await fetch('/api/gallery');
+        const response = await fetch(`${API_BASE}/api/gallery`);
         if (response.ok) {
           const data = await response.json();
           setGalleryItems(data);

@@ -124,44 +124,46 @@ export default function Home() {
       </section>
 
       {/* ABOUT / STORY SECTION */}
-      <section id="about" className="about container">
-        <div className="about-grid">
-          <div className="about-left reveal">
-            <span className="section-subtitle" style={{ textAlign: 'left', marginBottom: '0.8rem' }}>
-              About Hampers Nest
-            </span>
-            <h3>Thoughtfully Curated <br />Luxury Gifts</h3>
-            <p className="about-text" style={{ fontSize: '0.95rem' }}>
-              Hampers Nest specializes in premium customized return gifts designed to leave a lasting impression. Every
-              hamper is thoughtfully curated with attention to quality, aesthetics, and deep personalization. We merge
-              traditional Hyderabad artistry with modern premium packaging to build return gifts worth cherishing.
-            </p>
+      <section id="about" className="about">
+        <div className="container">
+          <div className="about-grid">
+            <div className="about-left reveal">
+              <span className="section-subtitle" style={{ textAlign: 'left', marginBottom: '0.8rem' }}>
+                About Hampers Nest
+              </span>
+              <h3>Thoughtfully Curated <br />Luxury Gifts</h3>
+              <p className="about-text" style={{ fontSize: '0.95rem' }}>
+                Hampers Nest specializes in premium customized return gifts designed to leave a lasting impression. Every
+                hamper is thoughtfully curated with attention to quality, aesthetics, and deep personalization. We merge
+                traditional Hyderabad artistry with modern premium packaging to build return gifts worth cherishing.
+              </p>
 
-            <div className="about-services-tags" style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', marginTop: '1.5rem' }}>
-              <div className="service-tag" style={{ background: 'var(--color-lavender)', padding: '6px 12px', borderRadius: '20px', fontSize: '0.8rem', color: 'var(--color-purple)', fontWeight: 500 }}>
-                <i className="fa-solid fa-heart" style={{ marginRight: '6px', color: 'var(--color-gold)' }}></i> Wedding Curation
+              <div className="about-services-tags" style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', marginTop: '1.5rem' }}>
+                <div className="service-tag" style={{ background: 'var(--color-lavender)', padding: '6px 12px', borderRadius: '20px', fontSize: '0.8rem', color: 'var(--color-purple)', fontWeight: 500 }}>
+                  <i className="fa-solid fa-heart" style={{ marginRight: '6px', color: 'var(--color-gold)' }}></i> Wedding Curation
+                </div>
+                <div className="service-tag" style={{ background: 'var(--color-lavender)', padding: '6px 12px', borderRadius: '20px', fontSize: '0.8rem', color: 'var(--color-purple)', fontWeight: 500 }}>
+                  <i className="fa-solid fa-child" style={{ marginRight: '6px', color: 'var(--color-gold)' }}></i> Baby Showers
+                </div>
+                <div className="service-tag" style={{ background: 'var(--color-lavender)', padding: '6px 12px', borderRadius: '20px', fontSize: '0.8rem', color: 'var(--color-purple)', fontWeight: 500 }}>
+                  <i className="fa-solid fa-house-chimney" style={{ marginRight: '6px', color: 'var(--color-gold)' }}></i> Housewarmings
+                </div>
+                <div className="service-tag" style={{ background: 'var(--color-lavender)', padding: '6px 12px', borderRadius: '20px', fontSize: '0.8rem', color: 'var(--color-purple)', fontWeight: 500 }}>
+                  <i className="fa-solid fa-briefcase" style={{ marginRight: '6px', color: 'var(--color-gold)' }}></i> Corporate Gifting
+                </div>
               </div>
-              <div className="service-tag" style={{ background: 'var(--color-lavender)', padding: '6px 12px', borderRadius: '20px', fontSize: '0.8rem', color: 'var(--color-purple)', fontWeight: 500 }}>
-                <i className="fa-solid fa-child" style={{ marginRight: '6px', color: 'var(--color-gold)' }}></i> Baby Showers
-              </div>
-              <div className="service-tag" style={{ background: 'var(--color-lavender)', padding: '6px 12px', borderRadius: '20px', fontSize: '0.8rem', color: 'var(--color-purple)', fontWeight: 500 }}>
-                <i className="fa-solid fa-house-chimney" style={{ marginRight: '6px', color: 'var(--color-gold)' }}></i> Housewarmings
-              </div>
-              <div className="service-tag" style={{ background: 'var(--color-lavender)', padding: '6px 12px', borderRadius: '20px', fontSize: '0.8rem', color: 'var(--color-purple)', fontWeight: 500 }}>
-                <i className="fa-solid fa-briefcase" style={{ marginRight: '6px', color: 'var(--color-gold)' }}></i> Corporate Gifting
-              </div>
+              
+              <Link to="/about" className="btn btn-secondary" style={{ marginTop: '2rem' }}>
+                Read Our Story
+              </Link>
             </div>
-            
-            <Link to="/about" className="btn btn-secondary" style={{ marginTop: '2rem' }}>
-              Read Our Story
-            </Link>
-          </div>
 
-          <div className="about-right reveal" style={{ transitionDelay: '0.2s' }}>
-            <div className="about-img-box"><img src="/assets/wedding_gift.png" alt="Premium Wedding return gift" /></div>
-            <div className="about-img-box"><img src="/assets/baby_shower.png" alt="Baby shower return gift set" /></div>
-            <div className="about-img-box"><img src="/assets/housewarming.png" alt="Housewarming gift hamper" /></div>
-            <div className="about-img-box"><img src="/assets/half_saree.png" alt="Half Saree function return gift" /></div>
+            <div className="about-right reveal" style={{ transitionDelay: '0.2s' }}>
+              <div className="about-img-box"><img src="/assets/wedding_gift.png" alt="Premium Wedding return gift" /></div>
+              <div className="about-img-box"><img src="/assets/baby_shower.png" alt="Baby shower return gift set" /></div>
+              <div className="about-img-box"><img src="/assets/housewarming.png" alt="Housewarming gift hamper" /></div>
+              <div className="about-img-box"><img src="/assets/half_saree.png" alt="Half Saree function return gift" /></div>
+            </div>
           </div>
         </div>
       </section>

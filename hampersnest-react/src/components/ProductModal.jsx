@@ -54,7 +54,7 @@ export default function ProductModal() {
   };
 
   const handleBackdropClick = (e) => {
-    if (e.target.classList.contains('inquiry-modal')) {
+    if (e.target.classList.contains('product-modal')) {
       handleClose();
     }
   };
@@ -83,25 +83,15 @@ export default function ProductModal() {
 
   return (
     <div
-      className="inquiry-modal active"
+      className="product-modal active"
       onClick={handleBackdropClick}
-      style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', overflowY: 'auto', padding: '20px 10px' }}
     >
       <div
-        className="inquiry-modal-content"
-        style={{
-          maxWidth: '940px',
-          width: '100%',
-          margin: 'auto',
-          transform: 'none',
-          opacity: 1,
-          animation: 'heroZoomIn 0.3s ease forwards',
-          padding: '2rem'
-        }}
+        className="product-modal-content"
       >
         <button
           onClick={handleClose}
-          className="inquiry-modal-close"
+          className="product-modal-close"
           aria-label="Close Product Details"
         >
           <i className="fa-solid fa-xmark"></i>

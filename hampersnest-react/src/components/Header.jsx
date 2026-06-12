@@ -53,7 +53,6 @@ export default function Header() {
             <div className="logo-circle">
               <img src="/assets/logo.png" alt="Hampers Nest Logo" />
             </div>
-            <span className="brand-name">Hampers Nest</span>
           </Link>
 
           {/* Navigation Links */}

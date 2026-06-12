@@ -46,6 +46,19 @@ const productSchema = new mongoose.Schema({
     required: true,
     trim: true
   },
+  masterCategory: {
+    type: String,
+    trim: true,
+    default: 'Traditional'
+  },
+  customization: {
+    type: [String],
+    default: []
+  },
+  shipping: {
+    type: [String],
+    default: []
+  },
   rating: {
     type: Number,
     default: 4.5,

@@ -12,6 +12,17 @@ const slugify = (text) => {
     .replace(/-+$/, ''); // Trim - from end
 };
 
+// Helper to derive masterCategory from category
+const getMasterCategory = (cat) => {
+  if (!cat) return 'Traditional';
+  const lowerCat = cat.toLowerCase();
+  if (lowerCat.includes('wedding')) return 'Weddings';
+  if (lowerCat.includes('baby')) return 'Baby';
+  if (lowerCat.includes('corporate') || lowerCat.includes('bulk')) return 'Corporate';
+  if (lowerCat.includes('festival') || lowerCat.includes('season')) return 'Festivals';
+  return 'Traditional';
+};
+
 // @desc    Get all products
 // @route   GET /api/products
 // @access  Public
@@ -45,7 +56,7 @@ export const getProductById = async (req, res) => {
 // @route   POST /api/products
 // @access  Private/Admin
 export const createProduct = async (req, res) => {
-  const { name, price, image, category, rating, description, details, isFeatured, originalPrice, isActive } = req.body;
+  const { name, price, image, category, masterCategory, rating, description, details, customization, shipping, isFeatured, originalPrice, isActive } = req.body;
 
   if (!name || !price || !category) {
     return res.status(400).json({ message: 'Please provide name, price, and category' });
@@ -66,9 +77,12 @@ export const createProduct = async (req, res) => {
       price: Number(price),
       image: image || '/assets/hero_banner.png',
       category,
+      masterCategory: masterCategory || getMasterCategory(category),
       rating: rating ? Number(rating) : 4.5,
       description: description || '',
       details: Array.isArray(details) ? details : [],
+      customization: Array.isArray(customization) ? customization : [],
+      shipping: Array.isArray(shipping) ? shipping : [],
       isFeatured: !!isFeatured,
       originalPrice: originalPrice ? Number(originalPrice) : 0,
       isActive: isActive !== undefined ? !!isActive : true
@@ -85,7 +99,7 @@ export const createProduct = async (req, res) => {
 // @route   PUT /api/products/:id
 // @access  Private/Admin
 export const updateProduct = async (req, res) => {
-  const { name, price, image, category, rating, description, details, isFeatured, originalPrice, isActive } = req.body;
+  const { name, price, image, category, masterCategory, rating, description, details, customization, shipping, isFeatured, originalPrice, isActive } = req.body;
 
   try {
     const product = await Product.findOne({ id: req.params.id });
@@ -95,9 +109,14 @@ export const updateProduct = async (req, res) => {
       product.price = price !== undefined ? Number(price) : product.price;
       product.image = image !== undefined ? image : product.image;
       product.category = category !== undefined ? category : product.category;
+      product.masterCategory = masterCategory !== undefined 
+        ? masterCategory 
+        : (category !== undefined ? getMasterCategory(category) : product.masterCategory);
       product.rating = rating !== undefined ? Number(rating) : product.rating;
       product.description = description !== undefined ? description : product.description;
       product.details = details !== undefined ? (Array.isArray(details) ? details : []) : product.details;
+      product.customization = customization !== undefined ? (Array.isArray(customization) ? customization : []) : product.customization;
+      product.shipping = shipping !== undefined ? (Array.isArray(shipping) ? shipping : []) : product.shipping;
       product.isFeatured = isFeatured !== undefined ? !!isFeatured : product.isFeatured;
       product.originalPrice = originalPrice !== undefined ? Number(originalPrice) : product.originalPrice;
       product.isActive = isActive !== undefined ? !!isActive : product.isActive;

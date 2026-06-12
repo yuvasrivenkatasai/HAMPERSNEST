@@ -60,7 +60,7 @@ export default function ProductCard({ product }) {
           )}
         </p>
         <p className="card-usd-price">≈ ${usdPrice} USD</p>
-        <div style={{ display: 'flex', gap: '8px', marginTop: '4px' }}>
+        <div style={{ display: 'flex', gap: '8px', marginTop: 'auto' }}>
           <button
             onClick={handleViewDetails}
             className="card-link btn btn-secondary btn-quick-enquiry"
