@@ -3,11 +3,11 @@ export const USD_RATE = 83; // ₹83 = $1 USD
 
 export const MASTER_CATEGORIES = [
   { id: 'All',        label: 'All',                  emoji: '' },
-  { id: 'Weddings',   label: 'Weddings',             emoji: '💍' },
-  { id: 'Baby',       label: 'Baby Celebrations',    emoji: '👶' },
-  { id: 'Traditional',label: 'Traditional',          emoji: '🏡' },
-  { id: 'Festivals',  label: 'Festivals & Seasonal', emoji: '🎉' },
-  { id: 'Corporate',  label: 'Corporate & Bulk',     emoji: '🏢' },
+  { id: 'Weddings',   label: 'Weddings',             emoji: '' },
+  { id: 'Baby',       label: 'Baby Celebrations',    emoji: '' },
+  { id: 'Traditional',label: 'Traditional',          emoji: '' },
+  { id: 'Festivals',  label: 'Festivals & Seasonal', emoji: '' },
+  { id: 'Corporate',  label: 'Corporate & Bulk',     emoji: '' },
 ];
 
 export const products = [

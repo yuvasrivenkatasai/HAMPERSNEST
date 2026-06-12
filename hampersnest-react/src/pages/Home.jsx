@@ -299,7 +299,6 @@ export default function Home() {
       {/* BULK & CORPORATE ORDERS */}
       <section className="bulk-order-section">
         <div className="bulk-order-inner reveal">
-          <span className="bulk-order-icon">💼</span>
           <span className="bulk-order-subtitle">Bulk & Corporate Orders</span>
           <h2 className="bulk-order-title">Need 50, 100 or 500 Gifts?</h2>
           <p className="bulk-order-desc">

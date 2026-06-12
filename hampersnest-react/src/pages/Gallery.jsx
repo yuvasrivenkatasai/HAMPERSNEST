@@ -296,7 +296,7 @@ export default function Gallery() {
                     </p>
                   ) : (
                     <p style={{ margin: '0.5rem 0', fontSize: '0.9rem', color: 'var(--color-gold-dark)', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                      ✨ Custom Design Showcase
+                      Custom Design Showcase
                     </p>
                   )}
                   

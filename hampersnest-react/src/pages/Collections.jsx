@@ -151,7 +151,6 @@ export default function Collections() {
               onClick={() => handleCategoryChange(cat.id)}
               className={`category-tab ${activeCategory === cat.id ? 'active' : ''}`}
             >
-              {cat.emoji && <span className="master-tab-emoji" style={{ marginRight: '6px' }}>{cat.emoji}</span>}
               {cat.label}
             </button>
           ))}
