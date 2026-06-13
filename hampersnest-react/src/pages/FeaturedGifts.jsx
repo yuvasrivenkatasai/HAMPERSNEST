@@ -1,13 +1,12 @@
 import React, { useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
-import { products } from '../data/products';
 
 export default function FeaturedGifts() {
   const navigate = useNavigate();
-  const { addToCart, toggleWishlist, isInWishlist } = useCart();
+  const { products, addToCart, toggleWishlist, isInWishlist } = useCart();
 
-  const featuredItems = products.filter(p => p.isFeatured);
+  const featuredItems = products ? products.filter(p => p.isFeatured) : [];
 
   useEffect(() => {
     const revealElements = document.querySelectorAll('.reveal, .reveal-heading, .featured-row');

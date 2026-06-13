@@ -1,0 +1,28 @@
+{
+  "name": "hampersnest-backend",
+  "version": "1.0.0",
+  "description": "Backend server and API for HampersNest e-commerce and admin dashboard",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.1066.0",
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "jsonwebtoken": "^9.0.2",
+    "multer": "^2.1.1",
+    "mysql2": "^3.11.0",
+    "oracledb": "^7.0.0",
+    "sequelize": "^6.37.3",
+    "sharp": "^0.35.0",
+    "sqlite3": "^5.1.7"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.0"
+  }
+}

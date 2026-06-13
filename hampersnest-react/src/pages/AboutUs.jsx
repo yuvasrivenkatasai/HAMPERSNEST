@@ -64,24 +64,26 @@ export default function AboutUs() {
       </div>
 
       {/* Main Story Grid */}
-      <section className="about container" style={{ paddingTop: '2rem' }}>
-        <div className="about-grid">
-          <div className="about-left reveal">
-            <span className="section-subtitle" style={{ textAlign: 'left', marginBottom: '0.8rem' }}>The Curation Studio</span>
-            <h3>Where Tradition <br />Meets Luxury</h3>
-            <p className="about-text" style={{ fontSize: '0.95rem', marginBottom: '1rem' }}>
-              Established in Hyderabad, Hampers Nest was founded on a simple belief: <em>a return gift is a physical representation of your gratitude and celebration.</em> We believe that generic, mass-produced items lack the warmth and elegance that your guests deserve.
-            </p>
-            <p className="about-text" style={{ fontSize: '0.95rem' }}>
-              Our curation studio collaborates with local Indian artisans, bringing timeless treasures (like handcrafted brass bowls, peacock diyas, and zari pouches) and presenting them inside luxury, high-end packaging. Whether it is a grand wedding, a sweet baby shower, a warm housewarming, or an executive corporate event, we elevate the experience.
-            </p>
-          </div>
+      <section className="about" style={{ paddingTop: '2rem' }}>
+        <div className="container">
+          <div className="about-grid">
+            <div className="about-left reveal">
+              <span className="section-subtitle" style={{ textAlign: 'left', marginBottom: '0.8rem' }}>The Curation Studio</span>
+              <h3>Where Tradition <br />Meets Luxury</h3>
+              <p className="about-text" style={{ fontSize: '0.95rem', marginBottom: '1rem' }}>
+                Established in Hyderabad, Hampers Nest was founded on a simple belief: <em>a return gift is a physical representation of your gratitude and celebration.</em> We believe that generic, mass-produced items lack the warmth and elegance that your guests deserve.
+              </p>
+              <p className="about-text" style={{ fontSize: '0.95rem' }}>
+                Our curation studio collaborates with local Indian artisans, bringing timeless treasures (like handcrafted brass bowls, peacock diyas, and zari pouches) and presenting them inside luxury, high-end packaging. Whether it is a grand wedding, a sweet baby shower, a warm housewarming, or an executive corporate event, we elevate the experience.
+              </p>
+            </div>
 
-          <div className="about-right reveal" style={{ transitionDelay: '0.2s' }}>
-            <div className="about-img-box"><img src="/assets/wedding_gift.png" alt="Traditional brass crafting" /></div>
-            <div className="about-img-box"><img src="/assets/hero_banner.png" alt="Curated lavender box details" /></div>
-            <div className="about-img-box"><img src="/assets/housewarming.png" alt="Handcrafted diyas details" /></div>
-            <div className="about-img-box"><img src="/assets/corporate.png" alt="Premium corporate layout" /></div>
+            <div className="about-right reveal" style={{ transitionDelay: '0.2s' }}>
+              <div className="about-img-box"><img src="/assets/wedding_gift.png" alt="Traditional brass crafting" /></div>
+              <div className="about-img-box"><img src="/assets/hero_banner.png" alt="Curated lavender box details" /></div>
+              <div className="about-img-box"><img src="/assets/housewarming.png" alt="Handcrafted diyas details" /></div>
+              <div className="about-img-box"><img src="/assets/corporate.png" alt="Premium corporate layout" /></div>
+            </div>
           </div>
         </div>
       </section>

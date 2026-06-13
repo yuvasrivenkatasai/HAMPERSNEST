@@ -67,7 +67,7 @@ export default function ProductModal() {
   };
 
   const handleBackdropClick = (e) => {
-    if (e.target.classList.contains('inquiry-modal')) {
+    if (e.target.classList.contains('product-modal')) {
       handleClose();
     }
   };

@@ -44,14 +44,17 @@ export default function Header() {
 
   return (
     <>
-      <header id="header" className={scrolled ? 'scrolled' : ''}>
+      <header 
+        id="header" 
+        className={scrolled ? 'scrolled' : ''}
+        style={{ top: (settings && settings.announcementActive && !scrolled) ? '38px' : '0px' }}
+      >
         <div className="nav-container">
           {/* Logo container - image + brand name */}
           <Link to="/" className="logo-container" onClick={closeMobileMenu}>
             <div className="logo-circle">
               <img src="/assets/logo.png" alt="Hampers Nest Logo" />
             </div>
-            <span className="brand-name">Hampers Nest</span>
           </Link>
 
           {/* Navigation Links */}

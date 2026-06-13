@@ -32,6 +32,7 @@ export default function Home() {
   const { addToCart, setQuoteModalOpen } = useCart();
   const { formatPrice } = useCurrency();
   const [activeSlide, setActiveSlide] = useState(0);
+  const { products } = useCart();
 
   // Testimonial slider auto-slide
   useEffect(() => {
@@ -125,44 +126,46 @@ export default function Home() {
       </section>
 
       {/* ABOUT / STORY SECTION */}
-      <section id="about" className="about container">
-        <div className="about-grid">
-          <div className="about-left reveal">
-            <span className="section-subtitle" style={{ textAlign: 'left', marginBottom: '0.8rem' }}>
-              About Hampers Nest
-            </span>
-            <h3>Thoughtfully Curated <br />Luxury Gifts</h3>
-            <p className="about-text" style={{ fontSize: '0.95rem' }}>
-              Hampers Nest specializes in premium customized return gifts designed to leave a lasting impression. Every
-              hamper is thoughtfully curated with attention to quality, aesthetics, and deep personalization. We merge
-              traditional Hyderabad artistry with modern premium packaging to build return gifts worth cherishing.
-            </p>
+      <section id="about" className="about">
+        <div className="container">
+          <div className="about-grid">
+            <div className="about-left reveal">
+              <span className="section-subtitle" style={{ textAlign: 'left', marginBottom: '0.8rem' }}>
+                About Hampers Nest
+              </span>
+              <h3>Thoughtfully Curated <br />Luxury Gifts</h3>
+              <p className="about-text" style={{ fontSize: '0.95rem' }}>
+                Hampers Nest specializes in premium customized return gifts designed to leave a lasting impression. Every
+                hamper is thoughtfully curated with attention to quality, aesthetics, and deep personalization. We merge
+                traditional Hyderabad artistry with modern premium packaging to build return gifts worth cherishing.
+              </p>
 
-            <div className="about-services-tags" style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', marginTop: '1.5rem' }}>
-              <div className="service-tag" style={{ background: 'var(--color-lavender)', padding: '6px 12px', borderRadius: '20px', fontSize: '0.8rem', color: 'var(--color-purple)', fontWeight: 500 }}>
-                <i className="fa-solid fa-heart" style={{ marginRight: '6px', color: 'var(--color-gold)' }}></i> Wedding Curation
+              <div className="about-services-tags" style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', marginTop: '1.5rem' }}>
+                <div className="service-tag" style={{ background: 'var(--color-lavender)', padding: '6px 12px', borderRadius: '20px', fontSize: '0.8rem', color: 'var(--color-purple)', fontWeight: 500 }}>
+                  <i className="fa-solid fa-heart" style={{ marginRight: '6px', color: 'var(--color-gold)' }}></i> Wedding Curation
+                </div>
+                <div className="service-tag" style={{ background: 'var(--color-lavender)', padding: '6px 12px', borderRadius: '20px', fontSize: '0.8rem', color: 'var(--color-purple)', fontWeight: 500 }}>
+                  <i className="fa-solid fa-child" style={{ marginRight: '6px', color: 'var(--color-gold)' }}></i> Baby Showers
+                </div>
+                <div className="service-tag" style={{ background: 'var(--color-lavender)', padding: '6px 12px', borderRadius: '20px', fontSize: '0.8rem', color: 'var(--color-purple)', fontWeight: 500 }}>
+                  <i className="fa-solid fa-house-chimney" style={{ marginRight: '6px', color: 'var(--color-gold)' }}></i> Housewarmings
+                </div>
+                <div className="service-tag" style={{ background: 'var(--color-lavender)', padding: '6px 12px', borderRadius: '20px', fontSize: '0.8rem', color: 'var(--color-purple)', fontWeight: 500 }}>
+                  <i className="fa-solid fa-briefcase" style={{ marginRight: '6px', color: 'var(--color-gold)' }}></i> Corporate Gifting
+                </div>
               </div>
-              <div className="service-tag" style={{ background: 'var(--color-lavender)', padding: '6px 12px', borderRadius: '20px', fontSize: '0.8rem', color: 'var(--color-purple)', fontWeight: 500 }}>
-                <i className="fa-solid fa-child" style={{ marginRight: '6px', color: 'var(--color-gold)' }}></i> Baby Showers
-              </div>
-              <div className="service-tag" style={{ background: 'var(--color-lavender)', padding: '6px 12px', borderRadius: '20px', fontSize: '0.8rem', color: 'var(--color-purple)', fontWeight: 500 }}>
-                <i className="fa-solid fa-house-chimney" style={{ marginRight: '6px', color: 'var(--color-gold)' }}></i> Housewarmings
-              </div>
-              <div className="service-tag" style={{ background: 'var(--color-lavender)', padding: '6px 12px', borderRadius: '20px', fontSize: '0.8rem', color: 'var(--color-purple)', fontWeight: 500 }}>
-                <i className="fa-solid fa-briefcase" style={{ marginRight: '6px', color: 'var(--color-gold)' }}></i> Corporate Gifting
-              </div>
+              
+              <Link to="/about" className="btn btn-secondary" style={{ marginTop: '2rem' }}>
+                Read Our Story
+              </Link>
             </div>
-            
-            <Link to="/about" className="btn btn-secondary" style={{ marginTop: '2rem' }}>
-              Read Our Story
-            </Link>
-          </div>
 
-          <div className="about-right reveal" style={{ transitionDelay: '0.2s' }}>
-            <div className="about-img-box"><img src="/assets/wedding_gift.png" alt="Premium Wedding return gift" /></div>
-            <div className="about-img-box"><img src="/assets/baby_shower.png" alt="Baby shower return gift set" /></div>
-            <div className="about-img-box"><img src="/assets/housewarming.png" alt="Housewarming gift hamper" /></div>
-            <div className="about-img-box"><img src="/assets/half_saree.png" alt="Half Saree function return gift" /></div>
+            <div className="about-right reveal" style={{ transitionDelay: '0.2s' }}>
+              <div className="about-img-box"><img src="/assets/wedding_gift.png" alt="Premium Wedding return gift" /></div>
+              <div className="about-img-box"><img src="/assets/baby_shower.png" alt="Baby shower return gift set" /></div>
+              <div className="about-img-box"><img src="/assets/housewarming.png" alt="Housewarming gift hamper" /></div>
+              <div className="about-img-box"><img src="/assets/half_saree.png" alt="Half Saree function return gift" /></div>
+            </div>
           </div>
         </div>
       </section>
@@ -209,7 +212,6 @@ export default function Home() {
       {/* BULK & CORPORATE ORDERS */}
       <section className="bulk-order-section">
         <div className="bulk-order-inner reveal">
-          <span className="bulk-order-icon">💼</span>
           <span className="bulk-order-subtitle">Bulk & Corporate Orders</span>
           <h2 className="bulk-order-title">Need 50, 100 or 500 Gifts?</h2>
           <p className="bulk-order-desc">
@@ -231,6 +233,27 @@ export default function Home() {
             <i className="fa-brands fa-whatsapp"></i>
             Request Bulk Quote
           </button>
+        </div>
+      </section>
+
+      {/* POPULAR HAMPERS SECTION */}
+      <section className="featured-products container" style={{ paddingTop: '4rem', paddingBottom: '4rem' }}>
+        <span className="section-subtitle">Curator's Choice</span>
+        <h2 className="section-title">Popular Gift Hampers</h2>
+        <p style={{ textAlign: 'center', color: '#666', fontSize: '0.9rem', marginBottom: '2.5rem', maxWidth: '600px', margin: '0 auto 2.5rem auto' }}>
+          Explore our most loved customized gift hampers. Handpicked and tailored perfectly for premium weddings, baby showers, and celebrations.
+        </p>
+
+        <div className="collections-grid reveal active">
+          {products && products.slice(0, 4).map((product) => (
+            <ProductCard key={product.id} product={product} />
+          ))}
+        </div>
+
+        <div style={{ display: 'flex', justifyContent: 'center', marginTop: '3rem' }}>
+          <Link to="/collections" className="btn btn-primary" style={{ padding: '0.8rem 2.5rem', fontWeight: 600, letterSpacing: '0.5px' }}>
+            View All Products <i className="fa-solid fa-arrow-right" style={{ marginLeft: '8px' }}></i>
+          </Link>
         </div>
       </section>
 
