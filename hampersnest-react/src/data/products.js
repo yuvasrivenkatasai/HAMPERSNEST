@@ -2,12 +2,12 @@
 export const USD_RATE = 83; // ₹83 = $1 USD
 
 export const MASTER_CATEGORIES = [
-  { id: 'All',        label: 'All',                  emoji: '' },
-  { id: 'Weddings',   label: 'Weddings',             emoji: '💍' },
-  { id: 'Baby',       label: 'Baby Celebrations',    emoji: '👶' },
-  { id: 'Traditional',label: 'Traditional',          emoji: '🏡' },
-  { id: 'Festivals',  label: 'Festivals & Seasonal', emoji: '🎉' },
-  { id: 'Corporate',  label: 'Corporate & Bulk',     emoji: '🏢' },
+  { id: 'All',        label: 'All',                         emoji: '' },
+  { id: 'Weddings',   label: 'Weddings',                    emoji: '💍' },
+  { id: 'Baby',       label: 'Baby Celebrations',           emoji: '👶' },
+  { id: 'Traditional',label: 'Traditional Celebrations',    emoji: '🏡' },
+  { id: 'Festivals',  label: 'Festivals & Seasonal Gifts',  emoji: '🎉' },
+  { id: 'Corporate',  label: 'Corporate & Bulk Orders',     emoji: '🏢' },
 ];
 
 export const products = [
@@ -15,7 +15,13 @@ export const products = [
     id: "wedding-hamper",
     name: "Wedding Gift Hamper",
     price: 499,
-    image: "/assets/wedding_gift.png",
+    images: [
+      "/assets/wedding_gift.png",
+      "/assets/hero_banner.png",
+      "/assets/brass_cup.png"
+    ],
+    videos: [],
+    get image() { return this.images[0]; },
     category: "Wedding",
     masterCategory: "Weddings",
     rating: 4.9,
@@ -35,7 +41,12 @@ export const products = [
     id: "baby-shower-hamper",
     name: "Baby Shower Hamper",
     price: 399,
-    image: "/assets/baby_shower.png",
+    images: [
+      "/assets/baby_shower.png",
+      "/assets/hero_banner.png"
+    ],
+    videos: [],
+    get image() { return this.images[0]; },
     category: "Baby Shower",
     masterCategory: "Baby",
     rating: 4.8,
@@ -55,7 +66,13 @@ export const products = [
     id: "housewarming-hamper",
     name: "Housewarming Hamper",
     price: 799,
-    image: "/assets/housewarming.png",
+    images: [
+      "/assets/housewarming.png",
+      "/assets/brass_cup.png",
+      "/assets/hero_banner.png"
+    ],
+    videos: [],
+    get image() { return this.images[0]; },
     category: "Housewarming",
     masterCategory: "Traditional",
     rating: 4.7,
@@ -75,7 +92,12 @@ export const products = [
     id: "corporate-exec",
     name: "Corporate Executive Hamper",
     price: 999,
-    image: "/assets/corporate.png",
+    images: [
+      "/assets/corporate.png",
+      "/assets/hero_banner.png"
+    ],
+    videos: [],
+    get image() { return this.images[0]; },
     category: "Corporate",
     masterCategory: "Corporate",
     rating: 4.9,
@@ -95,7 +117,13 @@ export const products = [
     id: "custom-luxury",
     name: "Customized Luxury Box",
     price: 1299,
-    image: "/assets/hero_banner.png",
+    images: [
+      "/assets/hero_banner.png",
+      "/assets/wedding_gift.png",
+      "/assets/brass_cup.png"
+    ],
+    videos: [],
+    get image() { return this.images[0]; },
     category: "Customized",
     masterCategory: "Traditional",
     rating: 5.0,
@@ -115,7 +143,12 @@ export const products = [
     id: "brass-bowl-set",
     name: "Brass Bowl Gift Set",
     price: 299,
-    image: "/assets/brass_cup.png",
+    images: [
+      "/assets/brass_cup.png",
+      "/assets/housewarming.png"
+    ],
+    videos: [],
+    get image() { return this.images[0]; },
     category: "Brass",
     masterCategory: "Traditional",
     rating: 4.6,
@@ -134,7 +167,12 @@ export const products = [
     id: "brass-cups-artisan",
     name: "Artisan Engraved Brass Cups",
     price: 299,
-    image: "/assets/brass_cup.png",
+    images: [
+      "/assets/brass_cup.png",
+      "/assets/housewarming.png"
+    ],
+    videos: [],
+    get image() { return this.images[0]; },
     category: "Brass",
     masterCategory: "Traditional",
     rating: 4.8,
@@ -153,7 +191,12 @@ export const products = [
     id: "half-saree-gift",
     name: "Half Saree Return Gift",
     price: 349,
-    image: "/assets/half_saree.png",
+    images: [
+      "/assets/half_saree.png",
+      "/assets/wedding_gift.png"
+    ],
+    videos: [],
+    get image() { return this.images[0]; },
     category: "Wedding",
     masterCategory: "Weddings",
     rating: 4.7,
@@ -172,7 +215,12 @@ export const products = [
     id: "lavender-premium",
     name: "Custom Lavender Hamper",
     price: 899,
-    image: "/assets/hero_banner.png",
+    images: [
+      "/assets/hero_banner.png",
+      "/assets/baby_shower.png"
+    ],
+    videos: [],
+    get image() { return this.images[0]; },
     category: "Customized",
     masterCategory: "Festivals",
     rating: 4.9,
@@ -191,7 +239,12 @@ export const products = [
     id: "corporate-premium",
     name: "Premium Corporate Pack",
     price: 1499,
-    image: "/assets/corporate.png",
+    images: [
+      "/assets/corporate.png",
+      "/assets/hero_banner.png"
+    ],
+    videos: [],
+    get image() { return this.images[0]; },
     category: "Corporate",
     masterCategory: "Corporate",
     rating: 5.0,

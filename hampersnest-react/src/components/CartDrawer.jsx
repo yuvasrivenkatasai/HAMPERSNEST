@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useCart } from '../context/CartContext';
-import { USD_RATE } from '../data/products';
+import { useCurrency } from '../context/CurrencyContext';
 
 export default function CartDrawer() {
   const {
@@ -13,6 +13,7 @@ export default function CartDrawer() {
     removeFromCart,
     getWhatsappCheckoutUrl
   } = useCart();
+  const { currency, formatPrice } = useCurrency();
 
   const [checkoutStep, setCheckoutStep] = useState(1); // 1 = review items, 2 = checkout details
   const [formData, setFormData] = useState({
@@ -117,7 +118,7 @@ export default function CartDrawer() {
                     
                     <div className="cart-item-details">
                       <span className="cart-item-name">{item.name}</span>
-                      <span className="cart-item-price">₹{item.price}</span>
+                      <span className="cart-item-price">{formatPrice(item.price)}</span>
                       
                       {/* Customization Details */}
                       {(item.customizations.giftTag ||
@@ -263,9 +264,11 @@ export default function CartDrawer() {
             </div>
             <div className="cart-summary-row cart-summary-total">
               <span>Subtotal:</span>
-              <span>₹{cartTotal}</span>
+              <span>{formatPrice(cartTotal)}</span>
             </div>
-            <p className="cart-usd-total">≈ ${Math.round(cartTotal / USD_RATE)} USD</p>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '4px' }}>
+              <span className="cart-currency-badge">{currency === 'INR' ? '₹ INR' : '$ USD'}</span>
+            </div>
 
             {checkoutStep === 1 ? (
               <button

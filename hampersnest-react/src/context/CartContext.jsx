@@ -24,6 +24,7 @@ export const CartProvider = ({ children }) => {
 
   const [cartOpen, setCartOpen] = useState(false);
   const [inquiryOpen, setInquiryOpen] = useState(false);
+  const [quoteModalOpen, setQuoteModalOpen] = useState(false);
   const [selectedProductForModal, setSelectedProductForModal] = useState(null);
 
   // Sync to localStorage
@@ -152,8 +153,7 @@ export const CartProvider = ({ children }) => {
     const dateStr = userDetails.deliveryDate ? `*Required Date:* ${userDetails.deliveryDate}\n` : '';
     const notesStr = userDetails.notes ? `*Notes:* ${userDetails.notes}\n` : '';
 
-    const usdTotal = Math.round(cartTotal / 83);
-    const message = `Hi Hampers Nest!\n\nI would like to place an order / get a quote for the following hampers:\n\n${orderDetailsText}\n\n*Total Items:* ${cartCount}\n*Estimated Subtotal:* ₹${cartTotal} (≈ $${usdTotal} USD)\n\n${nameStr}${phoneStr}${eventStr}${dateStr}${notesStr}Please confirm availability and share the catalog. Thank you!`;
+    const message = `Hi Hampers Nest!\n\nI would like to place an order / get a quote for the following hampers:\n\n${orderDetailsText}\n\n*Total Items:* ${cartCount}\n*Estimated Subtotal:* ₹${cartTotal}\n\n${nameStr}${phoneStr}${eventStr}${dateStr}${notesStr}Please confirm availability and share the catalog. Thank you!`;
 
     return `https://api.whatsapp.com/send?phone=${whatsappBaseNumber}&text=${encodeURIComponent(message)}`;
   };
@@ -167,6 +167,8 @@ export const CartProvider = ({ children }) => {
         setCartOpen,
         inquiryOpen,
         setInquiryOpen,
+        quoteModalOpen,
+        setQuoteModalOpen,
         selectedProductForModal,
         setSelectedProductForModal,
         addToCart,

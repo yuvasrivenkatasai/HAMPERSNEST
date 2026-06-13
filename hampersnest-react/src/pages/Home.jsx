@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
+import { useCurrency } from '../context/CurrencyContext';
+import { products } from '../data/products';
 
 const testimonials = [
   {
@@ -23,9 +25,12 @@ const testimonials = [
   }
 ];
 
+// Get first 6 featured products dynamically
+const featuredProducts = products.filter((p) => p.isFeatured).slice(0, 6);
+
 export default function Home() {
-  const navigate = useNavigate();
-  const { addToCart } = useCart();
+  const { addToCart, setQuoteModalOpen } = useCart();
+  const { formatPrice } = useCurrency();
   const [activeSlide, setActiveSlide] = useState(0);
 
   // Testimonial slider auto-slide
@@ -61,11 +66,9 @@ export default function Home() {
     return () => observer.disconnect();
   }, []);
 
-  const handleWhatsappDirect = (e) => {
+  const openQuoteModal = (e) => {
     e.preventDefault();
-    const whatsappBaseNumber = '917989202194';
-    const welcomeText = encodeURIComponent('Hi Hampers Nest! I am interested in viewing your customized Return Gifts collection and getting a catalog.');
-    window.open(`https://api.whatsapp.com/send?phone=${whatsappBaseNumber}&text=${welcomeText}`, '_blank');
+    setQuoteModalOpen(true);
   };
 
   return (
@@ -97,7 +100,7 @@ export default function Home() {
               <Link to="/collections" className="btn-hero btn-hero-primary hero-shimmer-btn">
                 Explore Collections
               </Link>
-              <a href="#" onClick={handleWhatsappDirect} className="btn-hero btn-hero-secondary">
+              <a href="#" onClick={openQuoteModal} className="btn-hero btn-hero-secondary">
                 <i className="fa-brands fa-whatsapp"></i> WhatsApp Consultation
               </a>
             </div>
@@ -164,122 +167,33 @@ export default function Home() {
         </div>
       </section>
 
-      {/* SHOP OUR COLLECTIONS — 6 Product Cards */}
+      {/* SHOP OUR COLLECTIONS — Dynamic 6 Featured Products */}
       <section className="shop-collections-section" style={{ background: 'var(--color-lavender)' }}>
         <div className="container">
           <span className="section-subtitle">Browse By Celebration</span>
           <h2 className="section-title">Shop Our Collections</h2>
 
           <div className="shop-collections-grid reveal" style={{ marginTop: '2.5rem' }}>
-
-            {/* Product 1 — Wedding */}
-            <div className="shop-product-card">
-              <div className="shop-card-img">
-                <img src="/assets/wedding_gift.png" alt="Wedding Gift Hamper" />
+            {featuredProducts.map((product) => (
+              <div key={product.id} className="shop-product-card">
+                <div className="shop-card-img">
+                  <img
+                    src={product.images?.[0] || product.image}
+                    alt={product.name}
+                  />
+                </div>
+                <div className="shop-card-content">
+                  <h3 className="shop-card-name">{product.name}</h3>
+                  <p className="shop-card-inr">{formatPrice(product.price)}</p>
+                  <button
+                    className="shop-card-btn"
+                    onClick={() => addToCart(product, 1, { giftTag: '', wrappingStyle: 'Standard', ribbonColor: 'None' })}
+                  >
+                    <i className="fa-solid fa-cart-shopping"></i> Add To Cart
+                  </button>
+                </div>
               </div>
-              <div className="shop-card-content">
-                <h3 className="shop-card-name">Wedding Gift Hamper</h3>
-                <p className="shop-card-inr">₹499</p>
-                <p className="shop-card-usd">≈ $6 USD</p>
-                <button
-                  className="shop-card-btn"
-                  onClick={() => addToCart({ id: 'wedding-hamper', name: 'Wedding Gift Hamper', price: 499, image: '/assets/wedding_gift.png', category: 'Wedding' }, 1, { giftTag: '', wrappingStyle: 'Standard', ribbonColor: 'None' })}
-                >
-                  <i className="fa-solid fa-cart-shopping"></i> Add To Cart
-                </button>
-              </div>
-            </div>
-
-            {/* Product 2 — Baby Shower */}
-            <div className="shop-product-card">
-              <div className="shop-card-img">
-                <img src="/assets/baby_shower.png" alt="Baby Shower Hamper" />
-              </div>
-              <div className="shop-card-content">
-                <h3 className="shop-card-name">Baby Shower Hamper</h3>
-                <p className="shop-card-inr">₹399</p>
-                <p className="shop-card-usd">≈ $5 USD</p>
-                <button
-                  className="shop-card-btn"
-                  onClick={() => addToCart({ id: 'baby-shower-hamper', name: 'Baby Shower Hamper', price: 399, image: '/assets/baby_shower.png', category: 'Baby Shower' }, 1, { giftTag: '', wrappingStyle: 'Standard', ribbonColor: 'None' })}
-                >
-                  <i className="fa-solid fa-cart-shopping"></i> Add To Cart
-                </button>
-              </div>
-            </div>
-
-            {/* Product 3 — Housewarming */}
-            <div className="shop-product-card">
-              <div className="shop-card-img">
-                <img src="/assets/housewarming.png" alt="Housewarming Hamper" />
-              </div>
-              <div className="shop-card-content">
-                <h3 className="shop-card-name">Housewarming Hamper</h3>
-                <p className="shop-card-inr">₹799</p>
-                <p className="shop-card-usd">≈ $10 USD</p>
-                <button
-                  className="shop-card-btn"
-                  onClick={() => addToCart({ id: 'housewarming-hamper', name: 'Housewarming Hamper', price: 799, image: '/assets/housewarming.png', category: 'Housewarming' }, 1, { giftTag: '', wrappingStyle: 'Standard', ribbonColor: 'None' })}
-                >
-                  <i className="fa-solid fa-cart-shopping"></i> Add To Cart
-                </button>
-              </div>
-            </div>
-
-            {/* Product 4 — Corporate */}
-            <div className="shop-product-card">
-              <div className="shop-card-img">
-                <img src="/assets/corporate.png" alt="Corporate Executive Hamper" />
-              </div>
-              <div className="shop-card-content">
-                <h3 className="shop-card-name">Corporate Executive Hamper</h3>
-                <p className="shop-card-inr">₹999</p>
-                <p className="shop-card-usd">≈ $12 USD</p>
-                <button
-                  className="shop-card-btn"
-                  onClick={() => addToCart({ id: 'corporate-exec', name: 'Corporate Executive Hamper', price: 999, image: '/assets/corporate.png', category: 'Corporate' }, 1, { giftTag: '', wrappingStyle: 'Standard', ribbonColor: 'None' })}
-                >
-                  <i className="fa-solid fa-cart-shopping"></i> Add To Cart
-                </button>
-              </div>
-            </div>
-
-            {/* Product 5 — Customized Luxury */}
-            <div className="shop-product-card">
-              <div className="shop-card-img">
-                <img src="/assets/hero_banner.png" alt="Customized Luxury Box" />
-              </div>
-              <div className="shop-card-content">
-                <h3 className="shop-card-name">Customized Luxury Box</h3>
-                <p className="shop-card-inr">₹1299</p>
-                <p className="shop-card-usd">≈ $16 USD</p>
-                <button
-                  className="shop-card-btn"
-                  onClick={() => addToCart({ id: 'custom-luxury', name: 'Customized Luxury Box', price: 1299, image: '/assets/hero_banner.png', category: 'Customized' }, 1, { giftTag: '', wrappingStyle: 'Standard', ribbonColor: 'None' })}
-                >
-                  <i className="fa-solid fa-cart-shopping"></i> Add To Cart
-                </button>
-              </div>
-            </div>
-
-            {/* Product 6 — Brass Bowl */}
-            <div className="shop-product-card">
-              <div className="shop-card-img">
-                <img src="/assets/brass_cup.png" alt="Brass Bowl Gift Set" />
-              </div>
-              <div className="shop-card-content">
-                <h3 className="shop-card-name">Brass Bowl Gift Set</h3>
-                <p className="shop-card-inr">₹299</p>
-                <p className="shop-card-usd">≈ $4 USD</p>
-                <button
-                  className="shop-card-btn"
-                  onClick={() => addToCart({ id: 'brass-bowl-set', name: 'Brass Bowl Gift Set', price: 299, image: '/assets/brass_cup.png', category: 'Brass' }, 1, { giftTag: '', wrappingStyle: 'Standard', ribbonColor: 'None' })}
-                >
-                  <i className="fa-solid fa-cart-shopping"></i> Add To Cart
-                </button>
-              </div>
-            </div>
-
+            ))}
           </div>
 
           {/* Explore All Collections CTA */}
@@ -310,15 +224,13 @@ export default function Home() {
             <span className="bulk-tag">Festival Gifting</span>
             <span className="bulk-tag">Custom Branding</span>
           </div>
-          <a
-            href="https://api.whatsapp.com/send?phone=917989202194&text=Hi%20Hampers%20Nest!%20I%20am%20interested%20in%20a%20Bulk%20or%20Corporate%20Order.%20Please%20share%20details%20and%20pricing."
-            target="_blank"
-            rel="noopener noreferrer"
+          <button
+            onClick={openQuoteModal}
             className="bulk-order-btn"
           >
             <i className="fa-brands fa-whatsapp"></i>
             Request Bulk Quote
-          </a>
+          </button>
         </div>
       </section>
 
@@ -389,7 +301,7 @@ export default function Home() {
             budget, and celebration style.
           </p>
           <div className="cta-buttons">
-            <a href="#" onClick={handleWhatsappDirect} className="btn btn-primary btn-whatsapp">
+            <a href="#" onClick={openQuoteModal} className="btn btn-primary btn-whatsapp">
               <i className="fa-brands fa-whatsapp"></i> Chat On WhatsApp
             </a>
             <Link to="/contact" className="btn btn-secondary" style={{ border: '1px solid var(--color-white)', color: 'var(--color-white)' }}>

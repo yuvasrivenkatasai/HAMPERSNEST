@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import { products, MASTER_CATEGORIES, USD_RATE } from '../data/products';
+import { products, MASTER_CATEGORIES } from '../data/products';
 import { useCart } from '../context/CartContext';
+import { useCurrency } from '../context/CurrencyContext';
 
 const PAGE_SIZE = 12;
 
@@ -260,9 +261,9 @@ export default function Collections() {
   );
 }
 
-// ── Isolated collection card with USD price ──────────────────────────
+// ── Isolated collection card with currency-aware price ──────────────────────────
 function CollectionCard({ product, animationDelay, onAddToCart, onViewDetails }) {
-  const usdPrice = Math.round(product.price / USD_RATE);
+  const { formatPrice } = useCurrency();
 
   return (
     <div
@@ -277,9 +278,8 @@ function CollectionCard({ product, animationDelay, onAddToCart, onViewDetails })
           {product.name}
         </h3>
         <p className="card-price">
-          <span className="price-prefix">From </span>₹{product.price}
+          <span className="price-prefix">From </span>{formatPrice(product.price)}
         </p>
-        <p className="card-usd-price">≈ ${usdPrice} USD</p>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '4px' }}>
           <button
             onClick={onViewDetails}

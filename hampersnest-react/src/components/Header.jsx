@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Link, NavLink } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
+import { useCurrency } from '../context/CurrencyContext';
 
 export default function Header() {
   const { cartCount, setCartOpen } = useCart();
+  const { currency, toggleCurrency } = useCurrency();
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -72,10 +74,48 @@ export default function Header() {
             <NavLink to="/contact" className={({ isActive }) => isActive ? 'active' : ''} onClick={closeMobileMenu}>
               Contact
             </NavLink>
+
+            {/* Currency Switcher — inside mobile menu */}
+            <div className="currency-switcher currency-switcher-mobile">
+              <button
+                className={`currency-btn ${currency === 'INR' ? 'active' : ''}`}
+                onClick={() => toggleCurrency('INR')}
+                aria-label="Switch to INR"
+              >
+                ₹ INR
+              </button>
+              <span className="currency-divider">|</span>
+              <button
+                className={`currency-btn ${currency === 'USD' ? 'active' : ''}`}
+                onClick={() => toggleCurrency('USD')}
+                aria-label="Switch to USD"
+              >
+                $ USD
+              </button>
+            </div>
           </nav>
 
           {/* Desktop & Mobile Actions */}
           <div className="header-actions">
+            {/* Currency Switcher — desktop (top-right of navbar) */}
+            <div className="currency-switcher currency-switcher-desktop">
+              <button
+                className={`currency-btn ${currency === 'INR' ? 'active' : ''}`}
+                onClick={() => toggleCurrency('INR')}
+                aria-label="Switch to INR"
+              >
+                ₹ INR
+              </button>
+              <span className="currency-divider">|</span>
+              <button
+                className={`currency-btn ${currency === 'USD' ? 'active' : ''}`}
+                onClick={() => toggleCurrency('USD')}
+                aria-label="Switch to USD"
+              >
+                $ USD
+              </button>
+            </div>
+
             {/* Cart Icon */}
             <button
               onClick={() => {
