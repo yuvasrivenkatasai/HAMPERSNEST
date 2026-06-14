@@ -6773,4 +6773,13 @@ footer h4,
     line-height: 16px !important;
     padding: 0 4px !important;
   }
+  /* Custom Colors for the Call To Action Section */
+.cta-banner .cta-title {
+  color: #FFFFFF !important; /* <-- Change this hex code to change the main title color */
+}
+
+.cta-banner .cta-desc {
+  color: #FFFFFF !important; /* <-- Change this hex code to change the paragraph color */
+}
+
 }

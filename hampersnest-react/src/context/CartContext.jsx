@@ -41,11 +41,17 @@ export const CartProvider = ({ children }) => {
         const API_BASE = window.location.hostname === 'localhost' || window.location.hostname.endsWith('.localhost')
           ? 'http://localhost:5000'
           : '';
-        const response = await fetch(`${API_BASE}/api/products`);
+        const response = await fetch(`${API_BASE}/api/products?nolimit=true`);
         if (response.ok) {
           const data = await response.json();
-          if (data && data.length > 0) {
+          if (data && data.products && Array.isArray(data.products)) {
+            console.log(`[Audit Debug] Fetched ${data.products.length} products from Oracle DB.`);
+            setProducts(data.products);
+          } else if (data && Array.isArray(data)) {
+            console.log(`[Audit Debug] Fetched ${data.length} products from Oracle DB (Array format).`);
             setProducts(data);
+          } else {
+            console.warn('[Audit Debug] Backend returned 0 products or invalid data format.', data);
           }
         }
       } catch (err) {

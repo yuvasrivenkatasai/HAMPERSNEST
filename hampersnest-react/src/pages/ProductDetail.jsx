@@ -10,7 +10,41 @@ export default function ProductDetail() {
   const { products, addToCart, toggleWishlist, isInWishlist } = useCart();
 
   // Find current product
-  const product = products ? products.find((p) => p.id === id) : null;
+  const [localProduct, setLocalProduct] = useState(null);
+  const [loadingLocal, setLoadingLocal] = useState(true);
+
+  useEffect(() => {
+    const fetchFallback = async () => {
+      const productFromContext = products ? products.find((p) => p.id === id) : null;
+      if (productFromContext) {
+        setLocalProduct(productFromContext);
+        setLoadingLocal(false);
+        return;
+      }
+
+      setLoadingLocal(true);
+      try {
+        const API_BASE = window.location.hostname === 'localhost' || window.location.hostname.endsWith('.localhost')
+          ? 'http://localhost:5000'
+          : '';
+        const response = await fetch(`${API_BASE}/api/products/${id}`);
+        if (response.ok) {
+          const data = await response.json();
+          setLocalProduct(data);
+        } else {
+          setLocalProduct(null);
+        }
+      } catch (err) {
+        console.error(err);
+        setLocalProduct(null);
+      } finally {
+        setLoadingLocal(false);
+      }
+    };
+    fetchFallback();
+  }, [id, products]);
+
+  const product = localProduct;
 
   // Customization States
   const [giftTag, setGiftTag] = useState('');
@@ -90,6 +124,15 @@ export default function ProductDetail() {
     return () => observer.disconnect();
   }, [id]);
 
+
+  if (loadingLocal) {
+    return (
+      <div className="page-container" style={{ textAlign: 'center', padding: '10rem 2rem' }}>
+        <i className="fa-solid fa-spinner fa-spin" style={{ fontSize: '3rem', color: 'var(--color-gold)' }}></i>
+        <p style={{ marginTop: '1rem', color: 'var(--color-gray-text)' }}>Loading product details...</p>
+      </div>
+    );
+  }
 
   if (!product) {
     return (

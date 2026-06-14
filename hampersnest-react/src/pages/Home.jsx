@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useCurrency } from '../context/CurrencyContext';
-import { products } from '../data/products';
 import SEO from '../components/SEO';
 import ProductCard from '../components/ProductCard';
 
@@ -27,14 +26,13 @@ const testimonials = [
   }
 ];
 
-// Get first 6 featured products dynamically
-const featuredProducts = products.filter((p) => p.isFeatured).slice(0, 6);
-
 export default function Home() {
-  const { addToCart, setQuoteModalOpen } = useCart();
+  const { products, addToCart, setQuoteModalOpen } = useCart();
   const { formatPrice } = useCurrency();
   const [activeSlide, setActiveSlide] = useState(0);
-  const { products } = useCart();
+
+  // Get first 6 featured products dynamically from context
+  const featuredProducts = (products || []).filter((p) => p.isFeatured).slice(0, 6);
 
   // Testimonial slider auto-slide
   useEffect(() => {

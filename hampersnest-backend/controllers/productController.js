@@ -17,12 +17,15 @@ const ensureCategoryExists = async (categoryId) => {
 // @access  Public
 export const getProducts = async (req, res) => {
   try {
+    const isAll = req.query.all === 'true';
+    const noLimit = req.query.nolimit === 'true';
     const page = parseInt(req.query.page, 10) || 1;
-    const limit = parseInt(req.query.limit, 10) || 100;
-    const offset = (page - 1) * limit;
+    // Bypass limit if requesting all products for admin or storefront full catalogue
+    const limit = (isAll || noLimit) ? null : (parseInt(req.query.limit, 10) || 100);
+    const offset = (isAll || noLimit) ? null : (page - 1) * limit;
 
     const filter = {};
-    if (req.query.all !== 'true') {
+    if (!isAll) {
       filter.isActive = { [Op.ne]: false };
     }
     
@@ -39,15 +42,14 @@ export const getProducts = async (req, res) => {
     const { count, rows } = await Product.findAndCountAll({
       where: filter,
       order: [['createdAt', 'DESC']],
-      limit,
-      offset
+      ...(limit !== null && { limit, offset })
     });
 
     res.json({
       products: rows,
       total: count,
-      page,
-      totalPages: Math.ceil(count / limit)
+      page: isAll ? 1 : page,
+      totalPages: isAll ? 1 : Math.ceil(count / limit)
     });
   } catch (error) {
     res.status(500).json({ message: error.message });
