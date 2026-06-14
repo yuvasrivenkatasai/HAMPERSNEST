@@ -25,7 +25,7 @@ export default function Footer() {
             }}
           >
             <Link to="/" className="logo footer-logo" style={{ display: 'block' }}>
-              <img src="/assets/logo.png" alt="Hampers Nest Logo" style={{ height: '50px', width: 'auto' }} />
+              <img src="/assets/logo.webp" alt="Hampers Nest Logo" style={{ height: '50px', width: 'auto' }} />
             </Link>
           </div>
           <p className="footer-about-text">
@@ -62,12 +62,12 @@ export default function Footer() {
         <div className="footer-col">
           <h4 className="footer-title">Follow Us</h4>
           <div className="footer-insta-grid">
-            <div className="footer-insta-img"><img src="/assets/wedding_gift.png" alt="Instagram Showcase 1" /></div>
-            <div className="footer-insta-img"><img src="/assets/baby_shower.png" alt="Instagram Showcase 2" /></div>
-            <div className="footer-insta-img"><img src="/assets/housewarming.png" alt="Instagram Showcase 3" /></div>
-            <div className="footer-insta-img"><img src="/assets/corporate.png" alt="Instagram Showcase 4" /></div>
-            <div className="footer-insta-img"><img src="/assets/hero_banner.png" alt="Instagram Showcase 5" /></div>
-            <div className="footer-insta-img"><img src="/assets/brass_cup.png" alt="Instagram Showcase 6" /></div>
+            <div className="footer-insta-img"><img src="/assets/wedding_gift.webp" alt="Instagram Showcase 1" /></div>
+            <div className="footer-insta-img"><img src="/assets/baby_shower.webp" alt="Instagram Showcase 2" /></div>
+            <div className="footer-insta-img"><img src="/assets/housewarming.webp" alt="Instagram Showcase 3" /></div>
+            <div className="footer-insta-img"><img src="/assets/corporate.webp" alt="Instagram Showcase 4" /></div>
+            <div className="footer-insta-img"><img src="/assets/hero_banner.webp" alt="Instagram Showcase 5" /></div>
+            <div className="footer-insta-img"><img src="/assets/brass_cup.webp" alt="Instagram Showcase 6" /></div>
           </div>
         </div>
       </div>

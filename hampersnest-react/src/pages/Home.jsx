@@ -112,13 +112,13 @@ export default function Home() {
             <div className="hero-visual hero-fade" style={{ '--delay': '0.5s' }}>
               <div className="hero-image-glow" aria-hidden="true"></div>
               <div className="hero-image-frame">
-                <img src="/assets/hero_banner.png" alt="Premium luxury curated gift hamper by Hampers Nest" />
+                <img src="/assets/hero_banner.webp" alt="Premium luxury curated gift hamper by Hampers Nest" />
               </div>
               <div className="hero-product-card hero-product-wedding">
-                <img src="/assets/wedding_gift.png" alt="Elegant wedding hamper gift" />
+                <img src="/assets/wedding_gift.webp" alt="Elegant wedding hamper gift" />
               </div>
               <div className="hero-product-card hero-product-brass">
-                <img src="/assets/brass_cup.png" alt="Handcrafted brass return gift" />
+                <img src="/assets/brass_cup.webp" alt="Handcrafted brass return gift" />
               </div>
             </div>
           </div>
@@ -161,10 +161,10 @@ export default function Home() {
             </div>
 
             <div className="about-right reveal" style={{ transitionDelay: '0.2s' }}>
-              <div className="about-img-box"><img src="/assets/wedding_gift.png" alt="Premium Wedding return gift" /></div>
-              <div className="about-img-box"><img src="/assets/baby_shower.png" alt="Baby shower return gift set" /></div>
-              <div className="about-img-box"><img src="/assets/housewarming.png" alt="Housewarming gift hamper" /></div>
-              <div className="about-img-box"><img src="/assets/half_saree.png" alt="Half Saree function return gift" /></div>
+              <div className="about-img-box"><img src="/assets/wedding_gift.webp" alt="Premium Wedding return gift" /></div>
+              <div className="about-img-box"><img src="/assets/baby_shower.webp" alt="Baby shower return gift set" /></div>
+              <div className="about-img-box"><img src="/assets/housewarming.webp" alt="Housewarming gift hamper" /></div>
+              <div className="about-img-box"><img src="/assets/half_saree.webp" alt="Half Saree function return gift" /></div>
             </div>
           </div>
         </div>

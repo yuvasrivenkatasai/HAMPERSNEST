@@ -16,9 +16,9 @@ export const products = [
     name: "Wedding Gift Hamper",
     price: 499,
     images: [
-      "/assets/wedding_gift.png",
-      "/assets/hero_banner.png",
-      "/assets/brass_cup.png"
+      "/assets/wedding_gift.webp",
+      "/assets/hero_banner.webp",
+      "/assets/brass_cup.webp"
     ],
     videos: [],
     get image() { return this.images[0]; },
@@ -42,8 +42,8 @@ export const products = [
     name: "Baby Shower Hamper",
     price: 399,
     images: [
-      "/assets/baby_shower.png",
-      "/assets/hero_banner.png"
+      "/assets/baby_shower.webp",
+      "/assets/hero_banner.webp"
     ],
     videos: [],
     get image() { return this.images[0]; },
@@ -67,9 +67,9 @@ export const products = [
     name: "Housewarming Hamper",
     price: 799,
     images: [
-      "/assets/housewarming.png",
-      "/assets/brass_cup.png",
-      "/assets/hero_banner.png"
+      "/assets/housewarming.webp",
+      "/assets/brass_cup.webp",
+      "/assets/hero_banner.webp"
     ],
     videos: [],
     get image() { return this.images[0]; },
@@ -93,8 +93,8 @@ export const products = [
     name: "Corporate Executive Hamper",
     price: 999,
     images: [
-      "/assets/corporate.png",
-      "/assets/hero_banner.png"
+      "/assets/corporate.webp",
+      "/assets/hero_banner.webp"
     ],
     videos: [],
     get image() { return this.images[0]; },
@@ -118,9 +118,9 @@ export const products = [
     name: "Customized Luxury Box",
     price: 1299,
     images: [
-      "/assets/hero_banner.png",
-      "/assets/wedding_gift.png",
-      "/assets/brass_cup.png"
+      "/assets/hero_banner.webp",
+      "/assets/wedding_gift.webp",
+      "/assets/brass_cup.webp"
     ],
     videos: [],
     get image() { return this.images[0]; },
@@ -144,8 +144,8 @@ export const products = [
     name: "Brass Bowl Gift Set",
     price: 299,
     images: [
-      "/assets/brass_cup.png",
-      "/assets/housewarming.png"
+      "/assets/brass_cup.webp",
+      "/assets/housewarming.webp"
     ],
     videos: [],
     get image() { return this.images[0]; },
@@ -168,8 +168,8 @@ export const products = [
     name: "Artisan Engraved Brass Cups",
     price: 299,
     images: [
-      "/assets/brass_cup.png",
-      "/assets/housewarming.png"
+      "/assets/brass_cup.webp",
+      "/assets/housewarming.webp"
     ],
     videos: [],
     get image() { return this.images[0]; },
@@ -192,8 +192,8 @@ export const products = [
     name: "Half Saree Return Gift",
     price: 349,
     images: [
-      "/assets/half_saree.png",
-      "/assets/wedding_gift.png"
+      "/assets/half_saree.webp",
+      "/assets/wedding_gift.webp"
     ],
     videos: [],
     get image() { return this.images[0]; },
@@ -216,8 +216,8 @@ export const products = [
     name: "Custom Lavender Hamper",
     price: 899,
     images: [
-      "/assets/hero_banner.png",
-      "/assets/baby_shower.png"
+      "/assets/hero_banner.webp",
+      "/assets/baby_shower.webp"
     ],
     videos: [],
     get image() { return this.images[0]; },
@@ -240,8 +240,8 @@ export const products = [
     name: "Premium Corporate Pack",
     price: 1499,
     images: [
-      "/assets/corporate.png",
-      "/assets/hero_banner.png"
+      "/assets/corporate.webp",
+      "/assets/hero_banner.webp"
     ],
     videos: [],
     get image() { return this.images[0]; },

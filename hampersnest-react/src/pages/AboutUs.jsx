@@ -79,10 +79,10 @@ export default function AboutUs() {
             </div>
 
             <div className="about-right reveal" style={{ transitionDelay: '0.2s' }}>
-              <div className="about-img-box"><img src="/assets/wedding_gift.png" alt="Traditional brass crafting" /></div>
-              <div className="about-img-box"><img src="/assets/hero_banner.png" alt="Curated lavender box details" /></div>
-              <div className="about-img-box"><img src="/assets/housewarming.png" alt="Handcrafted diyas details" /></div>
-              <div className="about-img-box"><img src="/assets/corporate.png" alt="Premium corporate layout" /></div>
+              <div className="about-img-box"><img src="/assets/wedding_gift.webp" alt="Traditional brass crafting" /></div>
+              <div className="about-img-box"><img src="/assets/hero_banner.webp" alt="Curated lavender box details" /></div>
+              <div className="about-img-box"><img src="/assets/housewarming.webp" alt="Handcrafted diyas details" /></div>
+              <div className="about-img-box"><img src="/assets/corporate.webp" alt="Premium corporate layout" /></div>
             </div>
           </div>
         </div>
