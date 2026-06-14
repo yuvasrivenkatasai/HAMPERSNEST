@@ -52,8 +52,8 @@ export default function Header() {
         <div className="nav-container">
           {/* Logo container - image + brand name */}
           <Link to="/" className="logo-container" onClick={closeMobileMenu}>
-            <div className="logo-circle">
-              <img src="/assets/logo.webp" alt="Hampers Nest Logo" />
+            <div className="logo-wrapper">
+              <img src="/assets/hampersnest-logo.png" alt="Hampers Nest Logo" />
             </div>
           </Link>
 

@@ -322,14 +322,14 @@ header.scrolled {
   text-decoration: none;
 }
 
-.logo-circle {
+.logo-wrapper {
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-.logo-circle img {
-  height: 75px;
+.logo-wrapper img {
+  height: 50px;
   width: auto;
   object-fit: contain;
   transition: var(--transition-smooth);
@@ -342,7 +342,7 @@ header.scrolled {
     width: auto;
   }
   .nav-container {
-    height: 40px !important;
+    height:20px !important;
   }
 
   .brand-name {
@@ -490,8 +490,8 @@ header.scrolled {
    ========================================== */
 .luxury-hero {
   position: relative;
-  min-height: 100vh;
-  min-height: 100dvh;
+  min-height: 70vh; /* Changed from 100vh to reduce excess space below the banner */
+  min-height: 70dvh;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -6661,7 +6661,7 @@ footer h4,
 
   /* ── Navbar container height & grid layout ── */
   .nav-container {
-    height: 110px !important;
+    height:  90px !important;
     padding: 0 40px !important;
     max-width: 1320px !important;
     /* Expands width to move branding left */
@@ -6677,25 +6677,25 @@ footer h4,
   }
 
   /* ── Prevent Flexbox from squishing the logo to 0 width ── */
-  .logo-circle {
+  .logo-wrapper {
     flex-shrink: 0 !important;
   }
 
   /* ── Logo: Visually enlarged to bypass transparent padding ── */
-  .logo-circle img {
-    height: 40px !important;
+  .logo-wrapper img {
+    height: 41px !important; /* Made larger to accommodate the horizontal logo */
     width: auto !important;
-    transform: scale(2.0) !important;
-    transform-origin: center !important;
+    transform: scale(2.2) !important; /* Zoomed in to crop out extra padding */
+    transform-origin: left center !important;
   }
 
   /* ── Brand name: 24px, 600 weight, 1.1 line-height ── */
   .brand-name {
-    font-size: 24px !important;
+    font-size: 20px !important;
     font-weight: 600 !important;
     line-height: 1.1 !important;
     letter-spacing: -0.3px !important;
-    margin-left: 40px !important; /* Pushes text away from scaled logo */
+    margin-left: 5px !important; /* Pushes text away from scaled logo */
     flex-shrink: 0 !important;
   }
 
