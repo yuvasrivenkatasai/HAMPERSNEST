@@ -341,6 +341,9 @@ header.scrolled {
     height: 75px;
     width: auto;
   }
+  .nav-container{
+    height : 40px
+  }
 
   .brand-name {
     font-size: 28px;
