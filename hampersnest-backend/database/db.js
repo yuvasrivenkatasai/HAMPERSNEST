@@ -12,6 +12,7 @@ const dbHost = process.env.DB_HOST || 'localhost';
 const dbPort = process.env.DB_PORT || 1521;
 const dbService = process.env.DB_SERVICE_NAME || 'XEPDB1';
 const dbWalletPath = process.env.DB_WALLET_PATH;
+const dbWalletPassword = process.env.DB_WALLET_PASSWORD;
 
 let sequelize;
 
@@ -21,6 +22,9 @@ if (dbWalletPath) {
   dialectOptions.connectString = dbService;
   dialectOptions.configDir = dbWalletPath;
   dialectOptions.walletLocation = dbWalletPath;
+  if (dbWalletPassword) {
+    dialectOptions.walletPassword = dbWalletPassword;
+  }
 } else {
   if (dbService.trim().startsWith('(')) {
     dialectOptions.connectString = dbService;
