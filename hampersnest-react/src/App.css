@@ -338,11 +338,11 @@ header.scrolled {
 /* Desktop logo: 70-80px, brand 28px/600 */
 @media (min-width: 1025px) {
   .logo-circle img {
-    height: 75px;
+    height: 30px; /* Reduced to fit the small navbar */
     width: auto;
   }
-  .nav-container{
-    height : 40px
+  .nav-container {
+    height: 40px !important;
   }
 
   .brand-name {
