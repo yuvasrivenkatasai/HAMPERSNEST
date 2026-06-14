@@ -1,8 +1,19 @@
+import crypto from 'crypto';
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import rateLimit from 'express-rate-limit';
+
+dotenv.config();
+
+// Ensure JWT_SECRET is set globally before routes load
+if (!process.env.JWT_SECRET) {
+  console.error('CRITICAL WARNING: JWT_SECRET is not set in environment variables! Using a random temporary secret. All sessions will be lost on server restart.');
+  process.env.JWT_SECRET = crypto.randomBytes(32).toString('hex');
+}
+
 import { connectDB } from './database/db.js';
 import authRoutes from './routes/auth.js';
 import productRoutes from './routes/products.js';
@@ -26,6 +37,23 @@ connectDB();
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Global Rate Limiter for all API routes (Enhanced for security)
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: (req, res) => {
+    // If request contains authorization, it's an admin API - allow 1000 requests
+    if (req.headers.authorization && req.headers.authorization.startsWith('Bearer ')) {
+      return 1000;
+    }
+    // Public APIs limit to 100 requests
+    return 100;
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many requests, please try again later.' }
+});
+app.use('/api/', apiLimiter);
 
 // Register API Routes
 app.use('/api/auth', authRoutes);

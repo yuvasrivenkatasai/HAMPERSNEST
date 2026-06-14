@@ -18,6 +18,8 @@ export default function Gallery() {
     category: '',
     image: '',
     description: '',
+    fileSize: 'Unknown',
+    dimensions: 'Unknown',
     isActive: true
   });
   const [formSubmitting, setFormSubmitting] = useState(false);
@@ -49,7 +51,9 @@ export default function Gallery() {
       const data = await response.json();
       setFormData(prev => ({
         ...prev,
-        image: data.url
+        image: data.url,
+        fileSize: data.size || 'Unknown',
+        dimensions: data.dimensions || 'Unknown'
       }));
     } catch (err) {
       console.error(err);
@@ -65,7 +69,7 @@ export default function Gallery() {
         apiRequest('/api/gallery?all=true'),
         apiRequest('/api/categories')
       ]);
-      setGalleryItems(galleryData);
+      setGalleryItems(galleryData.items || galleryData.galleryItems || galleryData.data || galleryData.rows || (Array.isArray(galleryData) ? galleryData : []));
       setCategories(Array.isArray(categoriesData) ? categoriesData : []);
     } catch (err) {
       console.error(err);
@@ -80,7 +84,7 @@ export default function Gallery() {
   }, []);
 
   const getCategoryLabel = (categoryId) => {
-    return categories.find(category => category.id === categoryId)?.name || categoryId || 'Uncategorized';
+    return (Array.isArray(categories) ? categories : []).find(category => category.id === categoryId)?.name || categoryId || 'Uncategorized';
   };
 
   const openAddModal = () => {
@@ -91,6 +95,8 @@ export default function Gallery() {
       category: defaultCategory,
       image: '',
       description: '',
+      fileSize: 'Unknown',
+      dimensions: 'Unknown',
       isActive: true
     });
     setModalOpen(true);
@@ -104,6 +110,8 @@ export default function Gallery() {
       category: item.category,
       image: item.image,
       description: item.description || '',
+      fileSize: item.fileSize || 'Unknown',
+      dimensions: item.dimensions || 'Unknown',
       isActive: item.isActive !== false
     });
     setModalOpen(true);
@@ -132,6 +140,8 @@ export default function Gallery() {
       category: formData.category,
       image: formData.image,
       description: formData.description,
+      fileSize: formData.fileSize,
+      dimensions: formData.dimensions,
       isActive: formData.isActive
     };
 
@@ -142,14 +152,14 @@ export default function Gallery() {
           method: 'PUT',
           body: payload
         });
-        setGalleryItems(prev => prev.map(item => item.id === editingItem.id ? updated : item));
+        setGalleryItems(prev => (Array.isArray(prev) ? prev : []).map(item => item.id === editingItem.id ? updated : item));
       } else {
         // Add mode
         const created = await apiRequest('/api/gallery', {
           method: 'POST',
           body: payload
         });
-        setGalleryItems(prev => [created, ...prev]);
+        setGalleryItems(prev => [created, ...(Array.isArray(prev) ? prev : [])]);
       }
       setModalOpen(false);
     } catch (err) {
@@ -167,7 +177,7 @@ export default function Gallery() {
         method: 'PUT',
         body: { isActive: newStatus }
       });
-      setGalleryItems(prev => prev.map(i => i.id === item.id ? { ...i, isActive: updated.isActive } : i));
+      setGalleryItems(prev => (Array.isArray(prev) ? prev : []).map(i => i.id === item.id ? { ...i, isActive: updated.isActive } : i));
     } catch (err) {
       console.error(err);
       alert(err.message || 'Failed to update status');
@@ -176,12 +186,13 @@ export default function Gallery() {
 
   // Get distinct categories dynamically
   const categoriesList = ['All', ...new Set([
-    ...categories.map(category => category.id),
-    ...galleryItems.map(i => i.category)
+    ...(Array.isArray(categories) ? categories : []).map(category => category.id),
+    ...(Array.isArray(galleryItems) ? galleryItems : []).map(i => i.category)
   ].filter(Boolean))];
 
   // Filter items
-  const filteredItems = galleryItems.filter(item => {
+  const safeGalleryItems = Array.isArray(galleryItems) ? galleryItems : [];
+  const filteredItems = safeGalleryItems.filter(item => {
     const matchesCategory = categoryFilter === 'All' || item.category === categoryFilter;
     const categoryLabel = getCategoryLabel(item.category).toLowerCase();
     const matchesSearch = 
@@ -253,6 +264,7 @@ export default function Gallery() {
                   <th>Showcase Title</th>
                   <th>Category</th>
                   <th>Description</th>
+                  <th>Media Info</th>
                   <th>Created Date</th>
                   <th>Status</th>
                   <th>Action</th>
@@ -275,6 +287,12 @@ export default function Gallery() {
                     <td>{getCategoryLabel(item.category)}</td>
                     <td style={{ maxWidth: '300px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                       {item.description || <span style={{ color: '#aaa', fontSize: '0.8rem' }}>None</span>}
+                    </td>
+                    <td>
+                      <div style={{ fontSize: '0.8rem', color: 'var(--color-gray-text)' }}>
+                        <div><i className="fa-solid fa-weight-scale"></i> {item.fileSize || 'Unknown'}</div>
+                        <div><i className="fa-solid fa-crop-simple"></i> {item.dimensions || 'Unknown'}</div>
+                      </div>
                     </td>
                     <td>{new Date(item.createdAt).toLocaleDateString()}</td>
                     <td>
@@ -310,6 +328,17 @@ export default function Gallery() {
                           title={item.isActive !== false ? "Set as Inactive" : "Set as Active"}
                         >
                           <i className={item.isActive !== false ? "fa-solid fa-eye-slash" : "fa-solid fa-eye"}></i>
+                        </button>
+                        <button
+                          className="btn-admin-secondary"
+                          style={{ padding: '0.4rem 0.6rem', fontSize: '0.72rem' }}
+                          onClick={() => {
+                            navigator.clipboard.writeText(item.image);
+                            alert('Media URL copied to clipboard!');
+                          }}
+                          title="Copy Media URL"
+                        >
+                          <i className="fa-solid fa-link"></i>
                         </button>
                       </div>
                     </td>

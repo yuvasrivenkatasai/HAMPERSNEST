@@ -12,6 +12,19 @@ export default function Products() {
   const [editingProduct, setEditingProduct] = useState(null); // null means "Add Product" mode
   const [search, setSearch] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('All');
+  
+  // Import modal states
+  const [importModalOpen, setImportModalOpen] = useState(false);
+  const [importMode, setImportMode] = useState('CREATE_ONLY');
+  const [importFile, setImportFile] = useState(null);
+  const [importing, setImporting] = useState(false);
+  const [importResult, setImportResult] = useState(null);
+  
+  // Bulk selection states
+  const [selectedIds, setSelectedIds] = useState([]);
+  const [bulkCategory, setBulkCategory] = useState('');
+  
+  const adminRole = localStorage.getItem('adminRole') || 'Staff';
 
   const [formData, setFormData] = useState({
     name: '',
@@ -69,7 +82,7 @@ export default function Products() {
         apiRequest('/api/products?all=true'),
         apiRequest('/api/categories')
       ]);
-      setProducts(productsData);
+      setProducts(productsData.products || productsData.data || productsData.rows || (Array.isArray(productsData) ? productsData : []));
       setCategories(Array.isArray(categoriesData) ? categoriesData : []);
     } catch (err) {
       console.error(err);
@@ -101,7 +114,7 @@ export default function Products() {
   };
 
   const getCategoryLabel = (categoryId) => {
-    return categories.find(category => category.id === categoryId)?.name || categoryId || 'Uncategorized';
+    return (Array.isArray(categories) ? categories : []).find(category => category.id === categoryId)?.name || categoryId || 'Uncategorized';
   };
 
   const openEditModal = (product) => {
@@ -181,14 +194,14 @@ export default function Products() {
           method: 'PUT',
           body: payload
         });
-        setProducts(prev => prev.map(p => p.id === editingProduct.id ? updated : p));
+        setProducts(prev => (Array.isArray(prev) ? prev : []).map(p => p.id === editingProduct.id ? updated : p));
       } else {
         // Add mode
         const created = await apiRequest('/api/products', {
           method: 'POST',
           body: payload
         });
-        setProducts(prev => [created, ...prev]);
+        setProducts(prev => [created, ...(Array.isArray(prev) ? prev : [])]);
       }
       setModalOpen(false);
     } catch (err) {
@@ -206,7 +219,7 @@ export default function Products() {
         method: 'PUT',
         body: { isActive: newStatus }
       });
-      setProducts(prev => prev.map(p => p.id === product.id ? { ...p, isActive: updated.isActive } : p));
+      setProducts(prev => (Array.isArray(prev) ? prev : []).map(p => p.id === product.id ? { ...p, isActive: updated.isActive } : p));
     } catch (err) {
       console.error(err);
       alert(err.message || 'Failed to update status');
@@ -215,12 +228,13 @@ export default function Products() {
 
   // Get distinct categories dynamically
   const categoriesList = ['All', ...new Set([
-    ...categories.map(category => category.id),
-    ...products.map(p => p.category)
+    ...(Array.isArray(categories) ? categories : []).map(category => category.id),
+    ...(Array.isArray(products) ? products : []).map(p => p.category)
   ].filter(Boolean))];
 
   // Filter products
-  const filteredProducts = products.filter(product => {
+  const safeProducts = Array.isArray(products) ? products : [];
+  const filteredProducts = safeProducts.filter(product => {
     const matchesCategory = categoryFilter === 'All' || product.category === categoryFilter;
     const categoryLabel = getCategoryLabel(product.category).toLowerCase();
     const matchesSearch = 
@@ -228,6 +242,47 @@ export default function Products() {
       categoryLabel.includes(search.toLowerCase());
     return matchesCategory && matchesSearch;
   });
+
+  // Bulk actions handlers
+  const handleSelectAll = (e) => {
+    if (e.target.checked) {
+      setSelectedIds(filteredProducts.map(p => p.id));
+    } else {
+      setSelectedIds([]);
+    }
+  };
+
+  const handleSelectOne = (id) => {
+    setSelectedIds(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]);
+  };
+
+  const executeBulkUpdate = async (updates) => {
+    if (!window.confirm(`Apply these changes to ${selectedIds.length} products?`)) return;
+    try {
+      await apiRequest('/api/products/bulk-update', {
+        method: 'POST',
+        body: { ids: selectedIds, updates }
+      });
+      fetchProducts();
+      setSelectedIds([]);
+    } catch (err) {
+      alert('Bulk update failed: ' + err.message);
+    }
+  };
+
+  const executeBulkDelete = async () => {
+    if (!window.confirm(`Are you sure you want to delete ${selectedIds.length} products? This cannot be undone.`)) return;
+    try {
+      await apiRequest('/api/products/bulk-delete', {
+        method: 'POST',
+        body: { ids: selectedIds }
+      });
+      fetchProducts();
+      setSelectedIds([]);
+    } catch (err) {
+      alert('Bulk delete failed: ' + err.message);
+    }
+  };
 
   if (loading) {
     return (
@@ -269,15 +324,130 @@ export default function Products() {
           </div>
         </div>
 
-        {/* Add Product Button */}
-        <button className="btn-admin" onClick={openAddModal}>
-          <i className="fa-solid fa-plus"></i> Add New Hamper
-        </button>
+        {/* Export / Import / Add Product Buttons */}
+        <div style={{ display: 'flex', gap: '10px' }}>
+          {(adminRole === 'Super Admin' || adminRole === 'Manager') && (
+            <>
+              <button className="btn-admin-secondary" onClick={() => window.open(`${API_BASE}/api/products/export/csv`, '_blank')}>
+                <i className="fa-solid fa-file-csv"></i> Export CSV
+              </button>
+              <button className="btn-admin-secondary" onClick={() => window.open(`${API_BASE}/api/products/export/excel`, '_blank')}>
+                <i className="fa-solid fa-file-excel"></i> Export Excel
+              </button>
+              <button className="btn-admin-secondary" onClick={() => setImportModalOpen(true)}>
+                <i className="fa-solid fa-file-import"></i> Import CSV
+              </button>
+              <button className="btn-admin" onClick={openAddModal}>
+                <i className="fa-solid fa-plus"></i> Add New Hamper
+              </button>
+            </>
+          )}
+        </div>
       </div>
+
+      {/* IMPORT MODAL */}
+      {importModalOpen && (
+        <div className="modal-backdrop" onClick={(e) => e.target.classList.contains('modal-backdrop') && setImportModalOpen(false)}>
+          <div className="modal-content" style={{ maxWidth: '500px' }}>
+            <div className="modal-header">
+              <h3>Import Products via CSV</h3>
+              <button className="modal-close" onClick={() => { setImportModalOpen(false); setImportResult(null); }}>
+                <i className="fa-solid fa-xmark"></i>
+              </button>
+            </div>
+            <div className="modal-body">
+              {!importResult ? (
+                <>
+                  <p style={{ fontSize: '0.9rem', color: 'var(--color-gray-text)', marginBottom: '15px' }}>
+                    Upload a CSV file to import products. Download the <a href={`${API_BASE}/api/products/template/csv`} style={{ color: 'var(--color-purple)' }}>template here</a>.
+                  </p>
+                  <div className="form-group">
+                    <label className="form-label">Import Mode</label>
+                    <select className="form-select" value={importMode} onChange={(e) => setImportMode(e.target.value)}>
+                      <option value="CREATE_ONLY">Create New Only (Skip Existing SKUs)</option>
+                      <option value="UPDATE_ONLY">Update Existing (Skip New SKUs)</option>
+                      <option value="CREATE_UPDATE">Create + Update</option>
+                    </select>
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">CSV File</label>
+                    <input type="file" accept=".csv" className="form-input" onChange={(e) => setImportFile(e.target.files[0])} style={{ padding: '8px' }} />
+                  </div>
+                </>
+              ) : (
+                <div style={{ padding: '20px', background: '#F3E8FF', borderRadius: '8px', textAlign: 'center' }}>
+                  <i className="fa-solid fa-circle-check" style={{ color: 'var(--color-purple)', fontSize: '2rem', marginBottom: '10px' }}></i>
+                  <h4>Import Complete</h4>
+                  <ul style={{ listStyle: 'none', padding: 0, marginTop: '15px', display: 'grid', gap: '10px' }}>
+                    <li><strong>Total Rows Processed:</strong> {importResult.totalRows}</li>
+                    <li style={{ color: '#16A34A' }}><strong>Created:</strong> {importResult.createdCount}</li>
+                    <li style={{ color: '#2563EB' }}><strong>Updated:</strong> {importResult.updatedCount}</li>
+                    <li style={{ color: '#6B7280' }}><strong>Skipped:</strong> {importResult.skippedCount}</li>
+                    <li style={{ color: '#DC2626' }}><strong>Errors:</strong> {importResult.errorCount}</li>
+                  </ul>
+                </div>
+              )}
+            </div>
+            <div className="modal-footer">
+              {!importResult ? (
+                <>
+                  <button className="btn-admin-secondary" onClick={() => setImportModalOpen(false)}>Cancel</button>
+                  <button className="btn-admin" disabled={importing || !importFile} onClick={async () => {
+                    setImporting(true);
+                    const formData = new FormData();
+                    formData.append('file', importFile);
+                    formData.append('mode', importMode);
+                    try {
+                      const res = await apiRequest('/api/products/import/csv', { method: 'POST', body: formData });
+                      setImportResult(res);
+                      fetchProducts();
+                    } catch (err) {
+                      alert(err.message);
+                    } finally {
+                      setImporting(false);
+                    }
+                  }}>
+                    {importing ? 'Importing...' : 'Start Import'}
+                  </button>
+                </>
+              ) : (
+                <button className="btn-admin" onClick={() => { setImportModalOpen(false); setImportResult(null); }}>Done</button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {error && (
         <div style={{ background: '#FFF5F5', color: '#E53E3E', padding: '1rem', borderRadius: '6px', marginBottom: '1rem', textAlign: 'center' }}>
           {error}
+        </div>
+      )}
+
+      {/* Floating Bulk Action Bar */}
+      {selectedIds.length > 0 && (
+        <div style={{
+          position: 'fixed', bottom: '20px', left: '50%', transform: 'translateX(-50%)',
+          background: '#fff', padding: '15px 25px', borderRadius: '8px', boxShadow: '0 10px 25px rgba(0,0,0,0.15)',
+          display: 'flex', gap: '15px', alignItems: 'center', zIndex: 1000, border: '1px solid var(--color-purple)'
+        }}>
+          <span style={{ fontWeight: 'bold', color: 'var(--color-purple)' }}>{selectedIds.length} Selected</span>
+          <div style={{ height: '24px', width: '1px', background: '#ccc' }}></div>
+          <button className="btn-admin-secondary" onClick={() => executeBulkUpdate({ isActive: true })}>Activate</button>
+          <button className="btn-admin-secondary" onClick={() => executeBulkUpdate({ isActive: false })}>Deactivate</button>
+          <button className="btn-admin-secondary" onClick={() => executeBulkUpdate({ isFeatured: true })}>Feature</button>
+          <button className="btn-admin-secondary" onClick={() => executeBulkUpdate({ isFeatured: false })}>Unfeature</button>
+          <div style={{ display: 'flex', gap: '5px' }}>
+            <select className="form-select" value={bulkCategory} onChange={e => setBulkCategory(e.target.value)} style={{ padding: '0.4rem' }}>
+              <option value="">Move to Category...</option>
+              {categories.map(cat => <option key={cat.id} value={cat.id}>{cat.name}</option>)}
+            </select>
+            <button className="btn-admin-secondary" disabled={!bulkCategory} onClick={() => executeBulkUpdate({ category: bulkCategory })}>Apply</button>
+          </div>
+          <div style={{ height: '24px', width: '1px', background: '#ccc' }}></div>
+          {adminRole === 'Super Admin' && (
+            <button className="btn-admin" style={{ background: '#dc3545', color: '#fff' }} onClick={executeBulkDelete}><i className="fa-solid fa-trash"></i> Delete</button>
+          )}
         </div>
       )}
 
@@ -288,6 +458,13 @@ export default function Products() {
             <table className="data-table">
               <thead>
                 <tr>
+                  <th style={{ width: '40px' }}>
+                    <input 
+                      type="checkbox" 
+                      checked={filteredProducts.length > 0 && selectedIds.length === filteredProducts.length}
+                      onChange={handleSelectAll} 
+                    />
+                  </th>
                   <th>Thumbnail</th>
                   <th>Hamper Name</th>
                   <th>Category</th>
@@ -306,7 +483,14 @@ export default function Products() {
                     ? ((product.clicks || 0) / product.views * 100).toFixed(1)
                     : 0;
                   return (
-                    <tr key={product.id}>
+                    <tr key={product.id} style={{ background: selectedIds.includes(product.id) ? '#F3E8FF' : 'transparent' }}>
+                      <td>
+                        <input 
+                          type="checkbox" 
+                          checked={selectedIds.includes(product.id)}
+                          onChange={() => handleSelectOne(product.id)} 
+                        />
+                      </td>
                       <td>
                         {/* Show image or placeholder circle */}
                         <img 
@@ -370,27 +554,31 @@ export default function Products() {
                       </td>
                       <td>
                         <div style={{ display: 'flex', gap: '6px' }}>
-                          <button
-                            className="btn-admin-secondary"
-                            style={{ padding: '0.4rem 0.6rem', fontSize: '0.72rem' }}
-                            onClick={() => openEditModal(product)}
-                            title="Edit Product"
-                          >
-                            <i className="fa-solid fa-pen-to-square"></i>
-                          </button>
-                          <button
-                            className="btn-admin"
-                            style={{ 
-                              padding: '0.4rem 0.6rem', 
-                              fontSize: '0.72rem', 
-                              background: product.isActive !== false ? 'var(--color-purple)' : 'var(--color-gold)',
-                              color: '#fff'
-                            }}
-                            onClick={() => handleToggleProductActive(product)}
-                            title={product.isActive !== false ? "Set as Inactive" : "Set as Active"}
-                          >
-                            <i className={product.isActive !== false ? "fa-solid fa-eye-slash" : "fa-solid fa-eye"}></i>
-                          </button>
+                          {(adminRole === 'Super Admin' || adminRole === 'Manager') && (
+                            <>
+                              <button
+                                className="btn-admin-secondary"
+                                style={{ padding: '0.4rem 0.6rem', fontSize: '0.72rem' }}
+                                onClick={() => openEditModal(product)}
+                                title="Edit Product"
+                              >
+                                <i className="fa-solid fa-pen-to-square"></i>
+                              </button>
+                              <button
+                                className="btn-admin"
+                                style={{ 
+                                  padding: '0.4rem 0.6rem', 
+                                  fontSize: '0.72rem', 
+                                  background: product.isActive !== false ? 'var(--color-purple)' : 'var(--color-gold)',
+                                  color: '#fff'
+                                }}
+                                onClick={() => handleToggleProductActive(product)}
+                                title={product.isActive !== false ? "Set as Inactive" : "Set as Active"}
+                              >
+                                <i className={product.isActive !== false ? "fa-solid fa-eye-slash" : "fa-solid fa-eye"}></i>
+                              </button>
+                            </>
+                          )}
                         </div>
                       </td>
                     </tr>

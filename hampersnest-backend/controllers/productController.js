@@ -12,23 +12,49 @@ const ensureCategoryExists = async (categoryId) => {
   return category;
 };
 
-// @desc    Get all products
+// @desc    Get all products (Paginated & Filtered)
 // @route   GET /api/products
 // @access  Public
 export const getProducts = async (req, res) => {
   try {
-    const filter = req.query.all === 'true' ? {} : { isActive: { [Op.ne]: false } };
-    const products = await Product.findAll({
+    const page = parseInt(req.query.page, 10) || 1;
+    const limit = parseInt(req.query.limit, 10) || 100;
+    const offset = (page - 1) * limit;
+
+    const filter = {};
+    if (req.query.all !== 'true') {
+      filter.isActive = { [Op.ne]: false };
+    }
+    
+    // Advanced filtering
+    if (req.query.category) filter.category = req.query.category;
+    if (req.query.featured === 'true') filter.isFeatured = true;
+    if (req.query.search) {
+      filter.name = { [Op.like]: `%${req.query.search}%` };
+    }
+    if (req.query.lowStock === 'true') {
+      filter.stockQuantity = { [Op.lte]: 5 }; // Define low stock threshold
+    }
+
+    const { count, rows } = await Product.findAndCountAll({
       where: filter,
-      order: [['createdAt', 'DESC']]
+      order: [['createdAt', 'DESC']],
+      limit,
+      offset
     });
-    res.json(products);
+
+    res.json({
+      products: rows,
+      total: count,
+      page,
+      totalPages: Math.ceil(count / limit)
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
 
-// @desc    Get product by string ID
+// @desc    Get product by ID
 // @route   GET /api/products/:id
 // @access  Public
 export const getProductById = async (req, res) => {
@@ -48,7 +74,7 @@ export const getProductById = async (req, res) => {
 // @route   POST /api/products
 // @access  Private/Admin
 export const createProduct = async (req, res) => {
-  const { name, price, image, category, masterCategory, rating, description, details, customization, shipping, isFeatured, originalPrice, isActive } = req.body;
+  const { name, sku, price, discountPrice, originalPrice, image, videoUrls, category, subCategory, occasion, tags, stockQuantity, masterCategory, rating, description, shortDescription, details, customization, shipping, isFeatured, isActive } = req.body;
 
   if (!name || !price || !category) {
     return res.status(400).json({ message: 'Please provide name, price, and category' });
@@ -62,17 +88,25 @@ export const createProduct = async (req, res) => {
     const createdProduct = await Product.create({
       id: uniqueId,
       name,
+      sku: sku || uniqueId.substring(0, 8).toUpperCase(),
       price: Number(price),
+      discountPrice: discountPrice ? Number(discountPrice) : 0,
+      originalPrice: originalPrice ? Number(originalPrice) : 0,
       image: image || '/assets/hero_banner.png',
+      videoUrls: Array.isArray(videoUrls) ? videoUrls : [],
       category,
       masterCategory: masterCategory || category,
+      subCategory: subCategory || '',
+      occasion: occasion || '',
+      tags: Array.isArray(tags) ? tags : [],
+      stockQuantity: stockQuantity !== undefined ? Number(stockQuantity) : 0,
       rating: rating ? Number(rating) : 4.5,
       description: description || '',
+      shortDescription: shortDescription || '',
       details: Array.isArray(details) ? details : [],
       customization: Array.isArray(customization) ? customization : [],
       shipping: Array.isArray(shipping) ? shipping : [],
       isFeatured: !!isFeatured,
-      originalPrice: originalPrice ? Number(originalPrice) : 0,
       isActive: isActive !== undefined ? !!isActive : true
     });
 
@@ -86,33 +120,27 @@ export const createProduct = async (req, res) => {
 // @route   PUT /api/products/:id
 // @access  Private/Admin
 export const updateProduct = async (req, res) => {
-  const { name, price, image, category, masterCategory, rating, description, details, customization, shipping, isFeatured, originalPrice, isActive } = req.body;
-
   try {
     const product = await Product.findOne({ where: { id: req.params.id } });
 
     if (product) {
-      if (category !== undefined) {
-        await ensureCategoryExists(category);
+      if (req.body.category !== undefined) {
+        await ensureCategoryExists(req.body.category);
       }
 
-      product.name = name !== undefined ? name : product.name;
-      product.price = price !== undefined ? Number(price) : product.price;
-      product.image = image !== undefined ? image : product.image;
-      product.category = category !== undefined ? category : product.category;
-      product.masterCategory = masterCategory !== undefined 
-        ? masterCategory 
-        : (category !== undefined ? category : product.masterCategory);
-      product.rating = rating !== undefined ? Number(rating) : product.rating;
-      product.description = description !== undefined ? description : product.description;
-      product.details = details !== undefined ? (Array.isArray(details) ? details : []) : product.details;
-      product.customization = customization !== undefined ? (Array.isArray(customization) ? customization : []) : product.customization;
-      product.shipping = shipping !== undefined ? (Array.isArray(shipping) ? shipping : []) : product.shipping;
-      product.isFeatured = isFeatured !== undefined ? !!isFeatured : product.isFeatured;
-      product.originalPrice = originalPrice !== undefined ? Number(originalPrice) : product.originalPrice;
-      product.isActive = isActive !== undefined ? !!isActive : product.isActive;
+      // Update fields if provided
+      const fields = [
+        'name', 'sku', 'price', 'discountPrice', 'originalPrice', 'image', 'videoUrls',
+        'category', 'masterCategory', 'subCategory', 'occasion', 'tags', 'stockQuantity',
+        'rating', 'description', 'shortDescription', 'details', 'customization', 'shipping',
+        'isFeatured', 'isActive'
+      ];
 
-
+      fields.forEach(field => {
+        if (req.body[field] !== undefined) {
+          product[field] = req.body[field];
+        }
+      });
 
       const updatedProduct = await product.save();
       res.json(updatedProduct);
@@ -142,7 +170,65 @@ export const deleteProduct = async (req, res) => {
   }
 };
 
-// @desc    Increment product views count
+// @desc    Bulk delete products
+// @route   POST /api/products/bulk-delete
+// @access  Private/Admin
+export const bulkDeleteProducts = async (req, res) => {
+  const { ids } = req.body;
+  if (!Array.isArray(ids) || ids.length === 0) {
+    return res.status(400).json({ message: 'Please provide an array of product IDs' });
+  }
+  try {
+    await Product.destroy({ where: { id: { [Op.in]: ids } } });
+    res.json({ message: 'Products deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// @desc    Bulk update products
+// @route   POST /api/products/bulk-update
+// @access  Private/Admin
+export const bulkUpdateProducts = async (req, res) => {
+  const { ids, updates } = req.body;
+  if (!Array.isArray(ids) || ids.length === 0 || !updates) {
+    return res.status(400).json({ message: 'Please provide IDs and updates object' });
+  }
+  try {
+    await Product.update(updates, { where: { id: { [Op.in]: ids } } });
+    res.json({ message: 'Products updated successfully' });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// @desc    Duplicate a product
+// @route   POST /api/products/:id/duplicate
+// @access  Private/Admin
+export const duplicateProduct = async (req, res) => {
+  try {
+    const product = await Product.findOne({ where: { id: req.params.id } });
+    if (!product) return res.status(404).json({ message: 'Product not found' });
+    
+    const uniqueId = crypto.randomUUID();
+    const productData = product.get({ plain: true });
+    
+    delete productData.id;
+    delete productData.createdAt;
+    delete productData.updatedAt;
+    
+    productData.id = uniqueId;
+    productData.name = `${productData.name} (Copy)`;
+    productData.sku = `${productData.sku}-COPY`;
+    
+    const duplicatedProduct = await Product.create(productData);
+    res.status(201).json(duplicatedProduct);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// @desc    Increment product views
 // @route   POST /api/products/:id/view
 // @access  Public
 export const incrementProductViews = async (req, res) => {
@@ -160,7 +246,7 @@ export const incrementProductViews = async (req, res) => {
   }
 };
 
-// @desc    Increment product clicks count
+// @desc    Increment product clicks
 // @route   POST /api/products/:id/click
 // @access  Public
 export const incrementProductClicks = async (req, res) => {

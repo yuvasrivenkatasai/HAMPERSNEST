@@ -43,7 +43,7 @@ export const getGalleryItems = async (req, res) => {
 // @route   POST /api/gallery
 // @access  Private/Admin
 export const createGalleryItem = async (req, res) => {
-  const { title, image, category, description, isActive } = req.body;
+  const { title, image, category, description, isActive, fileSize, dimensions, mediaType, width, height } = req.body;
 
   if (!title || !image || !category) {
     return res.status(400).json({ message: 'Please provide title, image, and category' });
@@ -66,6 +66,11 @@ export const createGalleryItem = async (req, res) => {
       image,
       category,
       description: description || '',
+      fileSize: fileSize || 'Unknown',
+      dimensions: dimensions || 'Unknown',
+      mediaType: mediaType || 'Image',
+      width: width || 0,
+      height: height || 0,
       isActive: isActive !== undefined ? !!isActive : true
     });
 
@@ -79,7 +84,7 @@ export const createGalleryItem = async (req, res) => {
 // @route   PUT /api/gallery/:id
 // @access  Private/Admin
 export const updateGalleryItem = async (req, res) => {
-  const { title, image, category, description, isActive } = req.body;
+  const { title, image, category, description, isActive, fileSize, dimensions, mediaType, width, height } = req.body;
 
   try {
     const item = await GalleryItem.findOne({ where: { id: req.params.id } });
@@ -94,6 +99,12 @@ export const updateGalleryItem = async (req, res) => {
       item.category = category !== undefined ? category : item.category;
       item.description = description !== undefined ? description : item.description;
       item.isActive = isActive !== undefined ? !!isActive : item.isActive;
+      
+      if (fileSize !== undefined) item.fileSize = fileSize;
+      if (dimensions !== undefined) item.dimensions = dimensions;
+      if (mediaType !== undefined) item.mediaType = mediaType;
+      if (width !== undefined) item.width = width;
+      if (height !== undefined) item.height = height;
 
       if (title !== undefined && slugify(title) !== req.params.id) {
         let baseId = slugify(title);

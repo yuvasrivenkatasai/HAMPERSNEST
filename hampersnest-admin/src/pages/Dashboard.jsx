@@ -1,6 +1,33 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { apiRequest } from '../utils/api';
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  BarElement,
+  ArcElement,
+  Title,
+  Tooltip,
+  Legend,
+  Filler
+} from 'chart.js';
+import { Line, Doughnut, Bar } from 'react-chartjs-2';
+
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  BarElement,
+  ArcElement,
+  Title,
+  Tooltip,
+  Legend,
+  Filler
+);
 
 export default function Dashboard() {
   const [data, setData] = useState(null);
@@ -26,7 +53,7 @@ export default function Dashboard() {
     return (
       <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '60vh', flexDirection: 'column', gap: '15px' }}>
         <i className="fa-solid fa-spinner fa-spin" style={{ fontSize: '2.5rem', color: 'var(--color-gold)' }}></i>
-        <p style={{ color: 'var(--color-gray-text)', fontSize: '0.9rem' }}>Loading dashboard analytics...</p>
+        <p style={{ color: 'var(--color-gray-text)', fontSize: '0.9rem' }}>Loading executive analytics...</p>
       </div>
     );
   }
@@ -41,24 +68,67 @@ export default function Dashboard() {
     );
   }
 
-  const { stats, salesByCategory, recentOrders, topViewedProducts } = data;
+  const { stats, statusCounts, salesByCategory, monthlyRevenue, inquiryTrends, topSellingProducts, lowStockProducts, recentOrders } = data;
 
-  // Find the highest category sale value to scale the progress charts
-  const maxCategorySale = salesByCategory && salesByCategory.length > 0 
-    ? Math.max(...salesByCategory.map(c => c.value)) 
-    : 1;
+  // Chart Configurations
+  const revenueChartData = {
+    labels: (Array.isArray(monthlyRevenue) ? monthlyRevenue : []).map(m => m.month),
+    datasets: [
+      {
+        label: 'Monthly Revenue (₹)',
+        data: (Array.isArray(monthlyRevenue) ? monthlyRevenue : []).map(m => m.revenue),
+        borderColor: '#4A1D5F',
+        backgroundColor: 'rgba(74, 29, 95, 0.1)',
+        fill: true,
+        tension: 0.4
+      }
+    ]
+  };
 
-  const shopConversionRate = stats.totalViews > 0
-    ? ((stats.totalClicks / stats.totalViews) * 100).toFixed(1)
-    : 0;
+  const revenueOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false }
+    },
+    scales: {
+      y: { beginAtZero: true }
+    }
+  };
+
+  const categoryChartData = {
+    labels: (Array.isArray(salesByCategory) ? salesByCategory : []).map(c => c.category),
+    datasets: [
+      {
+        data: (Array.isArray(salesByCategory) ? salesByCategory : []).map(c => c.value),
+        backgroundColor: [
+          '#4A1D5F',
+          '#C8A96B',
+          '#A8894A',
+          '#6B3480',
+          '#3A1649',
+          '#E8D5A8'
+        ],
+        borderWidth: 0
+      }
+    ]
+  };
+
+  const categoryOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { position: 'right' }
+    }
+  };
 
   return (
-    <div>
-      {/* 1. Core Financial/Order Statistics Grid */}
-      <div className="stats-grid" style={{ marginBottom: '1.2rem' }}>
+    <div style={{ paddingBottom: '2rem' }}>
+      {/* KPI Cards Grid */}
+      <div className="stats-grid" style={{ marginBottom: '1.5rem' }}>
         <div className="stat-card revenue">
           <div className="stat-info">
-            <h3>Revenue (Confirmed)</h3>
+            <h3>Total Revenue</h3>
             <div className="stat-value">₹{(stats.totalRevenue || 0).toLocaleString()}</div>
           </div>
           <div className="stat-icon">
@@ -76,6 +146,29 @@ export default function Dashboard() {
           </div>
         </div>
 
+        <div className="stat-card" style={{ borderLeftColor: 'var(--color-gold-dark)' }}>
+          <div className="stat-info">
+            <h3>Active Products</h3>
+            <div className="stat-value">{stats.activeProducts} / {stats.totalProducts}</div>
+          </div>
+          <div className="stat-icon" style={{ background: 'rgba(200, 169, 107, 0.1)', color: 'var(--color-gold-dark)' }}>
+            <i className="fa-solid fa-gift"></i>
+          </div>
+        </div>
+
+        <div className="stat-card inquiries">
+          <div className="stat-info">
+            <h3>Total Inquiries</h3>
+            <div className="stat-value">{stats.totalInquiries}</div>
+          </div>
+          <div className="stat-icon">
+            <i className="fa-solid fa-envelope-open-text"></i>
+          </div>
+        </div>
+      </div>
+
+      {/* Secondary KPI Cards */}
+      <div className="stats-grid" style={{ marginBottom: '2rem' }}>
         <div className="stat-card pending">
           <div className="stat-info">
             <h3>Pending Orders</h3>
@@ -85,196 +178,162 @@ export default function Dashboard() {
             <i className="fa-solid fa-clock-rotate-left"></i>
           </div>
         </div>
-
-        <div className="stat-card inquiries">
-          <div className="stat-info">
-            <h3>Customer Inquiries</h3>
-            <div className="stat-value">{stats.totalInquiries}</div>
-          </div>
-          <div className="stat-icon">
-            <i className="fa-solid fa-envelope-open-text"></i>
-          </div>
-        </div>
-      </div>
-
-      {/* Traffic & Conversion Analytics Grid */}
-      <div className="stats-grid" style={{ marginBottom: '2rem' }}>
-        <div className="stat-card" style={{ borderLeftColor: 'var(--color-gold-dark)' }}>
-          <div className="stat-info">
-            <h3>Total Product Views</h3>
-            <div className="stat-value">{stats.totalViews || 0}</div>
-          </div>
-          <div className="stat-icon" style={{ background: 'rgba(200, 169, 107, 0.1)', color: 'var(--color-gold-dark)' }}>
-            <i className="fa-regular fa-eye"></i>
-          </div>
-        </div>
-
-        <div className="stat-card" style={{ borderLeftColor: 'var(--color-purple)' }}>
-          <div className="stat-info">
-            <h3>Total Cart Clicks</h3>
-            <div className="stat-value">{stats.totalClicks || 0}</div>
-          </div>
-          <div className="stat-icon" style={{ background: 'rgba(74, 29, 95, 0.08)', color: 'var(--color-purple)' }}>
-            <i className="fa-solid fa-arrow-pointer"></i>
-          </div>
-        </div>
-
+        
         <div className="stat-card" style={{ borderLeftColor: 'var(--color-delivered)' }}>
           <div className="stat-info">
-            <h3>Conversion Rate</h3>
-            <div className="stat-value">{shopConversionRate}%</div>
+            <h3>Completed Orders</h3>
+            <div className="stat-value">{stats.completedOrders}</div>
           </div>
           <div className="stat-icon" style={{ background: 'rgba(25, 135, 84, 0.1)', color: 'var(--color-delivered)' }}>
+            <i className="fa-solid fa-check-double"></i>
+          </div>
+        </div>
+
+        <div className="stat-card" style={{ borderLeftColor: '#6C757D' }}>
+          <div className="stat-info">
+            <h3>Conversion Rate</h3>
+            <div className="stat-value">{stats.conversionRate}%</div>
+          </div>
+          <div className="stat-icon" style={{ background: '#F8F9FA', color: '#6C757D' }}>
             <i className="fa-solid fa-chart-line"></i>
           </div>
         </div>
+      </div>
 
-        <div className="stat-card" style={{ borderLeftColor: '#6C757D', opacity: 0.85 }}>
-          <div className="stat-info">
-            <h3>Average Order Value</h3>
-            <div className="stat-value">
-              ₹{stats.totalOrders > 0 ? Math.round(stats.totalRevenue / stats.totalOrders).toLocaleString() : 0}
-            </div>
+      {/* Charts Grid */}
+      <div className="dashboard-grid" style={{ marginBottom: '2rem' }}>
+        <div className="dashboard-panel">
+          <div className="panel-header">
+            <h3>Revenue Trend</h3>
           </div>
-          <div className="stat-icon" style={{ background: '#F8F9FA', color: '#6C757D' }}>
-            <i className="fa-solid fa-calculator"></i>
+          <div style={{ height: '300px' }}>
+            {monthlyRevenue && monthlyRevenue.length > 0 ? (
+              <Line data={revenueChartData} options={revenueOptions} />
+            ) : (
+              <div className="empty-state">No revenue data available</div>
+            )}
+          </div>
+        </div>
+
+        <div className="dashboard-panel">
+          <div className="panel-header">
+            <h3>Sales By Category</h3>
+          </div>
+          <div style={{ height: '300px' }}>
+            {salesByCategory && salesByCategory.length > 0 ? (
+              <Doughnut data={categoryChartData} options={categoryOptions} />
+            ) : (
+              <div className="empty-state">No category data available</div>
+            )}
           </div>
         </div>
       </div>
 
-      {/* 2. Main Dashboard Breakdown Layout */}
+      {/* Lists Grid */}
       <div className="dashboard-grid">
-        
-        {/* Recent Orders List */}
-        <div className="dashboard-panel">
-          <div className="panel-header">
-            <h3>Recent Orders</h3>
-            <Link to="/orders" className="btn-text">View All Orders <i className="fa-solid fa-angle-right"></i></Link>
-          </div>
-
-          <div className="table-responsive">
-            {recentOrders && recentOrders.length > 0 ? (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+          <div className="dashboard-panel">
+            <div className="panel-header">
+              <h3>Recent Orders</h3>
+              <Link to="/orders" className="btn-text">View All <i className="fa-solid fa-angle-right"></i></Link>
+            </div>
+            <div className="table-responsive">
               <table className="data-table">
                 <thead>
                   <tr>
                     <th>Order ID</th>
                     <th>Customer</th>
-                    <th>Celebration</th>
-                    <th>Total</th>
                     <th>Status</th>
-                    <th>Date</th>
+                    <th>Total</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {recentOrders.map((order) => (
-                    <tr key={order.orderId}>
-                      <td className="font-semibold" style={{ color: 'var(--color-purple-dark)' }}>{order.orderId}</td>
-                      <td>{order.customer.name}</td>
-                      <td>{order.eventType}</td>
-                      <td className="font-semibold">₹{order.totalAmount.toLocaleString()}</td>
-                      <td>
-                        <span className={`badge ${order.status.toLowerCase()}`}>
-                          {order.status}
-                        </span>
-                      </td>
-                      <td style={{ color: 'var(--color-gray-text)', fontSize: '0.8rem' }}>
-                        {new Date(order.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
-                      </td>
-                    </tr>
-                  ))}
+                  {recentOrders && recentOrders.length > 0 ? (
+                    (Array.isArray(recentOrders) ? recentOrders : []).map(o => (
+                      <tr key={o.orderId}>
+                        <td className="font-semibold" style={{ color: 'var(--color-purple)' }}>{o.orderId}</td>
+                        <td>{o.customer?.name}</td>
+                        <td><span className={`badge ${o.status.toLowerCase()}`}>{o.status}</span></td>
+                        <td className="font-semibold">₹{o.totalAmount.toLocaleString()}</td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr><td colSpan="4" style={{ textAlign: 'center' }}>No recent orders</td></tr>
+                  )}
                 </tbody>
               </table>
-            ) : (
-              <div className="empty-state">
-                <i className="fa-solid fa-cart-shopping"></i>
-                <p>No orders registered yet.</p>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Sales by Category (CSS Visual Chart) */}
-        <div className="dashboard-panel">
-          <div className="panel-header">
-            <h3>Category Performance</h3>
+            </div>
           </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', marginTop: '0.5rem' }}>
-            {salesByCategory && salesByCategory.length > 0 ? (
-              salesByCategory.map((cat) => {
-                const percentage = maxCategorySale > 0 ? (cat.value / maxCategorySale) * 100 : 0;
-                return (
-                  <div key={cat.category}>
-                    <div className="flex-between" style={{ fontSize: '0.85rem', marginBottom: '6px' }}>
-                      <span style={{ fontWeight: '500' }}>{cat.category}</span>
-                      <span className="font-semibold" style={{ color: 'var(--color-purple)' }}>
-                        ₹{cat.value.toLocaleString()}
-                      </span>
-                    </div>
-                    <div style={{ height: '8px', background: 'var(--color-lavender)', borderRadius: '4px', overflow: 'hidden' }}>
-                      <div
-                        style={{
-                          height: '100%',
-                          background: 'var(--gold-gradient)',
-                          width: `${percentage}%`,
-                          borderRadius: '4px',
-                          transition: 'width 0.8s ease'
-                        }}
-                      ></div>
-                    </div>
-                  </div>
-                );
-              })
-            ) : (
-              <div className="empty-state" style={{ padding: '1.5rem 0' }}>
-                <i className="fa-solid fa-chart-pie" style={{ fontSize: '2rem' }}></i>
-                <p style={{ fontSize: '0.85rem' }}>No sales distribution recorded.</p>
-              </div>
-            )}
-            
-            <div style={{ marginTop: '1rem', padding: '12px', background: 'var(--color-lavender)', borderRadius: '8px', fontSize: '0.8rem', color: 'var(--color-purple)' }}>
-              <i className="fa-solid fa-circle-info" style={{ marginRight: '6px' }}></i>
-              Stats show revenue from Confirmed, Shipped, and Delivered orders.
+          <div className="dashboard-panel">
+            <div className="panel-header">
+              <h3>System Activity</h3>
+            </div>
+            <div>
+              {data.recentActivity && data.recentActivity.length > 0 ? (
+                <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                  {(Array.isArray(data.recentActivity) ? data.recentActivity : []).map(log => (
+                    <li key={log.id} style={{ display: 'flex', gap: '10px', alignItems: 'flex-start', paddingBottom: '10px', borderBottom: '1px solid var(--color-gray-border)' }}>
+                      <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--color-purple)', marginTop: '6px' }}></div>
+                      <div>
+                        <div style={{ fontSize: '0.85rem' }}>
+                          <strong>{log.adminUser}</strong> performed <strong>{log.action}</strong> on <em>{log.entity}</em>
+                        </div>
+                        <div style={{ fontSize: '0.75rem', color: 'var(--color-gray-text)' }}>
+                          {new Date(log.createdAt).toLocaleString()}
+                        </div>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <div className="empty-state" style={{ padding: '1rem 0' }}>No recent activity</div>
+              )}
             </div>
           </div>
         </div>
 
-        {/* Popular Hampers (Views and conversion rates) */}
-        <div className="dashboard-panel" style={{ marginTop: '0.1rem' }}>
-          <div className="panel-header">
-            <h3>Popular Hampers (Views & Conv.)</h3>
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.9rem', marginTop: '0.5rem' }}>
-            {topViewedProducts && topViewedProducts.length > 0 ? (
-              topViewedProducts.map((p, idx) => {
-                const convRate = p.views > 0 
-                  ? ((p.clicks / p.views) * 100).toFixed(0) 
-                  : 0;
-                return (
-                  <div key={idx} className="flex-between" style={{ fontSize: '0.82rem', paddingBottom: '0.6rem', borderBottom: '1px solid var(--color-gray-border)' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <span style={{ fontWeight: 600, color: 'var(--color-gold-dark)' }}>#{idx + 1}</span>
-                      <span style={{ fontWeight: 500 }}>{p.name}</span>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+          <div className="dashboard-panel">
+            <div className="panel-header" style={{ marginBottom: '0.5rem' }}>
+              <h3>Top Selling Products</h3>
+            </div>
+            <div>
+              {topSellingProducts && topSellingProducts.length > 0 ? (
+                (Array.isArray(topSellingProducts) ? topSellingProducts : []).map((p, idx) => (
+                  <div key={idx} className="flex-between" style={{ padding: '0.75rem 0', borderBottom: '1px solid var(--color-gray-border)' }}>
+                    <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                      <span style={{ fontWeight: 600, color: 'var(--color-gold)' }}>#{idx + 1}</span>
+                      <span style={{ fontSize: '0.85rem', fontWeight: 500 }}>{p.name}</span>
                     </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                      <span style={{ color: 'var(--color-gray-text)', fontSize: '0.8rem' }} title="Views">
-                        <i className="fa-regular fa-eye" style={{ marginRight: '4px' }}></i>{p.views}
-                      </span>
-                      <span className="font-semibold" style={{ color: 'var(--color-purple)', fontSize: '0.8rem' }} title="Conversion Rate">
-                        {convRate}% conv
-                      </span>
-                    </div>
+                    <span style={{ fontSize: '0.85rem', color: 'var(--color-purple)' }}>{p.sold} sold</span>
                   </div>
-                );
-              })
-            ) : (
-              <div className="empty-state" style={{ padding: '1rem 0' }}>
-                <p style={{ fontSize: '0.8rem' }}>No product views recorded yet.</p>
-              </div>
-            )}
+                ))
+              ) : (
+                <div className="empty-state" style={{ padding: '1rem 0' }}>No sales data</div>
+              )}
+            </div>
+          </div>
+
+          <div className="dashboard-panel">
+            <div className="panel-header" style={{ marginBottom: '0.5rem' }}>
+              <h3 style={{ color: '#E53E3E' }}><i className="fa-solid fa-triangle-exclamation" style={{ marginRight: '8px' }}></i>Low Stock Alerts</h3>
+              <Link to="/inventory" className="btn-text" style={{ color: '#E53E3E' }}>Manage</Link>
+            </div>
+            <div>
+              {lowStockProducts && lowStockProducts.length > 0 ? (
+                (Array.isArray(lowStockProducts) ? lowStockProducts : []).map((p, idx) => (
+                  <div key={idx} className="flex-between" style={{ padding: '0.75rem 0', borderBottom: '1px solid var(--color-gray-border)' }}>
+                    <span style={{ fontSize: '0.85rem', fontWeight: 500 }}>{p.name}</span>
+                    <span style={{ fontSize: '0.85rem', fontWeight: 600, color: '#E53E3E', background: '#FFE3E3', padding: '2px 8px', borderRadius: '4px' }}>{p.stock} left</span>
+                  </div>
+                ))
+              ) : (
+                <div style={{ fontSize: '0.85rem', color: 'var(--color-gray-text)', padding: '1rem 0', textAlign: 'center' }}>Inventory levels look good.</div>
+              )}
+            </div>
           </div>
         </div>
-
       </div>
     </div>
   );

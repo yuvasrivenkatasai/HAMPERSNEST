@@ -1,7 +1,7 @@
 import jwt from 'jsonwebtoken';
 import { User } from '../database/models.js';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'hampersnest_super_secret_key_123';
+const JWT_SECRET = process.env.JWT_SECRET;
 
 export const protect = async (req, res, next) => {
   let token;
@@ -28,4 +28,13 @@ export const protect = async (req, res, next) => {
   if (!token) {
     return res.status(401).json({ message: 'Not authorized, no token provided' });
   }
+};
+
+export const authorizeRoles = (...roles) => {
+  return (req, res, next) => {
+    if (!req.user || !roles.includes(req.user.role)) {
+      return res.status(403).json({ message: `Role (${req.user?.role || 'None'}) is not authorized to access this resource` });
+    }
+    next();
+  };
 };

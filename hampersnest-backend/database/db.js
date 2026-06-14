@@ -1,83 +1,58 @@
 import { Sequelize } from 'sequelize';
 import dotenv from 'dotenv';
-import path from 'path';
-import { fileURLToPath } from 'url';
 import bcrypt from 'bcryptjs';
+import crypto from 'crypto';
 
 dotenv.config();
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+// Configuration defaults
+const dbUser = process.env.DB_USER || 'system';
+const dbPassword = process.env.DB_PASSWORD || 'admin123';
+const dbHost = process.env.DB_HOST || 'localhost';
+const dbPort = process.env.DB_PORT || 1521;
+const dbService = process.env.DB_SERVICE_NAME || 'XEPDB1';
 
-const dialect = process.env.DB_DIALECT || 'sqlite';
 let sequelize;
 
-if (dialect === 'oracle') {
-  sequelize = new Sequelize({
-    dialect: 'oracle',
-    username: process.env.DB_USER || 'SYSTEM',
-    password: process.env.DB_PASSWORD || 'admin123',
-    dialectOptions: {
-      connectString: `${process.env.DB_HOST || 'localhost'}:${process.env.DB_PORT || 1521}/${process.env.DB_NAME || 'xe'}`
-    },
-    logging: false
-  });
-} else if (dialect === 'sqlite') {
-  const sqliteStorage = process.env.DB_STORAGE || path.join(__dirname, 'database.sqlite');
-  sequelize = new Sequelize({
-    dialect: 'sqlite',
-    storage: sqliteStorage,
-    logging: false
-  });
-} else {
-  const dbUrl = process.env.DB_URL;
-  if (dbUrl) {
-    sequelize = new Sequelize(dbUrl, {
-      logging: false,
-      dialectOptions: process.env.DB_SSL === 'true' ? {
-        ssl: {
-          require: true,
-          rejectUnauthorized: false
-        }
-      } : {}
-    });
-  } else {
-    sequelize = new Sequelize(
-      process.env.DB_NAME || 'hampersnest',
-      process.env.DB_USER || 'root',
-      process.env.DB_PASSWORD || '',
-      {
-        host: process.env.DB_HOST || '127.0.0.1',
-        port: process.env.DB_PORT || 3306,
-        dialect: dialect,
-        logging: false
-      }
-    );
-  }
-}
+sequelize = new Sequelize({
+  dialect: 'oracle',
+  username: dbUser,
+  password: dbPassword,
+  dialectOptions: {
+    connectString: `${dbHost}:${dbPort}/${dbService}`
+  },
+  logging: false
+});
 
 export const connectDB = async () => {
   try {
     await sequelize.authenticate();
-    console.log(`SQL Database Connected (Dialect: ${dialect})`);
-    
-    // Automatically sync models to database (creates tables if they do not exist)
-    await sequelize.sync();
-    console.log('Database models synchronized.');
-
-    // Seeding logic (using dynamic import to avoid circular dependency)
+    console.log(`SQL Database Connected to Oracle using: ${dbHost}:${dbPort}/${dbService}`);
+    // Import models before syncing to register them with sequelize
     const { User, Category } = await import('./models.js');
 
-    // Seed default admin user
-    const adminExists = await User.findOne({ where: { username: 'admin' } });
-    if (!adminExists) {
-      const hashedPassword = await bcrypt.hash('admin123', 10);
+    // Automatically sync models to database
+    await sequelize.sync({ alter: false });
+    console.log('Database models synchronized.');
+
+    // Seed default admin user securely
+    const adminExists = await User.count();
+    if (adminExists === 0) {
+      const generatedPassword = process.env.ADMIN_PASSWORD || crypto.randomBytes(12).toString('hex');
+      const hashedPassword = await bcrypt.hash(generatedPassword, 10);
       await User.create({
-        username: 'admin',
+        username: process.env.ADMIN_USERNAME || 'superadmin',
         password: hashedPassword,
-        role: 'admin'
+        role: 'Super Admin'
       });
-      console.log('Default admin user seeded successfully.');
+      console.warn('================================================================');
+      console.warn('ATTENTION: Initial Super Admin user created.');
+      console.warn(`Username: ${process.env.ADMIN_USERNAME || 'superadmin'}`);
+      console.warn(`Password: ${generatedPassword}`);
+      if (!process.env.ADMIN_PASSWORD) {
+        console.warn('CRITICAL: Please save this auto-generated password!');
+      }
+      console.warn('================================================================');
     }
 
     // Seed default categories

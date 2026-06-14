@@ -4,7 +4,7 @@ import { useCart } from '../context/CartContext';
 import { useCurrency } from '../context/CurrencyContext';
 
 export default function Header() {
-  const { cartCount, setCartOpen } = useCart();
+  const { cartCount, setCartOpen, settings = {} } = useCart();
   const { currency, toggleCurrency } = useCurrency();
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -47,7 +47,7 @@ export default function Header() {
       <header 
         id="header" 
         className={scrolled ? 'scrolled' : ''}
-        style={{ top: (settings && settings.announcementActive && !scrolled) ? '38px' : '0px' }}
+        style={{ top: (settings?.announcementActive && !scrolled) ? '38px' : '0px' }}
       >
         <div className="nav-container">
           {/* Logo container - image + brand name */}

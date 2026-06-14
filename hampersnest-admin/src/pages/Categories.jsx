@@ -68,7 +68,7 @@ export default function Categories() {
           method: 'PUT',
           body: { name: formData.name }
         });
-        setCategories(prev => prev.map(c => c.id === editingCategory.id ? updated : c));
+        setCategories(prev => (Array.isArray(prev) ? prev : []).map(c => c.id === editingCategory.id ? updated : c));
         setSuccess(`Category "${formData.name}" updated successfully!`);
       } else {
         // Create Mode
@@ -177,14 +177,16 @@ export default function Categories() {
                         >
                           <i className="fa-solid fa-pen-to-square"></i> Edit
                         </button>
-                        <button
-                          className="btn-logout"
-                          style={{ padding: '0.4rem 0.7rem', fontSize: '0.75rem' }}
-                          onClick={() => handleDeleteCategory(category)}
-                          title="Delete Category"
-                        >
-                          <i className="fa-solid fa-trash-can"></i> Delete
-                        </button>
+                        {localStorage.getItem('adminRole') === 'Super Admin' && (
+                          <button
+                            className="btn-logout"
+                            style={{ padding: '0.4rem 0.7rem', fontSize: '0.75rem' }}
+                            onClick={() => handleDeleteCategory(category)}
+                            title="Delete Category"
+                          >
+                            <i className="fa-solid fa-trash-can"></i> Delete
+                          </button>
+                        )}
                       </div>
                     </td>
                   </tr>

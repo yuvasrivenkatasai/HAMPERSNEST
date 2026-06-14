@@ -15,7 +15,7 @@ export default function Orders() {
   const fetchOrders = async () => {
     try {
       const data = await apiRequest('/api/orders');
-      setOrders(data);
+      setOrders(ordersData.orders || ordersData.data || ordersData.rows || (Array.isArray(ordersData) ? ordersData : []));
     } catch (err) {
       console.error(err);
       setError('Failed to fetch orders list');
@@ -28,27 +28,28 @@ export default function Orders() {
     fetchOrders();
   }, []);
 
-  const handleStatusUpdate = async (orderId, newStatus) => {
+  const handleOrderUpdate = async (orderId, updates) => {
     setUpdatingStatus(true);
     try {
       const updatedOrder = await apiRequest(`/api/orders/${orderId}`, {
         method: 'PUT',
-        body: { status: newStatus }
+        body: updates
       });
       
       // Update local state
-      setOrders(prev => prev.map(o => o.orderId === orderId ? updatedOrder : o));
+      setOrders(prev => (Array.isArray(prev) ? prev : []).map(o => o.orderId === orderId ? updatedOrder : o));
       setSelectedOrder(updatedOrder);
     } catch (err) {
       console.error(err);
-      alert(err.message || 'Failed to update order status');
+      alert(err.message || 'Failed to update order');
     } finally {
       setUpdatingStatus(false);
     }
   };
 
   // Filter orders based on status tab and search text
-  const filteredOrders = orders.filter(order => {
+  const safeOrders = Array.isArray(orders) ? orders : [];
+  const filteredOrders = safeOrders.filter(order => {
     const matchesStatus = statusFilter === 'All' || order.status === statusFilter;
     const matchesSearch = 
       order.orderId.toLowerCase().includes(search.toLowerCase()) ||
@@ -93,17 +94,43 @@ export default function Orders() {
           ))}
         </div>
 
-        {/* Search Input */}
-        <div style={{ position: 'relative', width: '300px' }}>
-          <input
-            type="text"
-            className="form-input"
-            placeholder="Search by customer name, phone, ID..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            style={{ paddingLeft: '2.5rem' }}
-          />
-          <i className="fa-solid fa-magnifying-glass" style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--color-gray-text)' }}></i>
+        {/* Search Input and Export Actions */}
+        <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+          <div style={{ position: 'relative', width: '300px' }}>
+            <input
+              type="text"
+              className="form-input"
+              placeholder="Search by customer name, phone, ID..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              style={{ paddingLeft: '2.5rem' }}
+            />
+            <i className="fa-solid fa-magnifying-glass" style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--color-gray-text)' }}></i>
+          </div>
+          
+          <button 
+            className="btn-admin-secondary" 
+            title="Print / PDF Export"
+            onClick={() => window.print()}
+          >
+            <i className="fa-solid fa-file-pdf"></i>
+          </button>
+          <button 
+            className="btn-admin-secondary" 
+            title="Export to CSV"
+            onClick={() => window.open(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/orders/export/csv`, '_blank')}
+            style={{ padding: '0.75rem', borderRadius: 'var(--border-radius-sm)' }}
+          >
+            <i className="fa-solid fa-file-csv"></i>
+          </button>
+          <a 
+            href={`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/orders/export/excel`}
+            className="btn-admin" 
+            title="Export to Excel"
+            style={{ padding: '0.75rem', borderRadius: 'var(--border-radius-sm)' }}
+          >
+            <i className="fa-solid fa-file-excel"></i>
+          </a>
         </div>
       </div>
 
@@ -264,28 +291,92 @@ export default function Orders() {
                 </div>
               )}
 
-              {/* Update Status controls */}
-              <div className="form-group" style={{ marginTop: '2rem', borderTop: '1px solid var(--color-gray-border)', paddingTop: '1.5rem' }}>
-                <label className="form-label" htmlFor="status-select">Change Order Status</label>
-                <div style={{ display: 'flex', gap: '10px' }}>
-                  <select
-                    id="status-select"
-                    className="form-select"
-                    value={selectedOrder.status}
-                    onChange={(e) => handleStatusUpdate(selectedOrder.orderId, e.target.value)}
-                    disabled={updatingStatus}
-                    style={{ flexGrow: 1 }}
-                  >
-                    <option value="Pending">Pending (Awaiting Confirmation)</option>
-                    <option value="Confirmed">Confirmed (Processing / Packing)</option>
-                    <option value="Shipped">Shipped (In Transit)</option>
-                    <option value="Delivered">Delivered (Completed)</option>
-                  </select>
-                  {updatingStatus && (
-                    <div style={{ display: 'flex', alignItems: 'center', padding: '0 10px' }}>
-                      <i className="fa-solid fa-spinner fa-spin" style={{ color: 'var(--color-gold)' }}></i>
+              {/* Layout for History and Updates */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginTop: '2rem', borderTop: '1px solid var(--color-gray-border)', paddingTop: '1.5rem' }}>
+                
+                {/* Left Column: Updates */}
+                <div>
+                  <h4 style={{ color: 'var(--color-purple-dark)', marginBottom: '10px' }}>Manage Order</h4>
+                  
+                  <div className="form-group">
+                    <label className="form-label" htmlFor="status-select">Change Order Status</label>
+                    <div style={{ display: 'flex', gap: '10px' }}>
+                      <select
+                        id="status-select"
+                        className="form-select"
+                        value={selectedOrder.status}
+                        onChange={(e) => handleOrderUpdate(selectedOrder.orderId, { status: e.target.value })}
+                        disabled={updatingStatus}
+                        style={{ flexGrow: 1 }}
+                      >
+                        <option value="Pending">Pending (Awaiting Confirmation)</option>
+                        <option value="Confirmed">Confirmed (Processing / Packing)</option>
+                        <option value="Shipped">Shipped (In Transit)</option>
+                        <option value="Delivered">Delivered (Completed)</option>
+                      </select>
+                      {updatingStatus && (
+                        <div style={{ display: 'flex', alignItems: 'center', padding: '0 10px' }}>
+                          <i className="fa-solid fa-spinner fa-spin" style={{ color: 'var(--color-gold)' }}></i>
+                        </div>
+                      )}
                     </div>
-                  )}
+                  </div>
+
+                  <div className="form-group" style={{ marginTop: '15px' }}>
+                    <label className="form-label" htmlFor="internal-notes">Internal Admin Notes</label>
+                    <textarea
+                      id="internal-notes"
+                      className="form-textarea"
+                      rows="4"
+                      placeholder="Add private notes about this order..."
+                      defaultValue={selectedOrder.internalNotes || ''}
+                      onBlur={(e) => {
+                        if (e.target.value !== (selectedOrder.internalNotes || '')) {
+                          handleOrderUpdate(selectedOrder.orderId, { internalNotes: e.target.value });
+                        }
+                      }}
+                    ></textarea>
+                    <small style={{ color: 'var(--color-gray-text)' }}>Visible only to admins. Auto-saves on blur.</small>
+                  </div>
+                </div>
+
+                {/* Right Column: Timeline History */}
+                <div>
+                  <h4 style={{ color: 'var(--color-purple-dark)', marginBottom: '10px' }}>Order History</h4>
+                  <div style={{ background: '#f8f9fa', padding: '15px', borderRadius: '8px', maxHeight: '300px', overflowY: 'auto' }}>
+                    {selectedOrder.history && selectedOrder.history.length > 0 ? (
+                      <ul style={{ listStyle: 'none', padding: 0, margin: 0, position: 'relative' }}>
+                        {selectedOrder.history.slice().reverse().map((hist, idx) => (
+                          <li key={idx} style={{ 
+                            paddingLeft: '20px', 
+                            borderLeft: '2px solid var(--color-purple)', 
+                            position: 'relative',
+                            marginBottom: '15px',
+                            paddingBottom: idx === selectedOrder.history.length - 1 ? '0' : '5px'
+                          }}>
+                            <div style={{
+                              position: 'absolute', left: '-6px', top: '0',
+                              width: '10px', height: '10px', borderRadius: '50%', background: 'var(--color-purple)'
+                            }}></div>
+                            <div style={{ fontSize: '0.8rem', color: 'var(--color-gray-text)' }}>
+                              {new Date(hist.date).toLocaleString()} by {hist.admin}
+                            </div>
+                            <div style={{ fontSize: '0.9rem', fontWeight: '500', color: 'var(--color-purple-dark)', marginTop: '3px' }}>
+                              {hist.action}
+                            </div>
+                            {hist.from && hist.to && (
+                              <div style={{ fontSize: '0.85rem', color: '#555', marginTop: '3px' }}>
+                                <span style={{ textDecoration: 'line-through', marginRight: '5px' }}>{hist.from}</span>
+                                <span>&rarr; {hist.to}</span>
+                              </div>
+                            )}
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p style={{ fontSize: '0.85rem', color: 'var(--color-gray-text)', textAlign: 'center', margin: '20px 0' }}>No history recorded yet.</p>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>

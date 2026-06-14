@@ -50,6 +50,7 @@ export const getSettings = async (req, res) => {
     }));
     
     res.json({
+      ...settingsObj,
       announcementText: settingsObj.announcementText || 'Welcome to HampersNest! Customized Hampers and Return Gifts Hyderabad.',
       announcementActive: settingsObj.announcementActive !== undefined ? settingsObj.announcementActive : false,
       activeTheme: settingsObj.activeTheme || 'theme-default',
@@ -69,49 +70,29 @@ export const updateSettings = async (req, res) => {
   try {
     const promises = [];
     
-    if (announcementText !== undefined) {
-      promises.push(
-        Setting.upsert({
-          key: 'announcementText',
-          value: announcementText
-        })
-      );
-    }
-    
-    if (announcementActive !== undefined) {
-      promises.push(
-        Setting.upsert({
-          key: 'announcementActive',
-          value: !!announcementActive
-        })
-      );
-    }
-
-    if (activeTheme !== undefined) {
-      promises.push(
-        Setting.upsert({
-          key: 'activeTheme',
-          value: activeTheme
-        })
-      );
-    }
-
     if (categories !== undefined) {
       const normalizedCategories = normalizeCategories(categories);
-
-      if (normalizedCategories.length === 0) {
-        return res.status(400).json({ message: 'Please provide at least one category' });
+      if (normalizedCategories.length > 0) {
+        promises.push((async () => {
+          for (const cat of normalizedCategories) {
+            await Category.findOrCreate({
+              where: { id: cat.id },
+              defaults: { name: cat.label }
+            });
+          }
+        })());
       }
+    }
 
-      // Sync categories with Category table
-      promises.push((async () => {
-        for (const cat of normalizedCategories) {
-          await Category.findOrCreate({
-            where: { id: cat.id },
-            defaults: { name: cat.label }
-          });
-        }
-      })());
+    for (const [key, value] of Object.entries(req.body)) {
+      if (key !== 'categories') {
+        promises.push(
+          Setting.upsert({
+            key,
+            value
+          })
+        );
+      }
     }
 
     await Promise.all(promises);

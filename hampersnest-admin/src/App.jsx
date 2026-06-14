@@ -8,13 +8,14 @@ import Dashboard from './pages/Dashboard';
 import Orders from './pages/Orders';
 import Products from './pages/Products';
 import Inquiries from './pages/Inquiries';
-import Promotions from './pages/Promotions';
-import Gallery from './pages/Gallery';
 import Categories from './pages/Categories';
+import Inventory from './pages/Inventory';
+import MediaLibrary from './pages/Gallery';
+import Settings from './pages/Settings';
+import Users from './pages/Users';
 
 function NavigationMenu() {
   const location = useLocation();
-  const navigate = useNavigate();
 
   const handleLogout = () => {
     localStorage.removeItem('adminToken');
@@ -30,7 +31,7 @@ function NavigationMenu() {
       </div>
       
       {/* Sidebar Navigation */}
-      <ul className="sidebar-menu">
+      <ul className="sidebar-menu" style={{ overflowY: 'auto' }}>
         <li>
           <Link to="/" className={`sidebar-link ${location.pathname === '/' ? 'active' : ''}`}>
             <i className="fa-solid fa-chart-line"></i> Dashboard
@@ -47,8 +48,13 @@ function NavigationMenu() {
           </Link>
         </li>
         <li>
+          <Link to="/inventory" className={`sidebar-link ${location.pathname === '/inventory' ? 'active' : ''}`}>
+            <i className="fa-solid fa-boxes-stacked"></i> Inventory
+          </Link>
+        </li>
+        <li>
           <Link to="/categories" className={`sidebar-link ${location.pathname === '/categories' ? 'active' : ''}`}>
-            <i className="fa-solid fa-folder-open"></i> Categories
+            <i className="fa-solid fa-folder-tree"></i> Categories
           </Link>
         </li>
         <li>
@@ -57,15 +63,29 @@ function NavigationMenu() {
           </Link>
         </li>
         <li>
-          <Link to="/promotions" className={`sidebar-link ${location.pathname === '/promotions' ? 'active' : ''}`}>
-            <i className="fa-solid fa-bullhorn"></i> Campaigns
+          <Link to="/media" className={`sidebar-link ${location.pathname === '/media' ? 'active' : ''}`}>
+            <i className="fa-solid fa-photo-film"></i> Media Library
           </Link>
         </li>
-        <li>
-          <Link to="/gallery" className={`sidebar-link ${location.pathname === '/gallery' ? 'active' : ''}`}>
-            <i className="fa-solid fa-images"></i> Showcase Gallery
-          </Link>
-        </li>
+        
+        {localStorage.getItem('adminRole') === 'Super Admin' && (
+          <>
+            <li style={{ marginTop: '1.5rem', marginBottom: '0.5rem', paddingLeft: '1rem', fontSize: '0.75rem', textTransform: 'uppercase', color: 'rgba(255,255,255,0.5)', fontWeight: 'bold' }}>
+              Administration
+            </li>
+            
+            <li>
+              <Link to="/users" className={`sidebar-link ${location.pathname === '/users' ? 'active' : ''}`}>
+                <i className="fa-solid fa-users-gear"></i> Users & Roles
+              </Link>
+            </li>
+            <li>
+              <Link to="/settings" className={`sidebar-link ${location.pathname === '/settings' ? 'active' : ''}`}>
+                <i className="fa-solid fa-sliders"></i> Settings
+              </Link>
+            </li>
+          </>
+        )}
       </ul>
       
       {/* Logout button */}
@@ -80,17 +100,33 @@ function NavigationMenu() {
 
 function AdminLayout({ children }) {
   const location = useLocation();
+  const [userRole, setUserRole] = useState('Admin');
   
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const data = await apiRequest('/api/auth/verify');
+        setUserRole(data.role);
+        localStorage.setItem('adminRole', data.role);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    fetchProfile();
+  }, []);
+
   // Dynamic page title based on path
   const getPageTitle = () => {
     switch (location.pathname) {
-      case '/': return 'Dashboard Analytics';
+      case '/': return 'Executive Dashboard';
       case '/orders': return 'Orders Management';
       case '/products': return 'Hampers Catalogue';
+      case '/inventory': return 'Stock Management';
       case '/categories': return 'Categories Management';
       case '/inquiries': return 'Customer Inquiries';
-      case '/promotions': return 'Promotions & Themes';
-      case '/gallery': return 'Showcase Gallery';
+      case '/media': return 'Media Library';
+      case '/settings': return 'System Settings';
+      case '/users': return 'User Access Control';
       default: return 'Admin Control';
     }
   };
@@ -106,8 +142,11 @@ function AdminLayout({ children }) {
             <h2>{getPageTitle()}</h2>
           </div>
           <div className="admin-header-profile">
-            <i className="fa-solid fa-user-gear"></i>
-            <span>Administrator</span>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', marginRight: '5px' }}>
+              <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>Administrator</span>
+              <span style={{ fontSize: '0.7rem', color: 'var(--color-purple)' }}>{userRole}</span>
+            </div>
+            <i className="fa-solid fa-circle-user" style={{ fontSize: '1.8rem', color: 'var(--color-gold)', background: 'none', padding: 0 }}></i>
           </div>
         </header>
 
@@ -173,10 +212,12 @@ export default function App() {
                   <Route path="/" element={<Dashboard />} />
                   <Route path="/orders" element={<Orders />} />
                   <Route path="/products" element={<Products />} />
+                  <Route path="/inventory" element={<Inventory />} />
                   <Route path="/categories" element={<Categories />} />
                   <Route path="/inquiries" element={<Inquiries />} />
-                  <Route path="/promotions" element={<Promotions />} />
-                  <Route path="/gallery" element={<Gallery />} />
+                  <Route path="/media" element={<MediaLibrary />} />
+                  <Route path="/settings" element={<Settings />} />
+                  <Route path="/users" element={<Users />} />
                   <Route path="*" element={<Navigate to="/" replace />} />
                 </Routes>
               </AdminLayout>

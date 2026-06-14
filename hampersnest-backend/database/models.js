@@ -19,7 +19,11 @@ export const User = sequelize.define('User', {
   },
   role: {
     type: DataTypes.STRING,
-    defaultValue: 'admin'
+    defaultValue: 'Admin' // Super Admin, Admin, Manager
+  },
+  isActive: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: true
   }
 }, {
   tableName: 'users',
@@ -36,13 +40,29 @@ export const Product = sequelize.define('Product', {
     type: DataTypes.STRING,
     allowNull: false
   },
+  sku: {
+    type: DataTypes.STRING,
+    unique: true
+  },
   price: {
     type: DataTypes.INTEGER,
     allowNull: false
   },
+  discountPrice: {
+    type: DataTypes.INTEGER,
+    defaultValue: 0
+  },
+  originalPrice: {
+    type: DataTypes.INTEGER,
+    defaultValue: 0
+  },
   image: {
     type: DataTypes.TEXT,
     allowNull: false
+  },
+  videoUrls: {
+    type: DataTypes.JSON,
+    defaultValue: []
   },
   category: {
     type: DataTypes.STRING,
@@ -52,6 +72,18 @@ export const Product = sequelize.define('Product', {
     type: DataTypes.STRING,
     defaultValue: 'Traditional'
   },
+  subCategory: {
+    type: DataTypes.STRING,
+    defaultValue: ''
+  },
+  occasion: {
+    type: DataTypes.STRING,
+    defaultValue: ''
+  },
+  tags: {
+    type: DataTypes.JSON,
+    defaultValue: []
+  },
   customization: {
     type: DataTypes.JSON,
     defaultValue: []
@@ -60,11 +92,34 @@ export const Product = sequelize.define('Product', {
     type: DataTypes.JSON,
     defaultValue: []
   },
+  stockQuantity: {
+    type: DataTypes.INTEGER,
+    defaultValue: 0
+  },
+  reservedQuantity: {
+    type: DataTypes.INTEGER,
+    defaultValue: 0
+  },
+  lowStockThreshold: {
+    type: DataTypes.INTEGER,
+    defaultValue: 5
+  },
+  availableQuantity: {
+    type: DataTypes.VIRTUAL,
+    get() {
+      const stock = this.getDataValue('stockQuantity') || 0;
+      const reserved = this.getDataValue('reservedQuantity') || 0;
+      return stock - reserved;
+    }
+  },
   rating: {
     type: DataTypes.DECIMAL(3, 2),
     defaultValue: 4.5
   },
   description: {
+    type: DataTypes.TEXT
+  },
+  shortDescription: {
     type: DataTypes.TEXT
   },
   details: {
@@ -80,10 +135,6 @@ export const Product = sequelize.define('Product', {
     defaultValue: 0
   },
   clicks: {
-    type: DataTypes.INTEGER,
-    defaultValue: 0
-  },
-  originalPrice: {
     type: DataTypes.INTEGER,
     defaultValue: 0
   },
@@ -109,7 +160,7 @@ export const Order = sequelize.define('Order', {
     unique: true
   },
   customer: {
-    type: DataTypes.JSON,
+    type: DataTypes.JSON, // Contains Name, Phone, Email, Delivery Address, City
     allowNull: false
   },
   items: {
@@ -120,6 +171,10 @@ export const Order = sequelize.define('Order', {
   totalAmount: {
     type: DataTypes.INTEGER,
     allowNull: false
+  },
+  budget: {
+    type: DataTypes.INTEGER,
+    defaultValue: 0
   },
   eventType: {
     type: DataTypes.STRING,
@@ -132,9 +187,17 @@ export const Order = sequelize.define('Order', {
     type: DataTypes.TEXT,
     defaultValue: ''
   },
+  internalNotes: {
+    type: DataTypes.TEXT,
+    defaultValue: ''
+  },
+  history: {
+    type: DataTypes.JSON,
+    defaultValue: []
+  },
   status: {
     type: DataTypes.STRING,
-    defaultValue: 'Pending'
+    defaultValue: 'Pending' // Pending, Confirmed, Processing, Packed, Shipped, Delivered, Cancelled
   }
 }, {
   tableName: 'orders',
@@ -160,9 +223,17 @@ export const Inquiry = sequelize.define('Inquiry', {
     type: DataTypes.STRING,
     defaultValue: ''
   },
+  city: {
+    type: DataTypes.STRING,
+    defaultValue: ''
+  },
   eventType: {
     type: DataTypes.STRING,
     defaultValue: 'General'
+  },
+  budget: {
+    type: DataTypes.STRING,
+    defaultValue: ''
   },
   quantity: {
     type: DataTypes.INTEGER,
@@ -178,7 +249,19 @@ export const Inquiry = sequelize.define('Inquiry', {
   },
   status: {
     type: DataTypes.STRING,
-    defaultValue: 'Unread'
+    defaultValue: 'New' // New, Contacted, In Progress, Converted, Closed
+  },
+  leadNotes: {
+    type: DataTypes.TEXT,
+    defaultValue: ''
+  },
+  assignedAdmin: {
+    type: DataTypes.STRING,
+    defaultValue: 'Unassigned'
+  },
+  history: {
+    type: DataTypes.JSON,
+    defaultValue: []
   }
 }, {
   tableName: 'inquiries',
@@ -214,7 +297,7 @@ export const GalleryItem = sequelize.define('GalleryItem', {
   },
   title: {
     type: DataTypes.STRING,
-    allowNull: false
+    defaultValue: ''
   },
   image: {
     type: DataTypes.TEXT,
@@ -227,6 +310,26 @@ export const GalleryItem = sequelize.define('GalleryItem', {
   description: {
     type: DataTypes.TEXT,
     defaultValue: ''
+  },
+  fileSize: {
+    type: DataTypes.STRING,
+    defaultValue: 'Unknown'
+  },
+  dimensions: {
+    type: DataTypes.STRING,
+    defaultValue: 'Unknown'
+  },
+  mediaType: {
+    type: DataTypes.STRING,
+    defaultValue: 'Image'
+  },
+  width: {
+    type: DataTypes.INTEGER,
+    defaultValue: 0
+  },
+  height: {
+    type: DataTypes.INTEGER,
+    defaultValue: 0
   },
   isActive: {
     type: DataTypes.BOOLEAN,
@@ -246,15 +349,61 @@ export const Category = sequelize.define('Category', {
   name: {
     type: DataTypes.STRING,
     allowNull: false
+  },
+  parentId: {
+    type: DataTypes.STRING,
+    allowNull: true
+  },
+  sortOrder: {
+    type: DataTypes.INTEGER,
+    defaultValue: 0
   }
 }, {
   tableName: 'categories',
   timestamps: true
 });
 
+// 8. Audit Log Model
+export const AuditLog = sequelize.define('AuditLog', {
+  id: {
+    type: DataTypes.INTEGER,
+    autoIncrement: true,
+    primaryKey: true
+  },
+  adminUser: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
+  action: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
+  entity: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
+  entityId: {
+    type: DataTypes.STRING,
+    allowNull: true
+  },
+  details: {
+    type: DataTypes.JSON,
+    allowNull: true
+  },
+  ipAddress: {
+    type: DataTypes.STRING,
+    allowNull: true
+  }
+}, {
+  tableName: 'audit_logs',
+  timestamps: true,
+  updatedAt: false // Audit logs generally just need createdAt
+});
+
 // Associations
 Category.hasMany(Product, { foreignKey: 'category', sourceKey: 'id', as: 'products' });
 Product.belongsTo(Category, { foreignKey: 'category', targetKey: 'id', as: 'categoryDetails' });
 
-Category.hasMany(GalleryItem, { foreignKey: 'category', sourceKey: 'id', as: 'galleryItems' });
-GalleryItem.belongsTo(Category, { foreignKey: 'category', targetKey: 'id', as: 'categoryDetails' });
+// Self-referencing association for sub-categories
+Category.hasMany(Category, { as: 'subCategories', foreignKey: 'parentId' });
+Category.belongsTo(Category, { as: 'parentCategory', foreignKey: 'parentId' });

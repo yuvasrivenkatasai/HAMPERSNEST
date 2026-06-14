@@ -14,10 +14,11 @@ export default function Promotions() {
   useEffect(() => {
     const fetchSettings = async () => {
       try {
-        const settings = await apiRequest('/api/settings');
-        setAnnouncementText(settings.announcementText || '');
-        setAnnouncementActive(!!settings.announcementActive);
-        setActiveTheme(settings.activeTheme || 'theme-default');
+        const responseData = await apiRequest('/api/settings');
+        const settings = responseData || {};
+        setAnnouncementText(settings?.announcementText || '');
+        setAnnouncementActive(!!settings?.announcementActive);
+        setActiveTheme(settings?.activeTheme || 'theme-default');
       } catch (err) {
         console.error(err);
         setError('Failed to fetch settings');

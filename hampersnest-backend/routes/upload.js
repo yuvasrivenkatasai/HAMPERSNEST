@@ -66,6 +66,14 @@ router.post('/', protect, upload.single('image'), async (req, res) => {
       .webp({ quality: 80 })
       .toBuffer();
 
+    const metadata = await sharp(webpBuffer).metadata();
+    const dimensions = `${metadata.width}x${metadata.height}`;
+    const sizeBytes = webpBuffer.length;
+    let sizeStr = '';
+    if (sizeBytes < 1024) sizeStr = `${sizeBytes} B`;
+    else if (sizeBytes < 1024 * 1024) sizeStr = `${(sizeBytes / 1024).toFixed(1)} KB`;
+    else sizeStr = `${(sizeBytes / (1024 * 1024)).toFixed(2)} MB`;
+
     let imageUrl = '';
 
     if (isR2Configured()) {
@@ -108,7 +116,7 @@ router.post('/', protect, upload.single('image'), async (req, res) => {
       console.log(`Successfully saved locally: ${imageUrl}`);
     }
 
-    res.status(200).json({ url: imageUrl, filename });
+    res.status(200).json({ url: imageUrl, filename, size: sizeStr, dimensions });
   } catch (error) {
     console.error('Image processing/upload failed:', error);
     res.status(500).json({ message: `Image upload failed: ${error.message}` });

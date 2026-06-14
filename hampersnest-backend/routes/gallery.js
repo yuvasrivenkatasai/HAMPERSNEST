@@ -5,7 +5,7 @@ import {
   updateGalleryItem,
   deleteGalleryItem
 } from '../controllers/galleryController.js';
-import { protect } from '../middleware/auth.js';
+import { protect, authorizeRoles } from '../middleware/auth.js';
 
 const router = express.Router();
 
@@ -13,8 +13,8 @@ const router = express.Router();
 router.get('/', getGalleryItems);
 
 // Protected routes for admin operations
-router.post('/', protect, createGalleryItem);
-router.put('/:id', protect, updateGalleryItem);
-router.delete('/:id', protect, deleteGalleryItem);
+router.post('/', protect, authorizeRoles('Super Admin', 'Manager'), createGalleryItem);
+router.put('/:id', protect, authorizeRoles('Super Admin', 'Manager'), updateGalleryItem);
+router.delete('/:id', protect, authorizeRoles('Super Admin', 'Manager'), deleteGalleryItem);
 
 export default router;
