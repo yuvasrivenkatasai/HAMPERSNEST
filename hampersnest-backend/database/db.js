@@ -11,23 +11,40 @@ const dbPassword = process.env.DB_PASSWORD || 'admin123';
 const dbHost = process.env.DB_HOST || 'localhost';
 const dbPort = process.env.DB_PORT || 1521;
 const dbService = process.env.DB_SERVICE_NAME || 'XEPDB1';
+const dbWalletPath = process.env.DB_WALLET_PATH;
 
 let sequelize;
+
+const dialectOptions = {};
+
+if (dbWalletPath) {
+  dialectOptions.connectString = dbService;
+  dialectOptions.configDir = dbWalletPath;
+  dialectOptions.walletLocation = dbWalletPath;
+} else {
+  if (dbService.trim().startsWith('(')) {
+    dialectOptions.connectString = dbService;
+  } else {
+    dialectOptions.connectString = `${dbHost}:${dbPort}/${dbService}`;
+  }
+}
 
 sequelize = new Sequelize({
   dialect: 'oracle',
   username: dbUser,
   password: dbPassword,
-  dialectOptions: {
-    connectString: `${dbHost}:${dbPort}/${dbService}`
-  },
+  dialectOptions,
   logging: false
 });
 
 export const connectDB = async () => {
   try {
     await sequelize.authenticate();
-    console.log(`SQL Database Connected to Oracle using: ${dbHost}:${dbPort}/${dbService}`);
+    if (dbWalletPath) {
+      console.log(`SQL Database Connected to Oracle Cloud via Wallet: ${dbService}`);
+    } else {
+      console.log(`SQL Database Connected to Oracle using: ${dbHost}:${dbPort}/${dbService}`);
+    }
     // Import models before syncing to register them with sequelize
     const { User, Category } = await import('./models.js');
 
