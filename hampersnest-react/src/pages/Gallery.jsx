@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
+import SEO from '../components/SEO';
 
 const API_BASE = window.location.hostname === 'localhost' || window.location.hostname.endsWith('.localhost')
   ? 'http://localhost:5000'
@@ -135,8 +136,26 @@ export default function Gallery() {
     navigate(`/product/${product.id}`);
   };
 
+  const gallerySchema = {
+    "@context": "https://schema.org",
+    "@type": "ImageGallery",
+    "name": "Hampers Nest Gift Showcase",
+    "description": "Exquisite return gift designs, customized packaging styles, and celebration setups in Hyderabad.",
+    "url": window.location.href,
+    "provider": {
+      "@type": "LocalBusiness",
+      "name": "Hampers Nest"
+    }
+  };
+
   return (
     <div className="page-container">
+      <SEO 
+        title="Luxury Gifting Gallery & Custom Portfolio | Hampers Nest"
+        description="Browse our gallery of past custom curations, wedding return gifts, and baby shower box setups crafted in Hyderabad."
+        keywords="gift gallery, portfolio, custom return gift images, hampersnest showcase"
+        schema={gallerySchema}
+      />
       {/* Header Banner */}
       <div className="page-header-banner">
         <div className="container" style={{ padding: 0 }}>

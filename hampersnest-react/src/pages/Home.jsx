@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useCurrency } from '../context/CurrencyContext';
 import { products } from '../data/products';
+import SEO from '../components/SEO';
+import ProductCard from '../components/ProductCard';
 
 const testimonials = [
   {
@@ -72,8 +74,56 @@ export default function Home() {
     setQuoteModalOpen(true);
   };
 
+  const homeSchema = {
+    "@context": "https://schema.org",
+    "@type": "LocalBusiness",
+    "name": "Hampers Nest",
+    "image": window.location.origin + "/assets/hero_banner.webp",
+    "@id": window.location.origin + "/#localbusiness",
+    "url": window.location.origin,
+    "telephone": "+917989202194",
+    "priceRange": "₹₹",
+    "address": {
+      "@type": "PostalAddress",
+      "streetAddress": "Jubilee Hills",
+      "addressLocality": "Hyderabad",
+      "addressRegion": "Telangana",
+      "postalCode": "500033",
+      "addressCountry": "IN"
+    },
+    "geo": {
+      "@type": "GeoCoordinates",
+      "latitude": 17.4278,
+      "longitude": 78.4056
+    },
+    "openingHoursSpecification": {
+      "@type": "OpeningHoursSpecification",
+      "dayOfWeek": [
+        "Monday",
+        "Tuesday",
+        "Wednesday",
+        "Thursday",
+        "Friday",
+        "Saturday",
+        "Sunday"
+      ],
+      "opens": "09:00",
+      "closes": "21:00"
+    },
+    "sameAs": [
+      "https://facebook.com/hampersnest",
+      "https://instagram.com/hampersnest"
+    ]
+  };
+
   return (
     <div style={{ overflow: 'hidden' }}>
+      <SEO 
+        title="Hampers Nest | Premium Customized Gift Hampers & Return Gifts Hyderabad"
+        description="Discover premium customized gift hampers, luxury wedding return gifts, baby shower boxes, housewarming kits, and corporate gifts by Hampers Nest Hyderabad. Ship across India."
+        keywords="wedding return gifts Hyderabad, customized gift hampers, baby shower gifts Hyderabad, brass items return gifts, corporate gift sets, luxury gifting Hyderabad, hampersnest, hamspersnest"
+        schema={homeSchema}
+      />
       {/* LUXURY HERO */}
       <section className="luxury-hero" id="hero">
         <div className="hero-particles" aria-hidden="true">

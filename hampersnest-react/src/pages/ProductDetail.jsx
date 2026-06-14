@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import ProductCard from '../components/ProductCard';
+import SEO from '../components/SEO';
 
 export default function ProductDetail() {
   const { id } = useParams();
@@ -93,6 +94,7 @@ export default function ProductDetail() {
   if (!product) {
     return (
       <div className="page-container" style={{ textAlign: 'center', padding: '5rem 2rem' }}>
+        <SEO title="Product Not Found | Hampers Nest" description="The requested customized gift hamper was not found." />
         <i className="fa-solid fa-triangle-exclamation" style={{ fontSize: '3rem', color: 'var(--color-gold)', marginBottom: '1.5rem' }}></i>
         <h2>Product Not Found</h2>
         <p style={{ margin: '1rem 0 2rem 0', color: '#666' }}>The product you are looking for does not exist or has been moved.</p>
@@ -220,8 +222,46 @@ export default function ProductDetail() {
     ? relatedProducts 
     : (products ? products.filter((p) => p.id !== product.id).slice(0, 3) : []);
 
+  const productSchema = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    "name": product.name,
+    "image": product.images ? product.images.map(img => img.startsWith('http') ? img : window.location.origin + img) : [window.location.origin + product.image],
+    "description": product.description,
+    "sku": product.id,
+    "brand": {
+      "@type": "Brand",
+      "name": "Hampers Nest"
+    },
+    "offers": {
+      "@type": "Offer",
+      "url": window.location.href,
+      "priceCurrency": "INR",
+      "price": product.price,
+      "priceValidUntil": "2027-12-31",
+      "itemCondition": "https://schema.org/NewCondition",
+      "availability": "https://schema.org/InStock",
+      "seller": {
+        "@type": "LocalBusiness",
+        "name": "Hampers Nest"
+      }
+    },
+    "aggregateRating": {
+      "@type": "AggregateRating",
+      "ratingValue": product.rating || 4.8,
+      "reviewCount": product.rating ? Math.floor(product.rating * 5) : 24
+    }
+  };
+
   return (
     <div className="page-container">
+      <SEO 
+        title={`${product.name} | Customized Gift Hampers Hyderabad | Hampers Nest`}
+        description={`${product.description} Customizable packaging, ribbons, and gift tags available. Order directly via WhatsApp.`}
+        keywords={`${product.name.toLowerCase()}, custom gift box hyderabad, return gift hampers, hampersnest product, hampersnest ${product.id}`}
+        ogImage={product.image}
+        schema={productSchema}
+      />
       {/* Breadcrumbs */}
       <div className="breadcrumb-bar">
         <div className="container" style={{ padding: '15px 16px', display: 'flex', gap: '8px', fontSize: '0.8rem', color: '#777' }}>

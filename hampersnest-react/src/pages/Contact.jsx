@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
+import SEO from '../components/SEO';
 
 export default function Contact() {
   const { cart, cartCount, cartTotal } = useCart();
@@ -98,8 +99,35 @@ export default function Contact() {
     }, 1800);
   };
 
+  const contactSchema = {
+    "@context": "https://schema.org",
+    "@type": "ContactPage",
+    "name": "Contact Hampers Nest",
+    "description": "Contact our curation expert team in Hyderabad for bulk orders, wedding return gifts, baby shower boxes, and custom hampers.",
+    "url": window.location.href,
+    "mainEntity": {
+      "@type": "LocalBusiness",
+      "name": "Hampers Nest",
+      "telephone": "+917989202194",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "Jubilee Hills",
+        "addressLocality": "Hyderabad",
+        "addressRegion": "Telangana",
+        "postalCode": "500033",
+        "addressCountry": "IN"
+      }
+    }
+  };
+
   return (
     <div className="page-container">
+      <SEO 
+        title="Contact Our Gifting Experts | Hampers Nest Hyderabad"
+        description="Contact Hampers Nest Hyderabad for bulk orders, wedding consultations, and customized gifting queries. Get a quick quote via WhatsApp or phone."
+        keywords="contact hampersnest, bulk return gifts hyderabad, wedding gifts consultation, custom hamper enquiry"
+        schema={contactSchema}
+      />
       {/* Header Banner */}
       <div className="page-header-banner">
         <div className="container" style={{ padding: 0 }}>

@@ -3,6 +3,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { products, MASTER_CATEGORIES } from '../data/products';
 import { useCart } from '../context/CartContext';
 import { useCurrency } from '../context/CurrencyContext';
+import SEO from '../components/SEO';
 
 export default function Collections() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -144,8 +145,40 @@ export default function Collections() {
     setSelectedProductForModal(product);
   };
 
+  const collectionSchema = {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    "name": activeCategory === 'All' ? "All Gift Collections" : `${getCategoryLabel(activeCategory)} Gift Hampers`,
+    "description": `Premium customized return gifts and luxury hampers for ${activeCategory === 'All' ? 'weddings, baby showers, housewarmings, and corporate events' : getCategoryLabel(activeCategory)}.`,
+    "url": window.location.href,
+    "provider": {
+      "@type": "LocalBusiness",
+      "name": "Hampers Nest",
+      "image": window.location.origin + "/assets/hero_banner.webp",
+      "telephone": "+917989202194",
+      "priceRange": "₹₹",
+      "address": {
+        "@type": "PostalAddress",
+        "addressLocality": "Hyderabad",
+        "addressCountry": "IN"
+      }
+    }
+  };
+
   return (
     <div className="page-container">
+      <SEO 
+        title={activeCategory === 'All' 
+          ? "Shop Premium Gift Hampers & Return Gifts | Hampers Nest" 
+          : `Shop Premium ${getCategoryLabel(activeCategory)} Return Gifts | Hampers Nest`}
+        description={activeCategory === 'All'
+          ? "Browse our collections of hand-crafted return gifts, wedding hampers, housewarming kits, and corporate gifting. Custom styling and ribbon packaging available."
+          : `Explore luxury curated ${getCategoryLabel(activeCategory)} return gifts and gift hampers by Hampers Nest. Custom packaging and quick delivery options.`}
+        keywords={activeCategory === 'All'
+          ? "gift collections, return gifts hyderabad, premium hampers, custom hampersnest, hampersnest collections"
+          : `${getCategoryLabel(activeCategory).toLowerCase()} return gifts, ${getCategoryLabel(activeCategory).toLowerCase()} hampers hyderabad, hampersnest`}
+        schema={collectionSchema}
+      />
       {/* Header Banner */}
       <div className="page-header-banner">
         <div className="container" style={{ padding: 0 }}>

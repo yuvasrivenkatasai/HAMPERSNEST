@@ -1,5 +1,5 @@
 import React from 'react';
-import { HashRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { CartProvider, useCart } from './context/CartContext';
 import { CurrencyProvider } from './context/CurrencyContext';
 import Header from './components/Header';

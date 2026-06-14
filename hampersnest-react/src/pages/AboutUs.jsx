@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import SEO from '../components/SEO';
 
 const visionPillars = [
   {
@@ -42,8 +43,33 @@ export default function AboutUs() {
     return () => observer.disconnect();
   }, []);
 
+  const aboutSchema = {
+    "@context": "https://schema.org",
+    "@type": "AboutPage",
+    "name": "About Hampers Nest",
+    "description": "Learn about the story, core philosophy, and artisanal curation of Hampers Nest Hyderabad.",
+    "url": window.location.href,
+    "mainEntity": {
+      "@type": "LocalBusiness",
+      "name": "Hampers Nest",
+      "image": window.location.origin + "/assets/hero_banner.webp",
+      "telephone": "+917989202194",
+      "address": {
+        "@type": "PostalAddress",
+        "addressLocality": "Hyderabad",
+        "addressCountry": "IN"
+      }
+    }
+  };
+
   return (
     <div className="page-container">
+      <SEO 
+        title="About Us | Luxury Curation & Philosophy | Hampers Nest"
+        description="Read the story behind Hampers Nest Hyderabad. We partner with local artisans to craft sustainable, highly customized return gifts and festival hampers."
+        keywords="about hampersnest, gifting history hyderabad, return gift curators, custom gift boxes hyderabad"
+        schema={aboutSchema}
+      />
       {/* Header Banner */}
       <div className="page-header-banner">
         <div className="container" style={{ padding: 0 }}>

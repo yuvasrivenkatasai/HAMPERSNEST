@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
+import SEO from '../components/SEO';
 
 export default function FeaturedGifts() {
   const navigate = useNavigate();
@@ -25,8 +26,33 @@ export default function FeaturedGifts() {
     return () => observer.disconnect();
   }, []);
 
+  const featuredSchema = {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    "name": "Featured Gifting Collection",
+    "description": "Discover our handpicked premium gift hampers and return gift packs crafted in Hyderabad.",
+    "url": window.location.href,
+    "provider": {
+      "@type": "LocalBusiness",
+      "name": "Hampers Nest",
+      "image": window.location.origin + "/assets/hero_banner.webp",
+      "telephone": "+917989202194",
+      "address": {
+        "@type": "PostalAddress",
+        "addressLocality": "Hyderabad",
+        "addressCountry": "IN"
+      }
+    }
+  };
+
   return (
     <div className="page-container">
+      <SEO 
+        title="Curator's Choice: Featured Luxury Hampers | Hampers Nest"
+        description="Explore our most loved customized gift hampers. Handpicked and tailored perfectly for premium weddings, baby showers, and grand celebrations."
+        keywords="featured hampers, premium return gifts, best gift hampers hyderabad, hampersnest best sellers"
+        schema={featuredSchema}
+      />
       {/* Header Banner */}
       <div className="page-header-banner">
         <div className="container" style={{ padding: 0 }}>
