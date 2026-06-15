@@ -38,8 +38,15 @@ sequelize = new Sequelize({
   username: dbUser,
   password: dbPassword,
   dialectOptions,
-  logging: false
+  logging: false,
+  pool: {
+    max: 3,
+    min: 0,
+    idle: 5000,
+    evict: 5000
+  }
 });
+
 
 export const connectDB = async () => {
   try {
