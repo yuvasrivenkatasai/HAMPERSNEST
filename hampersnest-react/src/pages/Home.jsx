@@ -270,15 +270,9 @@ export default function Home() {
                     </button>
                     <Link
                       to={`/product/${product.id}`}
-                      className="card-link btn"
-                      style={{ 
-                        color: 'var(--color-purple)', 
-                        borderColor: 'var(--color-purple)', 
-                        border: '1px solid', 
-                        background: 'transparent' 
-                      }}
+                      className="card-link-text"
                     >
-                      View Details <i className="fa-solid fa-chevron-right"></i>
+                      View Details <i className="fa-solid fa-arrow-right"></i>
                     </Link>
                   </div>
                 </div>

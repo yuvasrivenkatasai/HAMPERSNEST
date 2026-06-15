@@ -6986,25 +6986,50 @@ footer h4,
 .collection-card-action-row {
   display: flex;
   flex-direction: row;
-  gap: 8px;
-  margin-top: 4px;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: auto;
+  width: 100%;
 }
+.collection-card-action-row > .btn,
 .collection-card-action-row > button {
-  flex: 1;
-  height: 34px;
-  padding: 0 !important;
+  flex: 0 1 auto;
+}
+.card-link-text {
+  color: var(--color-purple);
+  font-weight: 600;
+  font-size: 0.85rem;
+  text-decoration: none;
+  background: transparent;
+  border: none;
+  padding: 0;
+  box-shadow: none;
   display: inline-flex;
   align-items: center;
-  justify-content: center;
-  font-size: 0.75rem !important;
-  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+.card-link-text i {
+  margin-left: 6px;
+  font-size: 0.75rem;
+  transition: transform 0.3s ease;
+}
+.card-link-text:hover {
+  color: var(--color-purple-dark);
+}
+.card-link-text:hover i {
+  transform: translateX(4px);
 }
 @media (max-width: 767px) {
   .collection-card-action-row {
     flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
   }
-  .collection-card-action-row > button {
+  .card-link-text {
+    justify-content: center;
     width: 100%;
+    padding: 0.5rem 0;
   }
 }
 /* BUST CACHE */

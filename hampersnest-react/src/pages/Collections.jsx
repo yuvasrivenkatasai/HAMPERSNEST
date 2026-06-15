@@ -433,15 +433,9 @@ function CollectionCard({ product, animationDelay, onAddToCart, onViewDetails })
           </button>
           <button
             onClick={onViewDetails}
-            className="card-link btn"
-            style={{ 
-              color: 'var(--color-purple)', 
-              borderColor: 'var(--color-purple)', 
-              border: '1px solid', 
-              background: 'transparent' 
-            }}
+            className="card-link-text"
           >
-            View Details <i className="fa-solid fa-chevron-right"></i>
+            View Details <i className="fa-solid fa-arrow-right"></i>
           </button>
         </div>
       </div>
