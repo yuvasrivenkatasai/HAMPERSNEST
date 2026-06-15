@@ -54,8 +54,8 @@ router.post('/', protect, upload.single('image'), async (req, res) => {
   }
 
   try {
-    // Parse target directory from query param (allow products, gallery, general)
-    const allowedFolders = ['products', 'gallery', 'general'];
+    // Parse target directory from query param (allow products, gallery, general, hero)
+    const allowedFolders = ['products', 'gallery', 'general', 'hero'];
     const folder = allowedFolders.includes(req.query.folder) ? req.query.folder : 'general';
 
     // Generate a unique filename with .webp extension
@@ -132,7 +132,7 @@ router.post('/video', protect, upload.single('video'), async (req, res) => {
   }
 
   try {
-    const allowedFolders = ['products', 'gallery', 'general'];
+    const allowedFolders = ['products', 'gallery', 'general', 'hero'];
     const folder = allowedFolders.includes(req.query.folder) ? req.query.folder : 'general';
 
     // Get original extension
