@@ -1,10 +1,11 @@
 // Detect API base URL dynamically
 // In development, Vite runs on port 5173, so point to backend on port 5000.
 // In production, we serve from the same domain/port, so use relative path.
-export const API_BASE = 
-  window.location.hostname === 'localhost' || window.location.hostname.endsWith('.localhost')
+export const API_BASE = import.meta.env.VITE_API_URL || 
+  (window.location.hostname === 'localhost' || window.location.hostname.endsWith('.localhost')
     ? `${window.location.protocol}//localhost:5000`
-    : '';
+    : '');
+
 
 export const apiRequest = async (endpoint, options = {}) => {
   const token = localStorage.getItem('adminToken');

@@ -67,75 +67,20 @@ app.use('/api/gallery', galleryRoutes);
 app.use('/api/categories', categoryRoutes);
 
 
-// Subdomain and static serving configuration
+// Static files and uploads configuration
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-
-const adminBuildPath = path.join(__dirname, '../hampersnest-admin/dist');
-const clientBuildPath = path.join(__dirname, '../hampersnest-react/dist');
 
 // Serve uploaded images statically
 app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
 
-// Dynamic subdomain static router
-app.use((req, res, next) => {
-  const host = req.headers.host || '';
-  
-  // Skip static files serving for API calls
-  if (req.path.startsWith('/api')) {
-    return next();
-  }
-
-  if (host.startsWith('admin.')) {
-    // 1. ADMIN SUBDOMAIN
-    const filePath = path.join(adminBuildPath, req.path);
-    res.sendFile(filePath, (err) => {
-      if (err) {
-        // If an asset is requested on admin subdomain but not found, try to search storefront assets directory
-        if (req.path.startsWith('/assets/')) {
-          const storefrontAssetPath = path.join(clientBuildPath, req.path);
-          return res.sendFile(storefrontAssetPath, (assetErr) => {
-            if (assetErr) {
-              res.status(404).end();
-            }
-          });
-        }
-
-        // Fallback to Admin SPA (React Routing)
-        res.sendFile(path.join(adminBuildPath, 'index.html'), (fallbackErr) => {
-          if (fallbackErr) {
-            res.status(500).send(`
-              <h3>Admin dashboard distribution folder not found</h3>
-              <p>Please compile the admin application first by running:</p>
-              <code>cd hampersnest-admin && npm run build</code>
-            `);
-          }
-        });
-      }
-    });
-  } else {
-    // 2. CLIENT MAIN STOREFRONT
-    const filePath = path.join(clientBuildPath, req.path);
-    res.sendFile(filePath, (err) => {
-      if (err) {
-        // Fallback to Customer SPA
-        res.sendFile(path.join(clientBuildPath, 'index.html'), (fallbackErr) => {
-          if (fallbackErr) {
-            res.status(500).send(`
-              <h3>Customer storefront distribution folder not found</h3>
-              <p>Please compile the React application first by running:</p>
-              <code>cd hampersnest-react && npm run build</code>
-            `);
-          }
-        });
-      }
-    });
-  }
+// Simple root status check
+app.get('/', (req, res) => {
+  res.json({ message: 'HampersNest Backend API is running successfully.' });
 });
 
 // Start listening
 app.listen(PORT, () => {
   console.log(`HampersNest Backend running on port ${PORT}`);
-  console.log(`- Customer Storefront: http://localhost:${PORT}`);
-  console.log(`- Admin Dashboard:    http://admin.localhost:${PORT}`);
+  console.log(`- API Status: http://localhost:${PORT}`);
 });

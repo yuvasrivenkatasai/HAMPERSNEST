@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { API_BASE } from '../config.js';
 
 const CartContext = createContext();
 
@@ -38,9 +39,6 @@ export const CartProvider = ({ children }) => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const API_BASE = window.location.hostname === 'localhost' || window.location.hostname.endsWith('.localhost')
-          ? 'http://localhost:5000'
-          : '';
         const response = await fetch(`${API_BASE}/api/products?nolimit=true`);
         if (response.ok) {
           const data = await response.json();
@@ -61,9 +59,6 @@ export const CartProvider = ({ children }) => {
 
     const fetchSettings = async () => {
       try {
-        const API_BASE = window.location.hostname === 'localhost' || window.location.hostname.endsWith('.localhost')
-          ? 'http://localhost:5000'
-          : '';
         const response = await fetch(`${API_BASE}/api/settings`);
         if (response.ok) {
           const data = await response.json();
@@ -142,9 +137,6 @@ export const CartProvider = ({ children }) => {
     // Record click analytics to backend
     const recordClick = async () => {
       try {
-        const API_BASE = window.location.hostname === 'localhost' || window.location.hostname.endsWith('.localhost')
-          ? 'http://localhost:5000'
-          : '';
         await fetch(`${API_BASE}/api/products/${product.id}/click`, {
           method: 'POST'
         });

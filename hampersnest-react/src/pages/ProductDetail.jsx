@@ -3,6 +3,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import ProductCard from '../components/ProductCard';
 import SEO from '../components/SEO';
+import { API_BASE } from '../config.js';
 
 export default function ProductDetail() {
   const { id } = useParams();
@@ -24,9 +25,6 @@ export default function ProductDetail() {
 
       setLoadingLocal(true);
       try {
-        const API_BASE = window.location.hostname === 'localhost' || window.location.hostname.endsWith('.localhost')
-          ? 'http://localhost:5000'
-          : '';
         const response = await fetch(`${API_BASE}/api/products/${id}`);
         if (response.ok) {
           const data = await response.json();
@@ -85,9 +83,6 @@ export default function ProductDetail() {
     if (id) {
       const recordView = async () => {
         try {
-          const API_BASE = window.location.hostname === 'localhost' || window.location.hostname.endsWith('.localhost')
-            ? 'http://localhost:5000'
-            : '';
           await fetch(`${API_BASE}/api/products/${id}/view`, {
             method: 'POST'
           });
@@ -216,9 +211,6 @@ export default function ProductDetail() {
     // Record direct WhatsApp click analytics to backend
     const recordDirectClick = async () => {
       try {
-        const API_BASE = window.location.hostname === 'localhost' || window.location.hostname.endsWith('.localhost')
-          ? 'http://localhost:5000'
-          : '';
         await fetch(`${API_BASE}/api/products/${product.id}/click`, {
           method: 'POST'
         });
