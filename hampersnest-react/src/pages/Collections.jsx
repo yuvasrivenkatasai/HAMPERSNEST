@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useCurrency } from '../context/CurrencyContext';
 import SEO from '../components/SEO';
@@ -8,6 +8,7 @@ export default function Collections() {
   const [searchParams, setSearchParams] = useSearchParams();
   const queryCategory = searchParams.get('category');
   const { products, addToCart, setSelectedProductForModal, settings } = useCart();
+  const navigate = useNavigate();
 
   const [activeCategory, setActiveCategory] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
@@ -141,7 +142,8 @@ export default function Collections() {
   };
 
   const handleViewDetails = (product) => {
-    setSelectedProductForModal(product);
+    navigate(`/product/${product.id}`);
+    window.scrollTo(0, 0);
   };
 
   const collectionSchema = {
@@ -422,20 +424,24 @@ function CollectionCard({ product, animationDelay, onAddToCart, onViewDetails })
         <p className="card-price">
           <span className="price-prefix">From </span>{formatPrice(product.price)}
         </p>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '4px' }}>
-          <button
-            onClick={onViewDetails}
-            className="card-link btn btn-secondary btn-quick-enquiry"
-            style={{ fontSize: '0.72rem', padding: '0.45rem 0.8rem' }}
-          >
-            View Details <i className="fa-solid fa-chevron-right"></i>
-          </button>
+        <div className="collection-card-action-row">
           <button
             onClick={onAddToCart}
             className="shop-card-btn"
-            style={{ width: '100%', justifyContent: 'center', height: '34px' }}
           >
             <i className="fa-solid fa-cart-shopping"></i> Add To Cart
+          </button>
+          <button
+            onClick={onViewDetails}
+            className="card-link btn"
+            style={{ 
+              color: 'var(--color-purple)', 
+              borderColor: 'var(--color-purple)', 
+              border: '1px solid', 
+              background: 'transparent' 
+            }}
+          >
+            View Details <i className="fa-solid fa-chevron-right"></i>
           </button>
         </div>
       </div>
