@@ -74,19 +74,7 @@ export default function ProductModal() {
     handleClose();
   };
 
-  const handleWhatsappOrder = () => {
-    const whatsappNumber = '917989202194';
-    const message = encodeURIComponent(
-      `Hi Hampers Nest! I would like to order:\n\n` +
-      `*${product.name}*\n` +
-      `Qty: ${quantity}\n` +
-      `Price: ${formatPrice(product.price * quantity)}\n\n` +
-      (giftTag ? `Gift Tag Message: "${giftTag}"\n` : '') +
-      `\nPlease confirm availability and delivery details. Thank you!`
-    );
-    window.open(`https://api.whatsapp.com/send?phone=${whatsappNumber}&text=${message}`, '_blank');
-    handleClose();
-  };
+
 
   const handleRequestCustomization = () => {
     handleClose();
@@ -310,16 +298,7 @@ export default function ProductModal() {
                     Add To Cart <i className="fa-solid fa-cart-shopping" style={{ marginLeft: '6px' }}></i>
                   </button>
 
-                  {/* Order on WhatsApp */}
-                  <button
-                    type="button"
-                    onClick={handleWhatsappOrder}
-                    className="modal-whatsapp-btn"
-                    style={{ flexShrink: 0 }}
-                  >
-                    <i className="fa-brands fa-whatsapp"></i>
-                    Order on WhatsApp
-                  </button>
+
 
                   {/* Wishlist */}
                   <button

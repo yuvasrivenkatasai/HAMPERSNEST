@@ -184,47 +184,7 @@ export default function ProductDetail() {
     });
   };
 
-  // Generate WhatsApp Direct Order Link
-  const handleWhatsAppOrder = (e) => {
-    e.preventDefault();
-    const whatsappBaseNumber = '917989202194';
 
-    // Record direct WhatsApp click analytics to backend
-    const recordDirectClick = async () => {
-      try {
-        await fetch(`${API_BASE}/api/products/${product.id}/click`, {
-          method: 'POST'
-        });
-      } catch (err) {
-        console.warn('Click tracking server connection failed:', err);
-      }
-    };
-    recordDirectClick();
-
-    // Build custom description
-    let detailsStr = `*${product.name}* (Qty: ${quantity})\n`;
-    detailsStr += `• Base Price: ₹${product.price} each\n`;
-    
-    if (giftTag.trim()) {
-      detailsStr += `• Gift Tag Message: "${giftTag.trim()}"\n`;
-    }
-
-    const activeAddOns = Object.keys(selectedAddOns)
-      .filter((key) => selectedAddOns[key])
-      .map((key) => `+ ${addOnDetails[key].name} (₹${addOnDetails[key].price})`);
-
-    if (activeAddOns.length > 0) {
-      detailsStr += `• Add-ons:\n   ${activeAddOns.join('\n   ')}\n`;
-    }
-
-    detailsStr += `\n*Total Estimated Price:* ₹${totalPrice}`;
-
-    const text = encodeURIComponent(
-      `Hi Hampers Nest!\n\nI want to order this customized hamper:\n\n${detailsStr}\n\nPlease confirm availability. Thank you!`
-    );
-
-    window.open(`https://api.whatsapp.com/send?phone=${whatsappBaseNumber}&text=${text}`, '_blank');
-  };
 
   // Filter Related Products (Same category, excluding current)
   const relatedProducts = products ? products
@@ -537,18 +497,8 @@ export default function ProductDetail() {
                 </button>
               </div>
 
-              {/* WhatsApp Checkout Button */}
-              <button
-                type="button"
-                onClick={handleWhatsAppOrder}
-                className="btn btn-whatsapp buy-btn-whatsapp"
-                style={{ width: '100%', height: '48px', marginTop: '0.8rem', padding: 0 }}
-              >
-                <i className="fa-brands fa-whatsapp" style={{ marginRight: '6px', fontSize: '1.2rem' }}></i> Order via WhatsApp
-              </button>
-
               {/* Delivery Information Block */}
-              <div style={{ marginTop: '1.5rem', padding: '1rem', background: '#F8F9FA', borderRadius: '8px', border: '1px solid #E9ECEF' }}>
+              <div style={{ marginTop: '24px', padding: '1rem', background: '#F8F9FA', borderRadius: '8px', border: '1px solid #E9ECEF' }}>
                 <h4 style={{ margin: '0 0 8px 0', fontSize: '0.9rem', color: 'var(--color-charcoal)' }}>
                   <i className="fa-solid fa-truck" style={{ marginRight: '6px', color: 'var(--color-gold)' }}></i> Delivery Information
                 </h4>
