@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import SEO from '../components/SEO';
+import { API_BASE } from '../config.js';
 
 export default function Contact() {
   const { cart, cartCount, cartTotal } = useCart();
@@ -74,9 +75,6 @@ export default function Contact() {
     };
 
     try {
-      const API_BASE = window.location.hostname === 'localhost' || window.location.hostname.endsWith('.localhost')
-        ? 'http://localhost:5000'
-        : '';
       await fetch(`${API_BASE}/api/inquiries`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

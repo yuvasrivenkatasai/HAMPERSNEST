@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useCart } from '../context/CartContext';
+import { API_BASE } from '../config.js';
 import { useCurrency } from '../context/CurrencyContext';
 
 export default function CartDrawer() {
@@ -88,9 +89,6 @@ export default function CartDrawer() {
 
     let orderId = null;
     try {
-      const API_BASE = window.location.hostname === 'localhost' || window.location.hostname.endsWith('.localhost')
-        ? 'http://localhost:5000'
-        : '';
       const response = await fetch(`${API_BASE}/api/orders`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
