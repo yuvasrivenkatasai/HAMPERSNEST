@@ -16,7 +16,10 @@ export default function Settings() {
     currency: 'INR',
     shippingRate: '0',
     announcementText: '',
-    announcementActive: false
+    announcementActive: false,
+    businessAddress: 'Hyderabad, Telangana, India',
+    googleMapsUrl: 'https://www.google.com/maps/place/Hampers+Nest/@17.419195,78.6025405',
+    whatsappNumber: '917989202194'
   });
   const [settingsLoading, setSettingsLoading] = useState(true);
   const [settingsMessage, setSettingsMessage] = useState(null);
@@ -182,7 +185,7 @@ export default function Settings() {
                 />
               </div>
               
-              <div className="form-group" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <div className="form-group" style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '20px' }}>
                 <input 
                   type="checkbox" 
                   name="announcementActive"
@@ -192,6 +195,46 @@ export default function Settings() {
                   style={{ width: '18px', height: '18px' }}
                 />
                 <label htmlFor="announcementActive" style={{ margin: 0, fontWeight: 500 }}>Show Announcement Banner</label>
+              </div>
+
+              <h4 style={{ color: 'var(--color-purple)', borderBottom: '1px solid var(--color-beige)', paddingBottom: '8px', marginBottom: '15px' }}>
+                <i className="fa-solid fa-location-dot"></i> Studio & Contact Info
+              </h4>
+
+              <div className="form-group">
+                <label className="form-label">Business Address</label>
+                <input 
+                  type="text" 
+                  name="businessAddress"
+                  className="form-input" 
+                  value={settingsData.businessAddress}
+                  onChange={handleSettingsChange}
+                  placeholder="e.g. Hyderabad, Telangana, India"
+                />
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Google Maps Share URL</label>
+                <input 
+                  type="url" 
+                  name="googleMapsUrl"
+                  className="form-input" 
+                  value={settingsData.googleMapsUrl}
+                  onChange={handleSettingsChange}
+                  placeholder="https://www.google.com/maps/..."
+                />
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">WhatsApp Number (with country code)</label>
+                <input 
+                  type="text" 
+                  name="whatsappNumber"
+                  className="form-input" 
+                  value={settingsData.whatsappNumber}
+                  onChange={handleSettingsChange}
+                  placeholder="e.g. 917989202194"
+                />
               </div>
 
               <button type="submit" className="btn-admin mt-2">

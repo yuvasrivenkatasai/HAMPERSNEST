@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { apiRequest } from '../utils/api';
+import CatalogExportModal from '../components/CatalogExportModal';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -33,6 +34,31 @@ export default function Dashboard() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  
+  // Catalog Modal state for Dashboard
+  const [catalogModalOpen, setCatalogModalOpen] = useState(false);
+  const [catalogProducts, setCatalogProducts] = useState([]);
+  const [catalogCategories, setCatalogCategories] = useState([]);
+  const [catalogLoading, setCatalogLoading] = useState(false);
+
+  const openCatalogModal = async () => {
+    setCatalogModalOpen(true);
+    if (catalogProducts.length === 0) {
+      setCatalogLoading(true);
+      try {
+        const [productsData, categoriesData] = await Promise.all([
+          apiRequest('/api/products?all=true'),
+          apiRequest('/api/categories')
+        ]);
+        setCatalogProducts(productsData.products || productsData.data || productsData.rows || (Array.isArray(productsData) ? productsData : []));
+        setCatalogCategories(Array.isArray(categoriesData) ? categoriesData : []);
+      } catch (err) {
+        console.error('Failed to load catalog data', err);
+      } finally {
+        setCatalogLoading(false);
+      }
+    }
+  };
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -124,6 +150,12 @@ export default function Dashboard() {
 
   return (
     <div style={{ paddingBottom: '2rem' }}>
+      <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '1rem' }}>
+        <button className="btn-admin" style={{ background: 'var(--color-gold)' }} onClick={openCatalogModal}>
+          <i className="fa-solid fa-file-pdf"></i> Generate PDF Catalog
+        </button>
+      </div>
+
       {/* KPI Cards Grid */}
       <div className="stats-grid" style={{ marginBottom: '1.5rem' }}>
         <div className="stat-card revenue">
@@ -335,6 +367,14 @@ export default function Dashboard() {
           </div>
         </div>
       </div>
+
+      {/* CATALOG EXPORT MODAL */}
+      <CatalogExportModal 
+        isOpen={catalogModalOpen} 
+        onClose={() => setCatalogModalOpen(false)} 
+        products={catalogProducts}
+        categories={catalogCategories}
+      />
     </div>
   );
 }

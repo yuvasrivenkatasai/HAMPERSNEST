@@ -87,7 +87,7 @@
 
 html {
   font-size: 16px;
-  scroll-behavior: smooth;
+  /* scroll-behavior: smooth; */
   scroll-padding-top: 80px;
 }
 
@@ -307,7 +307,7 @@ header.scrolled {
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 40px;
-  height: 60px;
+  height: 85px;
   /* Reduced from 70px */
   display: flex;
   justify-content: space-between;
@@ -329,7 +329,7 @@ header.scrolled {
 }
 
 .logo-wrapper img {
-  height: 50px;
+  height: 55px !important;
   width: auto;
   object-fit: contain;
   transition: var(--transition-smooth);
@@ -337,30 +337,15 @@ header.scrolled {
 
 /* Desktop logo: 70-80px, brand 28px/600 */
 @media (min-width: 1025px) {
-  .logo-circle img {
-    height: 30px; /* Reduced to fit the small navbar */
-    width: auto;
-  }
-  .nav-container {
-    height:20px !important;
-  }
-
-  .brand-name {
-    font-size: 28px;
-    font-weight: 600;
+  .logo-wrapper img {
+    height: 50px;
   }
 }
 
 /* Mobile logo: 55-60px, brand 22px/600 */
 @media (max-width: 1024px) {
-  .logo-circle img {
-    height: 58px;
-    width: auto;
-  }
-
-  .brand-name {
-    font-size: 22px;
-    font-weight: 600;
+  .logo-wrapper img {
+    height: 70px;
   }
 }
 
@@ -5300,7 +5285,7 @@ footer h4,
    PHASE 9 — MOBILE LOGO SCALING
    ========================================== */
 @media (max-width: 767px) {
-  .logo-circle img {
+  .logo img {
     height: 60px;
   }
 
@@ -5465,7 +5450,6 @@ footer h4,
    PHASE 2+3 — COLLECTIONS PAGE 4-COL GRID
    ========================================== */
 
-/* Master Category Tabs */
 .master-category-tabs {
   display: flex;
   flex-wrap: wrap;
@@ -6631,7 +6615,7 @@ footer h4,
   }
 }
 
-/* ===========================================
+/* ==========================================
    BULK ORDERS — BRIGHT TEXT FIX
    =========================================== */
 .bulk-order-subtitle {
@@ -6653,7 +6637,7 @@ footer h4,
   border: 1px solid rgba(255, 255, 255, 0.25) !important;
 }
 
-/* ===========================================
+/* ==========================================
    DESKTOP NAVBAR REFINEMENT — min-width: 1024px
    Mobile / tablet navbar is NOT touched here.
    =========================================== */
@@ -6661,7 +6645,6 @@ footer h4,
 
   /* ── Navbar container height & grid layout ── */
   .nav-container {
-    height:  90px !important;
     padding: 0 40px !important;
     max-width: 1320px !important;
     /* Expands width to move branding left */
@@ -6683,9 +6666,9 @@ footer h4,
 
   /* ── Logo: Visually enlarged to bypass transparent padding ── */
   .logo-wrapper img {
-    height: 41px !important; /* Made larger to accommodate the horizontal logo */
+    height: 35px !important; /* Made larger to accommodate the horizontal logo */
     width: auto !important;
-    transform: scale(2.2) !important; /* Zoomed in to crop out extra padding */
+    transform: scale(2.4) !important; /* Zoomed in to crop out extra padding */
     transform-origin: left center !important;
   }
 
@@ -6773,6 +6756,8 @@ footer h4,
     line-height: 16px !important;
     padding: 0 4px !important;
   }
+}
+
   /* Custom Colors for the Call To Action Section */
 .cta-banner .cta-title {
   color: #FFFFFF !important; /* <-- Change this hex code to change the main title color */
@@ -6782,4 +6767,219 @@ footer h4,
   color: #FFFFFF !important; /* <-- Change this hex code to change the paragraph color */
 }
 
+/* ==========================================
+   MOBILE COLLECTIONS OPTIMIZATION
+   ========================================== */
+@media (max-width: 768px) {
+  /* 1. Hero Section */
+  .page-header-banner {
+    padding: 1.2rem 0 0.8rem 0 !important;
+    margin-bottom: 0.5rem !important;
+  }
+
+  /* 2. Premium Gifting label */
+  .page-header-banner .section-subtitle {
+    font-size: 0.7rem !important;
+    letter-spacing: 1px !important;
+    margin-bottom: 0.25rem !important;
+    display: inline-block;
+  }
+
+  /* 3. Our Collections heading */
+  .page-header-banner h2 {
+    font-size: 1.5rem !important;
+    line-height: 1.1 !important;
+    margin-bottom: 0.25rem !important;
+  }
+
+  /* 4. Description text */
+  .page-header-banner p {
+    font-size: 0.8rem !important;
+    margin-top: 0 !important;
+    margin-bottom: 0.75rem !important;
+  }
+
+  /* 5. Popular Search chips */
+  .trending-tag-btn {
+    padding: 0.25rem 0.6rem !important;
+    height: auto !important;
+    font-size: 0.65rem !important;
+    margin-bottom: 0.25rem !important;
+  }
+
+  .trending-tags-banner {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem !important;
+    justify-content: center;
+  }
+  
+  .trending-tags-banner .trending-label {
+    font-size: 0.7rem !important;
+    margin-bottom: 0.1rem !important;
+    width: 100%;
+  }
+
+  /* 6. Category filter pills */
+  .category-tab {
+    padding: 0.35rem 0.8rem !important;
+    font-size: 0.75rem !important;
+    margin-bottom: 0.25rem !important;
+  }
+  .category-tabs {
+    margin-bottom: 0.5rem !important;
+  }
+
+  /* 7. Search section */
+  .filter-bar {
+    margin-top: -0.5rem !important;
+    margin-bottom: 1rem !important;
+    padding: 0.75rem !important;
+    gap: 0.5rem !important;
+  }
+  
+  .search-input-wrapper input {
+    padding: 0.5rem 1rem 0.5rem 2rem !important;
+    font-size: 0.8rem !important;
+  }
+
+  .sort-select {
+    padding: 0.5rem 1rem !important;
+    font-size: 0.8rem !important;
+  }
 }
+
+/* ==========================================
+   STUDIO MAP SECTION
+   ========================================== */
+.studio-map-section {
+  padding: 5rem 0;
+  background: var(--color-white);
+  border-top: 1px solid var(--color-beige);
+  overflow: hidden;
+  opacity: 0;
+  transform: translateY(30px);
+  transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.studio-map-section.active {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.studio-map-header {
+  margin-bottom: 3rem;
+}
+
+.studio-map-desc {
+  color: var(--color-charcoal);
+  max-width: 600px;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+
+.studio-map-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+  align-items: center;
+}
+
+@media (min-width: 992px) {
+  .studio-map-grid {
+    grid-template-columns: 1.2fr 1fr;
+    gap: 3rem;
+  }
+}
+
+.studio-map-embed-wrapper {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: 24px;
+  overflow: hidden;
+  box-shadow: var(--shadow-premium);
+  border: 1px solid var(--color-beige);
+}
+
+@media (min-width: 992px) {
+  .studio-map-embed-wrapper {
+    aspect-ratio: 4 / 3;
+  }
+}
+
+.studio-map-info-card {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: 24px;
+  padding: 2.5rem;
+  box-shadow: var(--shadow-premium);
+}
+
+.info-card-content h3 {
+  font-size: 1.8rem;
+  color: var(--color-purple-dark);
+  margin-bottom: 1.5rem;
+  font-weight: 700;
+}
+
+.info-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 1.2rem;
+}
+
+.info-row i {
+  color: var(--color-gold);
+  font-size: 1.2rem;
+  margin-top: 4px;
+}
+
+.info-row p {
+  color: var(--color-charcoal);
+  margin: 0;
+  line-height: 1.6;
+  font-size: 0.95rem;
+}
+
+.studio-map-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--color-beige);
+}
+
+@media (min-width: 576px) {
+  .studio-map-actions {
+    flex-direction: row;
+  }
+  .studio-map-actions .btn {
+    flex: 1;
+    justify-content: center;
+  }
+}
+/* PRODUCT MEDIA GALLERY */
+.product-media-gallery { display: flex; flex-direction: column; gap: 15px; }
+.media-thumbnails { display: flex; gap: 10px; flex-wrap: wrap; }
+.thumbnail-item { width: 70px; height: 70px; border-radius: 8px; border: 2px solid transparent; cursor: pointer; overflow: hidden; opacity: 0.6; transition: 0.3s; position: relative; }
+.thumbnail-item.active { border-color: var(--color-purple); opacity: 1; }
+.thumbnail-item:hover { opacity: 1; }
+.thumbnail-item img, .thumbnail-item video { width: 100%; height: 100%; object-fit: cover; }
+.video-thumbnail { position: relative; width: 100%; height: 100%; background: #000; }
+.video-thumbnail i { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: rgba(255,255,255,0.8); font-size: 1.2rem; }
+.video-play-indicator { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.5); width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; pointer-events: none; }
+.video-play-indicator i { color: #fff; font-size: 1.5rem; margin-left: 5px; }
+/* GALLERY LIGHTBOX */
+.gallery-lightbox { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.9); z-index: 9999; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
+.gallery-lightbox.active { opacity: 1; pointer-events: auto; }
+.lightbox-content-wrapper { position: relative; width: 90vw; height: 90vh; display: flex; align-items: center; justify-content: center; }
+.lightbox-media { max-width: 100%; max-height: 100%; object-fit: contain; }
+.lightbox-close { position: absolute; top: 20px; right: 30px; background: none; border: none; color: #fff; font-size: 2rem; cursor: pointer; z-index: 10000; }
+.lightbox-prev, .lightbox-next { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(255,255,255,0.1); border: none; color: #fff; font-size: 2rem; padding: 20px 15px; cursor: pointer; transition: 0.3s; border-radius: 8px; z-index: 10000; }
+.lightbox-prev:hover, .lightbox-next:hover { background: rgba(255,255,255,0.3); }
+.lightbox-prev { left: 20px; }
+.lightbox-next { right: 20px; }

@@ -44,3 +44,43 @@ export const apiRequest = async (endpoint, options = {}) => {
 
   return response.json();
 };
+
+export const apiDownload = async (endpoint, filename) => {
+  const token = localStorage.getItem('adminToken');
+  
+  const headers = {
+    ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+  };
+
+  const response = await fetch(`${API_BASE}${endpoint}`, { headers });
+
+  if (response.status === 401) {
+    localStorage.removeItem('adminToken');
+    if (!window.location.pathname.endsWith('/login')) {
+      window.location.href = '/login';
+    }
+    throw new Error('Not authorized, login expired.');
+  }
+
+  if (!response.ok) {
+    // If it's a blob error, we can't always parse json, but we try
+    let errorMsg = `Request failed with status ${response.status}`;
+    try {
+      const errorData = await response.json();
+      errorMsg = errorData.message || errorMsg;
+    } catch (e) {
+      // Ignored
+    }
+    throw new Error(errorMsg);
+  }
+
+  const blob = await response.blob();
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  window.URL.revokeObjectURL(url);
+};

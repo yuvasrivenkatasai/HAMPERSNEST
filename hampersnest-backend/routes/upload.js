@@ -123,4 +123,73 @@ router.post('/', protect, upload.single('image'), async (req, res) => {
   }
 });
 
+// @desc    Upload video, bypass sharp, save to R2/Local
+// @route   POST /api/upload/video
+// @access  Private/Admin
+router.post('/video', protect, upload.single('video'), async (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ message: 'No video file uploaded' });
+  }
+
+  try {
+    const allowedFolders = ['products', 'gallery', 'general'];
+    const folder = allowedFolders.includes(req.query.folder) ? req.query.folder : 'general';
+
+    // Get original extension
+    const ext = path.extname(req.file.originalname) || '.mp4';
+    const filename = `vid-${Date.now()}-${Math.round(Math.random() * 1e9)}${ext}`;
+
+    const videoBuffer = req.file.buffer;
+    const sizeBytes = videoBuffer.length;
+    let sizeStr = '';
+    if (sizeBytes < 1024) sizeStr = `${sizeBytes} B`;
+    else if (sizeBytes < 1024 * 1024) sizeStr = `${(sizeBytes / 1024).toFixed(1)} KB`;
+    else sizeStr = `${(sizeBytes / (1024 * 1024)).toFixed(2)} MB`;
+
+    let videoUrl = '';
+
+    if (isR2Configured()) {
+      console.log(`R2 Credentials detected. Uploading video to Cloudflare R2 folder: ${folder}...`);
+      
+      const bucketName = process.env.R2_BUCKET_NAME;
+      const key = `${folder}/${filename}`;
+      const command = new PutObjectCommand({
+        Bucket: bucketName,
+        Key: key,
+        Body: videoBuffer,
+        ContentType: req.file.mimetype || 'video/mp4',
+      });
+
+      await r2Client.send(command);
+
+      const publicUrlBase = process.env.R2_PUBLIC_URL.endsWith('/') 
+        ? process.env.R2_PUBLIC_URL.slice(0, -1) 
+        : process.env.R2_PUBLIC_URL;
+        
+      videoUrl = `${publicUrlBase}/${key}`;
+      console.log(`Successfully uploaded video to R2: ${videoUrl}`);
+    } else {
+      console.log(`No R2 Credentials config. Falling back to local storage video uploads folder: ${folder}...`);
+      
+      const uploadDir = path.join(__dirname, `../public/uploads/${folder}`);
+      if (!fs.existsSync(uploadDir)) {
+        fs.mkdirSync(uploadDir, { recursive: true });
+      }
+
+      const filePath = path.join(uploadDir, filename);
+      await fs.promises.writeFile(filePath, videoBuffer);
+      
+      const host = req.get('host');
+      const protocol = req.protocol;
+      videoUrl = `${protocol}://${host}/uploads/${folder}/${filename}`;
+      console.log(`Successfully saved video locally: ${videoUrl}`);
+    }
+
+    res.status(200).json({ url: videoUrl, filename, size: sizeStr });
+  } catch (error) {
+    console.error('Video upload failed:', error);
+    res.status(500).json({ message: `Video upload failed: ${error.message}` });
+  }
+});
+
 export default router;

@@ -60,6 +60,10 @@ export const Product = sequelize.define('Product', {
     type: DataTypes.TEXT,
     allowNull: false
   },
+  images: {
+    type: DataTypes.JSON,
+    defaultValue: []
+  },
   videoUrls: {
     type: DataTypes.JSON,
     defaultValue: []

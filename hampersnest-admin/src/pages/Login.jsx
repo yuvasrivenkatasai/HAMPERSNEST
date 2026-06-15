@@ -40,12 +40,12 @@ export default function Login({ setToken }) {
     <div className="login-container">
       <div className="login-card">
         {/* Decorative Brand Logo */}
-        <div style={{ marginBottom: '1rem' }}>
-          <i className="fa-solid fa-gem" style={{ fontSize: '3rem', color: 'var(--color-gold)' }}></i>
+        <div style={{ marginBottom: '1rem', textAlign: 'center' }}>
+          <img src="/assets/logo.webp" alt="Hampers Nest Logo" className="brand-logo-img login-logo" />
         </div>
         
-        <h2>HampersNest</h2>
-        <p>Admin Control Panel</p>
+        <h2>Hampers Nest Admin</h2>
+        <p>Luxury Gifting Control Panel</p>
 
         {error && <div className="login-error">{error}</div>}
 

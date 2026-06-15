@@ -4,10 +4,12 @@ import { CartProvider, useCart } from './context/CartContext';
 import { CurrencyProvider } from './context/CurrencyContext';
 import Header from './components/Header';
 import Footer from './components/Footer';
+import StudioMap from './components/StudioMap';
 import CartDrawer from './components/CartDrawer';
 import ProductModal from './components/ProductModal';
 import FloatingButtons from './components/FloatingButtons';
 import QuoteModal from './components/QuoteModal';
+import ScrollToTop from './components/ScrollToTop';
 
 import Home from './pages/Home';
 import Collections from './pages/Collections';
@@ -25,6 +27,7 @@ function AppInner() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', background: 'var(--color-ivory)' }}>
+      <ScrollToTop />
       {/* Header layout */}
       <Header />
 
@@ -41,7 +44,8 @@ function AppInner() {
         </Routes>
       </main>
 
-      {/* Footer layout */}
+      {/* Map & Footer layout */}
+      <StudioMap />
       <Footer />
 
       {/* Slide-over Shopping Cart Drawer */}

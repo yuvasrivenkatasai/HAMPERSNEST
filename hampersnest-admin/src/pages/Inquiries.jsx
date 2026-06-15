@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { apiRequest } from '../utils/api';
+import { apiRequest, apiDownload } from '../utils/api';
 
 export default function Inquiries() {
   const [inquiries, setInquiries] = useState([]);
@@ -95,10 +95,10 @@ export default function Inquiries() {
 
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
         <div style={{ display: 'flex', gap: '10px' }}>
-          <button className="btn-admin-secondary" onClick={() => window.open(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/inquiries/export/csv`, '_blank')}>
+          <button className="btn-admin-secondary" onClick={() => apiDownload('/api/inquiries/export/csv', 'inquiries.csv')}>
             <i className="fa-solid fa-file-csv"></i> Export CSV
           </button>
-          <button className="btn-admin-secondary" onClick={() => window.open(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/inquiries/export/excel`, '_blank')}>
+          <button className="btn-admin-secondary" onClick={() => apiDownload('/api/inquiries/export/excel', 'inquiries.xlsx')}>
             <i className="fa-solid fa-file-excel"></i> Export Excel
           </button>
         </div>

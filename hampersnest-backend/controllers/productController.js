@@ -76,7 +76,7 @@ export const getProductById = async (req, res) => {
 // @route   POST /api/products
 // @access  Private/Admin
 export const createProduct = async (req, res) => {
-  const { name, sku, price, discountPrice, originalPrice, image, videoUrls, category, subCategory, occasion, tags, stockQuantity, masterCategory, rating, description, shortDescription, details, customization, shipping, isFeatured, isActive } = req.body;
+  const { name, sku, price, discountPrice, originalPrice, image, images, videoUrls, category, subCategory, occasion, tags, stockQuantity, masterCategory, rating, description, shortDescription, details, customization, shipping, isFeatured, isActive } = req.body;
 
   if (!name || !price || !category) {
     return res.status(400).json({ message: 'Please provide name, price, and category' });
@@ -95,6 +95,7 @@ export const createProduct = async (req, res) => {
       discountPrice: discountPrice ? Number(discountPrice) : 0,
       originalPrice: originalPrice ? Number(originalPrice) : 0,
       image: image || '/assets/hero_banner.png',
+      images: Array.isArray(images) ? images : [],
       videoUrls: Array.isArray(videoUrls) ? videoUrls : [],
       category,
       masterCategory: masterCategory || category,
@@ -130,9 +131,8 @@ export const updateProduct = async (req, res) => {
         await ensureCategoryExists(req.body.category);
       }
 
-      // Update fields if provided
       const fields = [
-        'name', 'sku', 'price', 'discountPrice', 'originalPrice', 'image', 'videoUrls',
+        'name', 'sku', 'price', 'discountPrice', 'originalPrice', 'image', 'images', 'videoUrls',
         'category', 'masterCategory', 'subCategory', 'occasion', 'tags', 'stockQuantity',
         'rating', 'description', 'shortDescription', 'details', 'customization', 'shipping',
         'isFeatured', 'isActive'

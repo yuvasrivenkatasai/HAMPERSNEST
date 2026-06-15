@@ -26,8 +26,8 @@ function NavigationMenu() {
     <aside className="admin-sidebar">
       {/* Brand logo details */}
       <div className="sidebar-brand">
-        <i className="fa-solid fa-gem" style={{ fontSize: '1.5rem', color: 'var(--color-gold)' }}></i>
-        <h1>HampersNest</h1>
+        <img src="/assets/logo.webp" alt="Hampers Nest Logo" className="brand-logo-img sidebar-logo" />
+        <h1 style={{ display: 'none' }}>Hampers Nest Admin</h1>
       </div>
       
       {/* Sidebar Navigation */}
@@ -127,7 +127,7 @@ function AdminLayout({ children }) {
       case '/media': return 'Media Library';
       case '/settings': return 'System Settings';
       case '/users': return 'User Access Control';
-      default: return 'Admin Control';
+      default: return 'Hampers Nest Admin';
     }
   };
 

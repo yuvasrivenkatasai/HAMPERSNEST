@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { apiRequest } from '../utils/api';
+import { apiRequest, apiDownload } from '../utils/api';
 
 export default function Orders() {
   const [orders, setOrders] = useState([]);
@@ -15,7 +15,7 @@ export default function Orders() {
   const fetchOrders = async () => {
     try {
       const data = await apiRequest('/api/orders');
-      setOrders(ordersData.orders || ordersData.data || ordersData.rows || (Array.isArray(ordersData) ? ordersData : []));
+      setOrders(data.orders || data.data || data.rows || (Array.isArray(data) ? data : []));
     } catch (err) {
       console.error(err);
       setError('Failed to fetch orders list');
@@ -118,19 +118,19 @@ export default function Orders() {
           <button 
             className="btn-admin-secondary" 
             title="Export to CSV"
-            onClick={() => window.open(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/orders/export/csv`, '_blank')}
+            onClick={() => apiDownload('/api/orders/export/csv', 'orders.csv')}
             style={{ padding: '0.75rem', borderRadius: 'var(--border-radius-sm)' }}
           >
             <i className="fa-solid fa-file-csv"></i>
           </button>
-          <a 
-            href={`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/orders/export/excel`}
+          <button 
+            onClick={() => apiDownload('/api/orders/export/excel', 'orders.xlsx')}
             className="btn-admin" 
             title="Export to Excel"
             style={{ padding: '0.75rem', borderRadius: 'var(--border-radius-sm)' }}
           >
             <i className="fa-solid fa-file-excel"></i>
-          </a>
+          </button>
         </div>
       </div>
 

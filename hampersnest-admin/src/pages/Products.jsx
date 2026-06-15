@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { apiRequest, API_BASE } from '../utils/api';
+import { apiRequest, API_BASE, apiDownload } from '../utils/api';
+import CatalogExportModal from '../components/CatalogExportModal';
 
 export default function Products() {
   const [products, setProducts] = useState([]);
@@ -12,6 +13,9 @@ export default function Products() {
   const [editingProduct, setEditingProduct] = useState(null); // null means "Add Product" mode
   const [search, setSearch] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('All');
+  
+  // Catalog Modal state
+  const [catalogModalOpen, setCatalogModalOpen] = useState(false);
   
   // Import modal states
   const [importModalOpen, setImportModalOpen] = useState(false);
@@ -35,10 +39,14 @@ export default function Products() {
     detailsText: '', // text area split by newlines
     isFeatured: false,
     originalPrice: '',
-    isActive: true
+    isActive: true,
+    images: [],
+    videoUrls: []
   });
   const [formSubmitting, setFormSubmitting] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [uploadingGallery, setUploadingGallery] = useState(false);
+  const [uploadingVideo, setUploadingVideo] = useState(false);
 
   const handleImageUpload = async (e) => {
     const file = e.target.files[0];
@@ -76,6 +84,72 @@ export default function Products() {
     }
   };
 
+  const handleGalleryUpload = async (e) => {
+    const files = Array.from(e.target.files);
+    if (!files.length) return;
+
+    setUploadingGallery(true);
+    const token = localStorage.getItem('adminToken');
+    const newImages = [];
+
+    for (const file of files) {
+      const formDataObj = new FormData();
+      formDataObj.append('image', file);
+
+      try {
+        const response = await fetch(`${API_BASE}/api/upload?folder=products`, {
+          method: 'POST',
+          headers: { ...(token ? { 'Authorization': `Bearer ${token}` } : {}) },
+          body: formDataObj
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          newImages.push(data.url);
+        }
+      } catch (err) {
+        console.error('Gallery image upload failed', err);
+      }
+    }
+
+    setFormData(prev => ({
+      ...prev,
+      images: [...(prev.images || []), ...newImages]
+    }));
+    setUploadingGallery(false);
+  };
+
+  const handleVideoUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    setUploadingVideo(true);
+    const formDataObj = new FormData();
+    formDataObj.append('video', file);
+
+    try {
+      const token = localStorage.getItem('adminToken');
+      const response = await fetch(`${API_BASE}/api/upload/video?folder=products`, {
+        method: 'POST',
+        headers: { ...(token ? { 'Authorization': `Bearer ${token}` } : {}) },
+        body: formDataObj
+      });
+
+      if (!response.ok) throw new Error('Video upload failed');
+
+      const data = await response.json();
+      setFormData(prev => ({
+        ...prev,
+        videoUrls: [...(prev.videoUrls || []), data.url]
+      }));
+    } catch (err) {
+      console.error(err);
+      alert(err.message || 'Failed to upload video.');
+    } finally {
+      setUploadingVideo(false);
+    }
+  };
+
   const fetchProducts = async () => {
     try {
       const [productsData, categoriesData] = await Promise.all([
@@ -108,7 +182,9 @@ export default function Products() {
       detailsText: '',
       isFeatured: false,
       originalPrice: '',
-      isActive: true
+      isActive: true,
+      images: [],
+      videoUrls: []
     });
     setModalOpen(true);
   };
@@ -129,7 +205,9 @@ export default function Products() {
       detailsText: product.details ? product.details.join('\n') : '',
       isFeatured: !!product.isFeatured,
       originalPrice: product.originalPrice ? product.originalPrice.toString() : '',
-      isActive: product.isActive !== false
+      isActive: product.isActive !== false,
+      images: Array.isArray(product.images) ? product.images : [],
+      videoUrls: Array.isArray(product.videoUrls) ? product.videoUrls : []
     });
     setModalOpen(true);
   };
@@ -184,7 +262,9 @@ export default function Products() {
       details,
       isFeatured: formData.isFeatured,
       originalPrice: finalOriginalPrice,
-      isActive: formData.isActive
+      isActive: formData.isActive,
+      images: formData.images,
+      videoUrls: formData.videoUrls
     };
 
     try {
@@ -328,14 +408,17 @@ export default function Products() {
         <div style={{ display: 'flex', gap: '10px' }}>
           {(adminRole === 'Super Admin' || adminRole === 'Manager') && (
             <>
-              <button className="btn-admin-secondary" onClick={() => window.open(`${API_BASE}/api/products/export/csv`, '_blank')}>
+              <button className="btn-admin-secondary" onClick={() => apiDownload('/api/products/export/csv', 'products.csv')}>
                 <i className="fa-solid fa-file-csv"></i> Export CSV
               </button>
-              <button className="btn-admin-secondary" onClick={() => window.open(`${API_BASE}/api/products/export/excel`, '_blank')}>
+              <button className="btn-admin-secondary" onClick={() => apiDownload('/api/products/export/excel', 'products.xlsx')}>
                 <i className="fa-solid fa-file-excel"></i> Export Excel
               </button>
               <button className="btn-admin-secondary" onClick={() => setImportModalOpen(true)}>
                 <i className="fa-solid fa-file-import"></i> Import CSV
+              </button>
+              <button className="btn-admin" style={{ background: 'var(--color-gold)' }} onClick={() => setCatalogModalOpen(true)}>
+                <i className="fa-solid fa-file-pdf"></i> PDF Catalog
               </button>
               <button className="btn-admin" onClick={openAddModal}>
                 <i className="fa-solid fa-plus"></i> Add New Hamper
@@ -417,6 +500,15 @@ export default function Products() {
           </div>
         </div>
       )}
+
+      {/* CATALOG EXPORT MODAL */}
+      <CatalogExportModal 
+        isOpen={catalogModalOpen} 
+        onClose={() => setCatalogModalOpen(false)} 
+        products={products}
+        categories={categories}
+        selectedProductIds={selectedIds}
+      />
 
       {error && (
         <div style={{ background: '#FFF5F5', color: '#E53E3E', padding: '1rem', borderRadius: '6px', marginBottom: '1rem', textAlign: 'center' }}>
@@ -753,6 +845,79 @@ export default function Products() {
                         <span style={{ fontSize: '0.8rem', color: '#16A34A', fontWeight: '600', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
                           <i className="fa-solid fa-circle-check"></i> Image Active
                         </span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', marginTop: '15px' }}>
+                  <div className="form-group">
+                    <label className="form-label" htmlFor="prod-gallery-file">Additional Gallery Images</label>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', marginBottom: '10px' }}>
+                      <input
+                        type="file"
+                        id="prod-gallery-file"
+                        accept="image/*"
+                        multiple
+                        onChange={handleGalleryUpload}
+                        className="form-input"
+                        style={{ padding: '6px 12px' }}
+                      />
+                      {uploadingGallery && (
+                        <small style={{ color: 'var(--color-purple)', fontWeight: 500 }}>
+                          <i className="fa-solid fa-spinner fa-spin"></i> Uploading gallery images...
+                        </small>
+                      )}
+                    </div>
+                    {formData.images && formData.images.length > 0 && (
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: '10px' }}>
+                        {formData.images.map((img, idx) => (
+                          <div key={idx} style={{ position: 'relative' }}>
+                            <img src={img} alt={`Gallery ${idx}`} style={{ width: '50px', height: '50px', objectFit: 'cover', borderRadius: '4px' }} />
+                            <button
+                              type="button"
+                              onClick={() => setFormData(prev => ({ ...prev, images: prev.images.filter((_, i) => i !== idx) }))}
+                              style={{ position: 'absolute', top: '-5px', right: '-5px', background: 'red', color: 'white', border: 'none', borderRadius: '50%', width: '18px', height: '18px', fontSize: '10px', cursor: 'pointer' }}
+                            >
+                              <i className="fa-solid fa-xmark"></i>
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="form-group">
+                    <label className="form-label" htmlFor="prod-video-file">Product Videos (MP4/WebM)</label>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', marginBottom: '10px' }}>
+                      <input
+                        type="file"
+                        id="prod-video-file"
+                        accept="video/mp4,video/webm"
+                        onChange={handleVideoUpload}
+                        className="form-input"
+                        style={{ padding: '6px 12px' }}
+                      />
+                      {uploadingVideo && (
+                        <small style={{ color: 'var(--color-purple)', fontWeight: 500 }}>
+                          <i className="fa-solid fa-spinner fa-spin"></i> Uploading video...
+                        </small>
+                      )}
+                    </div>
+                    {formData.videoUrls && formData.videoUrls.length > 0 && (
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: '10px' }}>
+                        {formData.videoUrls.map((vid, idx) => (
+                          <div key={idx} style={{ position: 'relative', background: '#000', borderRadius: '4px', padding: '2px' }}>
+                            <video src={vid} style={{ width: '80px', height: '50px', objectFit: 'cover' }} />
+                            <button
+                              type="button"
+                              onClick={() => setFormData(prev => ({ ...prev, videoUrls: prev.videoUrls.filter((_, i) => i !== idx) }))}
+                              style={{ position: 'absolute', top: '-5px', right: '-5px', background: 'red', color: 'white', border: 'none', borderRadius: '50%', width: '18px', height: '18px', fontSize: '10px', cursor: 'pointer' }}
+                            >
+                              <i className="fa-solid fa-xmark"></i>
+                            </button>
+                          </div>
+                        ))}
                       </div>
                     )}
                   </div>
