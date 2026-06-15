@@ -404,6 +404,38 @@ export const AuditLog = sequelize.define('AuditLog', {
   updatedAt: false // Audit logs generally just need createdAt
 });
 
+// 9. Hero Banner Model
+export const HeroBanner = sequelize.define('HeroBanner', {
+  id: {
+    type: DataTypes.INTEGER,
+    autoIncrement: true,
+    primaryKey: true
+  },
+  title: {
+    type: DataTypes.STRING,
+    defaultValue: 'Main Homepage Hero'
+  },
+  mainImage: {
+    type: DataTypes.TEXT,
+    allowNull: true
+  },
+  floatingImageTop: {
+    type: DataTypes.TEXT,
+    allowNull: true
+  },
+  floatingImageBottom: {
+    type: DataTypes.TEXT,
+    allowNull: true
+  },
+  isActive: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: true
+  }
+}, {
+  tableName: 'hero_banners',
+  timestamps: true
+});
+
 // Associations
 Category.hasMany(Product, { foreignKey: 'category', sourceKey: 'id', as: 'products' });
 Product.belongsTo(Category, { foreignKey: 'category', targetKey: 'id', as: 'categoryDetails' });

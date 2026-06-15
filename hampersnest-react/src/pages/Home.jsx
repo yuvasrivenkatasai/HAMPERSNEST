@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useCurrency } from '../context/CurrencyContext';
+import { API_BASE } from '../config';
 import SEO from '../components/SEO';
 import ProductCard from '../components/ProductCard';
 
@@ -30,6 +31,30 @@ export default function Home() {
   const { products, addToCart, setQuoteModalOpen } = useCart();
   const { formatPrice } = useCurrency();
   const [activeSlide, setActiveSlide] = useState(0);
+  const [heroBanner, setHeroBanner] = useState({
+    mainImage: null,
+    floatingImageTop: null,
+    floatingImageBottom: null,
+    isActive: false
+  });
+
+  // Fetch Hero Banner Configuration
+  useEffect(() => {
+    const fetchHeroBanner = async () => {
+      try {
+        const response = await fetch(`${API_BASE}/api/hero-banner`);
+        if (response.ok) {
+          const data = await response.json();
+          if (data && data.isActive) {
+            setHeroBanner(data);
+          }
+        }
+      } catch (err) {
+        console.warn('Hero banner fetch failed, falling back to local defaults', err);
+      }
+    };
+    fetchHeroBanner();
+  }, []);
 
   // Get first 6 featured products dynamically from context
   const featuredProducts = (products || []).filter((p) => p.isFeatured).slice(0, 6);
@@ -160,13 +185,13 @@ export default function Home() {
             <div className="hero-visual hero-fade" style={{ '--delay': '0.5s' }}>
               <div className="hero-image-glow" aria-hidden="true"></div>
               <div className="hero-image-frame">
-                <img src="/assets/hero_banner.webp" alt="Premium luxury curated gift hamper by Hampers Nest" />
+                <img src={heroBanner.mainImage || "/assets/hero_banner.webp"} alt="Premium luxury curated gift hamper by Hampers Nest" />
               </div>
               <div className="hero-product-card hero-product-wedding">
-                <img src="/assets/wedding_gift.webp" alt="Elegant wedding hamper gift" />
+                <img src={heroBanner.floatingImageTop || "/assets/wedding_gift.webp"} alt="Elegant wedding hamper gift" />
               </div>
               <div className="hero-product-card hero-product-brass">
-                <img src="/assets/brass_cup.webp" alt="Handcrafted brass return gift" />
+                <img src={heroBanner.floatingImageBottom || "/assets/brass_cup.webp"} alt="Handcrafted brass return gift" />
               </div>
             </div>
           </div>

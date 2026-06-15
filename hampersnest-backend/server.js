@@ -24,6 +24,7 @@ import settingsRoutes from './routes/settings.js';
 import uploadRoutes from './routes/upload.js';
 import galleryRoutes from './routes/gallery.js';
 import categoryRoutes from './routes/categories.js';
+import heroBannerRoutes from './routes/heroBanner.js';
 
 dotenv.config();
 
@@ -65,6 +66,7 @@ app.use('/api/settings', settingsRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/gallery', galleryRoutes);
 app.use('/api/categories', categoryRoutes);
+app.use('/api/hero-banner', heroBannerRoutes);
 
 
 // Static files and uploads configuration
