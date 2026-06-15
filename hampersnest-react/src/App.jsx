@@ -19,7 +19,7 @@ import AboutUs from './pages/AboutUs';
 import Contact from './pages/Contact';
 import ProductDetail from './pages/ProductDetail';
 
-import './App.css';
+import './GlobalStyles.css';
 
 // Inner component — has access to CartContext (rendered inside CartProvider)
 function AppInner() {
