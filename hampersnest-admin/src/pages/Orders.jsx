@@ -263,9 +263,7 @@ export default function Orders() {
                         <td>
                           {/* Display Custom Details */}
                           {item.customizations ? (
-                            <div style={{ fontSize: '0.75rem', color: 'var(--color-gray-text)' }}>
-                              {item.customizations.wrappingStyle !== 'Standard' && <div>• Wrap: {item.customizations.wrappingStyle}</div>}
-                              {item.customizations.ribbonColor !== 'None' && <div>• Ribbon: {item.customizations.ribbonColor}</div>}
+                            <div style={{ fontSize: '0.8rem', color: '#666', marginTop: '4px' }}>
                               {item.customizations.giftTag && <div style={{ fontStyle: 'italic' }}>• Tag: "{item.customizations.giftTag}"</div>}
                             </div>
                           ) : 'Standard Product'}

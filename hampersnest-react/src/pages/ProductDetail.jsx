@@ -46,8 +46,6 @@ export default function ProductDetail() {
 
   // Customization States
   const [giftTag, setGiftTag] = useState('');
-  const [wrappingStyle, setWrappingStyle] = useState('Standard');
-  const [ribbonColor, setRibbonColor] = useState('None');
   const [selectedAddOns, setSelectedAddOns] = useState({
     candle: false,
     chocolates: false,
@@ -74,8 +72,6 @@ export default function ProductDetail() {
     setIsLightboxOpen(false);
     // Reset selections
     setGiftTag('');
-    setWrappingStyle('Standard');
-    setRibbonColor('None');
     setSelectedAddOns({
       candle: false,
       chocolates: false,
@@ -148,22 +144,6 @@ export default function ProductDetail() {
 
   const isWishlisted = isInWishlist(product.id);
 
-  // Pricing Rules
-  const boxPrices = {
-    'Standard': 0,
-    'Ivory Lace': 150,
-    'Royal Purple Silk': 180,
-    'Gold Glare Foil': 220,
-  };
-
-  const ribbonPrices = {
-    'None': 0,
-    'Metallic Gold': 30,
-    'Lavender Lace': 40,
-    'Royal Violet': 50,
-    'Red Velvet': 60,
-  };
-
   const addOnDetails = {
     candle: { name: 'Scented Wax Candle', price: 99 },
     chocolates: { name: 'Extra Chocolates (Pack of 4)', price: 149 },
@@ -173,8 +153,6 @@ export default function ProductDetail() {
 
   // Calculate Added Price
   const addedPrice = 
-    (boxPrices[wrappingStyle] || 0) +
-    (ribbonPrices[ribbonColor] || 0) +
     Object.keys(selectedAddOns).reduce((total, key) => {
       return total + (selectedAddOns[key] ? addOnDetails[key].price : 0);
     }, 0);
@@ -201,8 +179,6 @@ export default function ProductDetail() {
 
     addToCart(product, quantity, {
       giftTag,
-      wrappingStyle,
-      ribbonColor,
       addOns: activeAddOns,
       addedPrice,
     });
@@ -228,8 +204,6 @@ export default function ProductDetail() {
     // Build custom description
     let detailsStr = `*${product.name}* (Qty: ${quantity})\n`;
     detailsStr += `• Base Price: ₹${product.price} each\n`;
-    detailsStr += `• Wrapping: ${wrappingStyle} (+₹${boxPrices[wrappingStyle] || 0})\n`;
-    detailsStr += `• Ribbon: ${ribbonColor} (+₹${ribbonPrices[ribbonColor] || 0})\n`;
     
     if (giftTag.trim()) {
       detailsStr += `• Gift Tag Message: "${giftTag.trim()}"\n`;
@@ -487,83 +461,51 @@ export default function ProductDetail() {
             {/* Customization Form */}
             <div className="product-customizer-box">
               <h3 className="customizer-section-title">Personalize Your Hamper</h3>
+              <p style={{ fontSize: '0.85rem', color: '#666', marginBottom: '1.2rem', lineHeight: '1.5' }}>
+                {product.customizationText || 'Make your gift extra special by adding a custom gift tag and selecting add-ons.'}
+              </p>
 
               {/* 1. Custom Gift Tag Message */}
-              <div className="customizer-row">
-                <label className="customizer-label" htmlFor="gift-tag-msg">
-                  Custom Gift Tag Message (Optional)
-                </label>
-                <input
-                  type="text"
-                  id="gift-tag-msg"
-                  className="customizer-input-text"
-                  placeholder="e.g., Happy Wedding Sneha & Ajay! / Welcome Home"
-                  value={giftTag}
-                  onChange={(e) => setGiftTag(e.target.value)}
-                />
-              </div>
-
-              {/* 2. Wrapping Style Dropdown */}
-              <div className="customizer-row-split">
-                <div className="customizer-column">
-                  <label className="customizer-label" htmlFor="wrap-style">
-                    Wrapping Style
+              {product.customGiftTagEnabled !== false && (
+                <div className="customizer-row">
+                  <label className="customizer-label" htmlFor="gift-tag-msg">
+                    Custom Gift Tag Message (Optional)
                   </label>
-                  <select
-                    id="wrap-style"
-                    className="customizer-select"
-                    value={wrappingStyle}
-                    onChange={(e) => setWrappingStyle(e.target.value)}
-                  >
-                    <option value="Standard">Standard (Eco-craft box) - Free</option>
-                    <option value="Ivory Lace">Premium Ivory Lace (+₹150)</option>
-                    <option value="Royal Purple Silk">Royal Purple Silk (+₹180)</option>
-                    <option value="Gold Glare Foil">Gold Glare Foil (+₹220)</option>
-                  </select>
+                  <input
+                    type="text"
+                    id="gift-tag-msg"
+                    className="customizer-input-text"
+                    placeholder="e.g., Happy Wedding Sneha & Ajay! / Welcome Home"
+                    value={giftTag}
+                    onChange={(e) => setGiftTag(e.target.value)}
+                  />
                 </div>
+              )}
 
-                {/* 3. Ribbon Color Dropdown */}
-                <div className="customizer-column">
-                  <label className="customizer-label" htmlFor="ribbon-color">
-                    Satin Ribbon Color
-                  </label>
-                  <select
-                    id="ribbon-color"
-                    className="customizer-select"
-                    value={ribbonColor}
-                    onChange={(e) => setRibbonColor(e.target.value)}
-                  >
-                    <option value="None">None (Default Jute Rope) - Free</option>
-                    <option value="Metallic Gold">Metallic Gold (+₹30)</option>
-                    <option value="Lavender Lace">Lavender Lace (+₹40)</option>
-                    <option value="Royal Violet">Royal Violet Silk (+₹50)</option>
-                    <option value="Red Velvet">Red Velvet Ribbon (+₹60)</option>
-                  </select>
+              {/* 2. Add-ons Checkboxes */}
+              {product.addonsEnabled !== false && (
+                <div className="customizer-row" style={{ marginTop: '1.2rem' }}>
+                  <label className="customizer-label">Enhance with Add-ons (Optional)</label>
+                  <div className="addons-grid-check">
+                    {Object.keys(addOnDetails).map((key) => (
+                      <label key={key} className={`addon-checkbox-card ${selectedAddOns[key] ? 'active' : ''}`}>
+                        <input
+                          type="checkbox"
+                          checked={selectedAddOns[key]}
+                          onChange={(e) =>
+                            setSelectedAddOns((prev) => ({
+                              ...prev,
+                              [key]: e.target.checked,
+                            }))
+                          }
+                        />
+                        <span className="addon-name">{addOnDetails[key].name}</span>
+                        <span className="addon-price">+₹{addOnDetails[key].price}</span>
+                      </label>
+                    ))}
+                  </div>
                 </div>
-              </div>
-
-              {/* 4. Add-ons Checkboxes */}
-              <div className="customizer-row" style={{ marginTop: '1.2rem' }}>
-                <label className="customizer-label">Enhance with Add-ons (Optional)</label>
-                <div className="addons-grid-check">
-                  {Object.keys(addOnDetails).map((key) => (
-                    <label key={key} className={`addon-checkbox-card ${selectedAddOns[key] ? 'active' : ''}`}>
-                      <input
-                        type="checkbox"
-                        checked={selectedAddOns[key]}
-                        onChange={(e) =>
-                          setSelectedAddOns((prev) => ({
-                            ...prev,
-                            [key]: e.target.checked,
-                          }))
-                        }
-                      />
-                      <span className="addon-name">{addOnDetails[key].name}</span>
-                      <span className="addon-price">+₹{addOnDetails[key].price}</span>
-                    </label>
-                  ))}
-                </div>
-              </div>
+              )}
 
               {/* Quantity Selector and Purchase Actions */}
               <div className="action-row-buying">
@@ -604,6 +546,16 @@ export default function ProductDetail() {
               >
                 <i className="fa-brands fa-whatsapp" style={{ marginRight: '6px', fontSize: '1.2rem' }}></i> Order via WhatsApp
               </button>
+
+              {/* Delivery Information Block */}
+              <div style={{ marginTop: '1.5rem', padding: '1rem', background: '#F8F9FA', borderRadius: '8px', border: '1px solid #E9ECEF' }}>
+                <h4 style={{ margin: '0 0 8px 0', fontSize: '0.9rem', color: 'var(--color-charcoal)' }}>
+                  <i className="fa-solid fa-truck" style={{ marginRight: '6px', color: 'var(--color-gold)' }}></i> Delivery Information
+                </h4>
+                <p style={{ margin: 0, fontSize: '0.85rem', color: '#666', lineHeight: '1.5' }}>
+                  {product.deliveryInfoText || 'Standard Delivery: 3-5 business days. Express Delivery available at checkout.'}
+                </p>
+              </div>
             </div>
 
             {/* Accordion Tabs */}
@@ -660,25 +612,6 @@ export default function ProductDetail() {
                         </tr>
                       </tbody>
                     </table>
-                  </div>
-                )}
-              </div>
-
-              {/* Shipping & Delivery */}
-              <div className={`accordion-item ${accordions.shipping ? 'open' : ''}`}>
-                <button className="accordion-header" onClick={() => toggleAccordion('shipping')}>
-                  <span>Shipping & Delivery</span>
-                  <i className={`fa-solid ${accordions.shipping ? 'fa-chevron-up' : 'fa-chevron-down'}`}></i>
-                </button>
-                {accordions.shipping && (
-                  <div className="accordion-content">
-                    <p style={{ fontSize: '0.85rem', lineHeight: 1.6, color: 'var(--color-charcoal)' }}>
-                      • <strong>Hyderabad Delivery:</strong> Hand-delivery is available within Hyderabad city limits. Same-day delivery can be arranged for select ready hampers.
-                      <br />
-                      • <strong>Pan-India Shipping:</strong> We ship to all major cities across India via premium courier partners (Delhivery, BlueDart). Delivery usually takes 4-7 business days depending on the location.
-                      <br />
-                      • <strong>Bulk Delivery:</strong> For bulk orders above 50 units, custom logistics and doorstep delivery can be scheduled.
-                    </p>
                   </div>
                 )}
               </div>

@@ -16,8 +16,6 @@ export default function ProductModal() {
 
   const [quantity, setQuantity] = useState(1);
   const [giftTag, setGiftTag] = useState('');
-  const [wrappingStyle, setWrappingStyle] = useState('Standard');
-  const [ribbonColor, setRibbonColor] = useState('None');
   const [activeThumb, setActiveThumb] = useState(0);
   const [galleryOpen, setGalleryOpen] = useState(false);
 
@@ -26,8 +24,6 @@ export default function ProductModal() {
     if (selectedProductForModal) {
       setQuantity(1);
       setGiftTag('');
-      setWrappingStyle('Standard');
-      setRibbonColor('None');
       setActiveThumb(0);
       document.body.style.overflow = 'hidden';
     } else {
@@ -74,7 +70,7 @@ export default function ProductModal() {
 
   const handleAddToCartSubmit = (e) => {
     e.preventDefault();
-    addToCart(product, quantity, { giftTag, wrappingStyle, ribbonColor });
+    addToCart(product, quantity, { giftTag });
     handleClose();
   };
 
@@ -86,8 +82,6 @@ export default function ProductModal() {
       `Qty: ${quantity}\n` +
       `Price: ${formatPrice(product.price * quantity)}\n\n` +
       (giftTag ? `Gift Tag Message: "${giftTag}"\n` : '') +
-      (wrappingStyle !== 'Standard' ? `Wrapping: ${wrappingStyle}\n` : '') +
-      (ribbonColor !== 'None' ? `Ribbon: ${ribbonColor}\n` : '') +
       `\nPlease confirm availability and delivery details. Thank you!`
     );
     window.open(`https://api.whatsapp.com/send?phone=${whatsappNumber}&text=${message}`, '_blank');
@@ -272,39 +266,6 @@ export default function ProductModal() {
                     value={giftTag}
                     onChange={(e) => setGiftTag(e.target.value)}
                   />
-                </div>
-
-                <div className="form-row" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '0.8rem' }}>
-                  <div className="form-group" style={{ marginBottom: 0 }}>
-                    <label className="form-label" htmlFor="m-wrap">Wrapping Style</label>
-                    <select
-                      id="m-wrap"
-                      className="form-select"
-                      value={wrappingStyle}
-                      onChange={(e) => setWrappingStyle(e.target.value)}
-                    >
-                      <option value="Standard">Standard (Eco-craft box)</option>
-                      <option value="Ivory Lace">Premium Ivory Lace Ribbon</option>
-                      <option value="Royal Purple Silk">Royal Purple Silk Wrapper</option>
-                      <option value="Gold Glare Foil">Gold Glare Metallic Foil</option>
-                    </select>
-                  </div>
-
-                  <div className="form-group" style={{ marginBottom: 0 }}>
-                    <label className="form-label" htmlFor="m-ribbon">Satin Ribbon Color</label>
-                    <select
-                      id="m-ribbon"
-                      className="form-select"
-                      value={ribbonColor}
-                      onChange={(e) => setRibbonColor(e.target.value)}
-                    >
-                      <option value="None">None (Default Jute Rope)</option>
-                      <option value="Metallic Gold">Metallic Gold Ribbon</option>
-                      <option value="Lavender Lace">Lavender Lace Ribbon</option>
-                      <option value="Royal Violet">Royal Violet Silk Ribbon</option>
-                      <option value="Red Velvet">Red Velvet Ribbon</option>
-                    </select>
-                  </div>
                 </div>
 
                 {/* Quantity + Action Buttons */}

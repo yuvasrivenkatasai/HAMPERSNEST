@@ -76,7 +76,7 @@ export const getProductById = async (req, res) => {
 // @route   POST /api/products
 // @access  Private/Admin
 export const createProduct = async (req, res) => {
-  const { name, sku, price, discountPrice, originalPrice, image, images, videoUrls, category, subCategory, occasion, tags, stockQuantity, masterCategory, rating, description, shortDescription, details, customization, shipping, isFeatured, isActive } = req.body;
+  const { name, sku, price, discountPrice, originalPrice, image, images, videoUrls, category, subCategory, occasion, tags, stockQuantity, masterCategory, rating, description, shortDescription, details, customization, shipping, isFeatured, isActive, customGiftTagEnabled, addonsEnabled, customizationText, deliveryInfoText } = req.body;
 
   if (!name || !price || !category) {
     return res.status(400).json({ message: 'Please provide name, price, and category' });
@@ -109,6 +109,10 @@ export const createProduct = async (req, res) => {
       details: Array.isArray(details) ? details : [],
       customization: Array.isArray(customization) ? customization : [],
       shipping: Array.isArray(shipping) ? shipping : [],
+      customGiftTagEnabled: customGiftTagEnabled !== undefined ? !!customGiftTagEnabled : true,
+      addonsEnabled: addonsEnabled !== undefined ? !!addonsEnabled : true,
+      customizationText: customizationText || 'Make your gift extra special by adding a custom gift tag and selecting add-ons.',
+      deliveryInfoText: deliveryInfoText || 'Standard Delivery: 3-5 business days. Express Delivery available at checkout.',
       isFeatured: !!isFeatured,
       isActive: isActive !== undefined ? !!isActive : true
     });
@@ -135,7 +139,7 @@ export const updateProduct = async (req, res) => {
         'name', 'sku', 'price', 'discountPrice', 'originalPrice', 'image', 'images', 'videoUrls',
         'category', 'masterCategory', 'subCategory', 'occasion', 'tags', 'stockQuantity',
         'rating', 'description', 'shortDescription', 'details', 'customization', 'shipping',
-        'isFeatured', 'isActive'
+        'isFeatured', 'isActive', 'customGiftTagEnabled', 'addonsEnabled', 'customizationText', 'deliveryInfoText'
       ];
 
       fields.forEach(field => {

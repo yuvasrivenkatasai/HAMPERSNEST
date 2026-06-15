@@ -130,6 +130,22 @@ export const Product = sequelize.define('Product', {
     type: DataTypes.JSON,
     defaultValue: []
   },
+  customGiftTagEnabled: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: true
+  },
+  addonsEnabled: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: true
+  },
+  customizationText: {
+    type: DataTypes.TEXT,
+    defaultValue: 'Make your gift extra special by adding a custom gift tag and selecting add-ons.'
+  },
+  deliveryInfoText: {
+    type: DataTypes.TEXT,
+    defaultValue: 'Standard Delivery: 3-5 business days. Express Delivery available at checkout.'
+  },
   isFeatured: {
     type: DataTypes.BOOLEAN,
     defaultValue: false

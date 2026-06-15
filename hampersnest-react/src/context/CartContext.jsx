@@ -88,8 +88,6 @@ export const CartProvider = ({ children }) => {
   const addToCart = (product, quantity = 1, customizations = {}) => {
     const { 
       giftTag = '', 
-      wrappingStyle = 'Standard', 
-      ribbonColor = 'None',
       addOns = [],
       addedPrice = 0
     } = customizations;
@@ -98,7 +96,7 @@ export const CartProvider = ({ children }) => {
     
     // Create a unique cart item ID based on product ID, customizations, and add-ons
     const sortedAddOns = [...addOns].sort().join(',');
-    const cartItemId = `${product.id}-${giftTag.trim()}-${wrappingStyle}-${ribbonColor}-${sortedAddOns}`;
+    const cartItemId = `${product.id}-${giftTag.trim()}-${sortedAddOns}`;
 
     setCart((prevCart) => {
       const existingItemIndex = prevCart.findIndex((item) => item.cartItemId === cartItemId);
@@ -122,8 +120,6 @@ export const CartProvider = ({ children }) => {
             quantity: Number(quantity),
             customizations: {
               giftTag: giftTag.trim(),
-              wrappingStyle,
-              ribbonColor,
               addOns
             }
           }
@@ -194,12 +190,6 @@ export const CartProvider = ({ children }) => {
       let customStr = '';
       if (item.customizations.giftTag) {
         customStr += `\n   - Tag Msg: "${item.customizations.giftTag}"`;
-      }
-      if (item.customizations.wrappingStyle !== 'Standard') {
-        customStr += `\n   - Wrapping: ${item.customizations.wrappingStyle}`;
-      }
-      if (item.customizations.ribbonColor !== 'None') {
-        customStr += `\n   - Ribbon: ${item.customizations.ribbonColor}`;
       }
       if (item.customizations.addOns && item.customizations.addOns.length > 0) {
         customStr += `\n   - Add-ons: ${item.customizations.addOns.join(', ')}`;

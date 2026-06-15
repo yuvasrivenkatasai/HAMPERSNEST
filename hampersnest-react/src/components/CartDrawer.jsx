@@ -76,8 +76,6 @@ export default function CartDrawer() {
         price: item.price,
         quantity: item.quantity,
         customizations: {
-          wrappingStyle: item.customizations.wrappingStyle || 'Standard',
-          ribbonColor: item.customizations.ribbonColor || 'None',
           giftTag: item.customizations.giftTag || ''
         }
       })),
@@ -159,21 +157,11 @@ export default function CartDrawer() {
                       <span className="cart-item-price">{formatPrice(item.price)}</span>
                       
                       {/* Customization Details */}
-                      {(item.customizations.giftTag ||
-                        item.customizations.wrappingStyle !== 'Standard' ||
-                        item.customizations.ribbonColor !== 'None') && (
+                      {item.customizations.giftTag && (
                         <div className="cart-item-customizations">
-                          {item.customizations.wrappingStyle !== 'Standard' && (
-                            <div>• Wrap: {item.customizations.wrappingStyle}</div>
-                          )}
-                          {item.customizations.ribbonColor !== 'None' && (
-                            <div>• Ribbon: {item.customizations.ribbonColor}</div>
-                          )}
-                          {item.customizations.giftTag && (
-                            <div style={{ fontStyle: 'italic' }}>
-                              • Tag Msg: "{item.customizations.giftTag}"
-                            </div>
-                          )}
+                          <div style={{ fontStyle: 'italic' }}>
+                            • Tag Msg: "{item.customizations.giftTag}"
+                          </div>
                         </div>
                       )}
 

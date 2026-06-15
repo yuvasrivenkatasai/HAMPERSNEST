@@ -20,7 +20,11 @@ const sequelize = new Sequelize({
       'ALTER TABLE "orders" ADD "internalNotes" CLOB',
       'ALTER TABLE "inquiries" ADD "leadNotes" CLOB',
       'ALTER TABLE "inquiries" ADD "assignedAdmin" VARCHAR2(255) DEFAULT \'Unassigned\'',
-      'ALTER TABLE "inquiries" ADD "history" CLOB'
+      'ALTER TABLE "inquiries" ADD "history" CLOB',
+      'ALTER TABLE "products" ADD "customGiftTagEnabled" NUMBER(1) DEFAULT 1',
+      'ALTER TABLE "products" ADD "addonsEnabled" NUMBER(1) DEFAULT 1',
+      'ALTER TABLE "products" ADD "customizationText" CLOB',
+      'ALTER TABLE "products" ADD "deliveryInfoText" CLOB'
     ];
     for (let q of queries) {
       try {

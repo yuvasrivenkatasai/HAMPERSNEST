@@ -41,7 +41,11 @@ export default function Products() {
     originalPrice: '',
     isActive: true,
     images: [],
-    videoUrls: []
+    videoUrls: [],
+    customGiftTagEnabled: true,
+    addonsEnabled: true,
+    customizationText: 'Make your gift extra special by adding a custom gift tag and selecting add-ons.',
+    deliveryInfoText: 'Standard Delivery: 3-5 business days. Express Delivery available at checkout.'
   });
   const [formSubmitting, setFormSubmitting] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
@@ -184,7 +188,11 @@ export default function Products() {
       originalPrice: '',
       isActive: true,
       images: [],
-      videoUrls: []
+      videoUrls: [],
+      customGiftTagEnabled: true,
+      addonsEnabled: true,
+      customizationText: 'Make your gift extra special by adding a custom gift tag and selecting add-ons.',
+      deliveryInfoText: 'Standard Delivery: 3-5 business days. Express Delivery available at checkout.'
     });
     setModalOpen(true);
   };
@@ -207,7 +215,11 @@ export default function Products() {
       originalPrice: product.originalPrice ? product.originalPrice.toString() : '',
       isActive: product.isActive !== false,
       images: Array.isArray(product.images) ? product.images : [],
-      videoUrls: Array.isArray(product.videoUrls) ? product.videoUrls : []
+      videoUrls: Array.isArray(product.videoUrls) ? product.videoUrls : [],
+      customGiftTagEnabled: product.customGiftTagEnabled !== false,
+      addonsEnabled: product.addonsEnabled !== false,
+      customizationText: product.customizationText || 'Make your gift extra special by adding a custom gift tag and selecting add-ons.',
+      deliveryInfoText: product.deliveryInfoText || 'Standard Delivery: 3-5 business days. Express Delivery available at checkout.'
     });
     setModalOpen(true);
   };
@@ -264,7 +276,11 @@ export default function Products() {
       originalPrice: finalOriginalPrice,
       isActive: formData.isActive,
       images: formData.images,
-      videoUrls: formData.videoUrls
+      videoUrls: formData.videoUrls,
+      customGiftTagEnabled: formData.customGiftTagEnabled,
+      addonsEnabled: formData.addonsEnabled,
+      customizationText: formData.customizationText,
+      deliveryInfoText: formData.deliveryInfoText
     };
 
     try {
@@ -952,6 +968,65 @@ export default function Products() {
                   <small style={{ color: 'var(--color-gray-text)', fontSize: '0.75rem' }}>
                     Press Enter to start a new line for each detail. These will show as bullet points on the product page.
                   </small>
+                </div>
+
+                <div style={{ padding: '15px', background: '#F8F9FA', borderRadius: '8px', marginTop: '15px', border: '1px solid #E9ECEF' }}>
+                  <h4 style={{ margin: '0 0 10px 0', color: 'var(--color-purple)' }}>Storefront Personalization Options</h4>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', marginBottom: '15px' }}>
+                    <div className="form-group" style={{ display: 'flex', alignItems: 'center', gap: '8px', margin: 0 }}>
+                      <input
+                        type="checkbox"
+                        id="prod-gift-tag"
+                        name="customGiftTagEnabled"
+                        checked={formData.customGiftTagEnabled}
+                        onChange={handleInputChange}
+                        style={{ width: '18px', height: '18px', cursor: 'pointer' }}
+                      />
+                      <label htmlFor="prod-gift-tag" style={{ fontWeight: '500', cursor: 'pointer', fontSize: '0.9rem' }}>
+                        Enable Custom Gift Tag field
+                      </label>
+                    </div>
+
+                    <div className="form-group" style={{ display: 'flex', alignItems: 'center', gap: '8px', margin: 0 }}>
+                      <input
+                        type="checkbox"
+                        id="prod-addons"
+                        name="addonsEnabled"
+                        checked={formData.addonsEnabled}
+                        onChange={handleInputChange}
+                        style={{ width: '18px', height: '18px', cursor: 'pointer' }}
+                      />
+                      <label htmlFor="prod-addons" style={{ fontWeight: '500', cursor: 'pointer', fontSize: '0.9rem' }}>
+                        Enable Add-ons selection
+                      </label>
+                    </div>
+                  </div>
+
+                  <div className="form-group" style={{ marginBottom: '10px' }}>
+                    <label className="form-label" htmlFor="prod-cust-text">Customization Section Text</label>
+                    <textarea
+                      id="prod-cust-text"
+                      name="customizationText"
+                      className="form-textarea"
+                      rows="2"
+                      placeholder="e.g. Make your gift extra special..."
+                      value={formData.customizationText}
+                      onChange={handleInputChange}
+                    ></textarea>
+                  </div>
+                  
+                  <div className="form-group" style={{ margin: 0 }}>
+                    <label className="form-label" htmlFor="prod-del-info">Delivery Information Text</label>
+                    <textarea
+                      id="prod-del-info"
+                      name="deliveryInfoText"
+                      className="form-textarea"
+                      rows="2"
+                      placeholder="e.g. Standard Delivery: 3-5 business days."
+                      value={formData.deliveryInfoText}
+                      onChange={handleInputChange}
+                    ></textarea>
+                  </div>
                 </div>
 
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', marginTop: '1rem' }}>
