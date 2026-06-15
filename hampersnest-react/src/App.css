@@ -6983,4 +6983,27 @@ footer h4,
 .lightbox-prev:hover, .lightbox-next:hover { background: rgba(255,255,255,0.3); }
 .lightbox-prev { left: 20px; }
 .lightbox-next { right: 20px; }
-.collection-card-action-row { display: flex; flex-direction: row; gap: 8px; margin-top: 4px; } .collection-card-action-row > button { flex: 1; height: 34px; padding: 0 !important; display: inline-flex; align-items: center; justify-content: center; font-size: 0.75rem !important; border-radius: 4px; } @media (max-width: 767px) { .collection-card-action-row { flex-direction: column; } .collection-card-action-row > button { width: 100%; } }
+.collection-card-action-row {
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+  margin-top: 4px;
+}
+.collection-card-action-row > button {
+  flex: 1;
+  height: 34px;
+  padding: 0 !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem !important;
+  border-radius: 4px;
+}
+@media (max-width: 767px) {
+  .collection-card-action-row {
+    flex-direction: column;
+  }
+  .collection-card-action-row > button {
+    width: 100%;
+  }
+}
