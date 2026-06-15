@@ -261,12 +261,26 @@ export default function Home() {
                 <div className="shop-card-content">
                   <h3 className="shop-card-name">{product.name}</h3>
                   <p className="shop-card-inr">{formatPrice(product.price)}</p>
-                  <button
-                    className="shop-card-btn"
-                    onClick={() => addToCart(product, 1, { giftTag: '', wrappingStyle: 'Standard', ribbonColor: 'None' })}
-                  >
-                    <i className="fa-solid fa-cart-shopping"></i> Add To Cart
-                  </button>
+                  <div className="collection-card-action-row">
+                    <button
+                      className="shop-card-btn"
+                      onClick={() => addToCart(product, 1, { giftTag: '', wrappingStyle: 'Standard', ribbonColor: 'None' })}
+                    >
+                      <i className="fa-solid fa-cart-shopping"></i> Add To Cart
+                    </button>
+                    <Link
+                      to={`/product/${product.id}`}
+                      className="card-link btn"
+                      style={{ 
+                        color: 'var(--color-purple)', 
+                        borderColor: 'var(--color-purple)', 
+                        border: '1px solid', 
+                        background: 'transparent' 
+                      }}
+                    >
+                      View Details <i className="fa-solid fa-chevron-right"></i>
+                    </Link>
+                  </div>
                 </div>
               </div>
             ))}
