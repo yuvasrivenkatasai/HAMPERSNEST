@@ -2,10 +2,8 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import SEO from '../components/SEO';
+import { API_BASE } from '../config.js';
 
-const API_BASE = window.location.hostname === 'localhost' || window.location.hostname.endsWith('.localhost')
-  ? 'http://localhost:5000'
-  : '';
 
 export default function Gallery() {
   const navigate = useNavigate();
