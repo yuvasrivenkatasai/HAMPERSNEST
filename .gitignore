@@ -17,3 +17,9 @@ hampersnest-admin/dist/
 hampersnest-backend/public/uploads/
 hampersnest-backend/.env
 .env
+
+# wrangler files
+.wrangler
+.dev.vars*
+!.dev.vars.example
+!.env.example
