@@ -315,7 +315,6 @@ header.scrolled {
   transition: var(--transition-smooth);
 }
 
-
 .logo-container {
   display: flex;
   align-items: center;
