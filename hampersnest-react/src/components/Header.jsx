@@ -8,8 +8,6 @@ export default function Header() {
   const { currency, toggleCurrency } = useCurrency();
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [collectionsDropdownOpen, setCollectionsDropdownOpen] = useState(false);
-
   // Toggle scroll header state
   useEffect(() => {
     const handleScroll = () => {
@@ -41,7 +39,6 @@ export default function Header() {
 
   const closeMobileMenu = () => {
     setMobileMenuOpen(false);
-    setCollectionsDropdownOpen(false);
   };
 
   return (
@@ -65,39 +62,13 @@ export default function Header() {
               <NavLink to="/" className={({ isActive }) => isActive ? 'active' : ''} onClick={closeMobileMenu}>
                 Home
               </NavLink>
-              <div className={`nav-dropdown-wrapper ${collectionsDropdownOpen ? 'open' : ''}`}>
-                <NavLink 
-                  to="/collections" 
-                  className={({ isActive }) => isActive ? 'active' : ''}
-                  onClick={(e) => {
-                    if (window.innerWidth <= 1024) {
-                      e.preventDefault();
-                      setCollectionsDropdownOpen(!collectionsDropdownOpen);
-                    } else {
-                      closeMobileMenu();
-                    }
-                  }}
-                >
-                  Collections <i className="fa-solid fa-chevron-down dropdown-arrow"></i>
-                </NavLink>
-                <div className="nav-dropdown-menu">
-                  <Link to="/collections" onClick={closeMobileMenu}>All Products</Link>
-                  {Array.isArray(settings?.categories) && settings.categories.map((category) => {
-                    const id = String(category.id || category.label || '').trim();
-                    const label = String(category.label || category.id || '').trim();
-                    if (!id) return null;
-                    return (
-                      <Link 
-                        key={id} 
-                        to={`/collections?category=${encodeURIComponent(id)}`} 
-                        onClick={closeMobileMenu}
-                      >
-                        {label}
-                      </Link>
-                    );
-                  })}
-                </div>
-              </div>
+              <NavLink 
+                to="/collections" 
+                className={({ isActive }) => isActive ? 'active' : ''} 
+                onClick={closeMobileMenu}
+              >
+                Collections
+              </NavLink>
               <NavLink to="/featured" className={({ isActive }) => isActive ? 'active' : ''} onClick={closeMobileMenu}>
                 Featured Gifts
               </NavLink>
