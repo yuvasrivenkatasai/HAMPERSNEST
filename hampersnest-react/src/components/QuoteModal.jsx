@@ -30,7 +30,7 @@ const CUSTOMIZATION_OPTIONS = [
   'Invitation Inserts',
 ];
 
-const WA_NUMBER = '917989202194';
+const WA_NUMBER = '917989202094';
 
 const EMPTY_FORM = {
   occasion: '',

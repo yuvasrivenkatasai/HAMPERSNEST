@@ -72,7 +72,7 @@ export default function Home() {
     const revealElements = document.querySelectorAll(
       '.reveal, .reveal-heading, .reveal-category, .reveal-gallery, .reveal-testimonial'
     );
-    
+
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -104,7 +104,7 @@ export default function Home() {
     "image": window.location.origin + "/assets/hero_banner.webp",
     "@id": window.location.origin + "/#localbusiness",
     "url": window.location.origin,
-    "telephone": "+917989202194",
+    "telephone": "+917989202094",
     "priceRange": "₹₹",
     "address": {
       "@type": "PostalAddress",
@@ -141,7 +141,7 @@ export default function Home() {
 
   return (
     <div style={{ overflow: 'hidden' }}>
-      <SEO 
+      <SEO
         title="Hampers Nest | Premium Customized Gift Hampers & Return Gifts Hyderabad"
         description="Discover premium customized gift hampers, luxury wedding return gifts, baby shower boxes, housewarming kits, and corporate gifts by Hampers Nest Hyderabad. Ship across India."
         keywords="wedding return gifts Hyderabad, customized gift hampers, baby shower gifts Hyderabad, brass items return gifts, corporate gift sets, luxury gifting Hyderabad, hampersnest, hamspersnest"
@@ -208,9 +208,7 @@ export default function Home() {
               </span>
               <h3>Thoughtfully Curated <br />Luxury Gifts</h3>
               <p className="about-text" style={{ fontSize: '0.95rem' }}>
-                Hampers Nest specializes in premium customized return gifts designed to leave a lasting impression. Every
-                hamper is thoughtfully curated with attention to quality, aesthetics, and deep personalization. We merge
-                traditional Hyderabad artistry with modern premium packaging to build return gifts worth cherishing.
+                At HampersNest, we are committed to crafting luxury experiences that make gifting truly special. Our vision is to curate exquisite gift hampers that embody elegance and thoughtfulness, ensuring each product is of the highest quality and beautifully packaged. We aim to exceed expectations, transforming every gift into a memorable moment of joy and celebration. Join us in celebrating life's special occasions with our thoughtfully designed hampers.
               </p>
 
               <div className="about-services-tags" style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', marginTop: '1.5rem' }}>
@@ -227,7 +225,7 @@ export default function Home() {
                   <i className="fa-solid fa-briefcase" style={{ marginRight: '6px', color: 'var(--color-gold)' }}></i> Corporate Gifting
                 </div>
               </div>
-              
+
               <Link to="/about" className="btn btn-secondary" style={{ marginTop: '2rem' }}>
                 Read Our Story
               </Link>
@@ -365,7 +363,7 @@ export default function Home() {
                   ))}
                 </div>
                 <p className="testimonial-quote">"{testimonial.quote}"</p>
-                
+
                 <div className="testimonial-user">
                   <div className="testimonial-avatar">
                     <svg viewBox="0 0 100 100">
@@ -393,6 +391,126 @@ export default function Home() {
               ></button>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* FOLLOW US INSTAGRAM SECTION */}
+      <section className="follow-us-section reveal container" style={{ paddingBottom: '4rem' }}>
+        <div className="follow-us-header text-center">
+          <span className="section-subtitle">Stay Connected</span>
+          <h2 className="section-title">Follow Us on Instagram</h2>
+          <a
+            href="https://www.instagram.com/hampersnest"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="instagram-handle"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              color: 'var(--color-gold-dark)',
+              fontSize: '1.2rem',
+              fontWeight: 600,
+              textDecoration: 'none',
+              marginTop: '0.5rem',
+              transition: 'color 0.3s ease'
+            }}
+          >
+            <i className="fa-brands fa-instagram"></i> @hampersnest
+          </a>
+        </div>
+
+        <div className="instagram-grid" style={{ marginTop: '2.5rem' }}>
+          <div className="instagram-card">
+            <img src="/assets/wedding_gift.webp" alt="Luxury Wedding Return Gifts" />
+            <a
+              href="https://www.instagram.com/hampersnest"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="instagram-overlay"
+            >
+              <i className="fa-brands fa-instagram"></i>
+              <span>View Post</span>
+            </a>
+          </div>
+          <div className="instagram-card">
+            <img src="/assets/baby_shower.webp" alt="Custom Baby Shower Hampers" />
+            <a
+              href="https://www.instagram.com/hampersnest"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="instagram-overlay"
+            >
+              <i className="fa-brands fa-instagram"></i>
+              <span>View Post</span>
+            </a>
+          </div>
+          <div className="instagram-card">
+            <img src="/assets/housewarming.webp" alt="Elegant Housewarming Trays" />
+            <a
+              href="https://www.instagram.com/hampersnest"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="instagram-overlay"
+            >
+              <i className="fa-brands fa-instagram"></i>
+              <span>View Post</span>
+            </a>
+          </div>
+          <div className="instagram-card">
+            <img src="/assets/corporate.webp" alt="Premium Corporate Gifting Sets" />
+            <a
+              href="https://www.instagram.com/hampersnest"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="instagram-overlay"
+            >
+              <i className="fa-brands fa-instagram"></i>
+              <span>View Post</span>
+            </a>
+          </div>
+          <div className="instagram-card">
+            <img src="/assets/hero_banner.webp" alt="Curation Studio Custom Packaging" />
+            <a
+              href="https://www.instagram.com/hampersnest"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="instagram-overlay"
+            >
+              <i className="fa-brands fa-instagram"></i>
+              <span>View Post</span>
+            </a>
+          </div>
+          <div className="instagram-card">
+            <img src="/assets/brass_cup.webp" alt="Traditional Brass Gifting Bowls" />
+            <a
+              href="https://www.instagram.com/hampersnest"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="instagram-overlay"
+            >
+              <i className="fa-brands fa-instagram"></i>
+              <span>View Post</span>
+            </a>
+          </div>
+        </div>
+
+        <div className="follow-us-cta text-center" style={{ marginTop: '2.5rem', display: 'flex', justifyContent: 'center' }}>
+          <a
+            href="https://www.instagram.com/hampersnest"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn btn-primary"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '0.8rem 2.2rem',
+              fontWeight: 600
+            }}
+          >
+            <i className="fa-brands fa-instagram" style={{ marginRight: '8px', fontSize: '1.15rem' }}></i> Visit Instagram Profile
+          </a>
         </div>
       </section>
 

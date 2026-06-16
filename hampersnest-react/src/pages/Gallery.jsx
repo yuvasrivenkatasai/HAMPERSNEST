@@ -117,7 +117,7 @@ export default function Gallery() {
     if (imageUrl && imageUrl.startsWith('/')) {
       absoluteImageUrl = window.location.origin + imageUrl;
     }
-    const whatsappBaseNumber = '917989202194';
+    const whatsappBaseNumber = '917989202094';
     const welcomeText = encodeURIComponent(`Hi Hampers Nest! I am interested in this event setup style from your showcase: ${title} (${absoluteImageUrl}). Could you please share a customized quote?`);
     window.open(`https://api.whatsapp.com/send?phone=${whatsappBaseNumber}&text=${welcomeText}`, '_blank');
   };

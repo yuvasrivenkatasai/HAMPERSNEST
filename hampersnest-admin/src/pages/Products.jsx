@@ -31,6 +31,7 @@ export default function Products() {
   const adminRole = localStorage.getItem('adminRole') || 'Staff';
 
   const [formData, setFormData] = useState({
+    id: '',
     name: '',
     price: '',
     category: '',
@@ -48,110 +49,86 @@ export default function Products() {
     deliveryInfoText: 'Standard Delivery: 3-5 business days. Express Delivery available at checkout.'
   });
   const [formSubmitting, setFormSubmitting] = useState(false);
-  const [uploadingImage, setUploadingImage] = useState(false);
   const [uploadingGallery, setUploadingGallery] = useState(false);
   const [uploadingVideo, setUploadingVideo] = useState(false);
+  
+  const [selectedImages, setSelectedImages] = useState([]);
+  const [selectedVideos, setSelectedVideos] = useState([]);
 
-  const handleImageUpload = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    setUploadingImage(true);
-    const formDataObj = new FormData();
-    formDataObj.append('image', file);
-
-    try {
-      const token = localStorage.getItem('adminToken');
-      const response = await fetch(`${API_BASE}/api/upload?folder=products`, {
-        method: 'POST',
-        headers: {
-          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
-        },
-        body: formDataObj
-      });
-
-      if (!response.ok) {
-        const errData = await response.json().catch(() => ({}));
-        throw new Error(errData.message || 'Image upload failed');
-      }
-
-      const data = await response.json();
-      setFormData(prev => ({
-        ...prev,
-        image: data.url
-      }));
-    } catch (err) {
-      console.error(err);
-      alert(err.message || 'Failed to upload image. Please verify config.');
-    } finally {
-      setUploadingImage(false);
-    }
-  };
-
-  const handleGalleryUpload = async (e) => {
+  const handleImagesSelected = (e) => {
     const files = Array.from(e.target.files);
     if (!files.length) return;
 
-    setUploadingGallery(true);
-    const token = localStorage.getItem('adminToken');
-    const newImages = [];
-
-    for (const file of files) {
-      const formDataObj = new FormData();
-      formDataObj.append('image', file);
-
-      try {
-        const response = await fetch(`${API_BASE}/api/upload?folder=products`, {
-          method: 'POST',
-          headers: { ...(token ? { 'Authorization': `Bearer ${token}` } : {}) },
-          body: formDataObj
-        });
-
-        if (response.ok) {
-          const data = await response.json();
-          newImages.push(data.url);
-        }
-      } catch (err) {
-        console.error('Gallery image upload failed', err);
-      }
-    }
-
-    setFormData(prev => ({
-      ...prev,
-      images: [...(prev.images || []), ...newImages]
+    const newItems = files.map(file => ({
+      id: Math.random().toString(36).substring(2, 9) + '-' + Date.now(),
+      file,
+      preview: URL.createObjectURL(file)
     }));
-    setUploadingGallery(false);
+
+    setSelectedImages(prev => [...prev, ...newItems]);
   };
 
-  const handleVideoUpload = async (e) => {
+  const handleTemplateSelected = (val) => {
+    setSelectedImages(prev => [
+      ...prev,
+      {
+        id: Math.random().toString(36).substring(2, 9) + '-' + Date.now(),
+        url: val,
+        preview: val
+      }
+    ]);
+  };
+
+  const moveImage = (index, direction) => {
+    const newIndex = index + direction;
+    if (newIndex < 0 || newIndex >= selectedImages.length) return;
+
+    const updated = [...selectedImages];
+    const temp = updated[index];
+    updated[index] = updated[newIndex];
+    updated[newIndex] = temp;
+
+    setSelectedImages(updated);
+  };
+
+  const setAsCover = (index) => {
+    if (index <= 0 || index >= selectedImages.length) return;
+
+    const updated = [...selectedImages];
+    const target = updated.splice(index, 1)[0];
+    updated.unshift(target);
+
+    setSelectedImages(updated);
+  };
+
+  const removeImage = (index) => {
+    const item = selectedImages[index];
+    if (item.file && item.preview.startsWith('blob:')) {
+      URL.revokeObjectURL(item.preview);
+    }
+    setSelectedImages(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const handleVideoSelected = (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
-    setUploadingVideo(true);
-    const formDataObj = new FormData();
-    formDataObj.append('video', file);
+    setSelectedVideos(prev => [
+      ...prev,
+      {
+        id: Math.random().toString(36).substring(2, 9) + '-' + Date.now(),
+        file,
+        preview: URL.createObjectURL(file)
+      }
+    ]);
+  };
 
-    try {
-      const token = localStorage.getItem('adminToken');
-      const response = await fetch(`${API_BASE}/api/upload/video?folder=products`, {
-        method: 'POST',
-        headers: { ...(token ? { 'Authorization': `Bearer ${token}` } : {}) },
-        body: formDataObj
-      });
-
-      if (!response.ok) throw new Error('Video upload failed');
-
-      const data = await response.json();
-      setFormData(prev => ({
-        ...prev,
-        videoUrls: [...(prev.videoUrls || []), data.url]
-      }));
-    } catch (err) {
-      console.error(err);
-      alert(err.message || 'Failed to upload video.');
-    } finally {
-      setUploadingVideo(false);
+  const removeVideo = (index) => {
+    const item = selectedVideos[index];
+    if (item.file && item.preview.startsWith('blob:')) {
+      URL.revokeObjectURL(item.preview);
     }
+    setSelectedVideos(prev => prev.filter((_, i) => i !== index));
   };
 
   const fetchProducts = async () => {
@@ -176,8 +153,17 @@ export default function Products() {
 
   const openAddModal = () => {
     setEditingProduct(null);
+    setSelectedImages([]);
+    setSelectedVideos([]);
     const defaultCategory = categories[0]?.id || '';
+    const newId = (typeof window !== 'undefined' && window.crypto && window.crypto.randomUUID)
+      ? window.crypto.randomUUID()
+      : 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+          var r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
+          return v.toString(16);
+        });
     setFormData({
+      id: newId,
       name: '',
       price: '',
       category: defaultCategory,
@@ -204,17 +190,42 @@ export default function Products() {
   const openEditModal = (product) => {
     setEditingProduct(product);
     
+    const combinedImages = [];
+    if (product.image) {
+      combinedImages.push(product.image);
+    }
+    if (Array.isArray(product.images)) {
+      product.images.forEach(img => {
+        if (img && !combinedImages.includes(img)) {
+          combinedImages.push(img);
+        }
+      });
+    }
+
+    setSelectedImages(combinedImages.map(url => ({
+      id: Math.random().toString(36).substring(2, 9) + '-' + Date.now(),
+      url,
+      preview: url
+    })));
+
+    setSelectedVideos((Array.isArray(product.videoUrls) ? product.videoUrls : []).map(url => ({
+      id: Math.random().toString(36).substring(2, 9) + '-' + Date.now(),
+      url,
+      preview: url
+    })));
+
     setFormData({
+      id: product.id || '',
       name: product.name,
       price: product.price.toString(),
       category: product.category,
-      image: product.image,
+      image: product.image || '',
       description: product.description || '',
       detailsText: product.details ? product.details.join('\n') : '',
       isFeatured: !!product.isFeatured,
       originalPrice: product.originalPrice ? product.originalPrice.toString() : '',
       isActive: product.isActive !== false,
-      images: Array.isArray(product.images) ? product.images : [],
+      images: combinedImages,
       videoUrls: Array.isArray(product.videoUrls) ? product.videoUrls : [],
       customGiftTagEnabled: product.customGiftTagEnabled !== false,
       addonsEnabled: product.addonsEnabled !== false,
@@ -222,6 +233,20 @@ export default function Products() {
       deliveryInfoText: product.deliveryInfoText || 'Standard Delivery: 3-5 business days. Express Delivery available at checkout.'
     });
     setModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    selectedImages.forEach(img => {
+      if (img.file && img.preview && img.preview.startsWith('blob:')) {
+        URL.revokeObjectURL(img.preview);
+      }
+    });
+    selectedVideos.forEach(vid => {
+      if (vid.file && vid.preview && vid.preview.startsWith('blob:')) {
+        URL.revokeObjectURL(vid.preview);
+      }
+    });
+    setModalOpen(false);
   };
 
   const handleInputChange = (e) => {
@@ -238,8 +263,8 @@ export default function Products() {
     const priceVal = formData.price ? Number(formData.price) : 0;
     const originalPriceVal = formData.originalPrice ? Number(formData.originalPrice) : 0;
 
-    if (!formData.name || (!priceVal && !originalPriceVal) || !formData.category || !formData.image) {
-      alert('Please fill out all required fields (Name, Category, Image, and at least one price).');
+    if (!formData.name || (!priceVal && !originalPriceVal) || !formData.category || selectedImages.length === 0) {
+      alert('Please fill out all required fields (Name, Category, at least one Image, and at least one price).');
       return;
     }
 
@@ -265,25 +290,79 @@ export default function Products() {
       finalOriginalPrice = 0;
     }
 
-    const payload = {
-      name: formData.name,
-      price: finalPrice,
-      category: formData.category,
-      image: formData.image,
-      description: formData.description,
-      details,
-      isFeatured: formData.isFeatured,
-      originalPrice: finalOriginalPrice,
-      isActive: formData.isActive,
-      images: formData.images,
-      videoUrls: formData.videoUrls,
-      customGiftTagEnabled: formData.customGiftTagEnabled,
-      addonsEnabled: formData.addonsEnabled,
-      customizationText: formData.customizationText,
-      deliveryInfoText: formData.deliveryInfoText
-    };
-
     try {
+      const token = localStorage.getItem('adminToken');
+
+      // 1. Upload Images to R2/Local Storage
+      const uploadedImages = [];
+      for (let i = 0; i < selectedImages.length; i++) {
+        const item = selectedImages[i];
+        if (item.file) {
+          const formDataObj = new FormData();
+          formDataObj.append('image', item.file);
+          
+          const response = await fetch(`${API_BASE}/api/upload?folder=products&productId=${formData.id}`, {
+            method: 'POST',
+            headers: { ...(token ? { 'Authorization': `Bearer ${token}` } : {}) },
+            body: formDataObj
+          });
+
+          if (!response.ok) {
+            const errData = await response.json().catch(() => ({}));
+            throw new Error(errData.message || `Failed to upload image: ${item.file.name}`);
+          }
+
+          const data = await response.json();
+          uploadedImages.push(data.url);
+        } else {
+          uploadedImages.push(item.url);
+        }
+      }
+
+      // 2. Upload Videos to R2/Local Storage
+      const uploadedVideos = [];
+      for (let i = 0; i < selectedVideos.length; i++) {
+        const item = selectedVideos[i];
+        if (item.file) {
+          const formDataObj = new FormData();
+          formDataObj.append('video', item.file);
+          
+          const response = await fetch(`${API_BASE}/api/upload/video?folder=products&productId=${formData.id}`, {
+            method: 'POST',
+            headers: { ...(token ? { 'Authorization': `Bearer ${token}` } : {}) },
+            body: formDataObj
+          });
+
+          if (!response.ok) {
+            throw new Error(`Failed to upload video: ${item.file.name}`);
+          }
+
+          const data = await response.json();
+          uploadedVideos.push(data.url);
+        } else {
+          uploadedVideos.push(item.url);
+        }
+      }
+
+      const payload = {
+        id: formData.id,
+        name: formData.name,
+        price: finalPrice,
+        category: formData.category,
+        image: uploadedImages[0] || '/assets/hero_banner.png',
+        description: formData.description,
+        details,
+        isFeatured: formData.isFeatured,
+        originalPrice: finalOriginalPrice,
+        isActive: formData.isActive,
+        images: uploadedImages.slice(1),
+        videoUrls: uploadedVideos,
+        customGiftTagEnabled: formData.customGiftTagEnabled,
+        addonsEnabled: formData.addonsEnabled,
+        customizationText: formData.customizationText,
+        deliveryInfoText: formData.deliveryInfoText
+      };
+
       if (editingProduct) {
         // Edit mode
         const updated = await apiRequest(`/api/products/${editingProduct.id}`, {
@@ -299,7 +378,7 @@ export default function Products() {
         });
         setProducts(prev => [created, ...(Array.isArray(prev) ? prev : [])]);
       }
-      setModalOpen(false);
+      handleCloseModal();
     } catch (err) {
       console.error(err);
       alert(err.message || 'Failed to save product');
@@ -705,11 +784,11 @@ export default function Products() {
 
       {/* ADD / EDIT PRODUCT MODAL */}
       {modalOpen && (
-        <div className="modal-backdrop" onClick={(e) => e.target.classList.contains('modal-backdrop') && setModalOpen(false)}>
+        <div className="modal-backdrop" onClick={(e) => e.target.classList.contains('modal-backdrop') && handleCloseModal()}>
           <div className="modal-content" style={{ maxWidth: '600px' }}>
             <div className="modal-header">
               <h3>{editingProduct ? `Edit Hamper: ${editingProduct.name}` : 'Add New Gift Hamper'}</h3>
-              <button className="modal-close" onClick={() => setModalOpen(false)}>
+              <button className="modal-close" type="button" onClick={handleCloseModal}>
                 <i className="fa-solid fa-xmark"></i>
               </button>
             </div>
@@ -795,114 +874,146 @@ export default function Products() {
                       </small>
                     )}
                   </div>
+                </div>
 
-                  <div className="form-group">
-                    <label className="form-label" htmlFor="prod-img">Image Path / URL *</label>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginTop: '15px' }}>
+                  {/* Left Column: Hamper Images */}
+                  <div className="form-group" style={{ gridColumn: 'span 2' }}>
+                    <label className="form-label" style={{ fontWeight: '600', color: 'var(--color-purple-dark)', fontSize: '0.95rem' }}>
+                      Hamper Images * <span style={{ fontWeight: 'normal', fontSize: '0.8rem', color: 'var(--color-gray-text)' }}>(Upload multiple. Drag/reorder. The first image will be the Cover image)</span>
+                    </label>
                     
-                    {/* File Uploader */}
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', marginBottom: '10px' }}>
-                      <span style={{ fontSize: '0.8rem', fontWeight: 500, color: 'var(--color-gray-text)' }}>
-                        Upload file (converts to WebP & uploads to R2)
-                      </span>
-                      <input
-                        type="file"
-                        id="prod-image-file"
-                        accept="image/*"
-                        onChange={handleImageUpload}
-                        className="form-input"
-                        style={{ padding: '6px 12px' }}
-                      />
-                      {uploadingImage && (
-                        <small style={{ color: 'var(--color-purple)', fontWeight: 500 }}>
-                          <i className="fa-solid fa-spinner fa-spin"></i> Processing and uploading WebP...
-                        </small>
-                      )}
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', alignItems: 'center', marginBottom: '12px' }}>
+                      {/* Upload button wrapper */}
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                        <input
+                          type="file"
+                          id="prod-images-multiple"
+                          accept="image/*"
+                          multiple
+                          onChange={handleImagesSelected}
+                          className="form-input"
+                          style={{ padding: '6px 12px', width: '250px' }}
+                        />
+                      </div>
+
+                      {/* Select template assets */}
+                      <select
+                        className="form-select"
+                        style={{ width: '250px', fontSize: '0.85rem', height: '37px', padding: '6px 12px' }}
+                        onChange={(e) => {
+                          if (e.target.value) {
+                            handleTemplateSelected(e.target.value);
+                            e.target.value = ""; // Reset
+                          }
+                        }}
+                        value=""
+                      >
+                        <option value="" disabled>-- Or Add Quick Template Asset --</option>
+                        <option value="/assets/wedding_gift.png">Wedding Hamper</option>
+                        <option value="/assets/baby_shower.png">Baby Shower</option>
+                        <option value="/assets/housewarming.png">Housewarming</option>
+                        <option value="/assets/corporate.png">Corporate Hamper</option>
+                        <option value="/assets/brass_cup.png">Brass Cup</option>
+                        <option value="/assets/half_saree.png">Half Saree</option>
+                        <option value="/assets/hero_banner.png">Hero Banner default</option>
+                      </select>
                     </div>
 
-                    <input
-                      type="text"
-                      id="prod-img"
-                      name="image"
-                      className="form-input"
-                      placeholder="Auto-filled on upload or select template"
-                      value={formData.image}
-                      readOnly
-                      required
-                      style={{ background: '#f1f3f5', cursor: 'not-allowed' }}
-                    />
-                    <select
-                      className="form-select"
-                      style={{ marginTop: '5px', fontSize: '0.8rem', padding: '4px 8px', height: 'auto' }}
-                      onChange={(e) => {
-                        if (e.target.value) {
-                          setFormData(prev => ({ ...prev, image: e.target.value }));
-                        }
-                      }}
-                      value=""
-                    >
-                      <option value="" disabled>-- Or Select Quick Template Asset --</option>
-                      <option value="/assets/wedding_gift.png">Wedding Hamper (/assets/wedding_gift.png)</option>
-                      <option value="/assets/baby_shower.png">Baby Shower (/assets/baby_shower.png)</option>
-                      <option value="/assets/housewarming.png">Housewarming (/assets/housewarming.png)</option>
-                      <option value="/assets/corporate.png">Corporate Hamper (/assets/corporate.png)</option>
-                      <option value="/assets/brass_cup.png">Brass Cup (/assets/brass_cup.png)</option>
-                      <option value="/assets/half_saree.png">Half Saree (/assets/half_saree.png)</option>
-                      <option value="/assets/hero_banner.png">Hero Banner default (/assets/hero_banner.png)</option>
-                    </select>
-
-                    {/* Image Preview Block */}
-                    {formData.image && (
-                      <div style={{ marginTop: '10px', display: 'flex', gap: '10px', alignItems: 'center' }}>
-                        <img 
-                          src={formData.image} 
-                          alt="Preview" 
-                          style={{ width: '60px', height: '60px', objectFit: 'cover', borderRadius: '6px', border: '1px solid var(--color-gray-border)' }} 
-                        />
-                        <span style={{ fontSize: '0.8rem', color: '#16A34A', fontWeight: '600', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                          <i className="fa-solid fa-circle-check"></i> Image Active
-                        </span>
+                    {/* Image ordering and manipulation grid */}
+                    {selectedImages && selectedImages.length > 0 ? (
+                      <div style={{
+                        display: 'grid',
+                        gridTemplateColumns: 'repeat(auto-fill, minmax(110px, 1fr))',
+                        gap: '12px',
+                        padding: '12px',
+                        background: '#f8fafc',
+                        borderRadius: '8px',
+                        border: '1px dashed #cbd5e1'
+                      }}>
+                        {selectedImages.map((img, idx) => (
+                          <div key={img.id || idx} style={{
+                            position: 'relative',
+                            border: idx === 0 ? '2px solid var(--color-gold)' : '1px solid var(--color-gray-border)',
+                            borderRadius: '8px',
+                            padding: '4px',
+                            background: '#fff',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            boxShadow: '0 2px 8px rgba(0,0,0,0.05)'
+                          }}>
+                            <div style={{ position: 'relative', width: '100%', height: '80px' }}>
+                              <img src={img.preview} alt={`Hamper ${idx}`} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '4px' }} />
+                              {idx === 0 ? (
+                                <span style={{ position: 'absolute', top: '4px', left: '4px', background: 'var(--color-gold)', color: '#000', padding: '2px 6px', fontSize: '0.65rem', fontWeight: 'bold', borderRadius: '4px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>Cover</span>
+                              ) : (
+                                <span style={{ position: 'absolute', top: '4px', left: '4px', background: 'var(--color-purple)', color: '#fff', padding: '2px 6px', fontSize: '0.65rem', fontWeight: '500', borderRadius: '4px' }}>Gallery</span>
+                              )}
+                            </div>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', marginTop: '6px', gap: '2px' }}>
+                              <button
+                                type="button"
+                                disabled={idx === 0}
+                                onClick={() => moveImage(idx, -1)}
+                                className="btn-admin-secondary"
+                                style={{ padding: '2px 5px', fontSize: '0.7rem', flex: 1, minWidth: 0 }}
+                                title="Move Left/Up"
+                              >
+                                <i className="fa-solid fa-arrow-left"></i>
+                              </button>
+                              {idx > 0 && (
+                                <button
+                                  type="button"
+                                  onClick={() => setAsCover(idx)}
+                                  className="btn-admin-secondary"
+                                  style={{ padding: '2px 5px', fontSize: '0.7rem', flex: 1, minWidth: 0 }}
+                                  title="Set as Cover"
+                                >
+                                  <i className="fa-solid fa-star" style={{ color: 'var(--color-gold)' }}></i>
+                                </button>
+                              )}
+                              <button
+                                type="button"
+                                disabled={idx === selectedImages.length - 1}
+                                onClick={() => moveImage(idx, 1)}
+                                className="btn-admin-secondary"
+                                style={{ padding: '2px 5px', fontSize: '0.7rem', flex: 1, minWidth: 0 }}
+                                title="Move Right/Down"
+                              >
+                                <i className="fa-solid fa-arrow-right"></i>
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => removeImage(idx)}
+                                className="btn-admin-secondary"
+                                style={{ padding: '2px 5px', fontSize: '0.7rem', background: '#fee2e2', color: '#ef4444', border: '1px solid #fca5a5', flex: 1, minWidth: 0 }}
+                                title="Remove"
+                              >
+                                <i className="fa-solid fa-trash-can"></i>
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div style={{
+                        padding: '20px',
+                        textAlign: 'center',
+                        background: '#f8fafc',
+                        borderRadius: '8px',
+                        border: '1px dashed #cbd5e1',
+                        color: 'var(--color-gray-text)',
+                        fontSize: '0.85rem'
+                      }}>
+                        <i className="fa-regular fa-image" style={{ fontSize: '1.5rem', marginBottom: '8px', display: 'block' }}></i>
+                        No images uploaded yet. Select files or quick templates above.
                       </div>
                     )}
                   </div>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', marginTop: '15px' }}>
-                  <div className="form-group">
-                    <label className="form-label" htmlFor="prod-gallery-file">Additional Gallery Images</label>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', marginBottom: '10px' }}>
-                      <input
-                        type="file"
-                        id="prod-gallery-file"
-                        accept="image/*"
-                        multiple
-                        onChange={handleGalleryUpload}
-                        className="form-input"
-                        style={{ padding: '6px 12px' }}
-                      />
-                      {uploadingGallery && (
-                        <small style={{ color: 'var(--color-purple)', fontWeight: 500 }}>
-                          <i className="fa-solid fa-spinner fa-spin"></i> Uploading gallery images...
-                        </small>
-                      )}
-                    </div>
-                    {formData.images && formData.images.length > 0 && (
-                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: '10px' }}>
-                        {formData.images.map((img, idx) => (
-                          <div key={idx} style={{ position: 'relative' }}>
-                            <img src={img} alt={`Gallery ${idx}`} style={{ width: '50px', height: '50px', objectFit: 'cover', borderRadius: '4px' }} />
-                            <button
-                              type="button"
-                              onClick={() => setFormData(prev => ({ ...prev, images: prev.images.filter((_, i) => i !== idx) }))}
-                              style={{ position: 'absolute', top: '-5px', right: '-5px', background: 'red', color: 'white', border: 'none', borderRadius: '50%', width: '18px', height: '18px', fontSize: '10px', cursor: 'pointer' }}
-                            >
-                              <i className="fa-solid fa-xmark"></i>
-                            </button>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '15px', marginTop: '15px' }}>
                   <div className="form-group">
                     <label className="form-label" htmlFor="prod-video-file">Product Videos (MP4/WebM)</label>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', marginBottom: '10px' }}>
@@ -910,24 +1021,19 @@ export default function Products() {
                         type="file"
                         id="prod-video-file"
                         accept="video/mp4,video/webm"
-                        onChange={handleVideoUpload}
+                        onChange={handleVideoSelected}
                         className="form-input"
                         style={{ padding: '6px 12px' }}
                       />
-                      {uploadingVideo && (
-                        <small style={{ color: 'var(--color-purple)', fontWeight: 500 }}>
-                          <i className="fa-solid fa-spinner fa-spin"></i> Uploading video...
-                        </small>
-                      )}
                     </div>
-                    {formData.videoUrls && formData.videoUrls.length > 0 && (
+                    {selectedVideos && selectedVideos.length > 0 && (
                       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: '10px' }}>
-                        {formData.videoUrls.map((vid, idx) => (
-                          <div key={idx} style={{ position: 'relative', background: '#000', borderRadius: '4px', padding: '2px' }}>
-                            <video src={vid} style={{ width: '80px', height: '50px', objectFit: 'cover' }} />
+                        {selectedVideos.map((vid, idx) => (
+                          <div key={vid.id || idx} style={{ position: 'relative', background: '#000', borderRadius: '4px', padding: '2px' }}>
+                            <video src={vid.preview} style={{ width: '80px', height: '50px', objectFit: 'cover' }} />
                             <button
                               type="button"
-                              onClick={() => setFormData(prev => ({ ...prev, videoUrls: prev.videoUrls.filter((_, i) => i !== idx) }))}
+                              onClick={() => removeVideo(idx)}
                               style={{ position: 'absolute', top: '-5px', right: '-5px', background: 'red', color: 'white', border: 'none', borderRadius: '50%', width: '18px', height: '18px', fontSize: '10px', cursor: 'pointer' }}
                             >
                               <i className="fa-solid fa-xmark"></i>
@@ -1061,7 +1167,7 @@ export default function Products() {
               </div>
               
               <div className="modal-footer">
-                <button type="button" className="btn-admin-secondary" onClick={() => setModalOpen(false)} disabled={formSubmitting}>
+                <button type="button" className="btn-admin-secondary" onClick={handleCloseModal} disabled={formSubmitting}>
                   Cancel
                 </button>
                 <button type="submit" className="btn-admin" disabled={formSubmitting}>
