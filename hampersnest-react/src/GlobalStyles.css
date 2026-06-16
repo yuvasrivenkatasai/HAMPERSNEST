@@ -7063,6 +7063,29 @@ footer h4,
 
 /* CACHE BUSTER FOR REMOTE CI */
 
+<<<<<<< HEAD
+/* Collection Page Refinements */
+.collections-grid-4col .collection-card-action-row {
+  align-items: baseline;
+  gap: 6px;
+}
+.collections-grid-4col .card-link-text {
+  font-size: 0.8rem;
+  font-weight: 500;
+  white-space: nowrap;
+  align-items: baseline;
+}
+.collections-grid-4col .card-link-text i {
+  margin-left: 4px;
+}
+@media (max-width: 767px) {
+  .collections-grid-4col .collection-card-action-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+}
+=======
 /* ==========================================
    FOLLOW US INSTAGRAM SECTION
    ========================================== */
@@ -7294,3 +7317,4 @@ footer h4,
   margin-bottom: 1rem;
 }
 
+>>>>>>> 53d1926d62ac6c1667fdc1507d6217061cdd8a63
