@@ -83,7 +83,7 @@ export const createProduct = async (req, res) => {
   }
 
   try {
-    const uniqueId = crypto.randomUUID();
+    const uniqueId = req.body.id || crypto.randomUUID();
 
     await ensureCategoryExists(category);
 

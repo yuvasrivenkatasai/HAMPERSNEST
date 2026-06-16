@@ -6,9 +6,9 @@ export default function StudioMap() {
   const sectionRef = useRef(null);
 
   // Use dynamic settings, fallback to hardcoded values if missing
-  const businessAddress = settings?.businessAddress || 'Hyderabad, Telangana, India';
-  const googleMapsUrl = 'https://www.google.com/maps/dir/?api=1&destination=17.419195,78.6025405';
-  const whatsappNumber = settings?.whatsappNumber || '917989202194';
+  const businessAddress = settings?.businessAddress || 'Uppal, Hyderabad, Telangana, India';
+  const googleMapsUrl = settings?.googleMapsUrl || 'https://www.google.com/maps/place/Hampers+Nest/@17.4192972,78.6025777';
+  const whatsappNumber = settings?.whatsappNumber || '917989202094';
 
   useEffect(() => {
     const observer = new IntersectionObserver(

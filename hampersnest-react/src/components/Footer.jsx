@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 export default function Footer() {
   const handleWhatsappDirect = (e) => {
     e.preventDefault();
-    const whatsappBaseNumber = '917989202194';
+    const whatsappBaseNumber = '917989202094';
     const welcomeText = encodeURIComponent('Hi Hampers Nest! I am interested in viewing your customized Return Gifts collection and getting a catalog.');
     window.open(`https://api.whatsapp.com/send?phone=${whatsappBaseNumber}&text=${welcomeText}`, '_blank');
   };
@@ -74,12 +74,21 @@ export default function Footer() {
 
       {/* Footer Bottom Bar */}
       <div className="container footer-bottom" style={{ paddingTop: '2rem', borderTop: '1px solid rgba(255, 255, 255, 0.1)' }}>
+        <div className="footer-policy-links" style={{ display: 'flex', gap: '15px', flexWrap: 'wrap', marginBottom: '1rem', fontSize: '0.8rem', opacity: 0.8 }}>
+          <Link to="/privacy-policy" style={{ color: 'rgba(255,255,255,0.7)', transition: 'color 0.2s' }}>Privacy Policy</Link>
+          <span style={{ color: 'rgba(255,255,255,0.3)' }}>|</span>
+          <Link to="/shipping-policy" style={{ color: 'rgba(255,255,255,0.7)', transition: 'color 0.2s' }}>Shipping Policy</Link>
+          <span style={{ color: 'rgba(255,255,255,0.3)' }}>|</span>
+          <Link to="/refund-policy" style={{ color: 'rgba(255,255,255,0.7)', transition: 'color 0.2s' }}>Refund Policy</Link>
+          <span style={{ color: 'rgba(255,255,255,0.3)' }}>|</span>
+          <Link to="/terms-and-conditions" style={{ color: 'rgba(255,255,255,0.7)', transition: 'color 0.2s' }}>Terms & Conditions</Link>
+        </div>
         <p>&copy; 2026 Hampers Nest. All Rights Reserved. Crafted with love for Hyderabad's premium celebrations.</p>
         <div className="footer-socials">
-          <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" style={{ marginRight: '15px' }}>
+          <a href="https://facebook.com" target="_blank" rel="noopener noreferrer">
             <i className="fa-brands fa-facebook-f"></i>
           </a>
-          <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" style={{ marginRight: '15px' }}>
+          <a href="https://instagram.com/hampersnest" target="_blank" rel="noopener noreferrer">
             <i className="fa-brands fa-instagram"></i>
           </a>
           <a href="#" onClick={handleWhatsappDirect} aria-label="WhatsApp direct link">

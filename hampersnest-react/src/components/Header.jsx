@@ -62,9 +62,19 @@ export default function Header() {
             <NavLink to="/" className={({ isActive }) => isActive ? 'active' : ''} onClick={closeMobileMenu}>
               Home
             </NavLink>
-            <NavLink to="/collections" className={({ isActive }) => isActive ? 'active' : ''} onClick={closeMobileMenu}>
-              Collections
-            </NavLink>
+            <div className="nav-dropdown-wrapper">
+              <NavLink to="/collections" className={({ isActive }) => isActive ? 'active' : ''}>
+                Collections <i className="fa-solid fa-chevron-down dropdown-arrow"></i>
+              </NavLink>
+              <div className="nav-dropdown-menu">
+                <Link to="/collections" onClick={closeMobileMenu}>All Products</Link>
+                <Link to="/collections?category=Wedding" onClick={closeMobileMenu}>Wedding Return Gifts</Link>
+                <Link to="/collections?category=Baby Shower" onClick={closeMobileMenu}>Baby Shower Hampers</Link>
+                <Link to="/collections?category=Housewarming" onClick={closeMobileMenu}>Housewarming Ceremony</Link>
+                <Link to="/collections?category=Corporate" onClick={closeMobileMenu}>Corporate Gifting</Link>
+                <Link to="/collections?category=Brass" onClick={closeMobileMenu}>Traditional Brass Gifting</Link>
+              </div>
+            </div>
             <NavLink to="/featured" className={({ isActive }) => isActive ? 'active' : ''} onClick={closeMobileMenu}>
               Featured Gifts
             </NavLink>

@@ -2711,10 +2711,20 @@ footer {
   font-weight: 300;
 }
 
+.footer-socials {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-shrink: 0;
+}
+
 .footer-socials a {
   font-size: 0.95rem;
   color: rgba(255, 255, 255, 0.9) !important;
-  margin-left: 1.2rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s ease;
 }
 
 .footer-socials a:hover {
@@ -7035,3 +7045,223 @@ footer h4,
 /* BUST CACHE */
 
 /* CACHE BUSTER FOR REMOTE CI */
+
+/* ==========================================
+   FOLLOW US INSTAGRAM SECTION
+   ========================================== */
+.follow-us-section {
+  background-color: var(--color-white);
+  border-top: 1px solid var(--color-beige);
+}
+
+.instagram-handle {
+  transition: color 0.3s ease;
+}
+
+.instagram-handle:hover {
+  color: var(--color-purple-light) !important;
+}
+
+.instagram-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 15px;
+}
+
+@media (max-width: 1024px) {
+  .instagram-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+  }
+}
+
+@media (max-width: 576px) {
+  .instagram-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+}
+
+.instagram-card {
+  position: relative;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  border: 1px solid var(--color-beige);
+  aspect-ratio: 1 / 1;
+}
+
+.instagram-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.instagram-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(74, 29, 95, 0.85); /* Purple semi-transparent overlay */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: var(--color-white);
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  z-index: 2;
+  text-decoration: none;
+}
+
+.instagram-overlay i {
+  font-size: 1.8rem;
+  color: var(--color-gold-light);
+  transform: translateY(10px);
+  transition: transform 0.4s ease;
+}
+
+.instagram-overlay span {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  transform: translateY(15px);
+  transition: transform 0.4s ease 0.05s;
+}
+
+.instagram-card:hover img {
+  transform: scale(1.08);
+}
+
+.instagram-card:hover .instagram-overlay {
+  opacity: 1;
+}
+
+.instagram-card:hover .instagram-overlay i,
+.instagram-card:hover .instagram-overlay span {
+  transform: translateY(0);
+}
+
+/* ==========================================
+   NAVIGATION DROPDOWNS
+   ========================================== */
+.nav-dropdown-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.dropdown-arrow {
+  font-size: 0.6rem;
+  margin-left: 4px;
+  transition: transform 0.3s ease;
+}
+
+.nav-dropdown-menu {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%) translateY(15px);
+  background: var(--color-white);
+  border: 1px solid var(--color-beige);
+  border-radius: 8px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+  min-width: 220px;
+  padding: 10px 0;
+  display: flex;
+  flex-direction: column;
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+  z-index: 100;
+}
+
+.nav-dropdown-menu a {
+  padding: 10px 20px !important;
+  font-size: 0.8rem !important;
+  font-weight: 500 !important;
+  text-transform: none !important;
+  letter-spacing: 0.5px !important;
+  color: var(--color-charcoal) !important;
+  transition: all 0.2s ease !important;
+  display: block;
+  text-align: left;
+}
+
+.nav-dropdown-menu a:hover {
+  background: var(--color-lavender);
+  color: var(--color-purple) !important;
+  padding-left: 24px !important;
+}
+
+.nav-dropdown-menu a::after {
+  display: none !important;
+}
+
+/* Hover behaviors */
+.nav-dropdown-wrapper:hover .nav-dropdown-menu {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateX(-50%) translateY(0);
+}
+
+.nav-dropdown-wrapper:hover .dropdown-arrow {
+  transform: rotate(180deg);
+}
+
+/* Mobile Dropdown styles */
+@media (max-width: 1024px) {
+  .nav-dropdown-wrapper {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .nav-dropdown-menu {
+    position: static;
+    transform: none;
+    box-shadow: none;
+    border: none;
+    background: transparent;
+    opacity: 1;
+    pointer-events: auto;
+    display: flex;
+    padding-left: 15px;
+    margin-top: 5px;
+    gap: 2px;
+    min-width: unset;
+  }
+  
+  .nav-dropdown-menu a {
+    padding: 8px 10px !important;
+    font-size: 0.75rem !important;
+    color: var(--color-purple-light) !important;
+  }
+}
+
+/* ==========================================
+   POLICIES PAGES LAYOUT
+   ========================================== */
+.policies-layout {
+  display: flex;
+  gap: 30px;
+  flex-wrap: wrap;
+}
+
+.policy-tab-btn:hover:not(.active) {
+  background: var(--color-lavender) !important;
+  color: var(--color-purple) !important;
+  border-color: var(--color-lavender-dark) !important;
+}
+
+.policy-text-block h4 {
+  margin-top: 1.5rem;
+  margin-bottom: 0.5rem;
+  color: var(--color-purple);
+  font-weight: 600;
+}
+
+.policy-text-block p {
+  margin-bottom: 1rem;
+}
+

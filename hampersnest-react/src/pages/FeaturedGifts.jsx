@@ -36,7 +36,7 @@ export default function FeaturedGifts() {
       "@type": "LocalBusiness",
       "name": "Hampers Nest",
       "image": window.location.origin + "/assets/hero_banner.webp",
-      "telephone": "+917989202194",
+      "telephone": "+917989202094",
       "address": {
         "@type": "PostalAddress",
         "addressLocality": "Hyderabad",

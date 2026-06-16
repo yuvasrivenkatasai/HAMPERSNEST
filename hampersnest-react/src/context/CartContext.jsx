@@ -184,7 +184,7 @@ export const CartProvider = ({ children }) => {
 
   // Generate Whatsapp Checkout Message
   const getWhatsappCheckoutUrl = (userDetails = {}, orderId = null) => {
-    const whatsappBaseNumber = '917989202194';
+    const whatsappBaseNumber = '917989202094';
     
     let orderDetailsText = cart.map((item, idx) => {
       let customStr = '';

@@ -47,7 +47,7 @@ export default function Contact() {
       return;
     }
 
-    const whatsappBaseNumber = '917989202194';
+    const whatsappBaseNumber = '917989202094';
     
     // Append cart items if they exist
     let cartString = '';
@@ -106,7 +106,7 @@ export default function Contact() {
     "mainEntity": {
       "@type": "LocalBusiness",
       "name": "Hampers Nest",
-      "telephone": "+917989202194",
+      "telephone": "+917989202094",
       "address": {
         "@type": "PostalAddress",
         "streetAddress": "Jubilee Hills",
@@ -163,7 +163,7 @@ export default function Contact() {
                 </div>
                 <div className="contact-detail-text">
                   <h5>Location</h5>
-                  <p>Hyderabad, Telangana, India</p>
+                  <p>Uppal, Hyderabad, Telangana, India</p>
                 </div>
               </div>
 

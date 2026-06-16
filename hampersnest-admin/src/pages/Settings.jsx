@@ -5,19 +5,19 @@ export default function Settings() {
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  
+
   const [message, setMessage] = useState(null);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
 
   const [settingsData, setSettingsData] = useState({
     storeName: 'HampersNest',
-    contactEmail: 'contact@hampersnest.com',
+    contactEmail: 'Hampersnestgifts@gmail.com',
     currency: 'INR',
     shippingRate: '0',
     announcementText: '',
     announcementActive: false,
-    businessAddress: 'Hyderabad, Telangana, India',
+    businessAddress: 'Uppal, Hyderabad, Telangana, India',
     googleMapsUrl: 'https://www.google.com/maps/place/Hampers+Nest/@17.4192972,78.6025777',
     whatsappNumber: '917989202194',
     instagramUrl: 'https://www.instagram.com/hampersnest',
@@ -138,7 +138,7 @@ export default function Settings() {
           <div className="panel-header">
             <h3><i className="fa-solid fa-globe color-gold"></i> Global Store Settings</h3>
           </div>
-          
+
           {settingsLoading ? (
             <div style={{ textAlign: 'center', padding: '2rem' }}>
               <i className="fa-solid fa-spinner fa-spin" style={{ color: 'var(--color-gold)', fontSize: '1.5rem' }}></i>
@@ -146,13 +146,13 @@ export default function Settings() {
           ) : (
             <form onSubmit={handleSettingsSubmit}>
               {settingsMessage && <div style={{ background: 'rgba(25, 135, 84, 0.1)', color: 'var(--color-delivered)', padding: '10px', borderRadius: '6px', marginBottom: '15px' }}>{settingsMessage}</div>}
-              
+
               <div className="form-group">
                 <label className="form-label">Store Name</label>
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   name="storeName"
-                  className="form-input" 
+                  className="form-input"
                   value={settingsData.storeName}
                   onChange={handleSettingsChange}
                 />
@@ -160,10 +160,10 @@ export default function Settings() {
 
               <div className="form-group">
                 <label className="form-label">Contact Email</label>
-                <input 
-                  type="email" 
+                <input
+                  type="email"
                   name="contactEmail"
-                  className="form-input" 
+                  className="form-input"
                   value={settingsData.contactEmail}
                   onChange={handleSettingsChange}
                 />
@@ -172,7 +172,7 @@ export default function Settings() {
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
                 <div className="form-group">
                   <label className="form-label">Default Currency</label>
-                  <select 
+                  <select
                     name="currency"
                     className="form-select"
                     value={settingsData.currency}
@@ -186,10 +186,10 @@ export default function Settings() {
                 </div>
                 <div className="form-group">
                   <label className="form-label">Flat Shipping Rate</label>
-                  <input 
-                    type="number" 
+                  <input
+                    type="number"
                     name="shippingRate"
-                    className="form-input" 
+                    className="form-input"
                     min="0"
                     value={settingsData.shippingRate}
                     onChange={handleSettingsChange}
@@ -199,18 +199,18 @@ export default function Settings() {
 
               <div className="form-group">
                 <label className="form-label">Announcement Banner Text</label>
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   name="announcementText"
-                  className="form-input" 
+                  className="form-input"
                   value={settingsData.announcementText}
                   onChange={handleSettingsChange}
                 />
               </div>
-              
+
               <div className="form-group" style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '20px' }}>
-                <input 
-                  type="checkbox" 
+                <input
+                  type="checkbox"
                   name="announcementActive"
                   id="announcementActive"
                   checked={settingsData.announcementActive}
@@ -226,10 +226,10 @@ export default function Settings() {
 
               <div className="form-group">
                 <label className="form-label">Business Address</label>
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   name="businessAddress"
-                  className="form-input" 
+                  className="form-input"
                   value={settingsData.businessAddress}
                   onChange={handleSettingsChange}
                   placeholder="e.g. Hyderabad, Telangana, India"
@@ -238,10 +238,10 @@ export default function Settings() {
 
               <div className="form-group">
                 <label className="form-label">Google Maps Share URL</label>
-                <input 
-                  type="url" 
+                <input
+                  type="url"
                   name="googleMapsUrl"
-                  className="form-input" 
+                  className="form-input"
                   value={settingsData.googleMapsUrl}
                   onChange={handleSettingsChange}
                   placeholder="https://www.google.com/maps/..."
@@ -250,13 +250,13 @@ export default function Settings() {
 
               <div className="form-group">
                 <label className="form-label">WhatsApp Number (with country code)</label>
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   name="whatsappNumber"
-                  className="form-input" 
+                  className="form-input"
                   value={settingsData.whatsappNumber}
                   onChange={handleSettingsChange}
-                  placeholder="e.g. 917989202194"
+                  placeholder="e.g. 917989202094"
                 />
               </div>
 
@@ -274,42 +274,42 @@ export default function Settings() {
             <div className="panel-header">
               <h3><i className="fa-solid fa-shield-halved color-gold"></i> Security Settings</h3>
             </div>
-            
+
             <form onSubmit={handlePasswordChange}>
               {error && <div className="login-error" style={{ padding: '10px', marginBottom: '15px' }}>{error}</div>}
               {message && <div style={{ background: 'rgba(25, 135, 84, 0.1)', color: 'var(--color-delivered)', padding: '10px', borderRadius: '6px', marginBottom: '15px' }}>{message}</div>}
-              
+
               <div className="form-group">
                 <label className="form-label">Current Password</label>
-                <input 
-                  type="password" 
-                  className="form-input" 
-                  required 
+                <input
+                  type="password"
+                  className="form-input"
+                  required
                   value={currentPassword}
                   onChange={(e) => setCurrentPassword(e.target.value)}
                 />
               </div>
               <div className="form-group">
                 <label className="form-label">New Password</label>
-                <input 
-                  type="password" 
-                  className="form-input" 
-                  required 
+                <input
+                  type="password"
+                  className="form-input"
+                  required
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
                 />
               </div>
               <div className="form-group">
                 <label className="form-label">Confirm New Password</label>
-                <input 
-                  type="password" 
-                  className="form-input" 
-                  required 
+                <input
+                  type="password"
+                  className="form-input"
+                  required
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                 />
               </div>
-              
+
               <button type="submit" className="btn-admin" disabled={loading}>
                 {loading ? 'Updating...' : 'Change Password'}
               </button>

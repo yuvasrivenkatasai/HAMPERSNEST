@@ -58,6 +58,20 @@ router.post('/', protect, upload.single('image'), async (req, res) => {
     const allowedFolders = ['products', 'gallery', 'general', 'hero'];
     const folder = allowedFolders.includes(req.query.folder) ? req.query.folder : 'general';
 
+    console.log('[DEBUG UPLOAD] Image Upload Endpoint Called:');
+    console.log('  - req.query:', req.query);
+    console.log('  - folder:', folder);
+
+    let uploadSubfolder = folder;
+    if (folder === 'products' && req.query.productId) {
+      const sanitizedProductId = req.query.productId.replace(/[^a-zA-Z0-9-_]/g, '');
+      console.log('  - sanitizedProductId:', sanitizedProductId);
+      if (sanitizedProductId) {
+        uploadSubfolder = `products/${sanitizedProductId}`;
+      }
+    }
+    console.log('  - final uploadSubfolder:', uploadSubfolder);
+
     // Generate a unique filename with .webp extension
     const filename = `${Date.now()}-${Math.round(Math.random() * 1e9)}.webp`;
 
@@ -77,10 +91,10 @@ router.post('/', protect, upload.single('image'), async (req, res) => {
     let imageUrl = '';
 
     if (isR2Configured()) {
-      console.log(`R2 Credentials detected. Uploading to Cloudflare R2 folder: ${folder}...`);
+      console.log(`R2 Credentials detected. Uploading to Cloudflare R2 folder: ${uploadSubfolder}...`);
       
       const bucketName = process.env.R2_BUCKET_NAME;
-      const key = `${folder}/${filename}`;
+      const key = `${uploadSubfolder}/${filename}`;
       const command = new PutObjectCommand({
         Bucket: bucketName,
         Key: key,
@@ -98,10 +112,10 @@ router.post('/', protect, upload.single('image'), async (req, res) => {
       imageUrl = `${publicUrlBase}/${key}`;
       console.log(`Successfully uploaded to R2: ${imageUrl}`);
     } else {
-      console.log(`No R2 Credentials config. Falling back to local storage uploads folder: ${folder}...`);
+      console.log(`No R2 Credentials config. Falling back to local storage uploads folder: ${uploadSubfolder}...`);
       
       // Ensure target directory exists
-      const uploadDir = path.join(__dirname, `../public/uploads/${folder}`);
+      const uploadDir = path.join(__dirname, `../public/uploads/${uploadSubfolder}`);
       if (!fs.existsSync(uploadDir)) {
         fs.mkdirSync(uploadDir, { recursive: true });
       }
@@ -112,7 +126,7 @@ router.post('/', protect, upload.single('image'), async (req, res) => {
       // Return relative/absolute URL
       const host = req.get('host');
       const protocol = req.protocol;
-      imageUrl = `${protocol}://${host}/uploads/${folder}/${filename}`;
+      imageUrl = `${protocol}://${host}/uploads/${uploadSubfolder}/${filename}`;
       console.log(`Successfully saved locally: ${imageUrl}`);
     }
 
@@ -135,6 +149,20 @@ router.post('/video', protect, upload.single('video'), async (req, res) => {
     const allowedFolders = ['products', 'gallery', 'general', 'hero'];
     const folder = allowedFolders.includes(req.query.folder) ? req.query.folder : 'general';
 
+    console.log('[DEBUG VIDEO UPLOAD] Video Upload Endpoint Called:');
+    console.log('  - req.query:', req.query);
+    console.log('  - folder:', folder);
+
+    let uploadSubfolder = folder;
+    if (folder === 'products' && req.query.productId) {
+      const sanitizedProductId = req.query.productId.replace(/[^a-zA-Z0-9-_]/g, '');
+      console.log('  - sanitizedProductId:', sanitizedProductId);
+      if (sanitizedProductId) {
+        uploadSubfolder = `products/${sanitizedProductId}`;
+      }
+    }
+    console.log('  - final uploadSubfolder:', uploadSubfolder);
+
     // Get original extension
     const ext = path.extname(req.file.originalname) || '.mp4';
     const filename = `vid-${Date.now()}-${Math.round(Math.random() * 1e9)}${ext}`;
@@ -149,10 +177,10 @@ router.post('/video', protect, upload.single('video'), async (req, res) => {
     let videoUrl = '';
 
     if (isR2Configured()) {
-      console.log(`R2 Credentials detected. Uploading video to Cloudflare R2 folder: ${folder}...`);
+      console.log(`R2 Credentials detected. Uploading video to Cloudflare R2 folder: ${uploadSubfolder}...`);
       
       const bucketName = process.env.R2_BUCKET_NAME;
-      const key = `${folder}/${filename}`;
+      const key = `${uploadSubfolder}/${filename}`;
       const command = new PutObjectCommand({
         Bucket: bucketName,
         Key: key,
@@ -169,9 +197,9 @@ router.post('/video', protect, upload.single('video'), async (req, res) => {
       videoUrl = `${publicUrlBase}/${key}`;
       console.log(`Successfully uploaded video to R2: ${videoUrl}`);
     } else {
-      console.log(`No R2 Credentials config. Falling back to local storage video uploads folder: ${folder}...`);
+      console.log(`No R2 Credentials config. Falling back to local storage video uploads folder: ${uploadSubfolder}...`);
       
-      const uploadDir = path.join(__dirname, `../public/uploads/${folder}`);
+      const uploadDir = path.join(__dirname, `../public/uploads/${uploadSubfolder}`);
       if (!fs.existsSync(uploadDir)) {
         fs.mkdirSync(uploadDir, { recursive: true });
       }
@@ -181,7 +209,7 @@ router.post('/video', protect, upload.single('video'), async (req, res) => {
       
       const host = req.get('host');
       const protocol = req.protocol;
-      videoUrl = `${protocol}://${host}/uploads/${folder}/${filename}`;
+      videoUrl = `${protocol}://${host}/uploads/${uploadSubfolder}/${filename}`;
       console.log(`Successfully saved video locally: ${videoUrl}`);
     }
 
