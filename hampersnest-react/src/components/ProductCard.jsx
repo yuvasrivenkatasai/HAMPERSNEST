@@ -58,10 +58,54 @@ export default function ProductCard({ product }) {
           src={product.image || (product.images && product.images[0]) || '/assets/hero_banner.png'}
           alt={product.name}
         />
+        {/* Inventory Badge Overlay */}
+        {product.stockQuantity === 0 ? (
+          <span className="card-stock-badge out-of-stock" style={{
+            position: 'absolute',
+            bottom: '10px',
+            left: '10px',
+            background: 'rgba(220, 38, 38, 0.95)',
+            color: '#fff',
+            padding: '4px 10px',
+            borderRadius: '50px',
+            fontSize: '0.68rem',
+            fontWeight: '700',
+            textTransform: 'uppercase',
+            zIndex: 3,
+            boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+            border: '1px solid rgba(255,255,255,0.2)'
+          }}>
+            Out of Stock
+          </span>
+        ) : product.stockQuantity <= (product.lowStockThreshold || 5) ? (
+          <span className="card-stock-badge low-stock" style={{
+            position: 'absolute',
+            bottom: '10px',
+            left: '10px',
+            background: 'rgba(217, 119, 6, 0.95)',
+            color: '#fff',
+            padding: '4px 10px',
+            borderRadius: '50px',
+            fontSize: '0.68rem',
+            fontWeight: '700',
+            textTransform: 'uppercase',
+            zIndex: 3,
+            boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+            border: '1px solid rgba(255,255,255,0.2)'
+          }}>
+            Only {product.stockQuantity} Left
+          </span>
+        ) : null}
         <div className="card-overlay" onClick={(e) => e.stopPropagation()}>
-          <button onClick={handleAddToCart} className="card-overlay-btn">
-            <i className="fa-solid fa-cart-shopping"></i> Add To Cart
-          </button>
+          {product.stockQuantity === 0 ? (
+            <button className="card-overlay-btn" disabled style={{ background: '#64748b', color: '#cbd5e1', cursor: 'not-allowed' }}>
+              Out of Stock
+            </button>
+          ) : (
+            <button onClick={handleAddToCart} className="card-overlay-btn">
+              <i className="fa-solid fa-cart-shopping"></i> Add To Cart
+            </button>
+          )}
         </div>
       </div>
       <div className="card-content">

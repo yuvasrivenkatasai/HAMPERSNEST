@@ -139,14 +139,14 @@ export default function ProductDetailTemplate({ product, displayRelated = [] }) 
 
       {/* Breadcrumbs */}
       <div className="breadcrumb-bar">
-        <div className="container" style={{ padding: '15px 16px', display: 'flex', gap: '8px', fontSize: '0.8rem', color: '#777' }}>
+        <div className="container" style={{ padding: '8px 16px', display: 'flex', gap: '8px', fontSize: '0.8rem', color: '#777' }}>
           <Link to="/" style={{ color: 'var(--color-gold-dark)' }}>Home</Link> / 
           <Link to="/collections" style={{ color: 'var(--color-gold-dark)' }}>Collections</Link> / 
           <span style={{ color: 'var(--color-purple)' }}>{product.name}</span>
         </div>
       </div>
 
-      <div className="container product-detail-section" style={{ paddingTop: '1rem' }}>
+      <div className="container product-detail-section" style={{ paddingTop: '0.5rem' }}>
         <div className="product-detail-layout-grid">
           
           {/* 1. Product Gallery */}
@@ -231,7 +231,7 @@ export default function ProductDetailTemplate({ product, displayRelated = [] }) 
                 <span className="rating-count">({product.rating || 5.0} Rating / Verified Client Reviews)</span>
               </div>
 
-              <div className="product-price-block">
+              <div className="product-price-block" style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', marginBottom: '1rem' }}>
                 <span className="current-price">{formatPrice(unitPrice)}</span>
                 {product.originalPrice > 0 && product.originalPrice > product.price && (
                   <>
@@ -240,6 +240,73 @@ export default function ProductDetailTemplate({ product, displayRelated = [] }) 
                       Save {Math.round((((product.originalPrice + addedPrice) - unitPrice) / (product.originalPrice + addedPrice)) * 100)}%
                     </span>
                   </>
+                )}
+                
+                {/* Compact Inline Stock Status Badge */}
+                {product.stockQuantity === 0 ? (
+                  <span className="stock-badge out-of-stock" style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                    background: '#FEE2E2',
+                    color: '#991B1B',
+                    padding: '2px 8px',
+                    borderRadius: '4px',
+                    fontSize: '0.72rem',
+                    fontWeight: '600',
+                    border: '1px solid #FCA5A5',
+                    marginLeft: '6px'
+                  }}>
+                    <i className="fa-solid fa-circle-xmark"></i> Out of Stock
+                  </span>
+                ) : product.stockQuantity === 1 ? (
+                  <span className="stock-badge critical-stock" style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                    background: '#FEF3C7',
+                    color: '#92400E',
+                    padding: '2px 8px',
+                    borderRadius: '4px',
+                    fontSize: '0.72rem',
+                    fontWeight: '600',
+                    border: '1px solid #FCD34D',
+                    marginLeft: '6px'
+                  }}>
+                    <i className="fa-solid fa-triangle-exclamation"></i> Only 1 Left!
+                  </span>
+                ) : product.stockQuantity <= (product.lowStockThreshold || 5) ? (
+                  <span className="stock-badge low-stock" style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                    background: '#FEF3C7',
+                    color: '#92400E',
+                    padding: '2px 8px',
+                    borderRadius: '4px',
+                    fontSize: '0.72rem',
+                    fontWeight: '600',
+                    border: '1px solid #FCD34D',
+                    marginLeft: '6px'
+                  }}>
+                    <i className="fa-solid fa-triangle-exclamation"></i> Low Stock ({product.stockQuantity} left)
+                  </span>
+                ) : (
+                  <span className="stock-badge in-stock" style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                    background: '#DCFCE7',
+                    color: '#166534',
+                    padding: '2px 8px',
+                    borderRadius: '4px',
+                    fontSize: '0.72rem',
+                    fontWeight: '600',
+                    border: '1px solid #86EFAC',
+                    marginLeft: '6px'
+                  }}>
+                    <i className="fa-solid fa-circle-check"></i> In Stock
+                  </span>
                 )}
               </div>
 
@@ -250,34 +317,50 @@ export default function ProductDetailTemplate({ product, displayRelated = [] }) 
             {/* Customization Form */}
             <div className="product-customizer-box">
               {/* 4. Customization Available */}
-              {product.customization && product.customization.length > 0 && (
-                <div style={{ marginBottom: '1.2rem', paddingBottom: '1.2rem', borderBottom: '1px solid var(--color-beige)' }}>
-                  <h5 style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--color-purple)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '0.5rem' }}>
-                    Customization Available:
-                  </h5>
-                  <div className="modal-features-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
-                    {product.customization.map((feat, idx) => (
-                      <span key={idx} style={{ fontSize: '0.85rem', color: '#555', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                        <i className="fa-solid fa-check" style={{ color: 'var(--color-gold)' }}></i> {feat}
-                      </span>
-                    ))}
+              {(() => {
+                const custItems = (product.customization && product.customization.length > 0)
+                  ? product.customization
+                  : (product.customizationText ? product.customizationText.split('\n').map(i => i.trim()).filter(Boolean) : []);
+
+                if (custItems.length === 0) return null;
+
+                return (
+                  <div style={{ paddingBottom: '0.8rem', borderBottom: '1px solid var(--color-beige)' }}>
+                    <h5 style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--color-purple)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '0.5rem' }}>
+                      Customization Available:
+                    </h5>
+                    <div className="modal-features-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                      {custItems.map((feat, idx) => (
+                        <span key={idx} style={{ fontSize: '0.85rem', color: '#555', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          <i className="fa-solid fa-check" style={{ color: 'var(--color-gold)' }}></i> {feat}
+                        </span>
+                      ))}
+                    </div>
                   </div>
-                </div>
-              )}
+                );
+              })()}
 
               {/* 5. Delivery Information */}
-              {product.shipping && product.shipping.length > 0 && (
-                <div style={{ marginBottom: '1.5rem', padding: '1rem', background: '#F8F9FA', borderRadius: '8px', border: '1px solid #E9ECEF' }}>
-                  <h5 style={{ margin: '0 0 8px 0', fontSize: '0.9rem', color: 'var(--color-charcoal)' }}>
-                    <i className="fa-solid fa-truck" style={{ marginRight: '6px', color: 'var(--color-gold)' }}></i> Delivery Information
-                  </h5>
-                  {product.shipping.map((item, idx) => (
-                    <div key={idx} style={{ fontSize: '0.85rem', color: '#666', lineHeight: '1.5', display: 'flex', alignItems: 'flex-start', gap: '8px', marginBottom: '4px' }}>
-                      <i className="fa-solid fa-truck-fast" style={{ fontSize: '0.75rem', marginTop: '4px', color: '#999' }}></i> {item}
-                    </div>
-                  ))}
-                </div>
-              )}
+              {(() => {
+                const delItems = (product.shipping && product.shipping.length > 0)
+                  ? product.shipping
+                  : (product.deliveryInfoText ? product.deliveryInfoText.split('\n').map(i => i.trim()).filter(Boolean) : []);
+
+                if (delItems.length === 0) return null;
+
+                return (
+                  <div style={{ padding: '0.85rem', background: '#F8F9FA', borderRadius: '8px', border: '1px solid #E9ECEF' }}>
+                    <h5 style={{ margin: '0 0 8px 0', fontSize: '0.9rem', color: 'var(--color-charcoal)' }}>
+                      <i className="fa-solid fa-truck" style={{ marginRight: '6px', color: 'var(--color-gold)' }}></i> Delivery Information
+                    </h5>
+                    {delItems.map((item, idx) => (
+                      <div key={idx} style={{ fontSize: '0.85rem', color: '#666', lineHeight: '1.5', display: 'flex', alignItems: 'flex-start', gap: '8px', marginBottom: '4px' }}>
+                        <i className="fa-solid fa-truck-fast" style={{ fontSize: '0.75rem', marginTop: '4px', color: '#999' }}></i> {item}
+                      </div>
+                    ))}
+                  </div>
+                );
+              })()}
 
               <h3 className="customizer-section-title">Personalize Your Hamper</h3>
 
@@ -330,14 +413,16 @@ export default function ProductDetailTemplate({ product, displayRelated = [] }) 
                   <button
                     type="button"
                     onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                    disabled={product.stockQuantity === 0 || quantity <= 1}
                     aria-label="Decrease quantity"
                   >
                     <i className="fa-solid fa-minus"></i>
                   </button>
-                  <span className="qty-value">{quantity}</span>
+                  <span className="qty-value">{product.stockQuantity === 0 ? 0 : quantity}</span>
                   <button
                     type="button"
                     onClick={() => setQuantity(quantity + 1)}
+                    disabled={product.stockQuantity === 0 || quantity >= product.stockQuantity}
                     aria-label="Increase quantity"
                   >
                     <i className="fa-solid fa-plus"></i>
@@ -348,10 +433,25 @@ export default function ProductDetailTemplate({ product, displayRelated = [] }) 
                 <button
                   type="button"
                   onClick={handleAddToBasket}
+                  disabled={product.stockQuantity === 0}
                   className="btn btn-primary buy-btn-cart"
-                  style={{ flex: 1, height: '48px', padding: 0, minWidth: '150px' }}
+                  style={{ 
+                    flex: 1, 
+                    height: '48px', 
+                    padding: 0, 
+                    minWidth: '150px',
+                    background: product.stockQuantity === 0 ? '#CBD5E1' : 'var(--gold-gradient)',
+                    borderColor: product.stockQuantity === 0 ? '#CBD5E1' : 'var(--color-gold)',
+                    color: product.stockQuantity === 0 ? '#64748B' : 'var(--color-white)',
+                    cursor: product.stockQuantity === 0 ? 'not-allowed' : 'pointer',
+                    boxShadow: product.stockQuantity === 0 ? 'none' : 'var(--shadow-gold)'
+                  }}
                 >
-                  Add To Cart <i className="fa-solid fa-cart-shopping" style={{ marginLeft: '6px' }}></i>
+                  {product.stockQuantity === 0 ? (
+                    'Out of Stock'
+                  ) : (
+                    <>Add To Cart <i className="fa-solid fa-cart-shopping" style={{ marginLeft: '6px' }}></i></>
+                  )}
                 </button>
 
                 {/* 9. Wishlist Button */}
