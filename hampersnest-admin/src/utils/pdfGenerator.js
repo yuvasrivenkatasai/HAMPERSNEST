@@ -7,6 +7,15 @@ const loadImageAsBase64 = async (url) => {
     let targetUrl = url;
     if (targetUrl.startsWith('/')) {
       targetUrl = window.location.origin + targetUrl;
+    } else if (targetUrl.startsWith('http')) {
+      // Add a cache-buster query parameter to bypass browser and CDN CORS caches
+      try {
+        const urlObj = new URL(targetUrl);
+        urlObj.searchParams.set('cb', Date.now().toString());
+        targetUrl = urlObj.toString();
+      } catch (e) {
+        targetUrl = `${targetUrl}${targetUrl.includes('?') ? '&' : '?'}cb=${Date.now()}`;
+      }
     }
 
     const response = await fetch(targetUrl);
