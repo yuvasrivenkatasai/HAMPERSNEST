@@ -211,7 +211,7 @@ export default function Home() {
               <div key={product.id} className="shop-product-card">
                 <div className="shop-card-img">
                   <img
-                    src={product.images?.[0] || product.image}
+                    src={product.image || product.images?.[0] || '/assets/hero_banner.png'}
                     alt={product.name}
                   />
                 </div>
