@@ -18,7 +18,7 @@ export default function Settings() {
     announcementText: '',
     announcementActive: false,
     businessAddress: 'Hyderabad, Telangana, India',
-    googleMapsUrl: 'https://www.google.com/maps/place/Hampers+Nest/@17.419195,78.6025405',
+    googleMapsUrl: 'https://www.google.com/maps/place/Hampers+Nest/@17.4192972,78.6025777',
     whatsappNumber: '917989202194'
   });
   const [settingsLoading, setSettingsLoading] = useState(true);

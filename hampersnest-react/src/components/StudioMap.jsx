@@ -7,7 +7,7 @@ export default function StudioMap() {
 
   // Use dynamic settings, fallback to hardcoded values if missing
   const businessAddress = settings?.businessAddress || 'Hyderabad, Telangana, India';
-  const googleMapsUrl = settings?.googleMapsUrl || 'https://www.google.com/maps/place/Hampers+Nest/@17.419195,78.6025405';
+  const googleMapsUrl = settings?.googleMapsUrl || 'https://www.google.com/maps/place/Hampers+Nest/@17.4192972,78.6025777';
   const whatsappNumber = settings?.whatsappNumber || '917989202194';
 
   useEffect(() => {
@@ -45,7 +45,7 @@ export default function StudioMap() {
           {/* Left Side: Map Embed */}
           <div className="studio-map-embed-wrapper">
             <iframe
-              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d15228.601555776224!2d78.5922405!3d17.419195!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bcb9f0e8f0b0001%3A0x123456789abcdef!2sHampers+Nest!5e0!3m2!1sen!2sin!4v1718429532152!5m2!1sen!2sin"
+              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d951.7108719375196!2d78.60257771936811!3d17.41929715897546!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bcb9f7754de06e7%3A0x8521cabc2faa0ae5!2sHampers%20Nest!5e0!3m2!1sen!2sin!4v1781604203517!5m2!1sen!2sin"
               width="100%"
               height="100%"
               style={{ border: 0 }}
