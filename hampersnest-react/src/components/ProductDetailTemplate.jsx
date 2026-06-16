@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useCurrency } from '../context/CurrencyContext';
 import ProductCard from './ProductCard';
+import { API_BASE } from '../config.js';
 
 export default function ProductDetailTemplate({ product, displayRelated = [] }) {
   const { addToCart, toggleWishlist, isInWishlist, setQuoteModalOpen } = useCart();
@@ -12,15 +13,7 @@ export default function ProductDetailTemplate({ product, displayRelated = [] }) 
 
   // Form States
   const [giftTag, setGiftTag] = useState('');
-  const [wrappingStyle, setWrappingStyle] = useState('Standard');
-  const [ribbonColor, setRibbonColor] = useState('None');
   const [quantity, setQuantity] = useState(1);
-  const [selectedAddOns, setSelectedAddOns] = useState({
-    candle: false,
-    chocolates: false,
-    bottle: false,
-    calligraphy: false,
-  });
 
   // Gallery States
   const [activeMediaIndex, setActiveMediaIndex] = useState(0);
@@ -39,14 +32,6 @@ export default function ProductDetailTemplate({ product, displayRelated = [] }) 
     setActiveMediaIndex(0);
     setIsLightboxOpen(false);
     setGiftTag('');
-    setWrappingStyle('Standard');
-    setRibbonColor('None');
-    setSelectedAddOns({
-      candle: false,
-      chocolates: false,
-      bottle: false,
-      calligraphy: false,
-    });
     setQuantity(1);
 
     // Track product view in backend database
@@ -64,37 +49,7 @@ export default function ProductDetailTemplate({ product, displayRelated = [] }) 
     }
   }, [product?.id]);
 
-  const boxPrices = {
-    'Standard': 0,
-    'Ivory Lace': 150,
-    'Royal Purple Silk': 180,
-    'Gold Glare Foil': 220,
-  };
-
-  const ribbonPrices = {
-    'None': 0,
-    'Metallic Gold': 30,
-    'Lavender Lace': 40,
-    'Royal Violet': 50,
-    'Red Velvet': 60,
-  };
-
-  const addOnDetails = {
-    candle: { name: 'Scented Wax Candle', price: 99 },
-    chocolates: { name: 'Extra Chocolates (Pack of 4)', price: 149 },
-    bottle: { name: 'Premium Hydration Flask', price: 299 },
-    calligraphy: { name: 'Calligraphy Message Card', price: 49 },
-  };
-
-  // Calculate Added Price
-  const addedPrice = 
-    (boxPrices[wrappingStyle] || 0) +
-    (ribbonPrices[ribbonColor] || 0) +
-    Object.keys(selectedAddOns).reduce((total, key) => {
-      return total + (selectedAddOns[key] ? addOnDetails[key].price : 0);
-    }, 0);
-
-  const unitPrice = product.price + addedPrice;
+  const unitPrice = product.price;
 
   const toggleAccordion = (section) => {
     setAccordions((prev) => ({
@@ -105,16 +60,9 @@ export default function ProductDetailTemplate({ product, displayRelated = [] }) 
 
   const handleAddToBasket = (e) => {
     e.preventDefault();
-    const activeAddOns = Object.keys(selectedAddOns)
-      .filter((key) => selectedAddOns[key])
-      .map((key) => addOnDetails[key].name);
 
     addToCart(product, quantity, {
-      giftTag,
-      wrappingStyle,
-      ribbonColor,
-      addOns: activeAddOns,
-      addedPrice,
+      giftTag
     });
   };
 
@@ -273,9 +221,9 @@ export default function ProductDetailTemplate({ product, displayRelated = [] }) 
                 <span className="current-price">{formatPrice(unitPrice)}</span>
                 {product.originalPrice > 0 && product.originalPrice > product.price && (
                   <>
-                    <span className="original-price">{formatPrice(product.originalPrice + addedPrice)}</span>
+                    <span className="original-price">{formatPrice(product.originalPrice)}</span>
                     <span className="save-badge">
-                      Save {Math.round((((product.originalPrice + addedPrice) - unitPrice) / (product.originalPrice + addedPrice)) * 100)}%
+                      Save {Math.round(((product.originalPrice - unitPrice) / product.originalPrice) * 100)}%
                     </span>
                   </>
                 )}
@@ -419,69 +367,7 @@ export default function ProductDetailTemplate({ product, displayRelated = [] }) 
                 </div>
               )}
 
-              {/* Wrapping Style Dropdown */}
-              <div className="customizer-row-split" style={{ display: 'flex', gap: '1rem', marginTop: '1.2rem' }}>
-                <div className="customizer-column" style={{ flex: 1 }}>
-                  <label className="customizer-label" htmlFor="wrap-style">
-                    Wrapping Style
-                  </label>
-                  <select
-                    id="wrap-style"
-                    className="customizer-select"
-                    value={wrappingStyle}
-                    onChange={(e) => setWrappingStyle(e.target.value)}
-                  >
-                    <option value="Standard">Standard (Eco-craft box) - Free</option>
-                    <option value="Ivory Lace">Premium Ivory Lace (+₹150)</option>
-                    <option value="Royal Purple Silk">Royal Purple Silk (+₹180)</option>
-                    <option value="Gold Glare Foil">Gold Glare Foil (+₹220)</option>
-                  </select>
-                </div>
 
-                {/* Ribbon Color Dropdown */}
-                <div className="customizer-column" style={{ flex: 1 }}>
-                  <label className="customizer-label" htmlFor="ribbon-color">
-                    Satin Ribbon Color
-                  </label>
-                  <select
-                    id="ribbon-color"
-                    className="customizer-select"
-                    value={ribbonColor}
-                    onChange={(e) => setRibbonColor(e.target.value)}
-                  >
-                    <option value="None">None (Default Jute Rope) - Free</option>
-                    <option value="Metallic Gold">Metallic Gold (+₹30)</option>
-                    <option value="Lavender Lace">Lavender Lace (+₹40)</option>
-                    <option value="Royal Violet">Royal Violet Silk (+₹50)</option>
-                    <option value="Red Velvet">Red Velvet Ribbon (+₹60)</option>
-                  </select>
-                </div>
-              </div>
-
-              {/* Add-ons Checkboxes */}
-              {product.addonsEnabled !== false && (
-                <div className="customizer-row" style={{ marginTop: '1.2rem' }}>
-                  <label className="customizer-label">Enhance with Add-ons (Optional)</label>
-                  <div className="addons-grid-check">
-                    {Object.keys(addOnDetails).map((key) => (
-                      <label key={key} className={`addon-checkbox-card ${selectedAddOns[key] ? 'active' : ''}`}>
-                        <input
-                          type="checkbox"
-                          checked={selectedAddOns[key]}
-                          onChange={(e) =>
-                            setSelectedAddOns((prev) => ({
-                              ...prev,
-                              [key]: e.target.checked,
-                            }))
-                          }
-                        />
-                        <span className="addon-name">{addOnDetails[key].name}</span>
-                        <span className="addon-price">+{formatPrice(addOnDetails[key].price)}</span>
-                      </label>
-                    ))}
-                  </div>
-                </div>
-              )}
 
               {/* Quantity Selector and Purchase Actions */}
               <div className="action-row-buying" style={{ display: 'flex', gap: '10px', alignItems: 'center', marginTop: '1.5rem', flexWrap: 'wrap' }}>

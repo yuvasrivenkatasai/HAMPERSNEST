@@ -256,7 +256,7 @@ export default function Settings() {
                   className="form-input"
                   value={settingsData.whatsappNumber}
                   onChange={handleSettingsChange}
-                  placeholder="e.g. 917989202094"
+                  placeholder="e.g. 917989202194"
                 />
               </div>
 

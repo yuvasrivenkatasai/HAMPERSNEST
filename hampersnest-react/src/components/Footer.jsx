@@ -4,9 +4,9 @@ import { Link } from 'react-router-dom';
 export default function Footer() {
   const handleWhatsappDirect = (e) => {
     e.preventDefault();
-    const whatsappBaseNumber = '917989202094';
+    const WHATSAPP_NUMBER = "917989202194";
     const welcomeText = encodeURIComponent('Hi Hampers Nest! I am interested in viewing your customized Return Gifts collection and getting a catalog.');
-    window.open(`https://api.whatsapp.com/send?phone=${whatsappBaseNumber}&text=${welcomeText}`, '_blank');
+    window.open(`https://api.whatsapp.com/send?phone=${WHATSAPP_NUMBER}&text=${welcomeText}`, '_blank');
   };
 
   return (
@@ -14,18 +14,18 @@ export default function Footer() {
       <div className="container footer-grid">
         {/* About column */}
         <div className="footer-col">
-          <div
-            style={{
-              background: 'var(--color-white)',
-              padding: '8px 12px',
-              borderRadius: '8px',
-              display: 'inline-block',
-              marginBottom: '1.5rem',
-              border: '1px solid var(--color-gold)'
-            }}
-          >
-            <Link to="/" className="logo footer-logo" style={{ display: 'block' }}>
-              <img src="/assets/logo.webp" alt="Hampers Nest Logo" style={{ height: '50px', width: 'auto' }} />
+          <div style={{ marginBottom: '1.5rem' }}>
+            <Link to="/" style={{ textDecoration: 'none' }}>
+              <h2 style={{ 
+                color: 'var(--color-gold)', 
+                fontSize: '2rem', 
+                fontWeight: '700', 
+                letterSpacing: '2px', 
+                margin: '0',
+                textTransform: 'uppercase'
+              }}>
+                HAMPERS NEST
+              </h2>
             </Link>
           </div>
           <p className="footer-about-text">
@@ -38,11 +38,11 @@ export default function Footer() {
         <div className="footer-col">
           <h4 className="footer-title">Quick Links</h4>
           <ul className="footer-links">
-            <li><Link to="/">Home</Link></li>
-            <li><Link to="/about">Our Story</Link></li>
-            <li><Link to="/collections">Featured Collections</Link></li>
-            <li><Link to="/gallery">Product Gallery</Link></li>
-            <li><Link to="/contact">Get Quote</Link></li>
+            <li><Link to="/" onClick={() => window.scrollTo(0, 0)}>Home</Link></li>
+            <li><Link to="/about" onClick={() => window.scrollTo(0, 0)}>Our Story</Link></li>
+            <li><Link to="/featured" onClick={() => window.scrollTo(0, 0)}>Featured Collections</Link></li>
+            <li><Link to="/gallery" onClick={() => window.scrollTo(0, 0)}>Product Gallery</Link></li>
+            <li><Link to="/contact" onClick={() => window.scrollTo(0, 0)}>Get Quote</Link></li>
           </ul>
         </div>
 
@@ -50,26 +50,15 @@ export default function Footer() {
         <div className="footer-col">
           <h4 className="footer-title">Collections</h4>
           <ul className="footer-links">
-            <li><Link to="/collections?category=Wedding">Wedding Gifting</Link></li>
-            <li><Link to="/collections?category=Baby Shower">Baby Shower Boxes</Link></li>
-            <li><Link to="/collections?category=Housewarming">Housewarming Kits</Link></li>
-            <li><Link to="/collections?category=Corporate">Corporate Hampers</Link></li>
-            <li><Link to="/collections?category=Customized">Customized Gifts</Link></li>
+            <li><Link to="/collections?category=Wedding" onClick={() => window.scrollTo(0, 0)}>Wedding Gifting</Link></li>
+            <li><Link to="/collections?category=Baby%20Shower" onClick={() => window.scrollTo(0, 0)}>Baby Shower Boxes</Link></li>
+            <li><Link to="/collections?category=Housewarming" onClick={() => window.scrollTo(0, 0)}>Housewarming Kits</Link></li>
+            <li><Link to="/collections?category=Corporate%20Gifting" onClick={() => window.scrollTo(0, 0)}>Corporate Hampers</Link></li>
+            <li><Link to="/collections?category=Customized%20Hampers" onClick={() => window.scrollTo(0, 0)}>Customized Gifts</Link></li>
           </ul>
         </div>
 
-        {/* Instagram Grid Column */}
-        <div className="footer-col">
-          <h4 className="footer-title">Follow Us</h4>
-          <div className="footer-insta-grid">
-            <div className="footer-insta-img"><img src="/assets/wedding_gift.webp" alt="Instagram Showcase 1" /></div>
-            <div className="footer-insta-img"><img src="/assets/baby_shower.webp" alt="Instagram Showcase 2" /></div>
-            <div className="footer-insta-img"><img src="/assets/housewarming.webp" alt="Instagram Showcase 3" /></div>
-            <div className="footer-insta-img"><img src="/assets/corporate.webp" alt="Instagram Showcase 4" /></div>
-            <div className="footer-insta-img"><img src="/assets/hero_banner.webp" alt="Instagram Showcase 5" /></div>
-            <div className="footer-insta-img"><img src="/assets/brass_cup.webp" alt="Instagram Showcase 6" /></div>
-          </div>
-        </div>
+
       </div>
 
       {/* Footer Bottom Bar */}

@@ -184,7 +184,7 @@ export const CartProvider = ({ children }) => {
 
   // Generate Whatsapp Checkout Message
   const getWhatsappCheckoutUrl = (userDetails = {}, orderId = null) => {
-    const whatsappBaseNumber = '917989202094';
+    const WHATSAPP_NUMBER = "917989202194";
     
     let orderDetailsText = cart.map((item, idx) => {
       let customStr = '';
@@ -206,7 +206,7 @@ export const CartProvider = ({ children }) => {
 
     const message = `Hi Hampers Nest!\n\nI would like to place an order / get a quote for the following hampers:\n\n${orderDetailsText}\n\n*Total Items:* ${cartCount}\n*Estimated Subtotal:* ₹${cartTotal}\n\n${nameStr}${phoneStr}${eventStr}${dateStr}${notesStr}Please confirm availability and share the catalog. Thank you!`;
 
-    return `https://api.whatsapp.com/send?phone=${whatsappBaseNumber}&text=${encodeURIComponent(message)}`;
+    return `https://api.whatsapp.com/send?phone=${WHATSAPP_NUMBER}&text=${encodeURIComponent(message)}`;
   };
 
   return (

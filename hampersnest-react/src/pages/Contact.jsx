@@ -1,11 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { useCart } from '../context/CartContext';
 import SEO from '../components/SEO';
 import { API_BASE } from '../config.js';
 
 export default function Contact() {
-  const { cart, cartCount, cartTotal } = useCart();
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
@@ -47,21 +45,14 @@ export default function Contact() {
       return;
     }
 
-    const whatsappBaseNumber = '917989202094';
+    const WHATSAPP_NUMBER = "917989202194";
     
-    // Append cart items if they exist
-    let cartString = '';
-    if (cart.length > 0) {
-      cartString = `\n\n*Interested Items in Cart:*` + cart.map((item, idx) => {
-        return `\n- ${item.name} x ${item.quantity}`;
-      }).join('');
-      cartString += `\n*Est. Cart Value:* ₹${cartTotal}`;
-    }
 
-    const textMessage = `Hi Hampers Nest!\n\nI would like to request a customized quote:\n\n*Name:* ${formData.name}\n*Phone:* ${formData.phone}\n*Event Type:* ${formData.eventType}\n*Est. Quantity:* ${formData.quantity}\n*Customization Request:* ${formData.message || 'N/A'}${cartString}`;
+
+    const textMessage = `Hi Hampers Nest!\n\nI would like to request a customized quote:\n\n*Name:* ${formData.name}\n*Phone:* ${formData.phone}\n*Event Type:* ${formData.eventType}\n*Est. Quantity:* ${formData.quantity}\n*Customization Request:* ${formData.message || 'N/A'}`;
 
     const encodedText = encodeURIComponent(textMessage);
-    const whatsappURL = `https://api.whatsapp.com/send?phone=${whatsappBaseNumber}&text=${encodedText}`;
+    const whatsappURL = `https://api.whatsapp.com/send?phone=${WHATSAPP_NUMBER}&text=${encodedText}`;
 
     setShowSuccessToast(true);
 
@@ -106,7 +97,7 @@ export default function Contact() {
     "mainEntity": {
       "@type": "LocalBusiness",
       "name": "Hampers Nest",
-      "telephone": "+917989202094",
+      "telephone": "+917989202194",
       "address": {
         "@type": "PostalAddress",
         "streetAddress": "Jubilee Hills",
@@ -200,8 +191,9 @@ export default function Contact() {
             </div>
 
             <div className="contact-socials">
-              <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="social-circle" aria-label="Facebook Page"><i className="fa-brands fa-facebook-f"></i></a>
-              <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="social-circle" aria-label="Instagram Page"><i className="fa-brands fa-instagram"></i></a>
+              <a href="https://www.facebook.com/share/1Cz8aEeJwo/?mibextid=wwXIfr" target="_blank" rel="noopener noreferrer" className="social-circle" aria-label="Facebook Page"><i className="fa-brands fa-facebook-f"></i></a>
+              <a href="https://www.instagram.com/hampersnest" target="_blank" rel="noopener noreferrer" className="social-circle" aria-label="Instagram Page"><i className="fa-brands fa-instagram"></i></a>
+              <a href="https://youtube.com/@hampersnestgifts?si=tHfy4HNnaphp1YBE" target="_blank" rel="noopener noreferrer" className="social-circle" aria-label="YouTube Channel"><i className="fa-brands fa-youtube"></i></a>
             </div>
           </div>
 
@@ -268,8 +260,8 @@ export default function Contact() {
                     id="f-qty"
                     name="quantity"
                     className="form-input"
-                    placeholder="Min 10 pieces"
-                    min="10"
+                    placeholder="Min 5 pieces"
+                    min="5"
                     value={formData.quantity}
                     onChange={handleInputChange}
                     required
@@ -290,12 +282,7 @@ export default function Contact() {
                 ></textarea>
               </div>
 
-              {cart.length > 0 && (
-                <div style={{ background: 'var(--color-lavender)', padding: '10px 14px', borderRadius: '8px', marginBottom: '1.2rem', fontSize: '0.8rem', color: 'var(--color-purple-dark)', borderLeft: '3px solid var(--color-gold)' }}>
-                  <i className="fa-solid fa-cart-shopping" style={{ marginRight: '6px' }}></i>
-                  <strong>Cart Integration:</strong> We will automatically append the {cartCount} items currently in your basket (₹{cartTotal}) to this catalog inquiry request.
-                </div>
-              )}
+
 
               <button type="submit" className="btn btn-primary" style={{ width: '100%' }}>
                 Send Inquiry Via WhatsApp <i className="fa-solid fa-paper-plane" style={{ marginLeft: '6px' }}></i>

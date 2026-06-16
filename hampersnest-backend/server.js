@@ -48,8 +48,8 @@ const apiLimiter = rateLimit({
     if (req.headers.authorization && req.headers.authorization.startsWith('Bearer ')) {
       return 1000;
     }
-    // Public APIs limit to 100 requests
-    return 100;
+    // Public APIs limit to 5000 requests (increased for dev/hot-reloading)
+    return 5000;
   },
   standardHeaders: true,
   legacyHeaders: false,

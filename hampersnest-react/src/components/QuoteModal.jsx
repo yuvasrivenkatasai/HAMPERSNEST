@@ -30,7 +30,7 @@ const CUSTOMIZATION_OPTIONS = [
   'Invitation Inserts',
 ];
 
-const WA_NUMBER = '917989202094';
+const WHATSAPP_NUMBER = "917989202194";
 
 const EMPTY_FORM = {
   occasion: '',
@@ -150,7 +150,7 @@ export default function QuoteModal({ open, onClose }) {
       (form.notes ? `*Additional Notes:*\n${form.notes}\n\n` : '') +
       `Please share suitable options.\n\nThank you.`;
 
-    window.open(`https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(message)}`, '_blank');
+    window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`, '_blank');
     onClose();
   };
 

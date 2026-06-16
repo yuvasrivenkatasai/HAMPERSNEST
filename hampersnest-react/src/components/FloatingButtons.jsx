@@ -7,7 +7,7 @@ export default function FloatingButtons() {
   return (
     <div className="floating-container-right" style={{ zIndex: 1000 }}>
       {/* Call button */}
-      <a href="tel:+917989202094" className="call-float" aria-label="Quick Call contact">
+      <a href="tel:+917989202194" className="call-float" aria-label="Quick Call contact">
         <i className="fa-solid fa-phone"></i>
       </a>
       {/* WhatsApp button — opens lead capture form */}

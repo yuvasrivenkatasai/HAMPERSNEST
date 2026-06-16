@@ -1,3 +1,4 @@
+import SeoKeywordsSection from '../components/SeoKeywordsSection';
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
@@ -156,7 +157,7 @@ export default function Collections() {
       "@type": "LocalBusiness",
       "name": "Hampers Nest",
       "image": window.location.origin + "/assets/hero_banner.webp",
-      "telephone": "+917989202094",
+      "telephone": "+917989202194",
       "priceRange": "₹₹",
       "address": {
         "@type": "PostalAddress",
