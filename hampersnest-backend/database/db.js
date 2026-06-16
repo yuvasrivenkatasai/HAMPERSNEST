@@ -59,9 +59,9 @@ export const connectDB = async () => {
     // Import models before syncing to register them with sequelize
     const { User, Category } = await import('./models.js');
 
-    // Automatically sync models to database
-    await sequelize.sync({ alter: false });
-    console.log('Database models synchronized.');
+    // Automatically sync models to database (Disabled to prevent schema resets on restart)
+    // await sequelize.sync({ alter: false });
+    console.log('Database connection verified.');
 
     // Seed default admin user securely
     const adminExists = await User.count();
