@@ -7063,7 +7063,6 @@ footer h4,
 
 /* CACHE BUSTER FOR REMOTE CI */
 
-<<<<<<< HEAD
 /* Collection Page Refinements */
 .collections-grid-4col .collection-card-action-row {
   align-items: baseline;
@@ -7085,7 +7084,7 @@ footer h4,
     gap: 12px;
   }
 }
-=======
+
 /* ==========================================
    FOLLOW US INSTAGRAM SECTION
    ========================================== */
@@ -7316,5 +7315,3 @@ footer h4,
 .policy-text-block p {
   margin-bottom: 1rem;
 }
-
->>>>>>> 53d1926d62ac6c1667fdc1507d6217061cdd8a63
