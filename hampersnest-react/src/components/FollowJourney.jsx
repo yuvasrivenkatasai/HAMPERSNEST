@@ -13,11 +13,6 @@ export default function FollowJourney() {
   const pinterestUrl = settings?.pinterestUrl;
   const twitterUrl = settings?.twitterUrl;
 
-  // Render nothing if no social URLs are configured
-  if (!instagramUrl && !youtubeUrl && !facebookUrl && !linkedinUrl && !pinterestUrl && !twitterUrl) {
-    return null;
-  }
-
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
@@ -36,6 +31,11 @@ export default function FollowJourney() {
 
     return () => observer.disconnect();
   }, [settings]);
+
+  // Render nothing if no social URLs are configured
+  if (!instagramUrl && !youtubeUrl && !facebookUrl && !linkedinUrl && !pinterestUrl && !twitterUrl) {
+    return null;
+  }
 
   return (
     <section className="follow-journey-section" ref={sectionRef}>
