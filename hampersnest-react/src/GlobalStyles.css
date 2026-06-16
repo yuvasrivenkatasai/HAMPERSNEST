@@ -7315,3 +7315,42 @@ footer h4,
 .policy-text-block p {
   margin-bottom: 1rem;
 }
+
+/* ==========================================
+   COLLECTION PAGE REFINEMENTS
+   ========================================== */
+.collections-grid-4col .collection-card-action-row {
+  justify-content: flex-start;
+  align-items: center;
+  gap: 14px;
+}
+
+.collections-grid-4col .shop-card-btn {
+  padding: 0 12px;
+  font-size: 11px;
+  letter-spacing: 0.5px;
+  height: 34px;
+}
+
+.collections-grid-4col .card-link-text {
+  font-size: 0.8rem;
+  font-weight: 500;
+  white-space: nowrap;
+  align-items: center;
+}
+
+.collections-grid-4col .card-link-text i {
+  margin-left: 4px;
+}
+
+@media (max-width: 767px) {
+  .collections-grid-4col .collection-card-action-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+  .collections-grid-4col .shop-card-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
