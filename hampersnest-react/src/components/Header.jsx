@@ -8,6 +8,7 @@ export default function Header() {
   const { currency, toggleCurrency } = useCurrency();
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [collectionsDropdownOpen, setCollectionsDropdownOpen] = useState(false);
 
   // Toggle scroll header state
   useEffect(() => {
@@ -40,6 +41,7 @@ export default function Header() {
 
   const closeMobileMenu = () => {
     setMobileMenuOpen(false);
+    setCollectionsDropdownOpen(false);
   };
 
   return (
@@ -59,52 +61,74 @@ export default function Header() {
 
           {/* Navigation Links */}
           <nav className={`nav-menu ${mobileMenuOpen ? 'active' : ''}`}>
-            <NavLink to="/" className={({ isActive }) => isActive ? 'active' : ''} onClick={closeMobileMenu}>
-              Home
-            </NavLink>
-            <div className="nav-dropdown-wrapper">
-              <NavLink to="/collections" className={({ isActive }) => isActive ? 'active' : ''}>
-                Collections <i className="fa-solid fa-chevron-down dropdown-arrow"></i>
+            <div className="nav-menu-inner">
+              <NavLink to="/" className={({ isActive }) => isActive ? 'active' : ''} onClick={closeMobileMenu}>
+                Home
               </NavLink>
-              <div className="nav-dropdown-menu">
-                <Link to="/collections" onClick={closeMobileMenu}>All Products</Link>
-                <Link to="/collections?category=Wedding" onClick={closeMobileMenu}>Wedding Return Gifts</Link>
-                <Link to="/collections?category=Baby Shower" onClick={closeMobileMenu}>Baby Shower Hampers</Link>
-                <Link to="/collections?category=Housewarming" onClick={closeMobileMenu}>Housewarming Ceremony</Link>
-                <Link to="/collections?category=Corporate" onClick={closeMobileMenu}>Corporate Gifting</Link>
-                <Link to="/collections?category=Brass" onClick={closeMobileMenu}>Traditional Brass Gifting</Link>
+              <div className={`nav-dropdown-wrapper ${collectionsDropdownOpen ? 'open' : ''}`}>
+                <NavLink 
+                  to="/collections" 
+                  className={({ isActive }) => isActive ? 'active' : ''}
+                  onClick={(e) => {
+                    if (window.innerWidth <= 1024) {
+                      e.preventDefault();
+                      setCollectionsDropdownOpen(!collectionsDropdownOpen);
+                    } else {
+                      closeMobileMenu();
+                    }
+                  }}
+                >
+                  Collections <i className="fa-solid fa-chevron-down dropdown-arrow"></i>
+                </NavLink>
+                <div className="nav-dropdown-menu">
+                  <Link to="/collections" onClick={closeMobileMenu}>All Products</Link>
+                  {Array.isArray(settings?.categories) && settings.categories.map((category) => {
+                    const id = String(category.id || category.label || '').trim();
+                    const label = String(category.label || category.id || '').trim();
+                    if (!id) return null;
+                    return (
+                      <Link 
+                        key={id} 
+                        to={`/collections?category=${encodeURIComponent(id)}`} 
+                        onClick={closeMobileMenu}
+                      >
+                        {label}
+                      </Link>
+                    );
+                  })}
+                </div>
               </div>
-            </div>
-            <NavLink to="/featured" className={({ isActive }) => isActive ? 'active' : ''} onClick={closeMobileMenu}>
-              Featured Gifts
-            </NavLink>
-            <NavLink to="/gallery" className={({ isActive }) => isActive ? 'active' : ''} onClick={closeMobileMenu}>
-              Gallery
-            </NavLink>
-            <NavLink to="/about" className={({ isActive }) => isActive ? 'active' : ''} onClick={closeMobileMenu}>
-              About Us
-            </NavLink>
-            <NavLink to="/contact" className={({ isActive }) => isActive ? 'active' : ''} onClick={closeMobileMenu}>
-              Contact
-            </NavLink>
+              <NavLink to="/featured" className={({ isActive }) => isActive ? 'active' : ''} onClick={closeMobileMenu}>
+                Featured Gifts
+              </NavLink>
+              <NavLink to="/gallery" className={({ isActive }) => isActive ? 'active' : ''} onClick={closeMobileMenu}>
+                Gallery
+              </NavLink>
+              <NavLink to="/about" className={({ isActive }) => isActive ? 'active' : ''} onClick={closeMobileMenu}>
+                About Us
+              </NavLink>
+              <NavLink to="/contact" className={({ isActive }) => isActive ? 'active' : ''} onClick={closeMobileMenu}>
+                Contact
+              </NavLink>
 
-            {/* Currency Switcher — inside mobile menu */}
-            <div className="currency-switcher currency-switcher-mobile">
-              <button
-                className={`currency-btn ${currency === 'INR' ? 'active' : ''}`}
-                onClick={() => toggleCurrency('INR')}
-                aria-label="Switch to INR"
-              >
-                ₹ INR
-              </button>
-              <span className="currency-divider">|</span>
-              <button
-                className={`currency-btn ${currency === 'USD' ? 'active' : ''}`}
-                onClick={() => toggleCurrency('USD')}
-                aria-label="Switch to USD"
-              >
-                $ USD
-              </button>
+              {/* Currency Switcher — inside mobile menu */}
+              <div className="currency-switcher currency-switcher-mobile">
+                <button
+                  className={`currency-btn ${currency === 'INR' ? 'active' : ''}`}
+                  onClick={() => toggleCurrency('INR')}
+                  aria-label="Switch to INR"
+                >
+                  ₹ INR
+                </button>
+                <span className="currency-divider">|</span>
+                <button
+                  className={`currency-btn ${currency === 'USD' ? 'active' : ''}`}
+                  onClick={() => toggleCurrency('USD')}
+                  aria-label="Switch to USD"
+                >
+                  $ USD
+                </button>
+              </div>
             </div>
           </nav>
 

@@ -365,6 +365,10 @@ header.scrolled {
   gap: 2rem;
 }
 
+.nav-menu-inner {
+  display: contents;
+}
+
 .nav-menu a {
   font-size: 0.8rem;
   font-weight: 600;
@@ -3143,13 +3147,26 @@ footer {
     flex-direction: column;
     justify-content: flex-start;
     align-items: stretch;
-    padding: 100px 30px 40px !important;
-    gap: 24px !important;
+    padding: 0 !important;
+    gap: 0 !important;
     opacity: 1 !important;
     visibility: visible !important;
     transform: translateX(100%) !important;
     transition: transform 0.4s cubic-bezier(0.165, 0.84, 0.44, 1) !important;
     z-index: 1001 !important;
+    overflow: hidden !important;
+  }
+
+  .nav-menu-inner {
+    display: flex !important;
+    flex-direction: column;
+    width: 100%;
+    height: calc(100vh - 85px);
+    margin-top: 85px;
+    padding: 20px 30px 40px !important;
+    gap: 24px !important;
+    overflow-y: auto !important;
+    box-sizing: border-box;
   }
 
   .nav-menu.active {
@@ -7199,14 +7216,16 @@ footer h4,
 }
 
 /* Hover behaviors */
-.nav-dropdown-wrapper:hover .nav-dropdown-menu {
-  opacity: 1;
-  pointer-events: auto;
-  transform: translateX(-50%) translateY(0);
-}
+@media (min-width: 1025px) {
+  .nav-dropdown-wrapper:hover .nav-dropdown-menu {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateX(-50%) translateY(0);
+  }
 
-.nav-dropdown-wrapper:hover .dropdown-arrow {
-  transform: rotate(180deg);
+  .nav-dropdown-wrapper:hover .dropdown-arrow {
+    transform: rotate(180deg);
+  }
 }
 
 /* Mobile Dropdown styles */
@@ -7223,13 +7242,23 @@ footer h4,
     box-shadow: none;
     border: none;
     background: transparent;
-    opacity: 1;
-    pointer-events: auto;
-    display: flex;
+    opacity: 0;
+    pointer-events: none;
+    display: none;
     padding-left: 15px;
     margin-top: 5px;
     gap: 2px;
     min-width: unset;
+  }
+
+  .nav-dropdown-wrapper.open .nav-dropdown-menu {
+    display: flex;
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .nav-dropdown-wrapper.open .dropdown-arrow {
+    transform: rotate(180deg);
   }
   
   .nav-dropdown-menu a {
