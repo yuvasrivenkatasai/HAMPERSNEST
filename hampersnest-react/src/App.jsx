@@ -5,6 +5,7 @@ import { CurrencyProvider } from './context/CurrencyContext';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import StudioMap from './components/StudioMap';
+import FollowJourney from './components/FollowJourney';
 import CartDrawer from './components/CartDrawer';
 import ProductModal from './components/ProductModal';
 import FloatingButtons from './components/FloatingButtons';
@@ -45,6 +46,7 @@ function AppInner() {
       </main>
 
       {/* Map & Footer layout */}
+      <FollowJourney />
       <StudioMap />
       <Footer />
 

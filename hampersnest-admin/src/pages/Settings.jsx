@@ -19,7 +19,13 @@ export default function Settings() {
     announcementActive: false,
     businessAddress: 'Hyderabad, Telangana, India',
     googleMapsUrl: 'https://www.google.com/maps/place/Hampers+Nest/@17.4192972,78.6025777',
-    whatsappNumber: '917989202194'
+    whatsappNumber: '917989202194',
+    instagramUrl: 'https://www.instagram.com/hampersnest',
+    youtubeUrl: 'https://youtube.com/@hampersnestgifts',
+    facebookUrl: '',
+    linkedinUrl: '',
+    pinterestUrl: '',
+    twitterUrl: ''
   });
   const [settingsLoading, setSettingsLoading] = useState(true);
   const [settingsMessage, setSettingsMessage] = useState(null);
@@ -97,6 +103,23 @@ export default function Settings() {
       setTimeout(() => setSettingsMessage(null), 3000);
     } catch (err) {
       alert(err.message || 'Failed to save settings');
+    }
+  };
+
+  const [socialMessage, setSocialMessage] = useState(null);
+
+  const handleSocialSubmit = async (e) => {
+    e.preventDefault();
+    setSocialMessage(null);
+    try {
+      await apiRequest('/api/settings', {
+        method: 'PUT',
+        body: settingsData
+      });
+      setSocialMessage('Social media settings updated successfully.');
+      setTimeout(() => setSocialMessage(null), 3000);
+    } catch (err) {
+      alert(err.message || 'Failed to save social media settings');
     }
   };
 
@@ -289,6 +312,94 @@ export default function Settings() {
               
               <button type="submit" className="btn-admin" disabled={loading}>
                 {loading ? 'Updating...' : 'Change Password'}
+              </button>
+            </form>
+          </div>
+
+          {/* Social Media Settings Panel */}
+          <div className="dashboard-panel" style={{ margin: 0 }}>
+            <div className="panel-header">
+              <h3><i className="fa-brands fa-instagram color-gold"></i> Social Media Settings</h3>
+            </div>
+            
+            <form onSubmit={handleSocialSubmit}>
+              {socialMessage && <div style={{ background: 'rgba(25, 135, 84, 0.1)', color: 'var(--color-delivered)', padding: '10px', borderRadius: '6px', marginBottom: '15px' }}>{socialMessage}</div>}
+              
+              <div className="form-group">
+                <label className="form-label">Instagram URL</label>
+                <input 
+                  type="url" 
+                  name="instagramUrl"
+                  className="form-input" 
+                  value={settingsData.instagramUrl || ''}
+                  onChange={handleSettingsChange}
+                  placeholder="https://www.instagram.com/..."
+                />
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">YouTube URL</label>
+                <input 
+                  type="url" 
+                  name="youtubeUrl"
+                  className="form-input" 
+                  value={settingsData.youtubeUrl || ''}
+                  onChange={handleSettingsChange}
+                  placeholder="https://youtube.com/@..."
+                />
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Facebook URL</label>
+                <input 
+                  type="url" 
+                  name="facebookUrl"
+                  className="form-input" 
+                  value={settingsData.facebookUrl || ''}
+                  onChange={handleSettingsChange}
+                  placeholder="https://www.facebook.com/..."
+                />
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+                <div className="form-group">
+                  <label className="form-label">LinkedIn URL</label>
+                  <input 
+                    type="url" 
+                    name="linkedinUrl"
+                    className="form-input" 
+                    value={settingsData.linkedinUrl || ''}
+                    onChange={handleSettingsChange}
+                    placeholder="Optional"
+                  />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Pinterest URL</label>
+                  <input 
+                    type="url" 
+                    name="pinterestUrl"
+                    className="form-input" 
+                    value={settingsData.pinterestUrl || ''}
+                    onChange={handleSettingsChange}
+                    placeholder="Optional"
+                  />
+                </div>
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Twitter/X URL</label>
+                <input 
+                  type="url" 
+                  name="twitterUrl"
+                  className="form-input" 
+                  value={settingsData.twitterUrl || ''}
+                  onChange={handleSettingsChange}
+                  placeholder="Optional"
+                />
+              </div>
+
+              <button type="submit" className="btn-admin mt-2">
+                Save Social Links
               </button>
             </form>
           </div>
