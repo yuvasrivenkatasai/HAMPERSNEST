@@ -12,6 +12,8 @@ export default function ProductDetailTemplate({ product, displayRelated = [] }) 
 
   // Form States
   const [giftTag, setGiftTag] = useState('');
+  const [wrappingStyle, setWrappingStyle] = useState('Standard');
+  const [ribbonColor, setRibbonColor] = useState('None');
   const [quantity, setQuantity] = useState(1);
   const [selectedAddOns, setSelectedAddOns] = useState({
     candle: false,
@@ -37,6 +39,8 @@ export default function ProductDetailTemplate({ product, displayRelated = [] }) 
     setActiveMediaIndex(0);
     setIsLightboxOpen(false);
     setGiftTag('');
+    setWrappingStyle('Standard');
+    setRibbonColor('None');
     setSelectedAddOns({
       candle: false,
       chocolates: false,
@@ -44,7 +48,36 @@ export default function ProductDetailTemplate({ product, displayRelated = [] }) 
       calligraphy: false,
     });
     setQuantity(1);
-  }, [product.id]);
+
+    // Track product view in backend database
+    if (product?.id) {
+      const recordView = async () => {
+        try {
+          await fetch(`${API_BASE}/api/products/${product.id}/view`, {
+            method: 'POST'
+          });
+        } catch (err) {
+          console.warn('View tracking server connection failed:', err);
+        }
+      };
+      recordView();
+    }
+  }, [product?.id]);
+
+  const boxPrices = {
+    'Standard': 0,
+    'Ivory Lace': 150,
+    'Royal Purple Silk': 180,
+    'Gold Glare Foil': 220,
+  };
+
+  const ribbonPrices = {
+    'None': 0,
+    'Metallic Gold': 30,
+    'Lavender Lace': 40,
+    'Royal Violet': 50,
+    'Red Velvet': 60,
+  };
 
   const addOnDetails = {
     candle: { name: 'Scented Wax Candle', price: 99 },
@@ -54,9 +87,12 @@ export default function ProductDetailTemplate({ product, displayRelated = [] }) 
   };
 
   // Calculate Added Price
-  const addedPrice = Object.keys(selectedAddOns).reduce((total, key) => {
-    return total + (selectedAddOns[key] ? addOnDetails[key].price : 0);
-  }, 0);
+  const addedPrice = 
+    (boxPrices[wrappingStyle] || 0) +
+    (ribbonPrices[ribbonColor] || 0) +
+    Object.keys(selectedAddOns).reduce((total, key) => {
+      return total + (selectedAddOns[key] ? addOnDetails[key].price : 0);
+    }, 0);
 
   const unitPrice = product.price + addedPrice;
 
@@ -75,6 +111,8 @@ export default function ProductDetailTemplate({ product, displayRelated = [] }) 
 
     addToCart(product, quantity, {
       giftTag,
+      wrappingStyle,
+      ribbonColor,
       addOns: activeAddOns,
       addedPrice,
     });
@@ -380,6 +418,45 @@ export default function ProductDetailTemplate({ product, displayRelated = [] }) 
                   />
                 </div>
               )}
+
+              {/* Wrapping Style Dropdown */}
+              <div className="customizer-row-split" style={{ display: 'flex', gap: '1rem', marginTop: '1.2rem' }}>
+                <div className="customizer-column" style={{ flex: 1 }}>
+                  <label className="customizer-label" htmlFor="wrap-style">
+                    Wrapping Style
+                  </label>
+                  <select
+                    id="wrap-style"
+                    className="customizer-select"
+                    value={wrappingStyle}
+                    onChange={(e) => setWrappingStyle(e.target.value)}
+                  >
+                    <option value="Standard">Standard (Eco-craft box) - Free</option>
+                    <option value="Ivory Lace">Premium Ivory Lace (+₹150)</option>
+                    <option value="Royal Purple Silk">Royal Purple Silk (+₹180)</option>
+                    <option value="Gold Glare Foil">Gold Glare Foil (+₹220)</option>
+                  </select>
+                </div>
+
+                {/* Ribbon Color Dropdown */}
+                <div className="customizer-column" style={{ flex: 1 }}>
+                  <label className="customizer-label" htmlFor="ribbon-color">
+                    Satin Ribbon Color
+                  </label>
+                  <select
+                    id="ribbon-color"
+                    className="customizer-select"
+                    value={ribbonColor}
+                    onChange={(e) => setRibbonColor(e.target.value)}
+                  >
+                    <option value="None">None (Default Jute Rope) - Free</option>
+                    <option value="Metallic Gold">Metallic Gold (+₹30)</option>
+                    <option value="Lavender Lace">Lavender Lace (+₹40)</option>
+                    <option value="Royal Violet">Royal Violet Silk (+₹50)</option>
+                    <option value="Red Velvet">Red Velvet Ribbon (+₹60)</option>
+                  </select>
+                </div>
+              </div>
 
               {/* Add-ons Checkboxes */}
               {product.addonsEnabled !== false && (
