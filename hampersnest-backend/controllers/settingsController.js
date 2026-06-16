@@ -84,12 +84,18 @@ export const updateSettings = async (req, res) => {
       }
     }
 
-    for (const [key, value] of Object.entries(req.body)) {
+    for (const [key, rawValue] of Object.entries(req.body)) {
       if (key !== 'categories') {
+        let valueToSave = rawValue;
+        if (typeof rawValue === 'string') {
+          const trimmed = rawValue.trim();
+          valueToSave = trimmed === '' ? null : trimmed;
+        }
+
         promises.push(
           Setting.upsert({
             key,
-            value
+            value: valueToSave
           })
         );
       }

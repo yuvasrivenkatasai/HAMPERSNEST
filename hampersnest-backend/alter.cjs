@@ -24,7 +24,8 @@ const sequelize = new Sequelize({
       'ALTER TABLE "products" ADD "customGiftTagEnabled" NUMBER(1) DEFAULT 1',
       'ALTER TABLE "products" ADD "addonsEnabled" NUMBER(1) DEFAULT 1',
       'ALTER TABLE "products" ADD "customizationText" CLOB',
-      'ALTER TABLE "products" ADD "deliveryInfoText" CLOB'
+      'ALTER TABLE "products" ADD "deliveryInfoText" CLOB',
+      'ALTER TABLE "settings" MODIFY "value" NULL'
     ];
     for (let q of queries) {
       try {

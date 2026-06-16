@@ -302,7 +302,7 @@ export const Setting = sequelize.define('Setting', {
   },
   value: {
     type: DataTypes.JSON,
-    allowNull: false
+    allowNull: true
   }
 }, {
   tableName: 'settings',
