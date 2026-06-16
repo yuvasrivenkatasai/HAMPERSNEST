@@ -1,8 +1,10 @@
 import React, { useEffect, useRef } from 'react';
+import { useCart } from '../context/CartContext';
 import './FollowJourney.css';
 
 export default function FollowJourney() {
   const sectionRef = useRef(null);
+  const { settings } = useCart();
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -23,6 +25,59 @@ export default function FollowJourney() {
     return () => observer.disconnect();
   }, []);
 
+  const socialCards = [
+    {
+      id: 'instagram',
+      url: settings?.instagramUrl,
+      icon: 'fa-brands fa-instagram',
+      title: 'Instagram',
+      desc: 'Daily hamper inspirations, custom gifting ideas, wedding return gifts, festive hampers, and client stories.',
+      btnText: 'FOLLOW US'
+    },
+    {
+      id: 'youtube',
+      url: settings?.youtubeUrl,
+      icon: 'fa-brands fa-youtube',
+      title: 'YouTube',
+      desc: 'Product showcases, packaging experiences, gifting collections, customer stories, and behind-the-scenes content.',
+      btnText: 'WATCH NOW'
+    },
+    {
+      id: 'facebook',
+      url: settings?.facebookUrl,
+      icon: 'fa-brands fa-facebook-f',
+      title: 'Facebook',
+      desc: 'Latest updates, customer celebrations, premium gifting collections, announcements, and festive inspirations.',
+      btnText: 'VISIT PAGE'
+    },
+    {
+      id: 'linkedin',
+      url: settings?.linkedinUrl,
+      icon: 'fa-brands fa-linkedin',
+      title: 'LinkedIn',
+      desc: 'Professional network, corporate gifting solutions, and business updates.',
+      btnText: 'CONNECT'
+    },
+    {
+      id: 'pinterest',
+      url: settings?.pinterestUrl,
+      icon: 'fa-brands fa-pinterest',
+      title: 'Pinterest',
+      desc: 'Curated inspiration boards for wedding gifts, baby showers, and aesthetic packaging.',
+      btnText: 'VIEW PINS'
+    },
+    {
+      id: 'twitter',
+      url: settings?.twitterUrl,
+      icon: 'fa-brands fa-x-twitter',
+      title: 'Twitter / X',
+      desc: 'Quick updates, news, and conversations about premium gifting.',
+      btnText: 'FOLLOW'
+    }
+  ].filter(social => social.url && social.url.trim() !== '');
+
+  if (socialCards.length === 0) return null;
+
   return (
     <section className="follow-journey-section" ref={sectionRef}>
       {/* Decorative Floating Shapes */}
@@ -39,62 +94,23 @@ export default function FollowJourney() {
         </div>
 
         <div className="follow-journey-grid">
-          {/* Instagram */}
-          <div className="social-card journey-reveal" style={{ transitionDelay: '0.1s' }}>
-            <div className="social-icon-wrapper">
-              <i className="fa-brands fa-instagram"></i>
+          {socialCards.map((card, idx) => (
+            <div key={card.id} className="social-card journey-reveal" style={{ transitionDelay: `${0.1 * (idx + 1)}s` }}>
+              <div className="social-icon-wrapper">
+                <i className={card.icon}></i>
+              </div>
+              <h3>{card.title}</h3>
+              <p>{card.desc}</p>
+              <a
+                href={card.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn btn-secondary social-btn"
+              >
+                {card.btnText}
+              </a>
             </div>
-            <h3>Instagram</h3>
-            <p>
-              Daily hamper inspirations, custom gifting ideas, wedding return gifts, festive hampers, and client stories.
-            </p>
-            <a
-              href="https://www.instagram.com/hampersnest"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="btn btn-secondary social-btn"
-            >
-              FOLLOW US
-            </a>
-          </div>
-
-          {/* YouTube */}
-          <div className="social-card journey-reveal" style={{ transitionDelay: '0.2s' }}>
-            <div className="social-icon-wrapper">
-              <i className="fa-brands fa-youtube"></i>
-            </div>
-            <h3>YouTube</h3>
-            <p>
-              Product showcases, packaging experiences, gifting collections, customer stories, and behind-the-scenes content.
-            </p>
-            <a
-              href="https://youtube.com/@hampersnestgifts?si=tHfy4HNnaphp1YBE"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="btn btn-secondary social-btn"
-            >
-              WATCH NOW
-            </a>
-          </div>
-
-          {/* Facebook */}
-          <div className="social-card journey-reveal" style={{ transitionDelay: '0.3s' }}>
-            <div className="social-icon-wrapper">
-              <i className="fa-brands fa-facebook-f"></i>
-            </div>
-            <h3>Facebook</h3>
-            <p>
-              Latest updates, customer celebrations, premium gifting collections, announcements, and festive inspirations.
-            </p>
-            <a
-              href="https://www.facebook.com/share/1Cz8aEeJwo/?mibextid=wwXIfr"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="btn btn-secondary social-btn"
-            >
-              VISIT PAGE
-            </a>
-          </div>
+          ))}
         </div>
       </div>
     </section>

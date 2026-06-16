@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { useCart } from '../context/CartContext';
 import SEO from '../components/SEO';
-import { API_BASE } from '../config.js';
+import { API_BASE, WHATSAPP_NUMBER } from '../config.js';
 
 export default function Contact() {
+  const { settings } = useCart();
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
@@ -191,9 +193,12 @@ export default function Contact() {
             </div>
 
             <div className="contact-socials">
-              <a href="https://www.facebook.com/share/1Cz8aEeJwo/?mibextid=wwXIfr" target="_blank" rel="noopener noreferrer" className="social-circle" aria-label="Facebook Page"><i className="fa-brands fa-facebook-f"></i></a>
-              <a href="https://www.instagram.com/hampersnest" target="_blank" rel="noopener noreferrer" className="social-circle" aria-label="Instagram Page"><i className="fa-brands fa-instagram"></i></a>
-              <a href="https://youtube.com/@hampersnestgifts?si=tHfy4HNnaphp1YBE" target="_blank" rel="noopener noreferrer" className="social-circle" aria-label="YouTube Channel"><i className="fa-brands fa-youtube"></i></a>
+              {settings?.facebookUrl && <a href={settings.facebookUrl} target="_blank" rel="noopener noreferrer" className="social-circle" aria-label="Facebook Page"><i className="fa-brands fa-facebook-f"></i></a>}
+              {settings?.instagramUrl && <a href={settings.instagramUrl} target="_blank" rel="noopener noreferrer" className="social-circle" aria-label="Instagram Page"><i className="fa-brands fa-instagram"></i></a>}
+              {settings?.youtubeUrl && <a href={settings.youtubeUrl} target="_blank" rel="noopener noreferrer" className="social-circle" aria-label="YouTube Channel"><i className="fa-brands fa-youtube"></i></a>}
+              {settings?.linkedinUrl && <a href={settings.linkedinUrl} target="_blank" rel="noopener noreferrer" className="social-circle" aria-label="LinkedIn"><i className="fa-brands fa-linkedin"></i></a>}
+              {settings?.pinterestUrl && <a href={settings.pinterestUrl} target="_blank" rel="noopener noreferrer" className="social-circle" aria-label="Pinterest"><i className="fa-brands fa-pinterest"></i></a>}
+              {settings?.twitterUrl && <a href={settings.twitterUrl} target="_blank" rel="noopener noreferrer" className="social-circle" aria-label="Twitter"><i className="fa-brands fa-x-twitter"></i></a>}
             </div>
           </div>
 

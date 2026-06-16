@@ -29,7 +29,7 @@ const testimonials = [
 ];
 
 export default function Home() {
-  const { products, addToCart, setQuoteModalOpen } = useCart();
+  const { products, addToCart, setQuoteModalOpen, settings } = useCart();
   const { formatPrice } = useCurrency();
   const navigate = useNavigate();
   const [activeSlide, setActiveSlide] = useState(0);
@@ -136,9 +136,13 @@ export default function Home() {
       "closes": "21:00"
     },
     "sameAs": [
-      "https://facebook.com/hampersnest",
-      "https://instagram.com/hampersnest"
-    ]
+      settings?.facebookUrl,
+      settings?.instagramUrl,
+      settings?.youtubeUrl,
+      settings?.linkedinUrl,
+      settings?.pinterestUrl,
+      settings?.twitterUrl
+    ].filter(Boolean)
   };
 
   return (

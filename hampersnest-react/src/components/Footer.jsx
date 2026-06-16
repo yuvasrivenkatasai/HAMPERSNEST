@@ -1,7 +1,9 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { useCart } from '../context/CartContext';
 
 export default function Footer() {
+  const { settings } = useCart();
   const handleWhatsappDirect = (e) => {
     e.preventDefault();
     const WHATSAPP_NUMBER = "917989202194";
@@ -74,15 +76,36 @@ export default function Footer() {
         </div>
         <p>&copy; 2026 Hampers Nest. All Rights Reserved. Crafted with love for Hyderabad's premium celebrations.</p>
         <div className="footer-socials">
-          <a href="https://www.facebook.com/share/1Cz8aEeJwo/?mibextid=wwXIfr" target="_blank" rel="noopener noreferrer" aria-label="Facebook">
-            <i className="fa-brands fa-facebook-f"></i>
-          </a>
-          <a href="https://www.instagram.com/hampersnest" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
-            <i className="fa-brands fa-instagram"></i>
-          </a>
-          <a href="https://youtube.com/@hampersnestgifts?si=tHfy4HNnaphp1YBE" target="_blank" rel="noopener noreferrer" aria-label="YouTube">
-            <i className="fa-brands fa-youtube"></i>
-          </a>
+          {settings?.facebookUrl && (
+            <a href={settings.facebookUrl} target="_blank" rel="noopener noreferrer" aria-label="Facebook">
+              <i className="fa-brands fa-facebook-f"></i>
+            </a>
+          )}
+          {settings?.instagramUrl && (
+            <a href={settings.instagramUrl} target="_blank" rel="noopener noreferrer" aria-label="Instagram">
+              <i className="fa-brands fa-instagram"></i>
+            </a>
+          )}
+          {settings?.youtubeUrl && (
+            <a href={settings.youtubeUrl} target="_blank" rel="noopener noreferrer" aria-label="YouTube">
+              <i className="fa-brands fa-youtube"></i>
+            </a>
+          )}
+          {settings?.linkedinUrl && (
+            <a href={settings.linkedinUrl} target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
+              <i className="fa-brands fa-linkedin"></i>
+            </a>
+          )}
+          {settings?.pinterestUrl && (
+            <a href={settings.pinterestUrl} target="_blank" rel="noopener noreferrer" aria-label="Pinterest">
+              <i className="fa-brands fa-pinterest"></i>
+            </a>
+          )}
+          {settings?.twitterUrl && (
+            <a href={settings.twitterUrl} target="_blank" rel="noopener noreferrer" aria-label="Twitter">
+              <i className="fa-brands fa-x-twitter"></i>
+            </a>
+          )}
           <a href="#" onClick={handleWhatsappDirect} aria-label="WhatsApp direct link">
             <i className="fa-brands fa-whatsapp"></i>
           </a>

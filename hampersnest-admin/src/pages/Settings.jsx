@@ -260,6 +260,37 @@ export default function Settings() {
                 />
               </div>
 
+              <h4 style={{ color: 'var(--color-purple)', borderBottom: '1px solid var(--color-beige)', paddingBottom: '8px', marginBottom: '15px', marginTop: '20px' }}>
+                <i className="fa-solid fa-hashtag"></i> Social Media Links
+              </h4>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+                <div className="form-group">
+                  <label className="form-label"><i className="fa-brands fa-instagram"></i> Instagram</label>
+                  <input type="url" name="instagramUrl" className="form-input" value={settingsData.instagramUrl || ''} onChange={handleSettingsChange} placeholder="https://instagram.com/..." />
+                </div>
+                <div className="form-group">
+                  <label className="form-label"><i className="fa-brands fa-youtube"></i> YouTube</label>
+                  <input type="url" name="youtubeUrl" className="form-input" value={settingsData.youtubeUrl || ''} onChange={handleSettingsChange} placeholder="https://youtube.com/..." />
+                </div>
+                <div className="form-group">
+                  <label className="form-label"><i className="fa-brands fa-facebook"></i> Facebook</label>
+                  <input type="url" name="facebookUrl" className="form-input" value={settingsData.facebookUrl || ''} onChange={handleSettingsChange} placeholder="https://facebook.com/..." />
+                </div>
+                <div className="form-group">
+                  <label className="form-label"><i className="fa-brands fa-linkedin"></i> LinkedIn</label>
+                  <input type="url" name="linkedinUrl" className="form-input" value={settingsData.linkedinUrl || ''} onChange={handleSettingsChange} placeholder="https://linkedin.com/..." />
+                </div>
+                <div className="form-group">
+                  <label className="form-label"><i className="fa-brands fa-pinterest"></i> Pinterest</label>
+                  <input type="url" name="pinterestUrl" className="form-input" value={settingsData.pinterestUrl || ''} onChange={handleSettingsChange} placeholder="https://pinterest.com/..." />
+                </div>
+                <div className="form-group">
+                  <label className="form-label"><i className="fa-brands fa-x-twitter"></i> Twitter / X</label>
+                  <input type="url" name="twitterUrl" className="form-input" value={settingsData.twitterUrl || ''} onChange={handleSettingsChange} placeholder="https://twitter.com/..." />
+                </div>
+              </div>
+
               <button type="submit" className="btn-admin mt-2">
                 Save Settings
               </button>
