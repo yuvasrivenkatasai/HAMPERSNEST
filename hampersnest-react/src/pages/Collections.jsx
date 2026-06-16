@@ -7,7 +7,7 @@ import SEO from '../components/SEO';
 export default function Collections() {
   const [searchParams, setSearchParams] = useSearchParams();
   const queryCategory = searchParams.get('category');
-  const { products, addToCart, setSelectedProductForModal, settings } = useCart();
+  const { products, addToCart, settings } = useCart();
   const navigate = useNavigate();
 
   const [activeCategory, setActiveCategory] = useState('All');

@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useCurrency } from '../context/CurrencyContext';
 import ImageGallery from './ImageGallery';
 
 export default function ProductCard({ product }) {
-  const { addToCart, toggleWishlist, isInWishlist, setSelectedProductForModal } = useCart();
+  const { addToCart, toggleWishlist, isInWishlist } = useCart();
   const { formatPrice } = useCurrency();
+  const navigate = useNavigate();
   const isWishlisted = isInWishlist(product.id);
   const [galleryOpen, setGalleryOpen] = useState(false);
 
@@ -32,7 +34,8 @@ export default function ProductCard({ product }) {
 
   const handleViewDetails = (e) => {
     e.preventDefault();
-    setSelectedProductForModal(product);
+    e.stopPropagation();
+    navigate(`/product/${product.id}`);
   };
 
   const handleImageClick = (e) => {

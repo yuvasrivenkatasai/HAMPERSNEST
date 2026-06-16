@@ -7,7 +7,6 @@ import Footer from './components/Footer';
 import StudioMap from './components/StudioMap';
 import FollowJourney from './components/FollowJourney';
 import CartDrawer from './components/CartDrawer';
-import ProductModal from './components/ProductModal';
 import FloatingButtons from './components/FloatingButtons';
 import QuoteModal from './components/QuoteModal';
 import ScrollToTop from './components/ScrollToTop';
@@ -52,9 +51,6 @@ function AppInner() {
 
       {/* Slide-over Shopping Cart Drawer */}
       <CartDrawer />
-
-      {/* Product Details Customizer Modal */}
-      <ProductModal />
 
       {/* Lead Capture Quote Modal */}
       <QuoteModal open={quoteModalOpen} onClose={() => setQuoteModalOpen(false)} />
