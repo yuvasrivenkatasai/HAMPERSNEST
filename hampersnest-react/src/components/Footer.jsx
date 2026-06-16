@@ -85,11 +85,14 @@ export default function Footer() {
         </div>
         <p>&copy; 2026 Hampers Nest. All Rights Reserved. Crafted with love for Hyderabad's premium celebrations.</p>
         <div className="footer-socials">
-          <a href="https://facebook.com" target="_blank" rel="noopener noreferrer">
+          <a href="https://www.facebook.com/share/1Cz8aEeJwo/?mibextid=wwXIfr" target="_blank" rel="noopener noreferrer" aria-label="Facebook">
             <i className="fa-brands fa-facebook-f"></i>
           </a>
-          <a href="https://instagram.com/hampersnest" target="_blank" rel="noopener noreferrer">
+          <a href="https://www.instagram.com/hampersnest" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
             <i className="fa-brands fa-instagram"></i>
+          </a>
+          <a href="https://youtube.com/@hampersnestgifts?si=tHfy4HNnaphp1YBE" target="_blank" rel="noopener noreferrer" aria-label="YouTube">
+            <i className="fa-brands fa-youtube"></i>
           </a>
           <a href="#" onClick={handleWhatsappDirect} aria-label="WhatsApp direct link">
             <i className="fa-brands fa-whatsapp"></i>
