@@ -7,7 +7,7 @@ import { API_BASE } from '../config';
 import SEO from '../components/SEO';
 import ProductCard from '../components/ProductCard';
 
-const testimonials = [
+const DEFAULT_TESTIMONIALS = [
   {
     rating: 5,
     quote: "Hampers Nest curated the return gifts for my daughter's wedding in Hyderabad. The brass bowls were gorgeous, and our guests absolutely loved the customized packaging. Highly professional!",
@@ -33,6 +33,7 @@ export default function Home() {
   const { formatPrice } = useCurrency();
   const navigate = useNavigate();
   const [activeSlide, setActiveSlide] = useState(0);
+  const [testimonials, setTestimonials] = useState(DEFAULT_TESTIMONIALS);
   const [heroBanner, setHeroBanner] = useState({
     mainImage: null,
     floatingImageTop: null,
@@ -58,6 +59,24 @@ export default function Home() {
     fetchHeroBanner();
   }, []);
 
+  // Fetch Testimonials Configuration
+  useEffect(() => {
+    const fetchTestimonials = async () => {
+      try {
+        const response = await fetch(`${API_BASE}/api/testimonials`);
+        if (response.ok) {
+          const data = await response.json();
+          if (Array.isArray(data) && data.length > 0) {
+            setTestimonials(data);
+          }
+        }
+      } catch (err) {
+        console.warn('Testimonials fetch failed, falling back to local defaults', err);
+      }
+    };
+    fetchTestimonials();
+  }, []);
+
   // Get first 6 featured products dynamically from context
   const featuredProducts = (products || []).filter((p) => p.isFeatured).slice(0, 6);
 
@@ -67,7 +86,7 @@ export default function Home() {
       setActiveSlide((prev) => (prev + 1) % testimonials.length);
     }, 5000);
     return () => clearInterval(interval);
-  }, []);
+  }, [testimonials.length]);
 
   // IntersectionObserver for scroll animations
   useEffect(() => {
@@ -215,7 +234,7 @@ export default function Home() {
               <div key={product.id} className="shop-product-card">
                 <div className="shop-card-img">
                   <img
-                    src={product.images?.[0] || product.image}
+                    src={product.image || product.images?.[0] || '/assets/hero_banner.png'}
                     alt={product.name}
                   />
                 </div>

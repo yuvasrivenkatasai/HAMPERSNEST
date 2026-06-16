@@ -452,6 +452,38 @@ export const HeroBanner = sequelize.define('HeroBanner', {
   timestamps: true
 });
 
+// 10. Testimonial Model
+export const Testimonial = sequelize.define('Testimonial', {
+  id: {
+    type: DataTypes.INTEGER,
+    autoIncrement: true,
+    primaryKey: true
+  },
+  name: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
+  quote: {
+    type: DataTypes.TEXT,
+    allowNull: false
+  },
+  rating: {
+    type: DataTypes.INTEGER,
+    defaultValue: 5
+  },
+  event: {
+    type: DataTypes.STRING,
+    defaultValue: ''
+  },
+  isActive: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: true
+  }
+}, {
+  tableName: 'testimonials',
+  timestamps: true
+});
+
 // Associations
 Category.hasMany(Product, { foreignKey: 'category', sourceKey: 'id', as: 'products' });
 Product.belongsTo(Category, { foreignKey: 'category', targetKey: 'id', as: 'categoryDetails' });
