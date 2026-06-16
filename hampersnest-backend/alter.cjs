@@ -1,11 +1,36 @@
+require('dotenv').config();
 const { Sequelize } = require('sequelize');
+
+const dbUser = process.env.DB_USER || 'system';
+const dbPassword = process.env.DB_PASSWORD || 'admin123';
+const dbHost = process.env.DB_HOST || 'localhost';
+const dbPort = process.env.DB_PORT || 1521;
+const dbService = process.env.DB_SERVICE_NAME || 'XEPDB1';
+const dbWalletPath = process.env.DB_WALLET_PATH;
+const dbWalletPassword = process.env.DB_WALLET_PASSWORD;
+
+const dialectOptions = {};
+
+if (dbWalletPath) {
+  dialectOptions.connectString = dbService;
+  dialectOptions.configDir = dbWalletPath;
+  dialectOptions.walletLocation = dbWalletPath;
+  if (dbWalletPassword) {
+    dialectOptions.walletPassword = dbWalletPassword;
+  }
+} else {
+  if (dbService.trim().startsWith('(')) {
+    dialectOptions.connectString = dbService;
+  } else {
+    dialectOptions.connectString = `${dbHost}:${dbPort}/${dbService}`;
+  }
+}
+
 const sequelize = new Sequelize({
   dialect: 'oracle',
-  username: 'system',
-  password: 'sai9581',
-  dialectOptions: {
-    connectString: 'localhost:1521/XEPDB1'
-  },
+  username: dbUser,
+  password: dbPassword,
+  dialectOptions,
   logging: false
 });
 
@@ -39,7 +64,7 @@ const sequelize = new Sequelize({
         }
       }
     }
-  } catch(e) {
+  } catch (e) {
     console.error(e);
   }
   process.exit(0);
