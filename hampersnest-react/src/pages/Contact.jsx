@@ -140,9 +140,9 @@ export default function Contact() {
         <div className="contact-grid">
           {/* Left Column: Info & Map Placeholder */}
           <div className="contact-info reveal">
-            <span className="section-subtitle" style={{ textAlign: 'left', marginBottom: '0.8rem' }}>Get In Touch</span>
-            <h2 className="contact-info-title" style={{ fontSize: '2rem' }}>Plan Your Return Gifts</h2>
-            <p className="contact-info-desc" style={{ fontSize: '0.9rem' }}>
+            <span className="section-subtitle contact-info-subtitle">Get In Touch</span>
+            <h2 className="contact-info-title">Plan Your Return Gifts</h2>
+            <p className="contact-info-desc">
               Drop us your custom request details, and our Hyderabad team will get back to you with custom catalog designs,
               pricing options, and shipping estimates within a few hours.
             </p>
@@ -227,8 +227,8 @@ export default function Contact() {
 
           {/* Right Column: Contact Form */}
           <div className="contact-form-box reveal" style={{ transitionDelay: '0.2s' }}>
-            <h3 style={{ fontSize: '1.8rem', marginBottom: '0.5rem', textAlign: 'center', color: 'var(--color-purple)' }}>Request Details Quote</h3>
-            <p style={{ fontSize: '0.8rem', color: '#666', textAlign: 'center', marginBottom: '1.5rem' }}>
+            <h3 className="contact-form-title">Request Details Quote</h3>
+            <p className="contact-form-subtitle">
               Fill in your celebration size to receive custom catalogs
             </p>
             
@@ -261,7 +261,7 @@ export default function Contact() {
                 />
               </div>
 
-              <div className="form-row" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+              <div className="form-row">
                 <div className="form-group">
                   <label className="form-label" htmlFor="f-event">Celebration *</label>
                   <select

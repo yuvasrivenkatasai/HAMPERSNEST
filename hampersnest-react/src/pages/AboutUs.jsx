@@ -123,7 +123,7 @@ export default function AboutUs() {
           <span className="section-subtitle">Core Philosophy</span>
           <h2 className="section-title">The Pillars of {settings?.storeName || 'Hampers Nest'}</h2>
           
-          <div className="collections-grid reveal" style={{ marginTop: '2rem' }}>
+          <div className="pillars-grid reveal" style={{ marginTop: '2rem' }}>
             {visionPillars.map((pillar, idx) => (
               <div
                 key={idx}

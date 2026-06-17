@@ -148,7 +148,15 @@ export default function QuoteModal({ open, onClose }) {
 
         {/* Header */}
         <div className="quote-modal-header">
-          <div className="quote-modal-icon">🎁</div>
+          <div className="quote-modal-icon">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--color-gold)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ margin: '0 auto' }}>
+              <polyline points="20 12 20 22 4 22 4 12" fill="rgba(200, 169, 107, 0.15)" />
+              <rect x="2" y="7" width="20" height="5" rx="1" fill="rgba(200, 169, 107, 0.25)" />
+              <line x1="12" y1="22" x2="12" y2="7" />
+              <path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z" />
+              <path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z" />
+            </svg>
+          </div>
           <h2 id="quote-modal-title" className="quote-modal-title">Get a Free Quote for Your Event</h2>
           <p className="quote-modal-subtitle">
             Tell us about your celebration and we'll curate the perfect hamper solution based on your budget and requirements.
