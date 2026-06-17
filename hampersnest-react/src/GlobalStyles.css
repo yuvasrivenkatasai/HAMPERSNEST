@@ -1755,6 +1755,9 @@ header.scrolled {
   font-weight: 500;
   border: 1px solid rgba(74, 29, 95, 0.05);
   transition: var(--transition-fast);
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-block;
 }
 
 .bulk-tag:hover {

@@ -32,7 +32,17 @@ export default function Settings() {
     studioHoursMonSat: 'Monday - Saturday: 10:00 AM - 7:00 PM',
     studioHoursSun: 'Sunday: Closed (Available for emergency wedding deliveries)',
     studioWalkInMsg: 'Walk-ins by prior appointment only.',
-    ownerContactNumber: '+91 79892 02194'
+    ownerContactNumber: '+91 79892 02194',
+    heroTitle: 'Premium Return Gifts & Customized Hampers',
+    heroSubtitle: 'Wedding • Housewarming • Baby Shower • Corporate Gifting',
+    heroDescription: 'Luxury gifting solutions crafted for every celebration.',
+    heroButtonPrimary: 'Explore Collections',
+    heroButtonSecondary: 'WhatsApp Consultation',
+    aboutLabel: 'ABOUT HAMPERS NEST',
+    aboutTitle: 'Thoughtfully Curated Luxury Gifts',
+    aboutDescription: "We specialize in curating bespoke return gifts and premium hampers for all your special occasions. From exquisite brass and silver items to personalized chocolates and eco-friendly packaging, every hamper is crafted with love and attention to detail.\n\nWhether it's a grand wedding or an intimate baby shower, Hampers Nest brings a touch of elegance to your celebrations, ensuring your guests leave with a memorable token of appreciation.",
+    aboutTags: JSON.stringify(['Wedding Curation', 'Baby Showers', 'Housewarmings', 'Corporate Gifting']),
+    aboutButtonText: 'READ OUR STORY'
   });
   const [settingsLoading, setSettingsLoading] = useState(true);
   const [settingsMessage, setSettingsMessage] = useState(null);
@@ -131,6 +141,57 @@ export default function Settings() {
     }
   };
 
+  const [contentMessage, setContentMessage] = useState(null);
+
+  const handleContentSubmit = async (e) => {
+    e.preventDefault();
+    setContentMessage(null);
+    try {
+      await apiRequest('/api/settings', {
+        method: 'PUT',
+        body: settingsData
+      });
+      setContentMessage('Content updated successfully');
+      setTimeout(() => setContentMessage(null), 3000);
+    } catch (err) {
+      alert(err.message || 'Failed to save content settings');
+    }
+  };
+
+  const handleAddTag = () => {
+    try {
+      const tags = JSON.parse(settingsData.aboutTags || '[]');
+      tags.push('New Tag');
+      setSettingsData(prev => ({ ...prev, aboutTags: JSON.stringify(tags) }));
+    } catch(e) {
+      setSettingsData(prev => ({ ...prev, aboutTags: JSON.stringify(['New Tag']) }));
+    }
+  };
+
+  const handleRemoveTag = (index) => {
+    try {
+      const tags = JSON.parse(settingsData.aboutTags || '[]');
+      tags.splice(index, 1);
+      setSettingsData(prev => ({ ...prev, aboutTags: JSON.stringify(tags) }));
+    } catch(e) {}
+  };
+
+  const handleTagChange = (index, value) => {
+    try {
+      const tags = JSON.parse(settingsData.aboutTags || '[]');
+      tags[index] = value;
+      setSettingsData(prev => ({ ...prev, aboutTags: JSON.stringify(tags) }));
+    } catch(e) {}
+  };
+
+  const getTags = () => {
+    try {
+      return JSON.parse(settingsData.aboutTags || '[]');
+    } catch(e) {
+      return [];
+    }
+  };
+
   return (
     <div>
       <div className="flex-between mb-4">
@@ -141,8 +202,9 @@ export default function Settings() {
       </div>
 
       <div className="dashboard-grid">
-        {/* Global Settings Panel */}
-        <div className="dashboard-panel">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+          {/* Global Settings Panel */}
+          <div className="dashboard-panel" style={{ margin: 0 }}>
           <div className="panel-header">
             <h3><i className="fa-solid fa-globe color-gold"></i> Global Store Settings</h3>
           </div>
@@ -390,13 +452,98 @@ export default function Settings() {
               </div>
 
               <button type="submit" className="btn-admin mt-2">
-                Save Settings
+                Save Store Settings
               </button>
             </form>
           )}
+          </div>
+
+          {/* Content Management Panel */}
+          <div className="dashboard-panel" style={{ margin: 0 }}>
+            <div className="panel-header">
+              <h3><i className="fa-solid fa-pen-to-square color-gold"></i> Content Management</h3>
+            </div>
+
+            {settingsLoading ? (
+              <div style={{ textAlign: 'center', padding: '2rem' }}>
+                <i className="fa-solid fa-spinner fa-spin" style={{ color: 'var(--color-gold)', fontSize: '1.5rem' }}></i>
+              </div>
+            ) : (
+              <form onSubmit={handleContentSubmit}>
+                {contentMessage && <div style={{ background: 'rgba(25, 135, 84, 0.1)', color: 'var(--color-delivered)', padding: '10px', borderRadius: '6px', marginBottom: '15px' }}>{contentMessage}</div>}
+
+                <h4 style={{ color: 'var(--color-purple-dark)', borderBottom: '1px solid #ddd', paddingBottom: '8px', marginBottom: '15px' }}>Hero Section</h4>
+                <div className="form-group">
+                  <label className="form-label">Hero Main Heading *</label>
+                  <input type="text" name="heroTitle" className="form-input" required value={settingsData.heroTitle || ''} onChange={handleSettingsChange} />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Hero Subtitle</label>
+                  <input type="text" name="heroSubtitle" className="form-input" value={settingsData.heroSubtitle || ''} onChange={handleSettingsChange} />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Hero Description *</label>
+                  <textarea name="heroDescription" className="form-input" required rows="3" value={settingsData.heroDescription || ''} onChange={handleSettingsChange}></textarea>
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+                  <div className="form-group">
+                    <label className="form-label">Explore Collections Button Text *</label>
+                    <input type="text" name="heroButtonPrimary" className="form-input" required value={settingsData.heroButtonPrimary || ''} onChange={handleSettingsChange} />
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">WhatsApp Button Text</label>
+                    <input type="text" name="heroButtonSecondary" className="form-input" value={settingsData.heroButtonSecondary || ''} onChange={handleSettingsChange} />
+                  </div>
+                </div>
+
+                <h4 style={{ color: 'var(--color-purple-dark)', borderBottom: '1px solid #ddd', paddingBottom: '8px', margin: '20px 0 15px 0' }}>About Section</h4>
+                <div className="form-group">
+                  <label className="form-label">Small Label</label>
+                  <input type="text" name="aboutLabel" className="form-input" value={settingsData.aboutLabel || ''} onChange={handleSettingsChange} />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">About Heading *</label>
+                  <input type="text" name="aboutTitle" className="form-input" required value={settingsData.aboutTitle || ''} onChange={handleSettingsChange} />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">About Description *</label>
+                  <textarea name="aboutDescription" className="form-input" required rows="5" value={settingsData.aboutDescription || ''} onChange={handleSettingsChange}></textarea>
+                </div>
+                
+                <div className="form-group">
+                  <label className="form-label">Service Tags</label>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    {getTags().map((tag, idx) => (
+                      <div key={idx} style={{ display: 'flex', gap: '10px' }}>
+                        <input 
+                          type="text" 
+                          className="form-input" 
+                          value={tag} 
+                          onChange={(e) => handleTagChange(idx, e.target.value)} 
+                          required
+                        />
+                        <button type="button" onClick={() => handleRemoveTag(idx)} className="btn-admin-secondary" style={{ background: '#fee2e2', color: '#ef4444', border: '1px solid #fca5a5' }}>
+                          <i className="fa-solid fa-trash"></i>
+                        </button>
+                      </div>
+                    ))}
+                    <button type="button" onClick={handleAddTag} className="btn-admin-secondary" style={{ width: 'fit-content', marginTop: '5px' }}>
+                      <i className="fa-solid fa-plus"></i> Add Tag
+                    </button>
+                  </div>
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">About Button Text *</label>
+                  <input type="text" name="aboutButtonText" className="form-input" required value={settingsData.aboutButtonText || ''} onChange={handleSettingsChange} />
+                </div>
+
+                <button type="submit" className="btn-admin mt-2">Save Content</button>
+              </form>
+            )}
+          </div>
         </div>
 
-        {/* Right Column */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
           {/* Security Settings Panel */}
           <div className="dashboard-panel" style={{ margin: 0 }}>

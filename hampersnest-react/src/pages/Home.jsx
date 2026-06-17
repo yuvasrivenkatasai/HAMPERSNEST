@@ -186,24 +186,24 @@ export default function Home() {
           <div className="hero-left">
             <div className="hero-fade" style={{ '--delay': '0.2s' }}>
               <h1 className="hero-headline">
-                Premium Return Gifts & Customized Hampers
+                {settings?.heroTitle || 'Premium Return Gifts & Customized Hampers'}
               </h1>
             </div>
 
             <div className="hero-fade" style={{ '--delay': '0.4s' }}>
               <p className="hero-desc">
-                Wedding • Housewarming • Baby Shower • Corporate Gifting
+                {settings?.heroSubtitle || 'Wedding • Housewarming • Baby Shower • Corporate Gifting'}
                 <br />
-                <span style={{ fontSize: '0.9em', opacity: 0.9, display: 'inline-block', marginTop: '8px' }}>Luxury gifting solutions crafted for every celebration.</span>
+                <span style={{ fontSize: '0.9em', opacity: 0.9, display: 'inline-block', marginTop: '8px', whiteSpace: 'pre-line' }}>{settings?.heroDescription || 'Luxury gifting solutions crafted for every celebration.'}</span>
               </p>
             </div>
 
             <div className="hero-cta hero-fade" style={{ '--delay': '0.6s' }}>
               <Link to="/collections" className="btn-hero btn-hero-primary hero-shimmer-btn">
-                Explore Collections
+                {settings?.heroButtonPrimary || 'Explore Collections'}
               </Link>
               <a href="#" onClick={openQuoteModal} className="btn-hero btn-hero-secondary">
-                <i className="fa-brands fa-whatsapp"></i> WhatsApp Consultation
+                <i className="fa-brands fa-whatsapp"></i> {settings?.heroButtonSecondary || 'WhatsApp Consultation'}
               </a>
             </div>
           </div>
@@ -302,12 +302,12 @@ export default function Home() {
             and celebrations — crafted at scale without compromising on quality.
           </p>
           <div className="bulk-order-tags">
-            <span className="bulk-tag">Wedding Gifting</span>
-            <span className="bulk-tag">Corporate Events</span>
-            <span className="bulk-tag">Employee Gifts</span>
-            <span className="bulk-tag">Client Hampers</span>
-            <span className="bulk-tag">Festival Gifting</span>
-            <span className="bulk-tag">Custom Branding</span>
+            <Link to="/collections?category=Wedding" className="bulk-tag">Wedding Gifting</Link>
+            <Link to="/collections?category=Corporate Gifting" className="bulk-tag">Corporate Events</Link>
+            <Link to="/collections?category=Employee Gifts" className="bulk-tag">Employee Gifts</Link>
+            <Link to="/collections?category=Client Hampers" className="bulk-tag">Client Hampers</Link>
+            <Link to="/collections?category=Festive Hampers" className="bulk-tag">Festival Gifting</Link>
+            <Link to="/collections?category=Customized Hampers" className="bulk-tag">Custom Branding</Link>
           </div>
           <button
             onClick={openQuoteModal}
@@ -346,30 +346,30 @@ export default function Home() {
           <div className="about-grid">
             <div className="about-left reveal">
               <span className="section-subtitle" style={{ textAlign: 'left', marginBottom: '0.8rem' }}>
-                About Hampers Nest
+                {settings?.aboutLabel || 'ABOUT HAMPERS NEST'}
               </span>
-              <h3>Thoughtfully Curated <br />Luxury Gifts</h3>
-              <p className="about-text" style={{ fontSize: '0.95rem' }}>
-                At HampersNest, we are committed to crafting luxury experiences that make gifting truly special. Our vision is to curate exquisite gift hampers that embody elegance and thoughtfulness, ensuring each product is of the highest quality and beautifully packaged. We aim to exceed expectations, transforming every gift into a memorable moment of joy and celebration. Join us in celebrating life's special occasions with our thoughtfully designed hampers.
+              <h3 style={{ whiteSpace: 'pre-line' }}>{settings?.aboutTitle || 'Thoughtfully Curated Luxury Gifts'}</h3>
+              <p className="about-text" style={{ fontSize: '0.95rem', whiteSpace: 'pre-line' }}>
+                {settings?.aboutDescription || "At HampersNest, we are committed to crafting luxury experiences that make gifting truly special. Our vision is to curate exquisite gift hampers that embody elegance and thoughtfulness, ensuring each product is of the highest quality and beautifully packaged. We aim to exceed expectations, transforming every gift into a memorable moment of joy and celebration. Join us in celebrating life's special occasions with our thoughtfully designed hampers."}
               </p>
 
               <div className="about-services-tags" style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', marginTop: '1.5rem' }}>
-                <div onClick={() => navigate('/collections?category=Wedding')} className="service-tag" style={{ background: 'var(--color-lavender)', padding: '6px 12px', borderRadius: '20px', fontSize: '0.8rem', color: 'var(--color-purple)', fontWeight: 500, cursor: 'pointer' }}>
-                  <i className="fa-solid fa-heart" style={{ marginRight: '6px', color: 'var(--color-gold)' }}></i> Wedding Curation
-                </div>
-                <div onClick={() => navigate('/collections?category=Baby Shower')} className="service-tag" style={{ background: 'var(--color-lavender)', padding: '6px 12px', borderRadius: '20px', fontSize: '0.8rem', color: 'var(--color-purple)', fontWeight: 500, cursor: 'pointer' }}>
-                  <i className="fa-solid fa-child" style={{ marginRight: '6px', color: 'var(--color-gold)' }}></i> Baby Showers
-                </div>
-                <div onClick={() => navigate('/collections?category=Housewarming')} className="service-tag" style={{ background: 'var(--color-lavender)', padding: '6px 12px', borderRadius: '20px', fontSize: '0.8rem', color: 'var(--color-purple)', fontWeight: 500, cursor: 'pointer' }}>
-                  <i className="fa-solid fa-house-chimney" style={{ marginRight: '6px', color: 'var(--color-gold)' }}></i> Housewarmings
-                </div>
-                <div onClick={() => navigate('/collections?category=Corporate')} className="service-tag" style={{ background: 'var(--color-lavender)', padding: '6px 12px', borderRadius: '20px', fontSize: '0.8rem', color: 'var(--color-purple)', fontWeight: 500, cursor: 'pointer' }}>
-                  <i className="fa-solid fa-briefcase" style={{ marginRight: '6px', color: 'var(--color-gold)' }}></i> Corporate Gifting
-                </div>
+                {(()=>{
+                  try {
+                    const tags = JSON.parse(settings?.aboutTags || '["Wedding Curation", "Baby Showers", "Housewarmings", "Corporate Gifting"]');
+                    return tags.map((tag, idx) => (
+                      <div key={idx} onClick={() => navigate(`/collections?category=${tag}`)} className="service-tag" style={{ background: 'var(--color-lavender)', padding: '6px 12px', borderRadius: '20px', fontSize: '0.8rem', color: 'var(--color-purple)', fontWeight: 500, cursor: 'pointer' }}>
+                        <i className="fa-solid fa-gift" style={{ marginRight: '6px', color: 'var(--color-gold)' }}></i> {tag}
+                      </div>
+                    ));
+                  } catch(e) {
+                    return null;
+                  }
+                })()}
               </div>
 
               <Link to="/about" className="btn btn-secondary" style={{ marginTop: '2rem' }}>
-                Read Our Story
+                {settings?.aboutButtonText || 'READ OUR STORY'}
               </Link>
             </div>
 
