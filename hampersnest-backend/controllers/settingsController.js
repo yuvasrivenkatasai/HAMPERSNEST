@@ -1,4 +1,5 @@
 import { Setting, Category } from '../database/models.js';
+import { defaultPolicies } from '../utils/defaultPolicies.js';
 
 export const DEFAULT_CATEGORIES = [
   { id: '0e2b44c9-4ac3-4c86-a981-1519577d1887', label: 'Wedding' },
@@ -41,6 +42,24 @@ export const getSettings = async (req, res) => {
     settingsList.forEach(s => {
       settingsObj[s.key] = s.value;
     });
+
+    // Auto-initialize default policies if they don't exist or are empty
+    if (!settingsObj.customPolicies || !Array.isArray(settingsObj.customPolicies) || settingsObj.customPolicies.length === 0) {
+      settingsObj.customPolicies = defaultPolicies;
+      await Setting.upsert({ key: 'customPolicies', value: defaultPolicies });
+    } else {
+      // Ensure all core policies are present
+      let updated = false;
+      for (const defPol of defaultPolicies) {
+        if (!settingsObj.customPolicies.find(p => p.id === defPol.id)) {
+          settingsObj.customPolicies.push(defPol);
+          updated = true;
+        }
+      }
+      if (updated) {
+        await Setting.upsert({ key: 'customPolicies', value: settingsObj.customPolicies });
+      }
+    }
 
     // Fetch categories from the Categories table
     const categoriesDb = await Category.findAll({ order: [['createdAt', 'ASC']] });
