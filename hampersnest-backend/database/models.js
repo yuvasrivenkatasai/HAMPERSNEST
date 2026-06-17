@@ -180,13 +180,32 @@ export const Order = sequelize.define('Order', {
     unique: true
   },
   customer: {
-    type: DataTypes.JSON, // Contains Name, Phone, Email, Delivery Address, City
-    allowNull: false
+    type: DataTypes.BLOB, // Contains Name, Phone, Email, Delivery Address, City
+    allowNull: false,
+    get() {
+      const val = this.getDataValue('customer');
+      if (!val) return {};
+      try {
+        return typeof val === 'string' ? JSON.parse(val) : JSON.parse(val.toString('utf8'));
+      } catch(e) { return {}; }
+    },
+    set(val) {
+      this.setDataValue('customer', Buffer.from(JSON.stringify(val || {})));
+    }
   },
   items: {
-    type: DataTypes.JSON,
+    type: DataTypes.BLOB,
     allowNull: false,
-    defaultValue: []
+    get() {
+      const val = this.getDataValue('items');
+      if (!val) return [];
+      try {
+        return typeof val === 'string' ? JSON.parse(val) : JSON.parse(val.toString('utf8'));
+      } catch(e) { return []; }
+    },
+    set(val) {
+      this.setDataValue('items', Buffer.from(JSON.stringify(val || [])));
+    }
   },
   totalAmount: {
     type: DataTypes.INTEGER,
@@ -212,12 +231,37 @@ export const Order = sequelize.define('Order', {
     defaultValue: ''
   },
   history: {
-    type: DataTypes.JSON,
-    defaultValue: []
+    type: DataTypes.TEXT,
+    get() {
+      const val = this.getDataValue('history');
+      if (!val) return [];
+      try {
+        return typeof val === 'string' ? JSON.parse(val) : val;
+      } catch(e) { return []; }
+    },
+    set(val) {
+      this.setDataValue('history', typeof val === 'string' ? val : JSON.stringify(val || []));
+    }
   },
   status: {
     type: DataTypes.STRING,
     defaultValue: 'Pending' // Pending, Confirmed, Processing, Packed, Shipped, Delivered, Cancelled
+  },
+  source: {
+    type: DataTypes.STRING,
+    defaultValue: 'Website' // Website, WhatsApp, Instagram, Facebook, Walk-In Customer, Phone Call, Exhibition/Event, Referral, Other
+  },
+  paymentStatus: {
+    type: DataTypes.STRING,
+    defaultValue: 'Pending' // Pending, Partially Paid, Paid
+  },
+  paymentMethod: {
+    type: DataTypes.STRING,
+    defaultValue: ''
+  },
+  advancePaid: {
+    type: DataTypes.INTEGER,
+    defaultValue: 0
   }
 }, {
   tableName: 'orders',

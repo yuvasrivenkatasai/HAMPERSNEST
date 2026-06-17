@@ -29,10 +29,24 @@ export const getDashboardStats = async (req, res) => {
     const ordersByMonth = {};
     const inquiryTrends = {};
 
+    let onlineOrders = 0;
+    let offlineOrders = 0;
+    let pendingPayments = 0;
+
     // Grouping orders by status and month
     orders.forEach(order => {
       if (statusCounts[order.status] !== undefined) {
         statusCounts[order.status]++;
+      }
+      
+      if (order.source && order.source !== 'Website') {
+        offlineOrders++;
+      } else {
+        onlineOrders++;
+      }
+
+      if (order.paymentStatus === 'Pending' || order.paymentStatus === 'Partially Paid') {
+        pendingPayments += (order.totalAmount - (order.advancePaid || 0));
       }
       
       const month = new Date(order.createdAt).toLocaleString('default', { month: 'short', year: 'numeric' });
@@ -131,6 +145,9 @@ export const getDashboardStats = async (req, res) => {
       stats: {
         totalRevenue,
         totalOrders: orders.length,
+        onlineOrders,
+        offlineOrders,
+        pendingPayments,
         pendingOrders: statusCounts['Pending'],
         completedOrders: statusCounts['Delivered'],
         totalInquiries,

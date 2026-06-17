@@ -57,6 +57,7 @@ export default function ProductCard({ product }) {
         <img
           src={product.image || (product.images && product.images[0]) || '/assets/hero_banner.png'}
           alt={product.name}
+          loading="lazy"
         />
         {/* Inventory Badge Overlay */}
         {product.stockQuantity === 0 ? (

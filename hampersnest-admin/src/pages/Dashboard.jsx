@@ -172,6 +172,9 @@ export default function Dashboard() {
           <div className="stat-info">
             <h3>Total Orders</h3>
             <div className="stat-value">{stats.totalOrders}</div>
+            <div style={{ fontSize: '0.7rem', color: 'var(--color-gray-text)', marginTop: '4px' }}>
+              {stats.onlineOrders || 0} Online | {stats.offlineOrders || 0} Offline
+            </div>
           </div>
           <div className="stat-icon">
             <i className="fa-solid fa-box-archive"></i>
@@ -180,11 +183,11 @@ export default function Dashboard() {
 
         <div className="stat-card" style={{ borderLeftColor: 'var(--color-gold-dark)' }}>
           <div className="stat-info">
-            <h3>Active Products</h3>
-            <div className="stat-value">{stats.activeProducts} / {stats.totalProducts}</div>
+            <h3>Pending Payments</h3>
+            <div className="stat-value" style={{ color: '#E53E3E' }}>₹{(stats.pendingPayments || 0).toLocaleString()}</div>
           </div>
-          <div className="stat-icon" style={{ background: 'rgba(200, 169, 107, 0.1)', color: 'var(--color-gold-dark)' }}>
-            <i className="fa-solid fa-gift"></i>
+          <div className="stat-icon" style={{ background: '#FFE3E3', color: '#E53E3E' }}>
+            <i className="fa-solid fa-file-invoice-dollar"></i>
           </div>
         </div>
 
@@ -218,6 +221,16 @@ export default function Dashboard() {
           </div>
           <div className="stat-icon" style={{ background: 'rgba(25, 135, 84, 0.1)', color: 'var(--color-delivered)' }}>
             <i className="fa-solid fa-check-double"></i>
+          </div>
+        </div>
+
+        <div className="stat-card" style={{ borderLeftColor: 'var(--color-gold-dark)' }}>
+          <div className="stat-info">
+            <h3>Active Products</h3>
+            <div className="stat-value">{stats.activeProducts} / {stats.totalProducts}</div>
+          </div>
+          <div className="stat-icon" style={{ background: 'rgba(200, 169, 107, 0.1)', color: 'var(--color-gold-dark)' }}>
+            <i className="fa-solid fa-gift"></i>
           </div>
         </div>
 

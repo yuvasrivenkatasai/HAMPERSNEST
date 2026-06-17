@@ -1,4 +1,5 @@
 import React from 'react';
+import { HelmetProvider } from 'react-helmet-async';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { CartProvider, useCart } from './context/CartContext';
 import { CurrencyProvider } from './context/CurrencyContext';
@@ -42,18 +43,17 @@ function AppInner() {
           <Route path="/about" element={<AboutUs />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/product/:id" element={<ProductDetail />} />
+          
           {/* Dynamic Policy Routing */}
-          <Route path="/privacy-policy" element={<PolicyPage slug="privacy-policy" />} />
-          <Route path="/shipping-policy" element={<PolicyPage slug="shipping-policy" />} />
-          <Route path="/refund-policy" element={<PolicyPage slug="refund-policy" />} />
-          <Route path="/terms-and-conditions" element={<PolicyPage slug="terms-and-conditions" />} />
-          <Route path="/policy/:id" element={<PolicyPage />} />
+          <Route path="/policies/:slug" element={<PolicyPage />} />
         </Routes>
       </main>
 
-      {/* Map & Footer layout */}
-      <FollowJourney />
+      {/* Visit Our Studio section & Follow Our Journey rendered on all pages */}
       <StudioMap />
+      <FollowJourney />
+
+      {/* Main Footer */}
       <Footer />
 
       {/* Slide-over Shopping Cart Drawer */}
@@ -70,12 +70,14 @@ function AppInner() {
 
 export default function App() {
   return (
-    <CartProvider>
-      <CurrencyProvider>
-        <Router>
-          <AppInner />
-        </Router>
-      </CurrencyProvider>
-    </CartProvider>
+    <HelmetProvider>
+      <CartProvider>
+        <CurrencyProvider>
+          <Router>
+            <AppInner />
+          </Router>
+        </CurrencyProvider>
+      </CartProvider>
+    </HelmetProvider>
   );
 }

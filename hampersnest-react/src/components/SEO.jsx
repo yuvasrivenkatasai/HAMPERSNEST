@@ -1,84 +1,51 @@
-import { useEffect } from 'react';
+import React from 'react';
+import { Helmet } from 'react-helmet-async';
 import { useCart } from '../context/CartContext';
 
 export default function SEO({ title, description, keywords, ogTitle, ogDescription, ogImage, canonicalUrl, schema }) {
   const { settings } = useCart();
-  useEffect(() => {
-    // 1. Update Title
-    if (title) {
-      document.title = title;
-    }
-    
-    // 2. Helper to update/create meta tag
-    const updateMetaTag = (name, content, attribute = 'name') => {
-      if (content === undefined || content === null) return;
-      let element = document.querySelector(`meta[${attribute}="${name}"]`);
-      if (element) {
-        element.setAttribute('content', content);
-      } else {
-        element = document.createElement('meta');
-        element.setAttribute(attribute, name);
-        element.setAttribute('content', content);
-        document.head.appendChild(element);
-      }
-    };
+  const currentUrl = typeof window !== 'undefined' ? window.location.href : '';
+  const siteName = settings?.storeName || 'Hampers Nest';
 
-    // 3. Update Standard SEO Tags
-    updateMetaTag('description', description);
-    updateMetaTag('keywords', keywords);
-    updateMetaTag('robots', 'index, follow');
-    
-    // 4. Update Open Graph (Facebook/Instagram/WhatsApp preview)
-    const currentUrl = window.location.href;
-    updateMetaTag('og:title', ogTitle || title, 'property');
-    updateMetaTag('og:description', ogDescription || description, 'property');
-    
-    const getAbsoluteImageUrl = (img) => {
-      if (!img) return window.location.origin + '/favicon.svg';
-      if (img.startsWith('http')) return img;
-      return window.location.origin + img;
-    };
-    
-    updateMetaTag('og:image', getAbsoluteImageUrl(ogImage), 'property');
-    updateMetaTag('og:url', canonicalUrl || currentUrl, 'property');
-    updateMetaTag('og:type', 'website', 'property');
-    updateMetaTag('og:site_name', settings?.storeName || 'Hampers Nest', 'property');
-    
-    // 5. Update Twitter Cards
-    updateMetaTag('twitter:card', 'summary_large_image');
-    updateMetaTag('twitter:title', ogTitle || title);
-    updateMetaTag('twitter:description', ogDescription || description);
-    updateMetaTag('twitter:image', getAbsoluteImageUrl(ogImage));
-    updateMetaTag('twitter:url', canonicalUrl || currentUrl);
+  const getAbsoluteImageUrl = (img) => {
+    if (!img) return typeof window !== 'undefined' ? window.location.origin + '/favicon.svg' : '';
+    if (img.startsWith('http')) return img;
+    return typeof window !== 'undefined' ? window.location.origin + img : img;
+  };
 
-    // 6. Update Canonical Link
-    const targetCanonical = canonicalUrl || currentUrl;
-    let link = document.querySelector('link[rel="canonical"]');
-    if (link) {
-      link.setAttribute('href', targetCanonical);
-    } else {
-      link = document.createElement('link');
-      link.setAttribute('rel', 'canonical');
-      link.setAttribute('href', targetCanonical);
-      document.head.appendChild(link);
-    }
+  const finalTitle = title ? `${title} | ${siteName}` : siteName;
 
-    // 7. Inject JSON-LD Schema
-    let schemaScript = document.getElementById('seo-jsonld-schema');
-    if (schema) {
-      if (!schemaScript) {
-        schemaScript = document.createElement('script');
-        schemaScript.id = 'seo-jsonld-schema';
-        schemaScript.type = 'application/ld+json';
-        document.head.appendChild(schemaScript);
-      }
-      schemaScript.innerHTML = JSON.stringify(schema);
-    } else {
-      if (schemaScript) {
-        schemaScript.remove();
-      }
-    }
-  }, [title, description, keywords, ogTitle, ogDescription, ogImage, canonicalUrl, schema]);
+  return (
+    <Helmet>
+      {/* Standard Meta */}
+      <title>{finalTitle}</title>
+      <meta name="description" content={description || settings?.announcementBannerText || ''} />
+      {keywords && <meta name="keywords" content={keywords} />}
+      <meta name="robots" content="index, follow" />
 
-  return null;
+      {/* Open Graph / Facebook / Instagram / WhatsApp */}
+      <meta property="og:title" content={ogTitle || title || siteName} />
+      <meta property="og:description" content={ogDescription || description} />
+      <meta property="og:image" content={getAbsoluteImageUrl(ogImage)} />
+      <meta property="og:url" content={canonicalUrl || currentUrl} />
+      <meta property="og:type" content="website" />
+      <meta property="og:site_name" content={siteName} />
+
+      {/* Twitter Cards */}
+      <meta name="twitter:card" content="summary_large_image" />
+      <meta name="twitter:title" content={ogTitle || title || siteName} />
+      <meta name="twitter:description" content={ogDescription || description} />
+      <meta name="twitter:image" content={getAbsoluteImageUrl(ogImage)} />
+
+      {/* Canonical URL */}
+      {(canonicalUrl || currentUrl) && <link rel="canonical" href={canonicalUrl || currentUrl} />}
+
+      {/* JSON-LD Schema Markup */}
+      {schema && (
+        <script type="application/ld+json">
+          {JSON.stringify(schema)}
+        </script>
+      )}
+    </Helmet>
+  );
 }

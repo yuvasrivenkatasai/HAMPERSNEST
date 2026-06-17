@@ -1,7 +1,7 @@
 import { jsPDF } from 'jspdf';
 
 // Helper to load image as base64
-const loadImageAsBase64 = async (url) => {
+const loadImageAsBase64 = async (url, targetAspectRatio) => {
   try {
     // If it's a relative URL, prepend origin
     let targetUrl = url;
@@ -23,10 +23,57 @@ const loadImageAsBase64 = async (url) => {
     const blob = await response.blob();
     
     return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onloadend = () => resolve(reader.result);
-      reader.onerror = reject;
-      reader.readAsDataURL(blob);
+      const img = new Image();
+      const urlCreator = window.URL || window.webkitURL;
+      const imageUrl = urlCreator.createObjectURL(blob);
+      
+      img.onload = () => {
+        if (!targetAspectRatio) {
+          const reader = new FileReader();
+          reader.onloadend = () => {
+            resolve(reader.result);
+            urlCreator.revokeObjectURL(imageUrl);
+          };
+          reader.readAsDataURL(blob);
+          return;
+        }
+
+        // Calculate object-fit: cover with object-position: center
+        const imgRatio = img.width / img.height;
+        let sx = 0, sy = 0, sWidth = img.width, sHeight = img.height;
+
+        if (imgRatio > targetAspectRatio) {
+          // Image is wider than target. Crop left and right.
+          sWidth = img.height * targetAspectRatio;
+          sx = (img.width - sWidth) / 2;
+        } else {
+          // Image is taller than target. Crop top and bottom.
+          sHeight = img.width / targetAspectRatio;
+          sy = (img.height - sHeight) / 2;
+        }
+
+        // Higher resolution canvas for premium PDF quality
+        const canvas = document.createElement('canvas');
+        canvas.width = 800; // high res width
+        canvas.height = 800 / targetAspectRatio;
+        const ctx = canvas.getContext('2d');
+        
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        // Draw the image mimicking object-fit: cover
+        ctx.drawImage(img, sx, sy, sWidth, sHeight, 0, 0, canvas.width, canvas.height);
+        
+        resolve(canvas.toDataURL('image/jpeg', 0.95));
+        urlCreator.revokeObjectURL(imageUrl);
+      };
+      
+      img.onerror = () => {
+        urlCreator.revokeObjectURL(imageUrl);
+        reject(new Error('Image load error'));
+      };
+      
+      img.src = imageUrl;
     });
   } catch (error) {
     console.error('Error loading image:', error);
@@ -134,20 +181,25 @@ export const generateCatalogPdf = async (products, mode = 'download', onProgress
       onProgress(Math.round(((i + 1) / products.length) * 100));
     }
     
+    // Card image box dimensions
+    const destW = cardWidth - 4;
+    const destH = 50;
+    const targetAspectRatio = destW / destH;
+    
     // Load Image
-    const base64Img = await loadImageAsBase64(product.image);
+    const base64Img = await loadImageAsBase64(product.image, targetAspectRatio);
     if (base64Img) {
       try {
         // Image at top of card, height 50mm
-        doc.addImage(base64Img, 'JPEG', x + 2, y + 2, cardWidth - 4, 50, undefined, 'FAST');
+        doc.addImage(base64Img, 'JPEG', x + 2, y + 2, destW, destH, undefined, 'FAST');
       } catch (e) {
         console.warn('Could not draw image', e);
         doc.setFillColor(240, 240, 240);
-        doc.rect(x + 2, y + 2, cardWidth - 4, 50, 'F');
+        doc.rect(x + 2, y + 2, destW, destH, 'F');
       }
     } else {
       doc.setFillColor(240, 240, 240);
-      doc.rect(x + 2, y + 2, cardWidth - 4, 50, 'F');
+      doc.rect(x + 2, y + 2, destW, destH, 'F');
       doc.setTextColor(150, 150, 150);
       doc.setFontSize(10);
       doc.text('Image Not Available', x + cardWidth / 2, y + 25, { align: 'center' });

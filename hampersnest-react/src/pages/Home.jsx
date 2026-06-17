@@ -52,14 +52,14 @@ export default function Home() {
             setHeroBanner(data);
           }
         }
-      } catch (err) {
-        console.warn('Hero banner fetch failed, falling back to local defaults', err);
+      } catch (error) {
+        console.error('Error fetching hero banner:', error);
       }
     };
     fetchHeroBanner();
   }, []);
 
-  // Fetch Testimonials Configuration
+  // Fetch Testimonials
   useEffect(() => {
     const fetchTestimonials = async () => {
       try {
@@ -67,7 +67,8 @@ export default function Home() {
         if (response.ok) {
           const data = await response.json();
           if (Array.isArray(data) && data.length > 0) {
-            setTestimonials(data);
+            // Take only up to 6 published testimonials for a compact view
+            setTestimonials(data.slice(0, 6));
           }
         }
       } catch (err) {
@@ -185,13 +186,15 @@ export default function Home() {
           <div className="hero-left">
             <div className="hero-fade" style={{ '--delay': '0.2s' }}>
               <h1 className="hero-headline">
-                Luxury Gifts That Leave A Lasting Impression
+                Premium Return Gifts & Customized Hampers
               </h1>
             </div>
 
             <div className="hero-fade" style={{ '--delay': '0.4s' }}>
               <p className="hero-desc">
-                Thoughtfully crafted hampers for weddings, celebrations and memorable occasions.
+                Wedding • Housewarming • Baby Shower • Corporate Gifting
+                <br />
+                <span style={{ fontSize: '0.9em', opacity: 0.9, display: 'inline-block', marginTop: '8px' }}>Luxury gifting solutions crafted for every celebration.</span>
               </p>
             </div>
 
@@ -223,6 +226,24 @@ export default function Home() {
         </div>
       </section>
 
+      {/* TRUST SIGNALS */}
+      <section style={{ background: '#fff', borderBottom: '1px solid #eaeaea', padding: '15px 0' }}>
+        <div className="container" style={{ display: 'flex', justifyContent: 'center', gap: '30px', flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: '500', color: 'var(--color-text-dark)', fontSize: '0.95rem' }}>
+            <span style={{ color: 'var(--color-gold)' }}>⭐</span> Customized Gifts
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: '500', color: 'var(--color-text-dark)', fontSize: '0.95rem' }}>
+            <span style={{ color: 'var(--color-gold)' }}>🚚</span> Pan India Delivery
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: '500', color: 'var(--color-text-dark)', fontSize: '0.95rem' }}>
+            <span style={{ color: 'var(--color-gold)' }}>🎁</span> Bulk Orders Available
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: '500', color: 'var(--color-text-dark)', fontSize: '0.95rem' }}>
+            <span style={{ color: 'var(--color-gold)' }}>💬</span> WhatsApp Support
+          </div>
+        </div>
+      </section>
+
       {/* SHOP OUR COLLECTIONS — Dynamic 6 Featured Products */}
       <section className="shop-collections-section" style={{ background: 'var(--color-lavender)' }}>
         <div className="container">
@@ -236,6 +257,7 @@ export default function Home() {
                   <img
                     src={product.image || product.images?.[0] || '/assets/hero_banner.png'}
                     alt={product.name}
+                    loading="lazy"
                   />
                 </div>
                 <div className="shop-card-content">
