@@ -7298,19 +7298,22 @@ footer h4,
 
 /* Collection Page Refinements */
 .collections-grid-4col .collection-card-action-row {
-  align-items: center;
-  gap: 8px;
+  flex-direction: column !important;
+  align-items: stretch !important;
+  gap: 8px !important;
+  width: 100% !important;
 }
 
 .collections-grid-4col .card-link-text {
-  padding: 0 12px;
-  font-size: 11px;
-  letter-spacing: 0.5px;
-  height: 34px;
-  border-radius: 999px;
+  width: 100% !important;
+  height: 36px !important;
+  justify-content: center !important;
+  padding: 0 16px !important;
+  font-size: 12px !important;
+  letter-spacing: 0.5px !important;
+  border-radius: 999px !important;
   display: inline-flex;
   align-items: center;
-  justify-content: center;
 }
 
 .collections-grid-4col .card-link-text i {
@@ -7319,9 +7322,9 @@ footer h4,
 
 @media (max-width: 767px) {
   .collections-grid-4col .collection-card-action-row {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 10px;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 8px !important;
   }
 }
 
@@ -7464,50 +7467,56 @@ footer h4,
 /* ==========================================
    COLLECTION PAGE REFINEMENTS
    ========================================== */
-.collections-grid-4col .collection-card-action-row {
-  justify-content: flex-start;
-  align-items: center;
-  gap: 8px;
+.collections-grid-4col .collection-card-action-row,
+.shop-collections-grid .collection-card-action-row {
+  flex-direction: column !important;
+  align-items: stretch !important;
+  gap: 8px !important;
+  width: 100% !important;
 }
 
-.collections-grid-4col .shop-card-btn {
-  padding: 0 12px;
-  font-size: 11px;
-  letter-spacing: 0.5px;
-  height: 34px;
+.collections-grid-4col .shop-card-btn,
+.shop-collections-grid .shop-card-btn {
+  width: 100% !important;
+  justify-content: center !important;
+  height: 36px !important;
+  padding: 0 16px !important;
+  font-size: 12px !important;
+  letter-spacing: 0.5px !important;
 }
 
-.collections-grid-4col .card-link-text {
-  padding: 0 12px;
-  font-size: 11px;
-  letter-spacing: 0.5px;
-  height: 34px;
-  border-radius: 999px;
+.collections-grid-4col .card-link-text,
+.shop-collections-grid .card-link-text {
+  width: 100% !important;
+  height: 36px !important;
+  justify-content: center !important;
+  padding: 0 16px !important;
+  font-size: 12px !important;
+  letter-spacing: 0.5px !important;
+  border-radius: 999px !important;
   display: inline-flex;
   align-items: center;
-  justify-content: center;
 }
 
-.collections-grid-4col .card-link-text i {
+.collections-grid-4col .card-link-text i,
+.shop-collections-grid .card-link-text i {
   margin-left: 4px;
 }
 
 @media (max-width: 767px) {
-  .collections-grid-4col .collection-card-action-row {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 10px;
+  .collections-grid-4col .collection-card-action-row,
+  .shop-collections-grid .collection-card-action-row {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 8px !important;
   }
 
-  .collections-grid-4col .shop-card-btn {
-    width: 100%;
-    justify-content: center;
-  }
-
-  .collections-grid-4col .card-link-text {
-    width: 100% !important;
-    height: 34px !important;
-    justify-content: center !important;
+  .collections-grid-4col .shop-card-btn,
+  .shop-collections-grid .shop-card-btn,
+  .collections-grid-4col .card-link-text,
+  .shop-collections-grid .card-link-text {
+    height: 32px !important;
+    font-size: 11px !important;
   }
 }
 
