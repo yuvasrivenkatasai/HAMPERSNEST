@@ -38,19 +38,8 @@ const loadImageAsBase64 = async (url, targetAspectRatio) => {
           return;
         }
 
-        // Calculate object-fit: cover with object-position: center
+        // Calculate object-fit: contain with object-position: center
         const imgRatio = img.width / img.height;
-        let sx = 0, sy = 0, sWidth = img.width, sHeight = img.height;
-
-        if (imgRatio > targetAspectRatio) {
-          // Image is wider than target. Crop left and right.
-          sWidth = img.height * targetAspectRatio;
-          sx = (img.width - sWidth) / 2;
-        } else {
-          // Image is taller than target. Crop top and bottom.
-          sHeight = img.width / targetAspectRatio;
-          sy = (img.height - sHeight) / 2;
-        }
 
         // Higher resolution canvas for premium PDF quality
         const canvas = document.createElement('canvas');
@@ -60,9 +49,21 @@ const loadImageAsBase64 = async (url, targetAspectRatio) => {
         
         ctx.fillStyle = '#FFFFFF';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        let dx = 0, dy = 0, dWidth = canvas.width, dHeight = canvas.height;
+
+        if (imgRatio > targetAspectRatio) {
+          // Image is wider than target area. Scale to fit width, center vertically.
+          dHeight = canvas.width / imgRatio;
+          dy = (canvas.height - dHeight) / 2;
+        } else {
+          // Image is taller than target area. Scale to fit height, center horizontally.
+          dWidth = canvas.height * imgRatio;
+          dx = (canvas.width - dWidth) / 2;
+        }
         
-        // Draw the image mimicking object-fit: cover
-        ctx.drawImage(img, sx, sy, sWidth, sHeight, 0, 0, canvas.width, canvas.height);
+        // Draw the image mimicking object-fit: contain
+        ctx.drawImage(img, 0, 0, img.width, img.height, dx, dy, dWidth, dHeight);
         
         resolve(canvas.toDataURL('image/jpeg', 0.95));
         urlCreator.revokeObjectURL(imageUrl);

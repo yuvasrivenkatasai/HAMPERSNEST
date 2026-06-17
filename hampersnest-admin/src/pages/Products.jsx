@@ -69,17 +69,6 @@ export default function Products() {
     setSelectedImages(prev => [...prev, ...newItems]);
   };
 
-  const handleTemplateSelected = (val) => {
-    setSelectedImages(prev => [
-      ...prev,
-      {
-        id: Math.random().toString(36).substring(2, 9) + '-' + Date.now(),
-        url: val,
-        preview: val
-      }
-    ]);
-  };
-
   const moveImage = (index, direction) => {
     const newIndex = index + direction;
     if (newIndex < 0 || newIndex >= selectedImages.length) return;
@@ -916,28 +905,6 @@ export default function Products() {
                           style={{ padding: '6px 12px', width: '250px' }}
                         />
                       </div>
-
-                      {/* Select template assets */}
-                      <select
-                        className="form-select"
-                        style={{ width: '250px', fontSize: '0.85rem', height: '37px', padding: '6px 12px' }}
-                        onChange={(e) => {
-                          if (e.target.value) {
-                            handleTemplateSelected(e.target.value);
-                            e.target.value = ""; // Reset
-                          }
-                        }}
-                        value=""
-                      >
-                        <option value="" disabled>-- Or Add Quick Template Asset --</option>
-                        <option value="/assets/wedding_gift.png">Wedding Hamper</option>
-                        <option value="/assets/baby_shower.png">Baby Shower</option>
-                        <option value="/assets/housewarming.png">Housewarming</option>
-                        <option value="/assets/corporate.png">Corporate Hamper</option>
-                        <option value="/assets/brass_cup.png">Brass Cup</option>
-                        <option value="/assets/half_saree.png">Half Saree</option>
-                        <option value="/assets/hero_banner.png">Hero Banner default</option>
-                      </select>
                     </div>
 
                     {/* Image ordering and manipulation grid */}
@@ -1027,7 +994,7 @@ export default function Products() {
                         fontSize: '0.85rem'
                       }}>
                         <i className="fa-regular fa-image" style={{ fontSize: '1.5rem', marginBottom: '8px', display: 'block' }}></i>
-                        No images uploaded yet. Select files or quick templates above.
+                        No images uploaded yet. Select files above.
                       </div>
                     )}
                   </div>

@@ -1,6 +1,6 @@
 import SeoKeywordsSection from '../components/SeoKeywordsSection';
 import React, { useState, useEffect } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, Link, useNavigate, Navigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import ProductDetailTemplate from '../components/ProductDetailTemplate';
 import SEO from '../components/SEO';
@@ -132,15 +132,7 @@ export default function ProductDetail() {
   }
 
   if (!product) {
-    return (
-      <div className="page-container" style={{ textAlign: 'center', padding: '5rem 2rem' }}>
-        <SEO title={`Product Not Found | ${settings?.storeName || 'Hampers Nest'}`} description="The requested customized gift hamper was not found." />
-        <i className="fa-solid fa-triangle-exclamation" style={{ fontSize: '3rem', color: 'var(--color-gold)', marginBottom: '1.5rem' }}></i>
-        <h2>Product Not Found</h2>
-        <p style={{ margin: '1rem 0 2rem 0', color: '#666' }}>The product you are looking for does not exist or has been moved.</p>
-        <Link to="/collections" className="btn btn-primary">Back to Collections</Link>
-      </div>
-    );
+    return <Navigate to="/collections" replace />;
   }
 
   const isWishlisted = isInWishlist(product.id);

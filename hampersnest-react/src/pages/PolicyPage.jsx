@@ -35,13 +35,7 @@ export default function PolicyPage({ slug }) {
   }
 
   if (!policy || !policy.isPublished) {
-    return (
-      <div className="page-container" style={{ textAlign: 'center', padding: '5rem 20px' }}>
-        <h2 style={{ color: 'var(--color-purple)' }}>Policy Not Found</h2>
-        <p>The policy you are looking for does not exist or has been removed.</p>
-        <a href="/" className="btn btn-primary" style={{ marginTop: '20px' }}>Return to Home</a>
-      </div>
-    );
+    return <Navigate to="/" replace />;
   }
 
   return (

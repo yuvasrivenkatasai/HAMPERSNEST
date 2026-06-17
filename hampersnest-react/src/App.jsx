@@ -1,6 +1,6 @@
 import React from 'react';
 import { HelmetProvider } from 'react-helmet-async';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { CartProvider, useCart } from './context/CartContext';
 import { CurrencyProvider } from './context/CurrencyContext';
 import Header from './components/Header';
@@ -46,6 +46,9 @@ function AppInner() {
           
           {/* Dynamic Policy Routing */}
           <Route path="/policies/:slug" element={<PolicyPage />} />
+          
+          {/* Universal 404 Catch-All Redirect */}
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>
 
