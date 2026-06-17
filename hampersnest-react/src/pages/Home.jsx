@@ -78,8 +78,8 @@ export default function Home() {
     fetchTestimonials();
   }, []);
 
-  // Get first 6 featured products dynamically from context
-  const featuredProducts = (products || []).filter((p) => p.isFeatured).slice(0, 6);
+  // Get first 8 featured products dynamically from context
+  const featuredProducts = (products || []).filter((p) => p.isFeatured).slice(0, 8);
 
   // Testimonial slider auto-slide
   useEffect(() => {
@@ -263,11 +263,9 @@ export default function Home() {
                 <div className="shop-card-content">
                   <h3 className="shop-card-name">{product.name}</h3>
                   <p className="shop-card-inr">{formatPrice(product.price)}</p>
-                  {product.description && (
-                    <p className="shop-card-desc">
-                      {product.description}
-                    </p>
-                  )}
+                  <p className="shop-card-desc">
+                    {product.description || <span style={{ visibility: 'hidden' }}>&nbsp;</span>}
+                  </p>
                   <div className="collection-card-action-row">
                     <button
                       className="shop-card-btn"

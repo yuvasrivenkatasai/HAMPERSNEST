@@ -116,11 +116,9 @@ export default function ProductCard({ product }) {
         <p className="card-price">
           <span className="price-prefix">From </span>{formatPrice(product.price)}
         </p>
-        {product.description && (
-          <p className="card-desc">
-            {product.description}
-          </p>
-        )}
+        <p className="card-desc">
+          {product.description || <span style={{ visibility: 'hidden' }}>&nbsp;</span>}
+        </p>
         <div style={{ display: 'flex', gap: '8px', marginTop: '4px' }}>
           <button
             onClick={handleViewDetails}
