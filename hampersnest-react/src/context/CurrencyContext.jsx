@@ -31,11 +31,12 @@ export const CurrencyProvider = ({ children }) => {
 
   const formatPrice = useCallback((inrValue) => {
     if (currency === 'USD') {
-      const usd = (inrValue / USD_RATE).toFixed(2);
+      const rate = settings?.usdRate ? parseFloat(settings.usdRate) : USD_RATE || 83.5;
+      const usd = (inrValue / rate).toFixed(2);
       return `$${usd}`;
     }
     return `₹${inrValue}`;
-  }, [currency]);
+  }, [currency, settings?.usdRate]);
 
   return (
     <CurrencyContext.Provider value={{ currency, toggleCurrency, formatPrice }}>

@@ -14,6 +14,7 @@ export default function Settings() {
     storeName: 'HampersNest',
     contactEmail: 'Hampersnestgifts@gmail.com',
     currency: 'INR',
+    usdRate: '83',
     shippingRate: '0',
     announcementText: '',
     announcementActive: false,
@@ -48,7 +49,8 @@ export default function Settings() {
       setSettingsData(prev => ({
         ...prev,
         ...safeData,
-        shippingRate: safeData?.shippingRate || '0' // Ensure string for input
+        shippingRate: safeData?.shippingRate || '0', // Ensure string for input
+        usdRate: safeData?.usdRate || '83'
       }));
     } catch (err) {
       console.error('Failed to fetch settings:', err);
@@ -175,7 +177,7 @@ export default function Settings() {
                 />
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '15px' }}>
                 <div className="form-group">
                   <label className="form-label">Default Currency</label>
                   <select
@@ -189,6 +191,18 @@ export default function Settings() {
                     <option value="EUR">€ EUR</option>
                     <option value="GBP">£ GBP</option>
                   </select>
+                </div>
+                <div className="form-group">
+                  <label className="form-label">1 USD to INR Rate</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    name="usdRate"
+                    className="form-input"
+                    min="1"
+                    value={settingsData.usdRate}
+                    onChange={handleSettingsChange}
+                  />
                 </div>
                 <div className="form-group">
                   <label className="form-label">Flat Shipping Rate</label>
