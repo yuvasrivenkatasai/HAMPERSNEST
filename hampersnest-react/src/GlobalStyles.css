@@ -6512,11 +6512,9 @@ footer h4,
   background: rgba(20, 8, 40, 0.75);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 16px;
+  display: block;
   overflow-y: auto;
+  padding: 40px 16px;
   animation: quoteFadeIn 0.3s ease forwards;
 }
 
@@ -6538,13 +6536,10 @@ footer h4,
     0 0 0 1px rgba(200, 169, 107, 0.15);
   max-width: 680px;
   width: 100%;
-  max-height: 90vh;
-  overflow-y: auto;
   position: relative;
   padding: 2.5rem 2rem 2rem;
+  margin: 0 auto;
   animation: quoteSlideUp 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
-  scrollbar-width: thin;
-  scrollbar-color: var(--color-lavender-dark) transparent;
 }
 
 .quote-modal-container::-webkit-scrollbar {
@@ -6836,10 +6831,14 @@ footer h4,
 }
 
 @media (max-width: 600px) {
+  .quote-modal-backdrop {
+    padding: 16px 12px !important;
+  }
+
   .quote-modal-container {
-    padding: 1.5rem 1rem 1rem;
-    border-radius: 16px;
-    max-height: 92vh;
+    margin: 1rem auto !important;
+    padding: 1.5rem 1rem 1rem !important;
+    border-radius: 16px !important;
   }
 
   .quote-modal-title {
