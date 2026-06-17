@@ -313,8 +313,7 @@ header.scrolled {
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 40px;
-  height: 85px;
-  /* Reduced from 70px */
+  height: 70px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -344,14 +343,14 @@ header.scrolled {
 /* Desktop logo: 70-80px, brand 28px/600 */
 @media (min-width: 1025px) {
   .logo-wrapper img {
-    height: 50px;
+    height: 58px;
   }
 }
 
 /* Mobile logo: 55-60px, brand 22px/600 */
 @media (max-width: 1024px) {
   .logo-wrapper img {
-    height: 70px;
+    height: 50px;
   }
 }
 
@@ -1350,17 +1349,19 @@ header.scrolled {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 2rem;
+  align-items: start;
 }
 
 .collections-grid-4col {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 2rem;
+  align-items: start;
 }
 
 .collection-card {
   background-color: var(--color-white);
-  border-radius: 16px;
+  border-radius: 6px;
   overflow: hidden;
   box-shadow: var(--shadow-premium);
   transition: var(--transition-smooth);
@@ -1472,7 +1473,7 @@ header.scrolled {
 }
 
 .card-content {
-  padding: 1.5rem !important;
+  padding: 1.2rem !important;
   text-align: left !important;
   display: flex !important;
   flex-direction: column !important;
@@ -1493,12 +1494,24 @@ header.scrolled {
   font-size: 15px !important;
   font-weight: 600 !important;
   color: var(--color-gold-dark) !important;
-  margin-bottom: 16px !important;
+  margin-bottom: 8px !important;
   margin-top: 0 !important;
 }
 
 .card-desc {
-  display: none !important;
+  font-family: var(--font-sans);
+  font-size: 0.78rem !important;
+  color: var(--color-charcoal) !important;
+  opacity: 0.8;
+  margin-top: 0 !important;
+  margin-bottom: 12px !important;
+  line-height: 1.4 !important;
+  display: -webkit-box !important;
+  -webkit-line-clamp: 2 !important;
+  -webkit-box-orient: vertical !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  height: 2.8em !important;
 }
 
 .price-prefix {
@@ -1555,11 +1568,12 @@ header.scrolled {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 1.5rem;
+  align-items: start;
 }
 
 .shop-product-card {
   background: var(--color-white);
-  border-radius: 16px;
+  border-radius: 6px;
   overflow: hidden;
   box-shadow: var(--shadow-premium);
   border: 1px solid rgba(74, 18, 90, 0.04);
@@ -1625,6 +1639,22 @@ header.scrolled {
   margin-bottom: 12px;
 }
 
+.shop-card-desc {
+  font-family: var(--font-sans);
+  font-size: 0.78rem;
+  color: var(--color-charcoal);
+  opacity: 0.8;
+  margin-top: 0;
+  margin-bottom: 12px;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  height: 2.8em;
+}
+
 .shop-card-btn {
   display: inline-flex;
   align-items: center;
@@ -1657,6 +1687,7 @@ header.scrolled {
   .shop-collections-grid {
     grid-template-columns: repeat(2, 1fr);
     gap: 1rem;
+    align-items: start;
   }
 
   .shop-card-content {
@@ -1664,11 +1695,15 @@ header.scrolled {
   }
 
   .shop-card-name {
-    font-size: 0.88rem;
+    font-size: 13px;
   }
 
   .shop-card-inr {
-    font-size: 0.95rem;
+    font-size: 14px;
+  }
+
+  .shop-card-desc {
+    display: none !important;
   }
 
   .shop-card-btn {
@@ -1683,6 +1718,7 @@ header.scrolled {
   .shop-collections-grid {
     grid-template-columns: repeat(3, 1fr);
     gap: 1.2rem;
+    align-items: start;
   }
 }
 
@@ -1817,7 +1853,7 @@ header.scrolled {
 .gallery-item {
   break-inside: avoid;
   margin-bottom: 1.5rem;
-  border-radius: 16px;
+  border-radius: 6px;
   overflow: hidden;
   box-shadow: var(--shadow-premium);
   border: 1px solid rgba(74, 18, 90, 0.02);
@@ -2863,14 +2899,15 @@ footer {
     grid-template-columns: 1fr !important;
     gap: 20px !important;
     margin-top: 16px !important;
+    align-items: start !important;
   }
 
   .collection-card {
-    border-radius: 8px !important;
+    border-radius: 6px !important;
     /* clean premium radius */
     display: flex !important;
     flex-direction: column !important;
-    height: 100% !important;
+    height: auto !important;
     box-shadow: var(--shadow-premium) !important;
     border: 1px solid rgba(74, 18, 90, 0.04) !important;
   }
@@ -2898,8 +2935,19 @@ footer {
   }
 
   .collection-card .card-desc {
-    display: none !important;
-    /* Remove descriptions completely */
+    font-family: var(--font-sans);
+    font-size: 0.75rem !important;
+    color: var(--color-charcoal) !important;
+    opacity: 0.8;
+    margin-top: 0 !important;
+    margin-bottom: 10px !important;
+    line-height: 1.4 !important;
+    display: -webkit-box !important;
+    -webkit-line-clamp: 2 !important;
+    -webkit-box-orient: vertical !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    height: 2.8em !important;
   }
 
   .collection-card .card-link {
@@ -2923,7 +2971,7 @@ footer {
     display: flex !important;
     flex-direction: column !important;
     margin-bottom: 0 !important;
-    border-radius: 8px !important;
+    border-radius: 6px !important;
     height: 100% !important;
     box-shadow: var(--shadow-premium) !important;
     border: 1px solid rgba(74, 18, 90, 0.04) !important;
@@ -3093,16 +3141,15 @@ footer {
     margin-right: auto !important;
   }
 
-  .logo-circle {
-    width: 52px !important;
-    height: 52px !important;
-    min-width: 52px !important;
-    min-height: 52px !important;
+  .logo-wrapper {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
   }
 
-  .logo-circle img {
-    height: 52px !important;
-    width: 52px !important;
+  .logo-wrapper img {
+    height: 38px !important;
+    width: auto !important;
   }
 
   .brand-name {
@@ -3182,8 +3229,8 @@ footer {
     display: flex !important;
     flex-direction: column;
     width: 100%;
-    height: calc(100vh - 85px);
-    margin-top: 85px;
+    height: calc(100vh - 56px);
+    margin-top: 56px;
     padding: 20px 30px 40px !important;
     gap: 24px !important;
     overflow-y: auto !important;
@@ -3249,17 +3296,17 @@ footer {
     gap: 10px !important;
     margin-top: 16px !important;
     column-count: auto !important;
-    align-items: stretch !important;
+    align-items: start !important;
   }
 
   .collection-card,
   .gallery-item {
-    border-radius: 22px !important;
+    border-radius: 6px !important;
     background-color: var(--color-white) !important;
     box-shadow: var(--shadow-premium) !important;
     display: flex !important;
     flex-direction: column !important;
-    height: 100% !important;
+    height: auto !important;
     border: none !important;
     overflow: hidden !important;
     margin-bottom: 0 !important;
@@ -3273,8 +3320,8 @@ footer {
     width: 100% !important;
     object-fit: cover !important;
     object-position: center !important;
-    border-top-left-radius: 22px !important;
-    border-top-right-radius: 22px !important;
+    border-top-left-radius: 6px !important;
+    border-top-right-radius: 6px !important;
     border-bottom-left-radius: 0 !important;
     border-bottom-right-radius: 0 !important;
   }
@@ -3303,13 +3350,13 @@ footer {
 
   .collection-card .card-title,
   .gallery-item-info h4 {
-    font-size: 15px !important;
+    font-size: 13px !important;
     font-weight: 500 !important;
     color: var(--color-purple-dark) !important;
     line-height: 1.3 !important;
-    max-height: 40px !important;
-    height: 40px !important;
-    min-height: 40px !important;
+    max-height: 34px !important;
+    height: 34px !important;
+    min-height: 34px !important;
     overflow: hidden !important;
     display: -webkit-box !important;
     -webkit-line-clamp: 2 !important;
@@ -3320,7 +3367,7 @@ footer {
 
   .collection-card .card-price,
   .gallery-item-info .card-price {
-    font-size: 16px !important;
+    font-size: 14px !important;
     font-weight: 600 !important;
     color: var(--color-gold-dark) !important;
     margin-top: 4px !important;
@@ -3328,6 +3375,10 @@ footer {
     margin-bottom: 6px !important;
     /* Reduced space below price */
     text-align: left !important;
+  }
+
+  .collection-card .card-desc {
+    display: none !important;
   }
 
   .price-prefix {
@@ -4694,7 +4745,7 @@ footer h4,
 
 /* Responsive Overrides & Page adjustments */
 .page-container {
-  padding-top: 96px;
+  padding-top: 80px;
   /* offset sticky header */
 }
 
@@ -5543,12 +5594,14 @@ footer h4,
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 1.5rem;
+  align-items: start;
 }
 
 @media (min-width: 768px) and (max-width: 1024px) {
   .collections-grid-4col {
     grid-template-columns: repeat(3, 1fr);
     gap: 1.2rem;
+    align-items: start;
   }
 }
 
@@ -5556,6 +5609,7 @@ footer h4,
   .collections-grid-4col {
     grid-template-columns: repeat(2, 1fr);
     gap: 0.8rem;
+    align-items: start;
   }
 }
 
@@ -6714,12 +6768,8 @@ footer h4,
 
   /* ── Logo: Visually enlarged to bypass transparent padding ── */
   .logo-wrapper img {
-    height: 35px !important;
-    /* Made larger to accommodate the horizontal logo */
+    height: 58px !important;
     width: auto !important;
-    transform: scale(2.4) !important;
-    /* Zoomed in to crop out extra padding */
-    transform-origin: left center !important;
   }
 
   /* ── Brand name: 24px, 600 weight, 1.1 line-height ── */
@@ -7190,28 +7240,36 @@ footer h4,
 }
 
 .card-link-text {
-  color: var(--color-purple);
-  font-weight: 600;
-  font-size: 0.85rem;
-  text-decoration: none;
-  background: transparent;
-  border: none;
-  padding: 0;
-  box-shadow: none;
   display: inline-flex;
   align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 36px;
+  padding: 0 18px;
+  font-size: 12px;
+  font-weight: 600;
+  font-family: var(--font-sans);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  border-radius: 999px;
+  border: 1px solid var(--color-purple);
+  background: transparent;
+  color: var(--color-purple);
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: var(--transition-smooth);
+  white-space: nowrap;
 }
 
 .card-link-text i {
-  margin-left: 6px;
   font-size: 0.75rem;
   transition: transform 0.3s ease;
 }
 
 .card-link-text:hover {
-  color: var(--color-purple-dark);
+  background: var(--color-purple);
+  color: var(--color-white);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 22px rgba(74, 29, 95, 0.15);
 }
 
 .card-link-text:hover i {
@@ -7222,13 +7280,15 @@ footer h4,
   .collection-card-action-row {
     flex-direction: column;
     align-items: stretch;
-    gap: 12px;
+    gap: 10px;
   }
 
   .card-link-text {
-    justify-content: center;
-    width: 100%;
-    padding: 0.5rem 0;
+    width: 100% !important;
+    height: 32px !important;
+    padding: 0 12px !important;
+    font-size: 11px !important;
+    justify-content: center !important;
   }
 }
 
@@ -7238,15 +7298,19 @@ footer h4,
 
 /* Collection Page Refinements */
 .collections-grid-4col .collection-card-action-row {
-  align-items: baseline;
-  gap: 6px;
+  align-items: center;
+  gap: 8px;
 }
 
 .collections-grid-4col .card-link-text {
-  font-size: 0.8rem;
-  font-weight: 500;
-  white-space: nowrap;
-  align-items: baseline;
+  padding: 0 12px;
+  font-size: 11px;
+  letter-spacing: 0.5px;
+  height: 34px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .collections-grid-4col .card-link-text i {
@@ -7257,7 +7321,7 @@ footer h4,
   .collections-grid-4col .collection-card-action-row {
     flex-direction: column;
     align-items: stretch;
-    gap: 12px;
+    gap: 10px;
   }
 }
 
@@ -7403,7 +7467,7 @@ footer h4,
 .collections-grid-4col .collection-card-action-row {
   justify-content: flex-start;
   align-items: center;
-  gap: 14px;
+  gap: 8px;
 }
 
 .collections-grid-4col .shop-card-btn {
@@ -7414,10 +7478,14 @@ footer h4,
 }
 
 .collections-grid-4col .card-link-text {
-  font-size: 0.8rem;
-  font-weight: 500;
-  white-space: nowrap;
+  padding: 0 12px;
+  font-size: 11px;
+  letter-spacing: 0.5px;
+  height: 34px;
+  border-radius: 999px;
+  display: inline-flex;
   align-items: center;
+  justify-content: center;
 }
 
 .collections-grid-4col .card-link-text i {
@@ -7428,12 +7496,18 @@ footer h4,
   .collections-grid-4col .collection-card-action-row {
     flex-direction: column;
     align-items: stretch;
-    gap: 12px;
+    gap: 10px;
   }
 
   .collections-grid-4col .shop-card-btn {
     width: 100%;
     justify-content: center;
+  }
+
+  .collections-grid-4col .card-link-text {
+    width: 100% !important;
+    height: 34px !important;
+    justify-content: center !important;
   }
 }
 

@@ -171,6 +171,11 @@ function CollectionCard({ product, animationDelay, onAddToCart, onViewDetails })
         <p className="card-price">
           <span className="price-prefix">From </span>{formatPrice(product.price)}
         </p>
+        {product.description && (
+          <p className="card-desc">
+            {product.description}
+          </p>
+        )}
         <div className="collection-card-action-row">
           <button
             onClick={onAddToCart}

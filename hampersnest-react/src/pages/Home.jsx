@@ -263,6 +263,11 @@ export default function Home() {
                 <div className="shop-card-content">
                   <h3 className="shop-card-name">{product.name}</h3>
                   <p className="shop-card-inr">{formatPrice(product.price)}</p>
+                  {product.description && (
+                    <p className="shop-card-desc">
+                      {product.description}
+                    </p>
+                  )}
                   <div className="collection-card-action-row">
                     <button
                       className="shop-card-btn"
@@ -327,7 +332,7 @@ export default function Home() {
           Explore our most loved customized gift hampers. Handpicked and tailored perfectly for premium weddings, baby showers, and celebrations.
         </p>
 
-        <div className="collections-grid reveal active">
+        <div className="collections-grid-4col reveal active">
           {products && products.slice(0, 4).map((product) => (
             <ProductCard key={product.id} product={product} />
           ))}
