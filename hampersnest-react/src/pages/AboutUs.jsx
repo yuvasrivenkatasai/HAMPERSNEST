@@ -2,6 +2,7 @@ import SeoKeywordsSection from '../components/SeoKeywordsSection';
 import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import SEO from '../components/SEO';
+import { useCart } from '../context/CartContext';
 
 const visionPillars = [
   {
@@ -27,6 +28,7 @@ const visionPillars = [
 ];
 
 export default function AboutUs() {
+  const { settings } = useCart();
   useEffect(() => {
     const revealElements = document.querySelectorAll('.reveal, .reveal-heading, .pillar-card');
     const observer = new IntersectionObserver(
@@ -47,14 +49,14 @@ export default function AboutUs() {
   const aboutSchema = {
     "@context": "https://schema.org",
     "@type": "AboutPage",
-    "name": "About Hampers Nest",
+    "name": `About ${settings?.storeName || 'Hampers Nest'}`,
     "description": "Learn about the story, core philosophy, and artisanal curation of Hampers Nest Hyderabad.",
     "url": window.location.href,
     "mainEntity": {
       "@type": "LocalBusiness",
-      "name": "Hampers Nest",
+      "name": settings?.storeName || "Hampers Nest",
       "image": window.location.origin + "/assets/hero_banner.webp",
-      "telephone": "+917989202194",
+      "telephone": `+${settings?.whatsappNumber}`,
       "address": {
         "@type": "PostalAddress",
         "addressLocality": "Hyderabad",
@@ -66,7 +68,7 @@ export default function AboutUs() {
   return (
     <div className="page-container">
       <SEO 
-        title="About Us | Luxury Curation & Philosophy | Hampers Nest"
+        title={`About Us | Luxury Curation & Philosophy | ${settings?.storeName || 'Hampers Nest'}`}
         description="Read the story behind Hampers Nest Hyderabad. We partner with local artisans to craft sustainable, highly customized return gifts and festival hampers."
         keywords="about hampersnest, gifting history hyderabad, return gift curators, custom gift boxes hyderabad"
         schema={aboutSchema}
@@ -98,7 +100,7 @@ export default function AboutUs() {
               <span className="section-subtitle" style={{ textAlign: 'left', marginBottom: '0.8rem' }}>The Curation Studio</span>
               <h3>Where Tradition <br />Meets Luxury</h3>
               <p className="about-text" style={{ fontSize: '0.95rem', marginBottom: '1rem' }}>
-                Established in Hyderabad, Hampers Nest was founded on a simple belief: <em>a return gift is a physical representation of your gratitude and celebration.</em> We believe that generic, mass-produced items lack the warmth and elegance that your guests deserve.
+                Established in Hyderabad, {settings?.storeName || 'Hampers Nest'} was founded on a simple belief: <em>a return gift is a physical representation of your gratitude and celebration.</em> We believe that generic, mass-produced items lack the warmth and elegance that your guests deserve.
               </p>
               <p className="about-text" style={{ fontSize: '0.95rem' }}>
                 Our curation studio collaborates with local Indian artisans, bringing timeless treasures (like handcrafted brass bowls, peacock diyas, and zari pouches) and presenting them inside luxury, high-end packaging. Whether it is a grand wedding, a sweet baby shower, a warm housewarming, or an executive corporate event, we elevate the experience.
@@ -119,7 +121,7 @@ export default function AboutUs() {
       <section style={{ background: 'var(--color-lavender)', padding: '3.5rem 0' }}>
         <div className="container">
           <span className="section-subtitle">Core Philosophy</span>
-          <h2 className="section-title">The Pillars of Hampers Nest</h2>
+          <h2 className="section-title">The Pillars of {settings?.storeName || 'Hampers Nest'}</h2>
           
           <div className="collections-grid reveal" style={{ marginTop: '2rem' }}>
             {visionPillars.map((pillar, idx) => (

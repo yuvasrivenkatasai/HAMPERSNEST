@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import SEO from '../components/SEO';
-import { API_BASE, WHATSAPP_NUMBER } from '../config.js';
+import { API_BASE } from '../config.js';
 
 export default function Contact() {
   const { settings } = useCart();
@@ -47,14 +47,12 @@ export default function Contact() {
       return;
     }
 
-    const WHATSAPP_NUMBER = "917989202194";
+    const whatsappNumber = settings?.whatsappNumber;
     
-
-
     const textMessage = `Hi Hampers Nest!\n\nI would like to request a customized quote:\n\n*Name:* ${formData.name}\n*Phone:* ${formData.phone}\n*Event Type:* ${formData.eventType}\n*Est. Quantity:* ${formData.quantity}\n*Customization Request:* ${formData.message || 'N/A'}`;
 
     const encodedText = encodeURIComponent(textMessage);
-    const whatsappURL = `https://api.whatsapp.com/send?phone=${WHATSAPP_NUMBER}&text=${encodedText}`;
+    const whatsappURL = `https://wa.me/${whatsappNumber}?text=${encodedText}`;
 
     setShowSuccessToast(true);
 
@@ -93,13 +91,13 @@ export default function Contact() {
   const contactSchema = {
     "@context": "https://schema.org",
     "@type": "ContactPage",
-    "name": "Contact Hampers Nest",
+    "name": `Contact ${settings?.storeName || 'Hampers Nest'}`,
     "description": "Contact our curation expert team in Hyderabad for bulk orders, wedding return gifts, baby shower boxes, and custom hampers.",
     "url": window.location.href,
     "mainEntity": {
       "@type": "LocalBusiness",
-      "name": "Hampers Nest",
-      "telephone": "+917989202194",
+      "name": settings?.storeName || "Hampers Nest",
+      "telephone": `+${settings?.whatsappNumber}`,
       "address": {
         "@type": "PostalAddress",
         "streetAddress": "Jubilee Hills",
@@ -114,7 +112,7 @@ export default function Contact() {
   return (
     <div className="page-container">
       <SEO 
-        title="Contact Our Gifting Experts | Hampers Nest Hyderabad"
+        title={`Contact Our Gifting Experts | ${settings?.storeName || 'Hampers Nest'} Hyderabad`}
         description="Contact Hampers Nest Hyderabad for bulk orders, wedding consultations, and customized gifting queries. Get a quick quote via WhatsApp or phone."
         keywords="contact hampersnest, bulk return gifts hyderabad, wedding gifts consultation, custom hamper enquiry"
         schema={contactSchema}
@@ -156,7 +154,25 @@ export default function Contact() {
                 </div>
                 <div className="contact-detail-text">
                   <h5>Location</h5>
-                  <p>Uppal, Hyderabad, Telangana, India</p>
+                  <p style={{ marginBottom: '5px' }}>{settings?.businessAddress || 'Uppal, Hyderabad, Telangana, India'}</p>
+                  <a 
+                    href={settings?.googleMapsUrl || 'https://www.google.com/maps/dir/?api=1&destination=Uppal%2C%20Hyderabad%2C%20Telangana%2C%20India'}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{ fontSize: '0.8rem', color: 'var(--color-gold-dark)', fontWeight: '600', textDecoration: 'none', display: 'inline-block' }}
+                  >
+                    Get Directions <i className="fa-solid fa-arrow-right-long" style={{ marginLeft: '4px' }}></i>
+                  </a>
+                </div>
+              </div>
+
+              <div className="contact-detail-item">
+                <div className="contact-icon-box">
+                  <i className="fa-regular fa-envelope"></i>
+                </div>
+                <div className="contact-detail-text">
+                  <h5>Email</h5>
+                  <p><a href={`mailto:${settings?.contactEmail || 'Hampersnestgifts@gmail.com'}`} style={{ color: 'var(--color-text)', textDecoration: 'none' }}>{settings?.contactEmail || 'Hampersnestgifts@gmail.com'}</a></p>
                 </div>
               </div>
 
@@ -183,12 +199,19 @@ export default function Contact() {
               }}
             >
               <h5 style={{ color: 'var(--color-purple)', fontWeight: 600, fontSize: '0.9rem', marginBottom: '0.5rem', textTransform: 'uppercase' }}>
-                <i className="fa-regular fa-clock" style={{ marginRight: '6px', color: 'var(--color-gold)' }}></i> Curation Studio Hours
+                <i className="fa-regular fa-clock" style={{ marginRight: '6px', color: 'var(--color-gold)' }}></i> {settings?.studioHoursTitle || 'Curation Studio Hours'}
               </h5>
               <p style={{ fontSize: '0.8rem', color: '#666', lineHeight: 1.6 }}>
-                Monday - Saturday: 10:00 AM - 7:00 PM<br />
-                Sunday: Closed (Available for emergency wedding deliveries)<br />
-                <span style={{ color: 'var(--color-gold-dark)', fontWeight: 500 }}>Walk-ins by prior appointment only.</span>
+                {settings?.studioHoursMonSat || 'Monday - Saturday: 10:00 AM - 7:00 PM'}<br />
+                {settings?.studioHoursSun || 'Sunday: Closed (Available for emergency wedding deliveries)'}<br />
+                <span style={{ color: 'var(--color-gold-dark)', fontWeight: 500 }}>{settings?.studioWalkInMsg || 'Walk-ins by prior appointment only.'}</span>
+              </p>
+
+              <h5 style={{ color: 'var(--color-purple)', fontWeight: 600, fontSize: '0.9rem', marginBottom: '0.3rem', marginTop: '1.2rem', textTransform: 'uppercase' }}>
+                <i className="fa-solid fa-phone" style={{ marginRight: '6px', color: 'var(--color-gold)' }}></i> OWNER CONTACT
+              </h5>
+              <p style={{ fontSize: '0.9rem', color: 'var(--color-gold-dark)', fontWeight: '600', margin: 0 }}>
+                {settings?.ownerContactNumber || '+91 79892 02194'}
               </p>
             </div>
 

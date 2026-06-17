@@ -219,9 +219,9 @@ export default function Collections() {
     "url": window.location.href,
     "provider": {
       "@type": "LocalBusiness",
-      "name": "Hampers Nest",
+      "name": settings?.storeName || "Hampers Nest",
       "image": window.location.origin + "/assets/hero_banner.webp",
-      "telephone": "+917989202194",
+      "telephone": `+${settings?.whatsappNumber}`,
       "priceRange": "₹₹",
       "address": {
         "@type": "PostalAddress",
@@ -235,8 +235,8 @@ export default function Collections() {
     <div className="page-container">
       <SEO 
         title={activeCategory === 'All' 
-          ? "Shop Premium Gift Hampers & Return Gifts | Hampers Nest" 
-          : `Shop Premium ${getCategoryLabel(activeCategory)} Return Gifts | Hampers Nest`}
+          ? `Shop Premium Gift Hampers & Return Gifts | ${settings?.storeName || 'Hampers Nest'}` 
+          : `Shop Premium ${getCategoryLabel(activeCategory)} Return Gifts | ${settings?.storeName || 'Hampers Nest'}`}
         description={activeCategory === 'All'
           ? "Browse our collections of hand-crafted return gifts, wedding hampers, housewarming kits, and corporate gifting. Custom styling and ribbon packaging available."
           : `Explore luxury curated ${getCategoryLabel(activeCategory)} return gifts and gift hampers by Hampers Nest. Custom packaging and quick delivery options.`}

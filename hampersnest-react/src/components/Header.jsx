@@ -43,6 +43,28 @@ export default function Header() {
 
   return (
     <>
+      {settings?.announcementActive && settings?.announcementText && (
+        <div className="top-banner" style={{ 
+          background: 'var(--color-purple-dark)', 
+          color: 'var(--color-white)', 
+          textAlign: 'center', 
+          padding: '8px 15px', 
+          fontSize: '0.85rem', 
+          fontWeight: '500', 
+          position: 'fixed', 
+          top: 0, 
+          left: 0, 
+          right: 0, 
+          zIndex: 1001,
+          height: '38px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          transition: 'all 0.3s ease'
+        }}>
+          {settings.announcementText}
+        </div>
+      )}
       <header 
         id="header" 
         className={scrolled ? 'scrolled' : ''}
@@ -52,7 +74,7 @@ export default function Header() {
           {/* Logo container - image + brand name */}
           <Link to="/" className="logo-container" onClick={closeMobileMenu}>
             <div className="logo-wrapper">
-              <img src="/assets/hampersnest-logo.png" alt="Hampers Nest Logo" />
+              <img src="/assets/hampersnest-logo.png" alt={`${settings?.storeName || 'Hampers Nest'} Logo`} />
             </div>
           </Link>
 

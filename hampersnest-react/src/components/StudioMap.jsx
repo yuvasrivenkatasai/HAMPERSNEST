@@ -7,8 +7,8 @@ export default function StudioMap() {
 
   // Use dynamic settings, fallback to hardcoded values if missing
   const businessAddress = settings?.businessAddress || 'Uppal, Hyderabad, Telangana, India';
-  const googleMapsUrl = settings?.googleMapsUrl || 'https://www.google.com/maps/place/Hampers+Nest/@17.4192972,78.6025777';
-  const whatsappNumber = settings?.whatsappNumber || '917989202194';
+  const googleMapsUrl = settings?.googleMapsUrl || 'https://www.google.com/maps/dir/?api=1&destination=Uppal%2C%20Hyderabad%2C%20Telangana%2C%20India';
+  const whatsappNumber = settings?.whatsappNumber;
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -52,14 +52,14 @@ export default function StudioMap() {
               allowFullScreen=""
               loading="lazy"
               referrerPolicy="no-referrer-when-downgrade"
-              title="Hampers Nest Google Maps Location"
+              title={`${settings?.storeName || 'Hampers Nest'} Google Maps Location`}
             ></iframe>
           </div>
 
           {/* Right Side: Business Information */}
           <div className="studio-map-info-card glass-panel">
             <div className="info-card-content">
-              <h3>Hampers Nest</h3>
+              <h3>{settings?.storeName || 'Hampers Nest'}</h3>
               
               <div className="info-row">
                 <i className="fa-solid fa-location-dot"></i>
@@ -84,7 +84,7 @@ export default function StudioMap() {
                   <i className="fa-solid fa-map-location-dot"></i> Get Directions
                 </a>
                 <a 
-                  href={`https://api.whatsapp.com/send?phone=${whatsappNumber}&text=Hi Hampers Nest! I would like to schedule a studio visit.`} 
+                  href={`https://wa.me/${whatsappNumber}?text=Hi ${settings?.storeName || 'Hampers Nest'}! I would like to schedule a studio visit.`} 
                   target="_blank" 
                   rel="noopener noreferrer" 
                   className="btn btn-whatsapp"

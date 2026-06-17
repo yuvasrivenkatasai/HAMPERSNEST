@@ -15,7 +15,13 @@ export const CartProvider = ({ children }) => {
   // Load initial states from localStorage if available
   const [cart, setCart] = useState(() => {
     const savedCart = localStorage.getItem('hampers_nest_cart');
-    return savedCart ? JSON.parse(savedCart) : [];
+    if (!savedCart) return [];
+    try {
+      const parsedCart = JSON.parse(savedCart);
+      return parsedCart.map(item => ({ ...item, quantity: Math.max(5, item.quantity || 5) }));
+    } catch {
+      return [];
+    }
   });
 
   const [wishlist, setWishlist] = useState(() => {
@@ -85,7 +91,7 @@ export const CartProvider = ({ children }) => {
   }, [wishlist]);
 
   // Cart operations
-  const addToCart = (product, quantity = 1, customizations = {}) => {
+  const addToCart = (product, quantity = 5, customizations = {}) => {
     const { 
       giftTag = '', 
       addOns = [],
@@ -104,7 +110,7 @@ export const CartProvider = ({ children }) => {
       if (existingItemIndex > -1) {
         // Increment quantity of existing item
         const updatedCart = [...prevCart];
-        updatedCart[existingItemIndex].quantity += Number(quantity);
+        updatedCart[existingItemIndex].quantity += Number(Math.max(5, quantity));
         return updatedCart;
       } else {
         // Add new item
@@ -117,7 +123,7 @@ export const CartProvider = ({ children }) => {
             price: finalPrice,
             image: product.image,
             category: product.category,
-            quantity: Number(quantity),
+            quantity: Number(Math.max(5, quantity)),
             customizations: {
               giftTag: giftTag.trim(),
               addOns
@@ -154,7 +160,7 @@ export const CartProvider = ({ children }) => {
     }
     setCart((prevCart) =>
       prevCart.map((item) =>
-        item.cartItemId === cartItemId ? { ...item, quantity: Number(newQuantity) } : item
+        item.cartItemId === cartItemId ? { ...item, quantity: Number(Math.max(5, newQuantity)) } : item
       )
     );
   };
@@ -184,8 +190,8 @@ export const CartProvider = ({ children }) => {
 
   // Generate Whatsapp Checkout Message
   const getWhatsappCheckoutUrl = (userDetails = {}, orderId = null) => {
-    const WHATSAPP_NUMBER = "917989202194";
-    
+    const whatsappNumber = settings?.whatsappNumber;
+
     let orderDetailsText = cart.map((item, idx) => {
       let customStr = '';
       if (item.customizations.giftTag) {
@@ -204,9 +210,9 @@ export const CartProvider = ({ children }) => {
     const dateStr = userDetails.deliveryDate ? `*Required Date:* ${userDetails.deliveryDate}\n` : '';
     const notesStr = userDetails.notes ? `*Notes:* ${userDetails.notes}\n` : '';
 
-    const message = `Hi Hampers Nest!\n\nI would like to place an order / get a quote for the following hampers:\n\n${orderDetailsText}\n\n*Total Items:* ${cartCount}\n*Estimated Subtotal:* ₹${cartTotal}\n\n${nameStr}${phoneStr}${eventStr}${dateStr}${notesStr}Please confirm availability and share the catalog. Thank you!`;
+    const message = `Hi ${settings?.storeName || 'Hampers Nest'}!\n\nI would like to place an order / get a quote for the following hampers:\n\n${orderDetailsText}\n\n*Total Items:* ${cartCount}\n*Estimated Subtotal:* ₹${cartTotal}\n\n${nameStr}${phoneStr}${eventStr}${dateStr}${notesStr}Please confirm availability and share the catalog. Thank you!`;
 
-    return `https://api.whatsapp.com/send?phone=${WHATSAPP_NUMBER}&text=${encodeURIComponent(message)}`;
+    return `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
   };
 
   return (

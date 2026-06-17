@@ -2,12 +2,13 @@ import React from 'react';
 import { useCart } from '../context/CartContext';
 
 export default function FloatingButtons() {
-  const { setQuoteModalOpen } = useCart();
+  const { setQuoteModalOpen, settings } = useCart();
+  const whatsappNumber = settings?.whatsappNumber;
 
   return (
     <div className="floating-container-right" style={{ zIndex: 1000 }}>
       {/* Call button */}
-      <a href="tel:+917989202194" className="call-float" aria-label="Quick Call contact">
+      <a href={`tel:+${whatsappNumber}`} className="call-float" aria-label="Quick Call contact">
         <i className="fa-solid fa-phone"></i>
       </a>
       {/* WhatsApp button — opens lead capture form */}

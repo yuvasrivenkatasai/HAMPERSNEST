@@ -17,7 +17,7 @@ export default function ProductCard({ product }) {
   const handleAddToCart = (e) => {
     e.stopPropagation();
     e.preventDefault();
-    addToCart(product, 1, {
+    addToCart(product, 5, {
       giftTag: '',
       wrappingStyle: 'Standard',
       ribbonColor: 'None'

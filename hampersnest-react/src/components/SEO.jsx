@@ -1,6 +1,8 @@
 import { useEffect } from 'react';
+import { useCart } from '../context/CartContext';
 
 export default function SEO({ title, description, keywords, ogTitle, ogDescription, ogImage, canonicalUrl, schema }) {
+  const { settings } = useCart();
   useEffect(() => {
     // 1. Update Title
     if (title) {
@@ -40,7 +42,7 @@ export default function SEO({ title, description, keywords, ogTitle, ogDescripti
     updateMetaTag('og:image', getAbsoluteImageUrl(ogImage), 'property');
     updateMetaTag('og:url', canonicalUrl || currentUrl, 'property');
     updateMetaTag('og:type', 'website', 'property');
-    updateMetaTag('og:site_name', 'Hampers Nest', 'property');
+    updateMetaTag('og:site_name', settings?.storeName || 'Hampers Nest', 'property');
     
     // 5. Update Twitter Cards
     updateMetaTag('twitter:card', 'summary_large_image');

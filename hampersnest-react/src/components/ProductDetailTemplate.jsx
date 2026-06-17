@@ -13,7 +13,7 @@ export default function ProductDetailTemplate({ product, displayRelated = [] }) 
 
   // Form States
   const [giftTag, setGiftTag] = useState('');
-  const [quantity, setQuantity] = useState(1);
+  const [quantity, setQuantity] = useState(5);
 
   // Gallery States
   const [activeMediaIndex, setActiveMediaIndex] = useState(0);
@@ -32,7 +32,7 @@ export default function ProductDetailTemplate({ product, displayRelated = [] }) 
     setActiveMediaIndex(0);
     setIsLightboxOpen(false);
     setGiftTag('');
-    setQuantity(1);
+    setQuantity(5);
 
     // Track product view in backend database
     if (product?.id) {
@@ -375,8 +375,8 @@ export default function ProductDetailTemplate({ product, displayRelated = [] }) 
                 <div className="qty-picker-detail" style={{ height: '48px', flexShrink: 0 }}>
                   <button
                     type="button"
-                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                    disabled={product.stockQuantity === 0 || quantity <= 1}
+                    onClick={() => setQuantity(Math.max(5, quantity - 1))}
+                    disabled={product.stockQuantity === 0 || quantity <= 5}
                     aria-label="Decrease quantity"
                   >
                     <i className="fa-solid fa-minus"></i>
@@ -438,6 +438,9 @@ export default function ProductDetailTemplate({ product, displayRelated = [] }) 
                 >
                   <i className={isWishlisted ? 'fa-solid fa-heart' : 'fa-regular fa-heart'}></i>
                 </button>
+              </div>
+              <div style={{ marginTop: '0.5rem', fontSize: '0.8rem', color: 'var(--color-charcoal)', fontWeight: '500', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <i className="fa-solid fa-circle-info" style={{ color: 'var(--color-gold)' }}></i> Minimum Order Quantity: 5 Pieces
               </div>
 
               {/* 10. Request Customization Button */}

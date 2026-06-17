@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useCallback } from 'react';
 import { USD_RATE } from '../data/products';
+import { useCart } from './CartContext';
 
 const CurrencyContext = createContext();
 
@@ -10,9 +11,17 @@ export const useCurrency = () => {
 };
 
 export const CurrencyProvider = ({ children }) => {
+  const { settings } = useCart();
   const [currency, setCurrency] = useState(() => {
     return localStorage.getItem('hampers_nest_currency') || 'INR';
   });
+
+  // Sync with settings if local storage is not set
+  React.useEffect(() => {
+    if (!localStorage.getItem('hampers_nest_currency') && settings?.currency) {
+      setCurrency(settings.currency);
+    }
+  }, [settings?.currency]);
 
   const toggleCurrency = useCallback((val) => {
     const next = val || (currency === 'INR' ? 'USD' : 'INR');

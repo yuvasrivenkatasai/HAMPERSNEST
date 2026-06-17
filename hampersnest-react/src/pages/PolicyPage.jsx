@@ -47,8 +47,8 @@ export default function PolicyPage({ slug }) {
   return (
     <div className="page-container">
       <SEO 
-        title={`${policy.title} | Hampers Nest`}
-        description={policy.description || `Read the ${policy.title} for Hampers Nest.`}
+        title={`${policy.title} | ${settings?.storeName || 'Hampers Nest'}`}
+        description={policy.description || `Read the ${policy.title} for ${settings?.storeName || 'Hampers Nest'}.`}
       />
       
       {/* Page Header */}

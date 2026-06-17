@@ -121,11 +121,11 @@ export default function Home() {
   const homeSchema = {
     "@context": "https://schema.org",
     "@type": "LocalBusiness",
-    "name": "Hampers Nest",
+    "name": settings?.storeName || "Hampers Nest",
     "image": window.location.origin + "/assets/hero_banner.webp",
     "@id": window.location.origin + "/#localbusiness",
     "url": window.location.origin,
-    "telephone": "+917989202194",
+    "telephone": `+${settings?.whatsappNumber}`,
     "priceRange": "₹₹",
     "address": {
       "@type": "PostalAddress",
@@ -167,7 +167,7 @@ export default function Home() {
   return (
     <div style={{ overflow: 'hidden' }}>
       <SEO
-        title="Hampers Nest | Premium Customized Gift Hampers & Return Gifts Hyderabad"
+        title={`${settings?.storeName || 'Hampers Nest'} | Premium Customized Gift Hampers & Return Gifts Hyderabad`}
         description="Discover premium customized gift hampers, luxury wedding return gifts, baby shower boxes, housewarming kits, and corporate gifts by Hampers Nest Hyderabad. Ship across India."
         keywords="wedding return gifts Hyderabad, customized gift hampers, baby shower gifts Hyderabad, brass items return gifts, corporate gift sets, luxury gifting Hyderabad, hampersnest, hamspersnest"
         schema={homeSchema}

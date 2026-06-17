@@ -18,7 +18,7 @@ export default function Settings() {
     announcementText: '',
     announcementActive: false,
     businessAddress: 'Uppal, Hyderabad, Telangana, India',
-    googleMapsUrl: 'https://www.google.com/maps/place/Hampers+Nest/@17.4192972,78.6025777',
+    googleMapsUrl: 'https://www.google.com/maps/dir/?api=1&destination=Uppal%2C%20Hyderabad%2C%20Telangana%2C%20India',
     whatsappNumber: '917989202194',
     instagramUrl: 'https://www.instagram.com/hampersnest',
     youtubeUrl: 'https://youtube.com/@hampersnestgifts',
@@ -26,7 +26,12 @@ export default function Settings() {
     linkedinUrl: '',
     pinterestUrl: '',
     twitterUrl: '',
-    popularSearches: '#WeddingReturnGifts, #BabyShowerGifts, #CorporateGifts, #BrassReturnGifts'
+    popularSearches: '#WeddingReturnGifts, #BabyShowerGifts, #CorporateGifts, #BrassReturnGifts',
+    studioHoursTitle: 'Curation Studio Hours',
+    studioHoursMonSat: 'Monday - Saturday: 10:00 AM - 7:00 PM',
+    studioHoursSun: 'Sunday: Closed (Available for emergency wedding deliveries)',
+    studioWalkInMsg: 'Walk-ins by prior appointment only.',
+    ownerContactNumber: '+91 79892 02194'
   });
   const [settingsLoading, setSettingsLoading] = useState(true);
   const [settingsMessage, setSettingsMessage] = useState(null);
@@ -277,6 +282,65 @@ export default function Settings() {
                   value={settingsData.whatsappNumber}
                   onChange={handleSettingsChange}
                   placeholder="e.g. 917989202194"
+                />
+              </div>
+
+              <h4 style={{ color: 'var(--color-purple)', borderBottom: '1px solid var(--color-beige)', paddingBottom: '8px', marginBottom: '15px', marginTop: '20px' }}>
+                <i className="fa-regular fa-clock"></i> Curation Studio Hours Management
+              </h4>
+
+              <div className="form-group">
+                <label className="form-label">Studio Hours Title</label>
+                <input
+                  type="text"
+                  name="studioHoursTitle"
+                  className="form-input"
+                  value={settingsData.studioHoursTitle || ''}
+                  onChange={handleSettingsChange}
+                />
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Monday–Saturday Timing</label>
+                <input
+                  type="text"
+                  name="studioHoursMonSat"
+                  className="form-input"
+                  value={settingsData.studioHoursMonSat || ''}
+                  onChange={handleSettingsChange}
+                />
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Sunday Timing</label>
+                <input
+                  type="text"
+                  name="studioHoursSun"
+                  className="form-input"
+                  value={settingsData.studioHoursSun || ''}
+                  onChange={handleSettingsChange}
+                />
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Walk-in Message</label>
+                <input
+                  type="text"
+                  name="studioWalkInMsg"
+                  className="form-input"
+                  value={settingsData.studioWalkInMsg || ''}
+                  onChange={handleSettingsChange}
+                />
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Owner Contact Number</label>
+                <input
+                  type="text"
+                  name="ownerContactNumber"
+                  className="form-input"
+                  value={settingsData.ownerContactNumber || ''}
+                  onChange={handleSettingsChange}
                 />
               </div>
 

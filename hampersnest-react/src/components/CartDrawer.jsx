@@ -65,6 +65,11 @@ export default function CartDrawer() {
       return;
     }
 
+    if (cart.some(item => item.quantity < 5)) {
+      alert('Minimum order quantity is 5 pieces per product. Please increase your quantities.');
+      return;
+    }
+
     const orderPayload = {
       customer: {
         name: formData.name,
@@ -170,7 +175,9 @@ export default function CartDrawer() {
                         <div className="cart-item-qty">
                           <button
                             onClick={() => updateQuantity(item.cartItemId, item.quantity - 1)}
+                            disabled={item.quantity <= 5}
                             aria-label="Decrease quantity"
+                            style={{ opacity: item.quantity <= 5 ? 0.5 : 1, cursor: item.quantity <= 5 ? 'not-allowed' : 'pointer' }}
                           >
                             <i className="fa-solid fa-minus"></i>
                           </button>

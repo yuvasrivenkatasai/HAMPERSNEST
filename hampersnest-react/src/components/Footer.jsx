@@ -6,9 +6,9 @@ export default function Footer() {
   const { settings } = useCart();
   const handleWhatsappDirect = (e) => {
     e.preventDefault();
-    const WHATSAPP_NUMBER = "917989202194";
-    const welcomeText = encodeURIComponent('Hi Hampers Nest! I am interested in viewing your customized Return Gifts collection and getting a catalog.');
-    window.open(`https://api.whatsapp.com/send?phone=${WHATSAPP_NUMBER}&text=${welcomeText}`, '_blank');
+    const whatsappNumber = settings?.whatsappNumber;
+    const welcomeText = encodeURIComponent(`Hi ${settings?.storeName || 'Hampers Nest'}! I am interested in viewing your customized Return Gifts collection and getting a catalog.`);
+    window.open(`https://wa.me/${whatsappNumber}?text=${welcomeText}`, '_blank');
   };
 
   return (
@@ -26,12 +26,12 @@ export default function Footer() {
                 margin: '0',
                 textTransform: 'uppercase'
               }}>
-                HAMPERS NEST
+                {settings?.storeName?.toUpperCase() || 'HAMPERS NEST'}
               </h2>
             </Link>
           </div>
           <p className="footer-about-text">
-            Hampers Nest curation studio crafts exceptional Customized Hampers & traditional/modern return gifts for
+            {settings?.storeName || 'Hampers Nest'} curation studio crafts exceptional Customized Hampers & traditional/modern return gifts for
             life's most precious occasions. Based out of Hyderabad, shipping premium bundles across India.
           </p>
         </div>
@@ -60,14 +60,20 @@ export default function Footer() {
           </ul>
         </div>
 
-
+        {/* Contact Info Column */}
+        <div className="footer-col">
+          <h4 className="footer-title">Contact Us</h4>
+          <ul className="footer-links">
+            <li><a href={`mailto:${settings?.contactEmail || 'Hampersnestgifts@gmail.com'}`}><i className="fa-regular fa-envelope" style={{ marginRight: '8px' }}></i>{settings?.contactEmail || 'Hampersnestgifts@gmail.com'}</a></li>
+            <li><a href={`https://wa.me/${settings?.whatsappNumber}`} target="_blank" rel="noopener noreferrer"><i className="fa-brands fa-whatsapp" style={{ marginRight: '8px' }}></i>+{settings?.whatsappNumber}</a></li>
+          </ul>
+        </div>
       </div>
 
       {/* Footer Bottom Bar */}
       <div className="container footer-bottom" style={{ paddingTop: '2rem', borderTop: '1px solid rgba(255, 255, 255, 0.1)' }}>
         <div className="footer-policy-links" style={{ display: 'flex', gap: '15px', flexWrap: 'wrap', marginBottom: '1rem', fontSize: '0.8rem', opacity: 0.8 }}>
-          {settings?.customPolicies 
-            ? settings.customPolicies.filter(p => p.isPublished).map((policy, index, array) => (
+          {settings?.customPolicies && settings.customPolicies.filter(p => p.isPublished).map((policy, index, array) => (
               <React.Fragment key={policy.id}>
                 <Link 
                   to={policy.isCustom ? `/policy/${policy.id}` : `/${policy.id}`} 
@@ -79,21 +85,9 @@ export default function Footer() {
                   <span style={{ color: 'rgba(255,255,255,0.3)' }}>|</span>
                 )}
               </React.Fragment>
-            ))
-            : (
-              <>
-                <Link to="/privacy-policy" style={{ color: 'rgba(255,255,255,0.7)', transition: 'color 0.2s' }}>Privacy Policy</Link>
-                <span style={{ color: 'rgba(255,255,255,0.3)' }}>|</span>
-                <Link to="/shipping-policy" style={{ color: 'rgba(255,255,255,0.7)', transition: 'color 0.2s' }}>Shipping Policy</Link>
-                <span style={{ color: 'rgba(255,255,255,0.3)' }}>|</span>
-                <Link to="/refund-policy" style={{ color: 'rgba(255,255,255,0.7)', transition: 'color 0.2s' }}>Refund Policy</Link>
-                <span style={{ color: 'rgba(255,255,255,0.3)' }}>|</span>
-                <Link to="/terms-and-conditions" style={{ color: 'rgba(255,255,255,0.7)', transition: 'color 0.2s' }}>Terms & Conditions</Link>
-              </>
-            )
-          }
+            ))}
         </div>
-        <p>&copy; 2026 Hampers Nest. All Rights Reserved. Crafted with love for Hyderabad's premium celebrations.</p>
+        <p>&copy; {new Date().getFullYear()} {settings?.storeName || 'Hampers Nest'}. All Rights Reserved. Crafted with love for Hyderabad's premium celebrations.</p>
         <div className="footer-socials">
           {settings?.facebookUrl && (
             <a href={settings.facebookUrl} target="_blank" rel="noopener noreferrer" aria-label="Facebook">

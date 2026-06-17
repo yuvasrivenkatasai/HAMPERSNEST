@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useCart } from '../context/CartContext';
 
 const OCCASIONS = [
   'Wedding Return Gifts',
@@ -30,12 +31,11 @@ const CUSTOMIZATION_OPTIONS = [
   'Invitation Inserts',
 ];
 
-const WHATSAPP_NUMBER = "917989202194";
 
 const EMPTY_FORM = {
   occasion: '',
   eventDate: '',
-  quantity: '',
+  quantity: '5',
   budget: '',
   location: '',
   customizations: [],
@@ -46,11 +46,9 @@ const EMPTY_FORM = {
 };
 
 export default function QuoteModal({ open, onClose }) {
+  const { settings } = useCart();
   const [form, setForm] = useState(EMPTY_FORM);
-  const [imageFile, setImageFile] = useState(null);
-  const [imagePreview, setImagePreview] = useState(null);
   const [errors, setErrors] = useState({});
-  const fileInputRef = useRef(null);
 
   // Lock body scroll when open
   useEffect(() => {
@@ -73,8 +71,6 @@ export default function QuoteModal({ open, onClose }) {
   useEffect(() => {
     if (!open) {
       setForm(EMPTY_FORM);
-      setImageFile(null);
-      setImagePreview(null);
       setErrors({});
     }
   }, [open]);
@@ -97,19 +93,6 @@ export default function QuoteModal({ open, onClose }) {
           : [...prev.customizations, option],
       };
     });
-  };
-
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    const allowed = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
-    if (!allowed.includes(file.type)) {
-      setErrors((prev) => ({ ...prev, image: 'Only JPG, PNG, WEBP files allowed.' }));
-      return;
-    }
-    setImageFile(file);
-    setImagePreview(URL.createObjectURL(file));
-    setErrors((prev) => ({ ...prev, image: '' }));
   };
 
   const validate = () => {
@@ -136,7 +119,7 @@ export default function QuoteModal({ open, onClose }) {
       : 'None';
 
     const message =
-      `Hello Hampers Nest,\n\n` +
+      `Hello ${settings?.storeName || 'Hampers Nest'},\n\n` +
       `I would like a quote for my event.\n\n` +
       `*Occasion:*\n${form.occasion || 'Not specified'}\n\n` +
       `*Event Date:*\n${form.eventDate || 'Not specified'}\n\n` +
@@ -150,7 +133,8 @@ export default function QuoteModal({ open, onClose }) {
       (form.notes ? `*Additional Notes:*\n${form.notes}\n\n` : '') +
       `Please share suitable options.\n\nThank you.`;
 
-    window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`, '_blank');
+    const whatsappNumber = settings?.whatsappNumber;
+    window.open(`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`, '_blank');
     onClose();
   };
 
@@ -215,7 +199,7 @@ export default function QuoteModal({ open, onClose }) {
                 name="quantity"
                 className="quote-input"
                 placeholder="e.g. 150"
-                min="1"
+                min="5"
                 value={form.quantity}
                 onChange={handleChange}
               />
@@ -270,44 +254,7 @@ export default function QuoteModal({ open, onClose }) {
             </div>
           </div>
 
-          {/* Image Upload */}
-          <div className="quote-form-group">
-            <label className="quote-label">
-              Upload Reference Image <span className="quote-optional">(Optional)</span>
-            </label>
-            <div
-              className="quote-upload-area"
-              onClick={() => fileInputRef.current?.click()}
-            >
-              {imagePreview ? (
-                <div className="quote-image-preview">
-                  <img src={imagePreview} alt="Reference preview" />
-                  <button
-                    type="button"
-                    className="quote-image-remove"
-                    onClick={(e) => { e.stopPropagation(); setImageFile(null); setImagePreview(null); }}
-                    aria-label="Remove image"
-                  >
-                    <i className="fa-solid fa-xmark"></i>
-                  </button>
-                </div>
-              ) : (
-                <>
-                  <i className="fa-solid fa-cloud-arrow-up"></i>
-                  <span>Click to upload a reference image</span>
-                  <span className="quote-upload-hint">JPG, JPEG, PNG, WEBP accepted</span>
-                </>
-              )}
-            </div>
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept=".jpg,.jpeg,.png,.webp"
-              style={{ display: 'none' }}
-              onChange={handleImageChange}
-            />
-            {errors.image && <span className="quote-error">{errors.image}</span>}
-          </div>
+
 
           {/* Row 3: Name + Mobile */}
           <div className="quote-form-row">

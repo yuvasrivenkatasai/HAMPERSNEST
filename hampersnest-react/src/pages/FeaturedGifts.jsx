@@ -7,7 +7,7 @@ import ProductCard from '../components/ProductCard';
 
 export default function FeaturedGifts() {
   const navigate = useNavigate();
-  const { products, addToCart, toggleWishlist, isInWishlist } = useCart();
+  const { products, addToCart, toggleWishlist, isInWishlist, settings } = useCart();
 
   const featuredItems = products ? products.filter(p => p.isFeatured) : [];
 
@@ -36,9 +36,9 @@ export default function FeaturedGifts() {
     "url": window.location.href,
     "provider": {
       "@type": "LocalBusiness",
-      "name": "Hampers Nest",
+      "name": settings?.storeName || "Hampers Nest",
       "image": window.location.origin + "/assets/hero_banner.webp",
-      "telephone": "+917989202194",
+      "telephone": `+${settings?.whatsappNumber}`,
       "address": {
         "@type": "PostalAddress",
         "addressLocality": "Hyderabad",
@@ -50,7 +50,7 @@ export default function FeaturedGifts() {
   return (
     <div className="page-container">
       <SEO 
-        title="Curator's Choice: Featured Luxury Hampers | Hampers Nest"
+        title={`Curator's Choice: Featured Luxury Hampers | ${settings?.storeName || 'Hampers Nest'}`}
         description="Explore our most loved customized gift hampers. Handpicked and tailored perfectly for premium weddings, baby showers, and grand celebrations."
         keywords="featured hampers, premium return gifts, best gift hampers hyderabad, hampersnest best sellers"
         schema={featuredSchema}
@@ -63,14 +63,23 @@ export default function FeaturedGifts() {
           <p style={{ marginBottom: '1.25rem' }}>Handpicked premium hampers crafted to elevate your celebrations</p>
 
           {/* Top Banner SEO Tags */}
-          <div className="trending-tags-banner">
-            <span className="trending-label">Popular Searches:</span>
-            <Link to="/collections?category=Wedding" className="trending-tag-btn">#WeddingReturnGifts</Link>
-            <Link to="/collections?category=Baby%20Shower" className="trending-tag-btn">#BabyShowerHampers</Link>
-            <Link to="/collections?category=Corporate" className="trending-tag-btn">#CorporateGifts</Link>
-            <Link to="/collections?category=Brass" className="trending-tag-btn">#BrassReturnGifts</Link>
-            <Link to="/collections?category=Customized" className="trending-tag-btn">#CustomGiftBoxes</Link>
-          </div>
+          {settings?.popularSearches && (
+            <div className="trending-tags-banner">
+              <span className="trending-label">Popular Searches:</span>
+              {settings.popularSearches.split(',').map((tag, idx) => {
+                const cleanTag = tag.trim();
+                let cat = '';
+                if (cleanTag.toLowerCase().includes('wedding')) cat = 'Wedding';
+                else if (cleanTag.toLowerCase().includes('baby')) cat = 'Baby Shower';
+                else if (cleanTag.toLowerCase().includes('corporate')) cat = 'Corporate';
+                else if (cleanTag.toLowerCase().includes('brass')) cat = 'Brass';
+                else if (cleanTag.toLowerCase().includes('custom')) cat = 'Customized';
+                return (
+                  <Link key={idx} to={cat ? `/collections?category=${cat}` : '/collections'} className="trending-tag-btn">{cleanTag}</Link>
+                );
+              })}
+            </div>
+          )}
         </div>
       </div>
 

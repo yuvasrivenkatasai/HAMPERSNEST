@@ -9,7 +9,7 @@ import { API_BASE } from '../config.js';
 export default function ProductDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { products, addToCart, toggleWishlist, isInWishlist } = useCart();
+  const { products, addToCart, toggleWishlist, isInWishlist, settings } = useCart();
 
   // Find current product
   const [localProduct, setLocalProduct] = useState(null);
@@ -134,7 +134,7 @@ export default function ProductDetail() {
   if (!product) {
     return (
       <div className="page-container" style={{ textAlign: 'center', padding: '5rem 2rem' }}>
-        <SEO title="Product Not Found | Hampers Nest" description="The requested customized gift hamper was not found." />
+        <SEO title={`Product Not Found | ${settings?.storeName || 'Hampers Nest'}`} description="The requested customized gift hamper was not found." />
         <i className="fa-solid fa-triangle-exclamation" style={{ fontSize: '3rem', color: 'var(--color-gold)', marginBottom: '1.5rem' }}></i>
         <h2>Product Not Found</h2>
         <p style={{ margin: '1rem 0 2rem 0', color: '#666' }}>The product you are looking for does not exist or has been moved.</p>
@@ -206,7 +206,7 @@ export default function ProductDetail() {
     "sku": product.id,
     "brand": {
       "@type": "Brand",
-      "name": "Hampers Nest"
+      "name": settings?.storeName || "Hampers Nest"
     },
     "offers": {
       "@type": "Offer",
@@ -218,7 +218,7 @@ export default function ProductDetail() {
       "availability": "https://schema.org/InStock",
       "seller": {
         "@type": "LocalBusiness",
-        "name": "Hampers Nest"
+        "name": settings?.storeName || "Hampers Nest"
       }
     },
     "aggregateRating": {
@@ -231,7 +231,7 @@ export default function ProductDetail() {
   return (
     <div className="page-container">
       <SEO 
-        title={`${product.name} | Customized Gift Hampers Hyderabad | Hampers Nest`}
+        title={`${product.name} | Customized Gift Hampers Hyderabad | ${settings?.storeName || 'Hampers Nest'}`}
         description={`${product.description} Customizable packaging, ribbons, and gift tags available. Order directly via WhatsApp.`}
         keywords={`${product.name.toLowerCase()}, custom gift box hyderabad, return gift hampers, hampersnest product, hampersnest ${product.id}`}
         ogImage={product.image}

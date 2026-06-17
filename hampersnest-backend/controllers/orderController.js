@@ -18,6 +18,11 @@ export const createOrder = async (req, res) => {
     return res.status(400).json({ message: 'Order details are incomplete' });
   }
 
+  // Validate Minimum Order Quantity (MOQ = 5)
+  if (items.some(item => Number(item.quantity) < 5)) {
+    return res.status(400).json({ message: 'Minimum order quantity is 5 pieces per product.' });
+  }
+
   try {
     const orderId = generateOrderId();
     const createdOrder = await Order.create({
