@@ -10,8 +10,6 @@ import Products from './pages/Products';
 import Inquiries from './pages/Inquiries';
 import Categories from './pages/Categories';
 import Inventory from './pages/Inventory';
-import MediaLibrary from './pages/Gallery';
-import HeroBannerManager from './pages/HeroBannerManager';
 import Settings from './pages/Settings';
 import Users from './pages/Users';
 import Testimonials from './pages/Testimonials';
@@ -63,16 +61,6 @@ function NavigationMenu() {
         <li>
           <Link to="/inquiries" className={`sidebar-link ${location.pathname === '/inquiries' ? 'active' : ''}`}>
             <i className="fa-solid fa-envelope-open-text"></i> Inquiries
-          </Link>
-        </li>
-        <li>
-          <Link to="/media" className={`sidebar-link ${location.pathname === '/media' ? 'active' : ''}`}>
-            <i className="fa-solid fa-photo-film"></i> Media Library
-          </Link>
-        </li>
-        <li>
-          <Link to="/hero-banner" className={`sidebar-link ${location.pathname === '/hero-banner' ? 'active' : ''}`}>
-            <i className="fa-solid fa-panorama"></i> Hero Banner Manager
           </Link>
         </li>
         <li>
@@ -142,8 +130,6 @@ function AdminLayout({ children }) {
       case '/inventory': return 'Stock Management';
       case '/categories': return 'Categories Management';
       case '/inquiries': return 'Customer Inquiries';
-      case '/media': return 'Media Library';
-      case '/hero-banner': return 'Hero Banner Manager';
       case '/testimonials': return 'Customer Testimonials';
       case '/policies': return 'Policy Management';
       case '/settings': return 'System Settings';
@@ -236,8 +222,6 @@ export default function App() {
                   <Route path="/inventory" element={<Inventory />} />
                   <Route path="/categories" element={<Categories />} />
                   <Route path="/inquiries" element={<Inquiries />} />
-                  <Route path="/media" element={<MediaLibrary />} />
-                  <Route path="/hero-banner" element={<HeroBannerManager />} />
                   <Route path="/testimonials" element={<Testimonials />} />
                   <Route path="/policies" element={<Policies />} />
                   <Route path="/settings" element={<Settings />} />
