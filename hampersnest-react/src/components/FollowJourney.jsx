@@ -6,25 +6,6 @@ export default function FollowJourney() {
   const sectionRef = useRef(null);
   const { settings } = useCart();
 
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add('active');
-            observer.unobserve(entry.target);
-          }
-        });
-      },
-      { threshold: 0.1 }
-    );
-
-    const elements = document.querySelectorAll('.journey-reveal');
-    elements.forEach((el) => observer.observe(el));
-
-    return () => observer.disconnect();
-  }, []);
-
   const socialCards = [
     {
       id: 'instagram',
@@ -75,6 +56,29 @@ export default function FollowJourney() {
       btnText: 'FOLLOW'
     }
   ].filter(social => social.url && social.url.trim() !== '');
+
+  useEffect(() => {
+    if (socialCards.length === 0 || !sectionRef.current) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('active');
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.1 }
+    );
+
+    const elements = sectionRef.current.querySelectorAll('.journey-reveal');
+    elements.forEach((el) => observer.observe(el));
+
+    return () => observer.disconnect();
+  }, [socialCards.length]);
+
+
 
   if (socialCards.length === 0) return null;
 
