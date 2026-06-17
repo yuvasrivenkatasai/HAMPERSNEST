@@ -12,33 +12,79 @@ export default function Collections() {
   const navigate = useNavigate();
 
   const [activeCategory, setActiveCategory] = useState('All');
+  const [activeSubcategory, setActiveSubcategory] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('featured');
   const [currentPage, setCurrentPage] = useState(1);
+  const productsGridRef = React.useRef(null);
+
   const storefrontCategories = useMemo(() => {
     const configuredCategories = Array.isArray(settings?.categories) ? settings.categories : [];
-    const categoryOptions = configuredCategories
+    return configuredCategories
       .map((category) => ({
         id: String(category.id || category.label || '').trim(),
-        label: String(category.label || category.id || '').trim()
+        label: String(category.label || category.id || '').trim(),
+        parentId: category.parentId || null
       }))
       .filter((category) => category.id);
-
-    return [{ id: 'All', label: 'All' }, ...categoryOptions];
   }, [settings]);
+
+  const mainCategories = useMemo(() => {
+    return [{ id: 'All', label: 'All' }, ...storefrontCategories.filter(c => !c.parentId)];
+  }, [storefrontCategories]);
+
+  const activeSubcategoriesList = useMemo(() => {
+    if (activeCategory === 'All') return [];
+    return storefrontCategories.filter(c => c.parentId === activeCategory);
+  }, [activeCategory, storefrontCategories]);
+
+  const popularSearches = useMemo(() => {
+    if (!settings?.popularSearches) return [];
+    return settings.popularSearches.split(',').map(s => s.trim().replace(/^#/, '')).filter(Boolean);
+  }, [settings?.popularSearches]);
   const getCategoryLabel = (categoryId) => {
     return storefrontCategories.find(category => category.id === categoryId)?.label || categoryId || '';
   };
 
   const getCategoryIdByLabel = (label) => {
     const match = storefrontCategories.find(
-      category => category.label.toLowerCase() === label.toLowerCase()
+      category => category.label.toLowerCase().replace(/\s/g, '') === label.toLowerCase().replace(/\s/g, '')
     );
     return match?.id || label;
   };
 
   const handleCategoryLabelChange = (label) => {
-    handleCategoryChange(getCategoryIdByLabel(label));
+    handleHashtagClick(label);
+  };
+
+  const scrollToGrid = () => {
+    if (productsGridRef.current) {
+      const yOffset = -80; // offset for fixed header
+      const y = productsGridRef.current.getBoundingClientRect().top + window.pageYOffset + yOffset;
+      window.scrollTo({ top: y, behavior: 'smooth' });
+    }
+  };
+
+  const handleHashtagClick = (hashtagText) => {
+    const cleanText = hashtagText.replace(/^#/, '').trim();
+    const catId = getCategoryIdByLabel(cleanText);
+    const categoryObj = storefrontCategories.find(c => c.id === catId);
+    
+    if (categoryObj) {
+      if (categoryObj.parentId) {
+        // It's a subcategory
+        setActiveCategory(categoryObj.parentId);
+        setActiveSubcategory(categoryObj.id);
+        searchParams.set('category', categoryObj.parentId);
+        setSearchParams(searchParams);
+      } else {
+        // It's a main category
+        handleCategoryChange(categoryObj.id);
+      }
+    } else {
+      setSearchQuery(cleanText);
+    }
+    scrollToGrid();
   };
 
   // Sync category from URL search parameter
@@ -49,12 +95,20 @@ export default function Collections() {
              c.label.toLowerCase() === queryCategory.toLowerCase()
       );
       if (match) {
-        setActiveCategory(match.id);
+        if (match.parentId) {
+          setActiveCategory(match.parentId);
+          setActiveSubcategory(match.id);
+        } else {
+          setActiveCategory(match.id);
+          setActiveSubcategory(null);
+        }
       } else {
         setActiveCategory('All');
+        setActiveSubcategory(null);
       }
     } else {
       setActiveCategory('All');
+      setActiveSubcategory(null);
     }
     setCurrentPage(1);
   }, [queryCategory, storefrontCategories]);
@@ -67,6 +121,7 @@ export default function Collections() {
   // Handle category tab click & update URL params
   const handleCategoryChange = (category) => {
     setActiveCategory(category);
+    setActiveSubcategory(null);
     setCurrentPage(1);
     if (category === 'All') {
       searchParams.delete('category');
@@ -74,6 +129,12 @@ export default function Collections() {
       searchParams.set('category', category);
     }
     setSearchParams(searchParams);
+  };
+
+  const handleSubcategoryChange = (subcatId) => {
+    setActiveSubcategory(subcatId);
+    setCurrentPage(1);
+    scrollToGrid();
   };
 
   // Filter & Sort Logic
@@ -84,6 +145,9 @@ export default function Collections() {
     // 1. Category Filter
     if (activeCategory !== 'All') {
       result = result.filter(p => p.category === activeCategory);
+    }
+    if (activeSubcategory) {
+      result = result.filter(p => p.subCategory === activeSubcategory);
     }
 
     // 2. Search Filter
@@ -108,7 +172,7 @@ export default function Collections() {
     }
 
     return result;
-  }, [activeCategory, searchQuery, sortBy, products]);
+  }, [activeCategory, activeSubcategory, searchQuery, sortBy, products]);
 
   // Pagination Logic
   const itemsPerPage = 8;
@@ -193,11 +257,15 @@ export default function Collections() {
           {/* Top Banner SEO Tags */}
           <div className="trending-tags-banner">
             <span className="trending-label">Popular Searches:</span>
-            <button onClick={() => handleCategoryLabelChange('Wedding')} className="trending-tag-btn">#WeddingReturnGifts</button>
-            <button onClick={() => handleCategoryLabelChange('Baby Shower')} className="trending-tag-btn">#BabyShowerHampers</button>
-            <button onClick={() => handleCategoryLabelChange('Corporate Gifting')} className="trending-tag-btn">#CorporateGifts</button>
-            <button onClick={() => handleCategoryLabelChange('Brass Gifting')} className="trending-tag-btn">#BrassReturnGifts</button>
-            <button onClick={() => handleCategoryLabelChange('Customized Hampers')} className="trending-tag-btn">#CustomGiftBoxes</button>
+            {popularSearches.length > 0 ? popularSearches.map(term => (
+              <button key={term} onClick={() => handleHashtagClick(term)} className="trending-tag-btn">#{term}</button>
+            )) : (
+              <>
+                <button onClick={() => handleHashtagClick('WeddingReturnGifts')} className="trending-tag-btn">#WeddingReturnGifts</button>
+                <button onClick={() => handleHashtagClick('BabyShowerHampers')} className="trending-tag-btn">#BabyShowerHampers</button>
+                <button onClick={() => handleHashtagClick('CorporateGifts')} className="trending-tag-btn">#CorporateGifts</button>
+              </>
+            )}
           </div>
         </div>
       </div>
@@ -205,8 +273,8 @@ export default function Collections() {
       <div className="container" style={{ paddingTop: '1rem' }}>
 
         {/* === MASTER CATEGORY TABS === */}
-        <div className="category-tabs reveal" style={{ display: 'flex', justifyContent: 'center', marginBottom: '2rem' }}>
-          {storefrontCategories.map((cat) => (
+        <div className="category-tabs reveal" style={{ display: 'flex', justifyContent: 'center', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
+          {mainCategories.map((cat) => (
             <button
               key={cat.id}
               onClick={() => handleCategoryChange(cat.id)}
@@ -217,8 +285,43 @@ export default function Collections() {
           ))}
         </div>
 
+        {/* === SUBCATEGORY CHIPS === */}
+        {activeSubcategoriesList.length > 0 && (
+          <div className="subcategory-chips reveal" style={{ display: 'flex', justifyContent: 'center', gap: '10px', flexWrap: 'wrap', marginBottom: '2rem' }}>
+            {activeSubcategoriesList.map(subcat => (
+              <button
+                key={subcat.id}
+                onClick={() => handleSubcategoryChange(subcat.id)}
+                className={`subcategory-chip ${activeSubcategory === subcat.id ? 'active' : ''}`}
+                style={{
+                  padding: '6px 14px',
+                  borderRadius: '20px',
+                  border: activeSubcategory === subcat.id ? 'none' : '1px solid var(--color-beige)',
+                  background: activeSubcategory === subcat.id ? 'var(--color-purple)' : '#fff',
+                  color: activeSubcategory === subcat.id ? '#fff' : 'var(--color-gray-text)',
+                  fontSize: '0.85rem',
+                  fontWeight: 500,
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                  boxShadow: activeSubcategory === subcat.id ? '0 2px 8px rgba(112, 26, 117, 0.3)' : 'none'
+                }}
+              >
+                #{subcat.label.replace(/\s+/g, '')}
+              </button>
+            ))}
+            {activeSubcategory && (
+              <button 
+                onClick={() => handleSubcategoryChange(null)}
+                style={{ background: 'none', border: 'none', color: 'var(--color-gold-dark)', fontSize: '0.85rem', cursor: 'pointer', textDecoration: 'underline' }}
+              >
+                Clear
+              </button>
+            )}
+          </div>
+        )}
+
         {/* === SEARCH + SORT BAR === */}
-        <div className="filter-bar reveal" style={{ marginBottom: '1.5rem' }}>
+        <div className="filter-bar reveal" ref={productsGridRef} style={{ marginBottom: '1.5rem' }}>
           <div className="search-input-wrapper">
             <i className="fa-solid fa-magnifying-glass"></i>
             <input
@@ -251,10 +354,10 @@ export default function Collections() {
           <span>Showing {paginatedProducts.length} of {filteredProducts.length} products</span>
           {searchQuery && (
             <button
-              onClick={() => setSearchQuery('')}
+              onClick={() => { setSearchQuery(''); setActiveSubcategory(null); }}
               style={{ background: 'none', border: 'none', color: 'var(--color-gold-dark)', cursor: 'pointer', fontWeight: 500, fontSize: '0.85rem' }}
             >
-              Clear Search ✕
+              Clear Filters ✕
             </button>
           )}
         </div>
@@ -268,7 +371,7 @@ export default function Collections() {
               Try modifying your search or selecting a different category.
             </p>
             <button
-              onClick={() => { setSearchQuery(''); setActiveCategory('All'); }}
+              onClick={() => { setSearchQuery(''); setActiveCategory('All'); setActiveSubcategory(null); }}
               className="btn btn-secondary"
               style={{ marginTop: '1.5rem' }}
             >

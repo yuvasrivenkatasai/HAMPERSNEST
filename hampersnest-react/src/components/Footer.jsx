@@ -66,13 +66,32 @@ export default function Footer() {
       {/* Footer Bottom Bar */}
       <div className="container footer-bottom" style={{ paddingTop: '2rem', borderTop: '1px solid rgba(255, 255, 255, 0.1)' }}>
         <div className="footer-policy-links" style={{ display: 'flex', gap: '15px', flexWrap: 'wrap', marginBottom: '1rem', fontSize: '0.8rem', opacity: 0.8 }}>
-          <Link to="/privacy-policy" style={{ color: 'rgba(255,255,255,0.7)', transition: 'color 0.2s' }}>Privacy Policy</Link>
-          <span style={{ color: 'rgba(255,255,255,0.3)' }}>|</span>
-          <Link to="/shipping-policy" style={{ color: 'rgba(255,255,255,0.7)', transition: 'color 0.2s' }}>Shipping Policy</Link>
-          <span style={{ color: 'rgba(255,255,255,0.3)' }}>|</span>
-          <Link to="/refund-policy" style={{ color: 'rgba(255,255,255,0.7)', transition: 'color 0.2s' }}>Refund Policy</Link>
-          <span style={{ color: 'rgba(255,255,255,0.3)' }}>|</span>
-          <Link to="/terms-and-conditions" style={{ color: 'rgba(255,255,255,0.7)', transition: 'color 0.2s' }}>Terms & Conditions</Link>
+          {settings?.customPolicies 
+            ? settings.customPolicies.filter(p => p.isPublished).map((policy, index, array) => (
+              <React.Fragment key={policy.id}>
+                <Link 
+                  to={policy.isCustom ? `/policy/${policy.id}` : `/${policy.id}`} 
+                  style={{ color: 'rgba(255,255,255,0.7)', transition: 'color 0.2s' }}
+                >
+                  {policy.title}
+                </Link>
+                {index < array.length - 1 && (
+                  <span style={{ color: 'rgba(255,255,255,0.3)' }}>|</span>
+                )}
+              </React.Fragment>
+            ))
+            : (
+              <>
+                <Link to="/privacy-policy" style={{ color: 'rgba(255,255,255,0.7)', transition: 'color 0.2s' }}>Privacy Policy</Link>
+                <span style={{ color: 'rgba(255,255,255,0.3)' }}>|</span>
+                <Link to="/shipping-policy" style={{ color: 'rgba(255,255,255,0.7)', transition: 'color 0.2s' }}>Shipping Policy</Link>
+                <span style={{ color: 'rgba(255,255,255,0.3)' }}>|</span>
+                <Link to="/refund-policy" style={{ color: 'rgba(255,255,255,0.7)', transition: 'color 0.2s' }}>Refund Policy</Link>
+                <span style={{ color: 'rgba(255,255,255,0.3)' }}>|</span>
+                <Link to="/terms-and-conditions" style={{ color: 'rgba(255,255,255,0.7)', transition: 'color 0.2s' }}>Terms & Conditions</Link>
+              </>
+            )
+          }
         </div>
         <p>&copy; 2026 Hampers Nest. All Rights Reserved. Crafted with love for Hyderabad's premium celebrations.</p>
         <div className="footer-socials">

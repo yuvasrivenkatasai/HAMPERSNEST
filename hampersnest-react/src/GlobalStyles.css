@@ -7422,3 +7422,67 @@ footer h4,
     justify-content: center;
   }
 }
+
+/* ==========================================================================
+   Policy Text Block Formatting (Rich Text Support)
+   ========================================================================== */
+.policy-text-block {
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  word-break: break-word;
+  white-space: normal;
+  max-width: 100%;
+}
+
+.policy-text-block p {
+  margin-bottom: 1.5rem;
+  line-height: 1.8;
+  color: var(--color-charcoal);
+}
+
+.policy-text-block h1,
+.policy-text-block h2,
+.policy-text-block h3,
+.policy-text-block h4,
+.policy-text-block h5,
+.policy-text-block h6 {
+  color: var(--color-purple);
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.policy-text-block ul,
+.policy-text-block ol {
+  margin-left: 20px;
+  margin-bottom: 1.5rem;
+  padding-left: 20px;
+}
+
+.policy-text-block li {
+  margin-bottom: 0.8rem;
+  line-height: 1.8;
+  color: var(--color-charcoal);
+}
+
+.policy-text-block a {
+  color: var(--color-gold);
+  text-decoration: underline;
+  transition: color 0.2s ease;
+}
+
+.policy-text-block a:hover {
+  color: var(--color-purple);
+}
+
+.policy-text-block strong,
+.policy-text-block b {
+  color: var(--color-purple);
+  font-weight: 600;
+}
+
+.policy-text-block em,
+.policy-text-block i {
+  font-style: italic;
+}

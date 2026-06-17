@@ -29,7 +29,7 @@ export const getCategories = async (req, res) => {
 // @route   POST /api/categories
 // @access  Private/Admin
 export const createCategory = async (req, res) => {
-  const { name } = req.body;
+  const { name, parentId } = req.body;
   
   if (!name) {
     return res.status(400).json({ message: 'Please provide a category name' });
@@ -41,7 +41,8 @@ export const createCategory = async (req, res) => {
   try {
     const newCategory = await Category.create({
       id: cleanId,
-      name: cleanName
+      name: cleanName,
+      parentId: parentId || null
     });
 
     res.status(201).json(newCategory);
@@ -54,7 +55,7 @@ export const createCategory = async (req, res) => {
 // @route   PUT /api/categories/:id
 // @access  Private/Admin
 export const updateCategory = async (req, res) => {
-  const { name } = req.body;
+  const { name, parentId } = req.body;
 
   if (!name) {
     return res.status(400).json({ message: 'Please provide a category name' });
@@ -69,6 +70,9 @@ export const updateCategory = async (req, res) => {
     }
 
     category.name = cleanName;
+    if (parentId !== undefined) {
+      category.parentId = parentId || null;
+    }
     await category.save();
 
     res.json(category);

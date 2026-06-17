@@ -18,11 +18,7 @@ import Gallery from './pages/Gallery';
 import AboutUs from './pages/AboutUs';
 import Contact from './pages/Contact';
 import ProductDetail from './pages/ProductDetail';
-import Policies from './pages/Policies';
-import PrivacyPolicy from './pages/PrivacyPolicy';
-import ShippingPolicy from './pages/ShippingPolicy';
-import TermsConditions from './pages/TermsConditions';
-import RefundPolicy from './pages/RefundPolicy';
+import PolicyPage from './pages/PolicyPage';
 
 import './GlobalStyles.css';
 
@@ -46,11 +42,12 @@ function AppInner() {
           <Route path="/about" element={<AboutUs />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/product/:id" element={<ProductDetail />} />
-          <Route path="/policies" element={<Policies />} />
-          <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-          <Route path="/shipping-policy" element={<ShippingPolicy />} />
-          <Route path="/terms-and-conditions" element={<TermsConditions />} />
-          <Route path="/refund-policy" element={<RefundPolicy />} />
+          {/* Dynamic Policy Routing */}
+          <Route path="/privacy-policy" element={<PolicyPage slug="privacy-policy" />} />
+          <Route path="/shipping-policy" element={<PolicyPage slug="shipping-policy" />} />
+          <Route path="/refund-policy" element={<PolicyPage slug="refund-policy" />} />
+          <Route path="/terms-and-conditions" element={<PolicyPage slug="terms-and-conditions" />} />
+          <Route path="/policy/:id" element={<PolicyPage />} />
         </Routes>
       </main>
 

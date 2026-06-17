@@ -8,7 +8,7 @@ export default function Categories() {
   const [success, setSuccess] = useState('');
   const [saving, setSaving] = useState(false);
   const [editingCategory, setEditingCategory] = useState(null); // null means "Add Category" mode
-  const [formData, setFormData] = useState({ name: '' });
+  const [formData, setFormData] = useState({ name: '', parentId: '' });
 
   const fetchCategories = async () => {
     try {
@@ -37,7 +37,8 @@ export default function Categories() {
   const handleSelectEdit = (category) => {
     setEditingCategory(category);
     setFormData({
-      name: category.name
+      name: category.name,
+      parentId: category.parentId || ''
     });
     setError('');
     setSuccess('');
@@ -45,7 +46,7 @@ export default function Categories() {
 
   const handleCancelEdit = () => {
     setEditingCategory(null);
-    setFormData({ name: '' });
+    setFormData({ name: '', parentId: '' });
     setError('');
     setSuccess('');
   };
@@ -63,10 +64,10 @@ export default function Categories() {
 
     try {
       if (editingCategory) {
-        // Edit Mode (Only name can be modified via PUT /api/categories/:id)
+        // Edit Mode
         const updated = await apiRequest(`/api/categories/${editingCategory.id}`, {
           method: 'PUT',
-          body: { name: formData.name }
+          body: { name: formData.name, parentId: formData.parentId || null }
         });
         setCategories(prev => (Array.isArray(prev) ? prev : []).map(c => c.id === editingCategory.id ? updated : c));
         setSuccess(`Category "${formData.name}" updated successfully!`);
@@ -74,14 +75,14 @@ export default function Categories() {
         // Create Mode
         const created = await apiRequest('/api/categories', {
           method: 'POST',
-          body: { name: formData.name }
+          body: { name: formData.name, parentId: formData.parentId || null }
         });
         setCategories(prev => [...prev, created]);
         setSuccess(`Category "${formData.name}" created successfully!`);
       }
       // Reset form
       setEditingCategory(null);
-      setFormData({ name: '' });
+      setFormData({ name: '', parentId: '' });
     } catch (err) {
       console.error(err);
       setError(err.message || 'Failed to save category');
@@ -150,6 +151,7 @@ export default function Categories() {
               <thead>
                 <tr>
                   <th>Display Label Name</th>
+                  <th>Type</th>
                   <th>Category GUID</th>
                   <th>Created Date</th>
                   <th style={{ textAlign: 'right' }}>Actions</th>
@@ -158,7 +160,17 @@ export default function Categories() {
               <tbody>
                 {categories.map(category => (
                   <tr key={category.id} className={editingCategory?.id === category.id ? 'active-row-highlight' : ''} style={editingCategory?.id === category.id ? { background: '#FDFBF7' } : {}}>
-                    <td className="font-semibold" style={{ color: 'var(--color-purple-dark)' }}>{category.name}</td>
+                    <td className="font-semibold" style={{ color: 'var(--color-purple-dark)' }}>
+                      {category.parentId && <span style={{color: '#999', marginRight: '5px'}}>↳</span>}
+                      {category.name}
+                    </td>
+                    <td>
+                      {category.parentId ? (
+                        <span className="badge" style={{background: '#F3E8FF', color: '#701A75'}}>Subcategory</span>
+                      ) : (
+                        <span className="badge" style={{background: '#E0F2FE', color: '#0369A1'}}>Main Category</span>
+                      )}
+                    </td>
                     <td>
                       <code style={{ background: '#F3E8FF', color: '#701A75', padding: '3px 8px', borderRadius: '4px', fontSize: '0.72rem', fontWeight: 600 }}>
                         {category.id}
@@ -193,7 +205,7 @@ export default function Categories() {
                 ))}
                 {categories.length === 0 && (
                   <tr>
-                    <td colSpan="4" style={{ textAlign: 'center', padding: '2rem', color: 'var(--color-gray-text)' }}>
+                    <td colSpan="5" style={{ textAlign: 'center', padding: '2rem', color: 'var(--color-gray-text)' }}>
                       No categories found. Create one using the form on the right.
                     </td>
                   </tr>
@@ -227,6 +239,25 @@ export default function Categories() {
               />
               <small style={{ color: 'var(--color-gray-text)', fontSize: '0.72rem', marginTop: '4px', display: 'block' }}>
                 The internal category GUID is generated automatically and cannot be edited.
+              </small>
+            </div>
+
+            <div className="form-group" style={{ marginBottom: '1.5rem' }}>
+              <label className="form-label" htmlFor="cat-parent">Parent Category (Optional)</label>
+              <select
+                id="cat-parent"
+                name="parentId"
+                className="form-select"
+                value={formData.parentId}
+                onChange={handleInputChange}
+              >
+                <option value="">-- None (Main Category) --</option>
+                {categories.filter(c => !c.parentId && c.id !== editingCategory?.id).map(c => (
+                  <option key={c.id} value={c.id}>{c.name}</option>
+                ))}
+              </select>
+              <small style={{ color: 'var(--color-gray-text)', fontSize: '0.72rem', marginTop: '4px', display: 'block' }}>
+                Select a parent if this is a subcategory. Leave blank for Main Categories.
               </small>
             </div>
 

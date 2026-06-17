@@ -25,7 +25,8 @@ export default function Settings() {
     facebookUrl: '',
     linkedinUrl: '',
     pinterestUrl: '',
-    twitterUrl: ''
+    twitterUrl: '',
+    popularSearches: '#WeddingReturnGifts, #BabyShowerGifts, #CorporateGifts, #BrassReturnGifts'
   });
   const [settingsLoading, setSettingsLoading] = useState(true);
   const [settingsMessage, setSettingsMessage] = useState(null);
@@ -218,6 +219,25 @@ export default function Settings() {
                   style={{ width: '18px', height: '18px' }}
                 />
                 <label htmlFor="announcementActive" style={{ margin: 0, fontWeight: 500 }}>Show Announcement Banner</label>
+              </div>
+
+              <h4 style={{ color: 'var(--color-purple)', borderBottom: '1px solid var(--color-beige)', paddingBottom: '8px', marginBottom: '15px', marginTop: '20px' }}>
+                <i className="fa-solid fa-fire"></i> Popular Searches (Storefront)
+              </h4>
+
+              <div className="form-group">
+                <label className="form-label">Trending Hashtags</label>
+                <input
+                  type="text"
+                  name="popularSearches"
+                  className="form-input"
+                  value={settingsData.popularSearches || ''}
+                  onChange={handleSettingsChange}
+                  placeholder="e.g. #WeddingReturnGifts, #CorporateGifts"
+                />
+                <small style={{ color: 'var(--color-gray-text)', fontSize: '0.75rem', marginTop: '4px', display: 'block' }}>
+                  Comma separated. These will appear as quick-filter chips on the Collections page. Make sure the text matches your category/subcategory labels (spaces are ignored for matching).
+                </small>
               </div>
 
               <h4 style={{ color: 'var(--color-purple)', borderBottom: '1px solid var(--color-beige)', paddingBottom: '8px', marginBottom: '15px' }}>

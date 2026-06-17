@@ -57,29 +57,6 @@ export default function FollowJourney() {
     }
   ].filter(social => social.url && social.url.trim() !== '');
 
-  useEffect(() => {
-    if (socialCards.length === 0 || !sectionRef.current) return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add('active');
-            observer.unobserve(entry.target);
-          }
-        });
-      },
-      { threshold: 0.1 }
-    );
-
-    const elements = sectionRef.current.querySelectorAll('.journey-reveal');
-    elements.forEach((el) => observer.observe(el));
-
-    return () => observer.disconnect();
-  }, [socialCards.length]);
-
-
-
   if (socialCards.length === 0) return null;
 
   return (
@@ -89,7 +66,7 @@ export default function FollowJourney() {
       <div className="floating-shape shape-2"></div>
 
       <div className="container">
-        <div className="journey-header text-center journey-reveal">
+        <div className="journey-header text-center">
           <span className="section-subtitle">CONNECT WITH US</span>
           <h2 className="section-title">Follow Our Journey</h2>
           <p className="journey-desc">
@@ -99,7 +76,7 @@ export default function FollowJourney() {
 
         <div className="follow-journey-grid">
           {socialCards.map((card, idx) => (
-            <div key={card.id} className="social-card journey-reveal" style={{ transitionDelay: `${0.1 * (idx + 1)}s` }}>
+            <div key={card.id} className="social-card">
               <div className="social-icon-wrapper">
                 <i className={card.icon}></i>
               </div>

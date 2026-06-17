@@ -35,6 +35,7 @@ export default function Products() {
     name: '',
     price: '',
     category: '',
+    subCategory: '',
     image: '',
     description: '',
     detailsText: '', // text area split by newlines
@@ -155,7 +156,7 @@ export default function Products() {
     setEditingProduct(null);
     setSelectedImages([]);
     setSelectedVideos([]);
-    const defaultCategory = categories[0]?.id || '';
+    const defaultCategory = categories.filter(c => !c.parentId)[0]?.id || '';
     const newId = (typeof window !== 'undefined' && window.crypto && window.crypto.randomUUID)
       ? window.crypto.randomUUID()
       : 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
@@ -167,6 +168,7 @@ export default function Products() {
       name: '',
       price: '',
       category: defaultCategory,
+      subCategory: '',
       image: '',
       description: '',
       detailsText: '',
@@ -219,6 +221,7 @@ export default function Products() {
       name: product.name,
       price: product.price.toString(),
       category: product.category,
+      subCategory: product.subCategory || '',
       image: product.image || '',
       description: product.description || '',
       detailsText: product.details ? product.details.join('\n') : '',
@@ -349,6 +352,7 @@ export default function Products() {
         name: formData.name,
         price: finalPrice,
         category: formData.category,
+        subCategory: formData.subCategory || '',
         image: uploadedImages[0] || '/assets/hero_banner.png',
         description: formData.description,
         details,
@@ -693,7 +697,7 @@ export default function Products() {
                         />
                       </td>
                       <td className="font-semibold" style={{ color: 'var(--color-purple-dark)' }}>{product.name}</td>
-                      <td>{getCategoryLabel(product.category)}</td>
+                      <td>{getCategoryLabel(product.category)}{product.subCategory ? ` > ${getCategoryLabel(product.subCategory)}` : ''}</td>
                       <td className="font-semibold">
                         ₹{product.price.toLocaleString()}
                         {product.originalPrice > 0 && product.originalPrice > product.price && (
@@ -864,15 +868,31 @@ export default function Products() {
                       onChange={handleInputChange}
                       required
                     >
-                      {categories.map(category => (
+                      {categories.filter(c => !c.parentId).map(category => (
                         <option key={category.id} value={category.id}>{category.name}</option>
                       ))}
                     </select>
-                    {categories.length === 0 && (
+                    {categories.filter(c => !c.parentId).length === 0 && (
                       <small style={{ color: '#E53E3E', fontSize: '0.75rem', marginTop: '4px', display: 'block' }}>
-                        Please create at least one category before adding products.
+                        Please create at least one Main Category before adding products.
                       </small>
                     )}
+                  </div>
+
+                  <div className="form-group">
+                    <label className="form-label" htmlFor="prod-subcat">Subcategory (Optional)</label>
+                    <select
+                      id="prod-subcat"
+                      name="subCategory"
+                      className="form-select"
+                      value={formData.subCategory}
+                      onChange={handleInputChange}
+                    >
+                      <option value="">-- None --</option>
+                      {categories.filter(c => c.parentId === formData.category).map(category => (
+                        <option key={category.id} value={category.id}>{category.name}</option>
+                      ))}
+                    </select>
                   </div>
                 </div>
 

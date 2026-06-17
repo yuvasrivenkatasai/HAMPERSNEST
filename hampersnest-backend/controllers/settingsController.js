@@ -46,7 +46,8 @@ export const getSettings = async (req, res) => {
     const categoriesDb = await Category.findAll({ order: [['createdAt', 'ASC']] });
     const categoriesFormatted = categoriesDb.map(c => ({
       id: c.id,
-      label: c.name
+      label: c.name,
+      parentId: c.parentId || null
     }));
     
     res.json({

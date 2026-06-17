@@ -15,6 +15,7 @@ import HeroBannerManager from './pages/HeroBannerManager';
 import Settings from './pages/Settings';
 import Users from './pages/Users';
 import Testimonials from './pages/Testimonials';
+import Policies from './pages/Policies';
 
 function NavigationMenu() {
   const location = useLocation();
@@ -79,6 +80,11 @@ function NavigationMenu() {
             <i className="fa-solid fa-comments"></i> Testimonials
           </Link>
         </li>
+        <li>
+          <Link to="/policies" className={`sidebar-link ${location.pathname === '/policies' ? 'active' : ''}`}>
+            <i className="fa-solid fa-file-contract"></i> Policies
+          </Link>
+        </li>
         
         {localStorage.getItem('adminRole') === 'Super Admin' && (
           <>
@@ -139,6 +145,7 @@ function AdminLayout({ children }) {
       case '/media': return 'Media Library';
       case '/hero-banner': return 'Hero Banner Manager';
       case '/testimonials': return 'Customer Testimonials';
+      case '/policies': return 'Policy Management';
       case '/settings': return 'System Settings';
       case '/users': return 'User Access Control';
       default: return 'Hampers Nest Admin';
@@ -232,6 +239,7 @@ export default function App() {
                   <Route path="/media" element={<MediaLibrary />} />
                   <Route path="/hero-banner" element={<HeroBannerManager />} />
                   <Route path="/testimonials" element={<Testimonials />} />
+                  <Route path="/policies" element={<Policies />} />
                   <Route path="/settings" element={<Settings />} />
                   <Route path="/users" element={<Users />} />
                   <Route path="*" element={<Navigate to="/" replace />} />
