@@ -5,18 +5,16 @@ import {
   updateCategory,
   deleteCategory
 } from '../controllers/categoryController.js';
-import { protect, authorizeRoles } from '../middleware/auth.js';
+import { protect, requirePermission } from '../middleware/auth.js';
 
 const router = express.Router();
 
 // Public route to fetch all categories
 router.get('/', getCategories);
 
-// Admin/Manager protected routes
-router.post('/', protect, authorizeRoles('Super Admin', 'Manager'), createCategory);
-router.put('/:id', protect, authorizeRoles('Super Admin', 'Manager'), updateCategory);
-
-// Super Admin only for delete
-router.delete('/:id', protect, authorizeRoles('Super Admin'), deleteCategory);
+// Protected routes (requires 'categories' permission)
+router.post('/', protect, requirePermission('categories'), createCategory);
+router.put('/:id', protect, requirePermission('categories'), updateCategory);
+router.delete('/:id', protect, requirePermission('categories'), deleteCategory);
 
 export default router;

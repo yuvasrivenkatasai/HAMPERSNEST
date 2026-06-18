@@ -24,6 +24,17 @@ export const User = sequelize.define('User', {
   isActive: {
     type: DataTypes.BOOLEAN,
     defaultValue: true
+  },
+  permissions: {
+    type: DataTypes.TEXT,
+    get() {
+      const val = this.getDataValue('permissions');
+      if (!val) return null;
+      try { return typeof val === 'string' ? JSON.parse(val) : val; } catch(e) { return null; }
+    },
+    set(val) {
+      this.setDataValue('permissions', typeof val === 'string' ? val : JSON.stringify(val || []));
+    }
   }
 }, {
   tableName: 'users',

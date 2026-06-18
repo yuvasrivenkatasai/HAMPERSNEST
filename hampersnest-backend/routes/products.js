@@ -11,7 +11,7 @@ import {
   incrementProductViews, 
   incrementProductClicks 
 } from '../controllers/productController.js';
-import { protect, authorizeRoles } from '../middleware/auth.js';
+import { protect, requirePermission } from '../middleware/auth.js';
 
 import multer from 'multer';
 import { 
@@ -24,11 +24,11 @@ import {
 const router = express.Router();
 const upload = multer({ dest: 'uploads/' });
 
-// Export/Import routes (Admin/Manager only)
-router.get('/export/csv', protect, authorizeRoles('Super Admin', 'Manager'), exportProductsCsv);
-router.get('/export/excel', protect, authorizeRoles('Super Admin', 'Manager'), exportProductsExcel);
-router.get('/template/csv', protect, authorizeRoles('Super Admin', 'Manager'), downloadProductsCsvTemplate);
-router.post('/import/csv', protect, authorizeRoles('Super Admin', 'Manager'), upload.single('file'), importProductsCsv);
+// Export/Import routes (requires 'products' permission)
+router.get('/export/csv', protect, requirePermission('products'), exportProductsCsv);
+router.get('/export/excel', protect, requirePermission('products'), exportProductsExcel);
+router.get('/template/csv', protect, requirePermission('products'), downloadProductsCsvTemplate);
+router.post('/import/csv', protect, requirePermission('products'), upload.single('file'), importProductsCsv);
 
 // Public routes
 router.get('/', getProducts);
@@ -36,14 +36,14 @@ router.get('/:id', getProductById);
 router.post('/:id/view', incrementProductViews);
 router.post('/:id/click', incrementProductClicks);
 
-// Protected routes (Admin/Manager)
-router.post('/', protect, authorizeRoles('Super Admin', 'Manager'), createProduct);
-router.post('/bulk-update', protect, authorizeRoles('Super Admin', 'Manager'), bulkUpdateProducts);
-router.post('/:id/duplicate', protect, authorizeRoles('Super Admin', 'Manager'), duplicateProduct);
-router.put('/:id', protect, authorizeRoles('Super Admin', 'Manager'), updateProduct);
+// Protected routes (requires 'products' permission)
+router.post('/', protect, requirePermission('products'), createProduct);
+router.post('/bulk-update', protect, requirePermission('products'), bulkUpdateProducts);
+router.post('/:id/duplicate', protect, requirePermission('products'), duplicateProduct);
+router.put('/:id', protect, requirePermission('products'), updateProduct);
 
-// Protected routes (Super Admin only for Delete)
-router.post('/bulk-delete', protect, authorizeRoles('Super Admin'), bulkDeleteProducts);
-router.delete('/:id', protect, authorizeRoles('Super Admin'), deleteProduct);
+// Protected routes (requires 'products' permission for delete too)
+router.post('/bulk-delete', protect, requirePermission('products'), bulkDeleteProducts);
+router.delete('/:id', protect, requirePermission('products'), deleteProduct);
 
 export default router;

@@ -26,7 +26,7 @@ export default function Login({ setToken }) {
       });
 
       localStorage.setItem('adminToken', data.token);
-      setToken(data.token);
+      setToken(data);
       navigate('/');
     } catch (err) {
       console.error(err);

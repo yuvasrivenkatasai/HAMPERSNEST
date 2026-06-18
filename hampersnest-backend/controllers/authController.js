@@ -4,6 +4,18 @@ import { User, AuditLog } from '../database/models.js';
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
+// All available module permission keys
+const ALL_MODULES = ['dashboard', 'orders', 'products', 'inventory', 'categories', 'inquiries', 'testimonials', 'policies', 'users', 'settings'];
+
+// Default permissions for each role
+// Super Admin always gets full access. All others are fully customizable.
+const getDefaultPermissions = (role) => {
+  if (role === 'Super Admin') {
+    return [...ALL_MODULES];
+  }
+  return []; // No defaults — must be manually assigned
+};
+
 // @desc    Auth user & get token
 // @route   POST /api/auth/login
 // @access  Public
@@ -29,10 +41,14 @@ export const loginUser = async (req, res) => {
         ipAddress: req.ip || 'Unknown'
       });
 
+      // Resolve permissions: use stored permissions, or generate defaults from role
+      const permissions = user.permissions || getDefaultPermissions(user.role);
+
       res.json({
         _id: user.id,
         username: user.username,
         role: user.role,
+        permissions,
         token
       });
     } else {
@@ -48,10 +64,12 @@ export const loginUser = async (req, res) => {
 // @access  Private
 export const verifyUser = async (req, res) => {
   try {
+    const permissions = req.user.permissions || getDefaultPermissions(req.user.role);
     res.json({
       _id: req.user.id,
       username: req.user.username,
-      role: req.user.role
+      role: req.user.role,
+      permissions
     });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -80,10 +98,11 @@ export const changePassword = async (req, res) => {
 
 // @desc    Get all users
 // @route   GET /api/auth/users
-// @access  Private/SuperAdmin
+// @access  Private (requires 'users' permission)
 export const getUsers = async (req, res) => {
-  if (req.user.role !== 'Super Admin') {
-    return res.status(403).json({ message: 'Not authorized as Super Admin' });
+  const userPerms = req.user.permissions || getDefaultPermissions(req.user.role);
+  if (req.user.role !== 'Super Admin' && !userPerms.includes('users')) {
+    return res.status(403).json({ message: 'Not authorized to manage users' });
   }
   try {
     const users = await User.findAll({ attributes: { exclude: ['password'] } });
@@ -95,20 +114,23 @@ export const getUsers = async (req, res) => {
 
 // @desc    Create user
 // @route   POST /api/auth/users
-// @access  Private/SuperAdmin
+// @access  Private (requires 'users' permission)
 export const createUser = async (req, res) => {
-  if (req.user.role !== 'Super Admin') {
-    return res.status(403).json({ message: 'Not authorized as Super Admin' });
+  const userPerms = req.user.permissions || getDefaultPermissions(req.user.role);
+  if (req.user.role !== 'Super Admin' && !userPerms.includes('users')) {
+    return res.status(403).json({ message: 'Not authorized to manage users' });
   }
-  const { username, password, role } = req.body;
+  const { username, password, role, permissions } = req.body;
   try {
     const hashedPassword = await bcrypt.hash(password, 10);
+    const finalPermissions = permissions || getDefaultPermissions(role || 'Admin');
     const user = await User.create({
       username,
       password: hashedPassword,
-      role: role || 'Admin'
+      role: role || 'Admin',
+      permissions: finalPermissions
     });
-    res.status(201).json({ id: user.id, username: user.username, role: user.role });
+    res.status(201).json({ id: user.id, username: user.username, role: user.role, permissions: user.permissions });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -116,10 +138,11 @@ export const createUser = async (req, res) => {
 
 // @desc    Delete user
 // @route   DELETE /api/auth/users/:id
-// @access  Private/SuperAdmin
+// @access  Private (requires 'users' permission)
 export const deleteUser = async (req, res) => {
-  if (req.user.role !== 'Super Admin') {
-    return res.status(403).json({ message: 'Not authorized as Super Admin' });
+  const userPerms = req.user.permissions || getDefaultPermissions(req.user.role);
+  if (req.user.role !== 'Super Admin' && !userPerms.includes('users')) {
+    return res.status(403).json({ message: 'Not authorized to manage users' });
   }
   try {
     if (req.params.id === req.user.id.toString()) {
@@ -139,13 +162,14 @@ export const deleteUser = async (req, res) => {
 
 // @desc    Update user
 // @route   PUT /api/auth/users/:id
-// @access  Private/SuperAdmin
+// @access  Private (requires 'users' permission)
 export const updateUser = async (req, res) => {
-  if (req.user.role !== 'Super Admin') {
-    return res.status(403).json({ message: 'Not authorized as Super Admin' });
+  const userPerms = req.user.permissions || getDefaultPermissions(req.user.role);
+  if (req.user.role !== 'Super Admin' && !userPerms.includes('users')) {
+    return res.status(403).json({ message: 'Not authorized to manage users' });
   }
   
-  const { username, password, role, isActive } = req.body;
+  const { username, password, role, isActive, permissions } = req.body;
   
   try {
     const user = await User.findByPk(req.params.id);
@@ -161,13 +185,17 @@ export const updateUser = async (req, res) => {
     if (username) user.username = username;
     if (role) user.role = role;
     if (isActive !== undefined) user.isActive = isActive;
+    if (permissions) user.permissions = permissions;
     if (password) {
       user.password = await bcrypt.hash(password, 10);
     }
     
     await user.save();
-    res.json({ id: user.id, username: user.username, role: user.role, isActive: user.isActive });
+    res.json({ id: user.id, username: user.username, role: user.role, isActive: user.isActive, permissions: user.permissions });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
+
+// Export default permissions helper for use in middleware
+export { getDefaultPermissions, ALL_MODULES };

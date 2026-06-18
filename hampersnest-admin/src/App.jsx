@@ -15,13 +15,85 @@ import Users from './pages/Users';
 import Testimonials from './pages/Testimonials';
 import Policies from './pages/Policies';
 
-function NavigationMenu() {
+// All modules with their sidebar config
+const ALL_SIDEBAR_ITEMS = [
+  { path: '/', permission: 'dashboard', icon: 'fa-solid fa-chart-line', label: 'Dashboard' },
+  { path: '/orders', permission: 'orders', icon: 'fa-solid fa-receipt', label: 'Orders' },
+  { path: '/products', permission: 'products', icon: 'fa-solid fa-gift', label: 'Products' },
+  { path: '/inventory', permission: 'inventory', icon: 'fa-solid fa-boxes-stacked', label: 'Inventory' },
+  { path: '/categories', permission: 'categories', icon: 'fa-solid fa-folder-tree', label: 'Categories' },
+  { path: '/inquiries', permission: 'inquiries', icon: 'fa-solid fa-envelope-open-text', label: 'Inquiries' },
+  { path: '/testimonials', permission: 'testimonials', icon: 'fa-solid fa-comments', label: 'Testimonials' },
+  { path: '/policies', permission: 'policies', icon: 'fa-solid fa-file-contract', label: 'Policies' },
+];
+
+const ADMIN_SIDEBAR_ITEMS = [
+  { path: '/users', permission: 'users', icon: 'fa-solid fa-users-gear', label: 'Users & Roles' },
+  { path: '/settings', permission: 'settings', icon: 'fa-solid fa-sliders', label: 'Settings' },
+];
+
+// Helper: check if a user has a given permission
+function hasPermission(permissions, permKey) {
+  if (!permissions || !Array.isArray(permissions)) return false;
+  return permissions.includes(permKey);
+}
+
+// Access Denied Component
+function AccessDenied() {
+  return (
+    <div style={{
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'center',
+      minHeight: '60vh',
+      textAlign: 'center',
+      gap: '16px'
+    }}>
+      <div style={{
+        width: '80px',
+        height: '80px',
+        borderRadius: '50%',
+        background: 'linear-gradient(135deg, #FEE2E2, #FECACA)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginBottom: '8px'
+      }}>
+        <i className="fa-solid fa-lock" style={{ fontSize: '2rem', color: '#DC2626' }}></i>
+      </div>
+      <h2 style={{ color: 'var(--color-purple-dark)', margin: 0, fontSize: '1.5rem' }}>Access Denied</h2>
+      <p style={{ color: 'var(--color-gray-text)', fontSize: '1rem', maxWidth: '400px', lineHeight: 1.6 }}>
+        You do not have permission to access this page. Please contact your administrator to request access.
+      </p>
+      <Link to="/" className="btn-admin" style={{ marginTop: '10px', textDecoration: 'none' }}>
+        <i className="fa-solid fa-arrow-left" style={{ marginRight: '6px' }}></i> Go Back
+      </Link>
+    </div>
+  );
+}
+
+// Protected Route wrapper
+function ProtectedRoute({ permissionKey, userPermissions, children }) {
+  if (!hasPermission(userPermissions, permissionKey)) {
+    return <AccessDenied />;
+  }
+  return children;
+}
+
+function NavigationMenu({ userPermissions }) {
   const location = useLocation();
 
   const handleLogout = () => {
     localStorage.removeItem('adminToken');
+    localStorage.removeItem('adminRole');
+    localStorage.removeItem('adminPermissions');
     window.location.href = '/login';
   };
+
+  // Filter sidebar items based on permissions
+  const visibleItems = ALL_SIDEBAR_ITEMS.filter(item => hasPermission(userPermissions, item.permission));
+  const visibleAdminItems = ADMIN_SIDEBAR_ITEMS.filter(item => hasPermission(userPermissions, item.permission));
 
   return (
     <aside className="admin-sidebar">
@@ -33,63 +105,27 @@ function NavigationMenu() {
       
       {/* Sidebar Navigation */}
       <ul className="sidebar-menu" style={{ overflowY: 'auto' }}>
-        <li>
-          <Link to="/" className={`sidebar-link ${location.pathname === '/' ? 'active' : ''}`}>
-            <i className="fa-solid fa-chart-line"></i> Dashboard
-          </Link>
-        </li>
-        <li>
-          <Link to="/orders" className={`sidebar-link ${location.pathname === '/orders' ? 'active' : ''}`}>
-            <i className="fa-solid fa-receipt"></i> Orders
-          </Link>
-        </li>
-        <li>
-          <Link to="/products" className={`sidebar-link ${location.pathname === '/products' ? 'active' : ''}`}>
-            <i className="fa-solid fa-gift"></i> Products
-          </Link>
-        </li>
-        <li>
-          <Link to="/inventory" className={`sidebar-link ${location.pathname === '/inventory' ? 'active' : ''}`}>
-            <i className="fa-solid fa-boxes-stacked"></i> Inventory
-          </Link>
-        </li>
-        <li>
-          <Link to="/categories" className={`sidebar-link ${location.pathname === '/categories' ? 'active' : ''}`}>
-            <i className="fa-solid fa-folder-tree"></i> Categories
-          </Link>
-        </li>
-        <li>
-          <Link to="/inquiries" className={`sidebar-link ${location.pathname === '/inquiries' ? 'active' : ''}`}>
-            <i className="fa-solid fa-envelope-open-text"></i> Inquiries
-          </Link>
-        </li>
-        <li>
-          <Link to="/testimonials" className={`sidebar-link ${location.pathname === '/testimonials' ? 'active' : ''}`}>
-            <i className="fa-solid fa-comments"></i> Testimonials
-          </Link>
-        </li>
-        <li>
-          <Link to="/policies" className={`sidebar-link ${location.pathname === '/policies' ? 'active' : ''}`}>
-            <i className="fa-solid fa-file-contract"></i> Policies
-          </Link>
-        </li>
+        {visibleItems.map(item => (
+          <li key={item.path}>
+            <Link to={item.path} className={`sidebar-link ${location.pathname === item.path ? 'active' : ''}`}>
+              <i className={item.icon}></i> {item.label}
+            </Link>
+          </li>
+        ))}
         
-        {localStorage.getItem('adminRole') === 'Super Admin' && (
+        {visibleAdminItems.length > 0 && (
           <>
             <li style={{ marginTop: '1.5rem', marginBottom: '0.5rem', paddingLeft: '1rem', fontSize: '0.75rem', textTransform: 'uppercase', color: 'rgba(255,255,255,0.5)', fontWeight: 'bold' }}>
               Administration
             </li>
             
-            <li>
-              <Link to="/users" className={`sidebar-link ${location.pathname === '/users' ? 'active' : ''}`}>
-                <i className="fa-solid fa-users-gear"></i> Users & Roles
-              </Link>
-            </li>
-            <li>
-              <Link to="/settings" className={`sidebar-link ${location.pathname === '/settings' ? 'active' : ''}`}>
-                <i className="fa-solid fa-sliders"></i> Settings
-              </Link>
-            </li>
+            {visibleAdminItems.map(item => (
+              <li key={item.path}>
+                <Link to={item.path} className={`sidebar-link ${location.pathname === item.path ? 'active' : ''}`}>
+                  <i className={item.icon}></i> {item.label}
+                </Link>
+              </li>
+            ))}
           </>
         )}
       </ul>
@@ -104,9 +140,9 @@ function NavigationMenu() {
   );
 }
 
-function AdminLayout({ children }) {
+function AdminLayout({ children, userPermissions }) {
   const location = useLocation();
-  const [userRole, setUserRole] = useState('Admin');
+  const [userRole, setUserRole] = useState(localStorage.getItem('adminRole') || 'Admin');
   
   useEffect(() => {
     const fetchProfile = async () => {
@@ -140,7 +176,7 @@ function AdminLayout({ children }) {
 
   return (
     <div className="admin-shell">
-      <NavigationMenu />
+      <NavigationMenu userPermissions={userPermissions} />
       
       <main className="admin-main">
         {/* Top bar header */}
@@ -169,6 +205,7 @@ function AdminLayout({ children }) {
 export default function App() {
   const [token, setToken] = useState(localStorage.getItem('adminToken'));
   const [checkingAuth, setCheckingAuth] = useState(true);
+  const [userPermissions, setUserPermissions] = useState([]);
 
   // Validate token with backend on boot
   useEffect(() => {
@@ -179,10 +216,16 @@ export default function App() {
       }
 
       try {
-        await apiRequest('/api/auth/verify');
+        const data = await apiRequest('/api/auth/verify');
+        const perms = data.permissions || [];
+        setUserPermissions(perms);
+        localStorage.setItem('adminPermissions', JSON.stringify(perms));
+        localStorage.setItem('adminRole', data.role);
       } catch (err) {
         console.error('Session expired:', err.message);
         localStorage.removeItem('adminToken');
+        localStorage.removeItem('adminRole');
+        localStorage.removeItem('adminPermissions');
         setToken(null);
       } finally {
         setCheckingAuth(false);
@@ -190,6 +233,17 @@ export default function App() {
     };
     verifyToken();
   }, [token]);
+
+  // Custom setToken that also stores permissions from login response
+  const handleSetToken = (loginData) => {
+    if (loginData && loginData.token) {
+      localStorage.setItem('adminToken', loginData.token);
+      localStorage.setItem('adminRole', loginData.role);
+      localStorage.setItem('adminPermissions', JSON.stringify(loginData.permissions || []));
+      setToken(loginData.token);
+      setUserPermissions(loginData.permissions || []);
+    }
+  };
 
   if (checkingAuth) {
     return (
@@ -206,7 +260,7 @@ export default function App() {
         {/* Public Login Route */}
         <Route 
           path="/login" 
-          element={token ? <Navigate to="/" replace /> : <Login setToken={setToken} />} 
+          element={token ? <Navigate to="/" replace /> : <Login setToken={handleSetToken} />} 
         />
 
         {/* Private Admin Pages */}
@@ -214,18 +268,18 @@ export default function App() {
           path="/*" 
           element={
             token ? (
-              <AdminLayout>
+              <AdminLayout userPermissions={userPermissions}>
                 <Routes>
-                  <Route path="/" element={<Dashboard />} />
-                  <Route path="/orders" element={<Orders />} />
-                  <Route path="/products" element={<Products />} />
-                  <Route path="/inventory" element={<Inventory />} />
-                  <Route path="/categories" element={<Categories />} />
-                  <Route path="/inquiries" element={<Inquiries />} />
-                  <Route path="/testimonials" element={<Testimonials />} />
-                  <Route path="/policies" element={<Policies />} />
-                  <Route path="/settings" element={<Settings />} />
-                  <Route path="/users" element={<Users />} />
+                  <Route path="/" element={<ProtectedRoute permissionKey="dashboard" userPermissions={userPermissions}><Dashboard /></ProtectedRoute>} />
+                  <Route path="/orders" element={<ProtectedRoute permissionKey="orders" userPermissions={userPermissions}><Orders /></ProtectedRoute>} />
+                  <Route path="/products" element={<ProtectedRoute permissionKey="products" userPermissions={userPermissions}><Products /></ProtectedRoute>} />
+                  <Route path="/inventory" element={<ProtectedRoute permissionKey="inventory" userPermissions={userPermissions}><Inventory /></ProtectedRoute>} />
+                  <Route path="/categories" element={<ProtectedRoute permissionKey="categories" userPermissions={userPermissions}><Categories /></ProtectedRoute>} />
+                  <Route path="/inquiries" element={<ProtectedRoute permissionKey="inquiries" userPermissions={userPermissions}><Inquiries /></ProtectedRoute>} />
+                  <Route path="/testimonials" element={<ProtectedRoute permissionKey="testimonials" userPermissions={userPermissions}><Testimonials /></ProtectedRoute>} />
+                  <Route path="/policies" element={<ProtectedRoute permissionKey="policies" userPermissions={userPermissions}><Policies /></ProtectedRoute>} />
+                  <Route path="/settings" element={<ProtectedRoute permissionKey="settings" userPermissions={userPermissions}><Settings /></ProtectedRoute>} />
+                  <Route path="/users" element={<ProtectedRoute permissionKey="users" userPermissions={userPermissions}><Users /></ProtectedRoute>} />
                   <Route path="*" element={<Navigate to="/" replace />} />
                 </Routes>
               </AdminLayout>

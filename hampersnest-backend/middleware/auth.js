@@ -1,5 +1,6 @@
 import jwt from 'jsonwebtoken';
 import { User } from '../database/models.js';
+import { getDefaultPermissions } from '../controllers/authController.js';
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
@@ -36,5 +37,28 @@ export const authorizeRoles = (...roles) => {
       return res.status(403).json({ message: `Role (${req.user?.role || 'None'}) is not authorized to access this resource` });
     }
     next();
+  };
+};
+
+// New: Permission-based middleware
+// Checks if the user has a specific module permission
+export const requirePermission = (moduleName) => {
+  return (req, res, next) => {
+    if (!req.user) {
+      return res.status(401).json({ message: 'Not authorized' });
+    }
+    
+    // Super Admin always has full access
+    if (req.user.role === 'Super Admin') {
+      return next();
+    }
+    
+    const userPermissions = req.user.permissions || getDefaultPermissions(req.user.role);
+    
+    if (userPermissions.includes(moduleName)) {
+      return next();
+    }
+    
+    return res.status(403).json({ message: `You do not have permission to access: ${moduleName}` });
   };
 };
