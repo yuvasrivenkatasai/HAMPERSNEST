@@ -61,12 +61,26 @@ export const Product = sequelize.define('Product', {
     allowNull: false
   },
   images: {
-    type: DataTypes.JSON,
-    defaultValue: []
+    type: DataTypes.TEXT,
+    get() {
+      const val = this.getDataValue('images');
+      if (!val) return [];
+      try { return typeof val === 'string' ? JSON.parse(val) : val; } catch(e) { return []; }
+    },
+    set(val) {
+      this.setDataValue('images', typeof val === 'string' ? val : JSON.stringify(val || []));
+    }
   },
   videoUrls: {
-    type: DataTypes.JSON,
-    defaultValue: []
+    type: DataTypes.BLOB,
+    get() {
+      const val = this.getDataValue('videoUrls');
+      if (!val) return [];
+      try { return typeof val === 'string' ? JSON.parse(val) : JSON.parse(val.toString()); } catch(e) { return []; }
+    },
+    set(val) {
+      this.setDataValue('videoUrls', Buffer.from(JSON.stringify(val || [])));
+    }
   },
   category: {
     type: DataTypes.STRING,
@@ -85,16 +99,37 @@ export const Product = sequelize.define('Product', {
     defaultValue: ''
   },
   tags: {
-    type: DataTypes.JSON,
-    defaultValue: []
+    type: DataTypes.BLOB,
+    get() {
+      const val = this.getDataValue('tags');
+      if (!val) return [];
+      try { return typeof val === 'string' ? JSON.parse(val) : JSON.parse(val.toString()); } catch(e) { return []; }
+    },
+    set(val) {
+      this.setDataValue('tags', Buffer.from(JSON.stringify(val || [])));
+    }
   },
   customization: {
-    type: DataTypes.JSON,
-    defaultValue: []
+    type: DataTypes.BLOB,
+    get() {
+      const val = this.getDataValue('customization');
+      if (!val) return [];
+      try { return typeof val === 'string' ? JSON.parse(val) : JSON.parse(val.toString()); } catch(e) { return []; }
+    },
+    set(val) {
+      this.setDataValue('customization', Buffer.from(JSON.stringify(val || [])));
+    }
   },
   shipping: {
-    type: DataTypes.JSON,
-    defaultValue: []
+    type: DataTypes.BLOB,
+    get() {
+      const val = this.getDataValue('shipping');
+      if (!val) return [];
+      try { return typeof val === 'string' ? JSON.parse(val) : JSON.parse(val.toString()); } catch(e) { return []; }
+    },
+    set(val) {
+      this.setDataValue('shipping', Buffer.from(JSON.stringify(val || [])));
+    }
   },
   stockQuantity: {
     type: DataTypes.INTEGER,
@@ -127,8 +162,15 @@ export const Product = sequelize.define('Product', {
     type: DataTypes.TEXT
   },
   details: {
-    type: DataTypes.JSON,
-    defaultValue: []
+    type: DataTypes.BLOB,
+    get() {
+      const val = this.getDataValue('details');
+      if (!val) return [];
+      try { return typeof val === 'string' ? JSON.parse(val) : JSON.parse(val.toString()); } catch(e) { return []; }
+    },
+    set(val) {
+      this.setDataValue('details', Buffer.from(JSON.stringify(val || [])));
+    }
   },
   customGiftTagEnabled: {
     type: DataTypes.BOOLEAN,

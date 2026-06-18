@@ -1,13 +1,13 @@
-import { Setting } from './database/models.js';
+import { sequelize } from './database/db.js';
 
-async function check() {
+async function run() {
   try {
-    const res = await Setting.upsert({ key: 'facebookUrl', value: null });
-    console.log('Success upserting NULL:', res);
+    const [results] = await sequelize.query("SELECT table_name, column_name, data_type FROM user_tab_columns WHERE lower(table_name) = 'products'");
+    console.log(results);
+    process.exit(0);
   } catch (e) {
-    console.error('Error:', e.message);
-  } finally {
-    process.exit();
+    console.log(e);
+    process.exit(1);
   }
 }
-check();
+run();

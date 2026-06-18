@@ -42,7 +42,35 @@ export default function Settings() {
     aboutTitle: 'Thoughtfully Curated Luxury Gifts',
     aboutDescription: "We specialize in curating bespoke return gifts and premium hampers for all your special occasions. From exquisite brass and silver items to personalized chocolates and eco-friendly packaging, every hamper is crafted with love and attention to detail.\n\nWhether it's a grand wedding or an intimate baby shower, Hampers Nest brings a touch of elegance to your celebrations, ensuring your guests leave with a memorable token of appreciation.",
     aboutTags: JSON.stringify(['Wedding Curation', 'Baby Showers', 'Housewarmings', 'Corporate Gifting']),
-    aboutButtonText: 'READ OUR STORY'
+    aboutButtonText: 'READ OUR STORY',
+    ourStorySection1Label: 'The Curation Studio',
+    ourStorySection1Title: 'Where Tradition <br />Meets Luxury',
+    ourStorySection1Paragraph1: 'Established in Hyderabad, {storeName} was founded on a simple belief: <em>a return gift is a physical representation of your gratitude and celebration.</em> We believe that generic, mass-produced items lack the warmth and elegance that your guests deserve.',
+    ourStorySection1Paragraph2: 'Our curation studio collaborates with local Indian artisans, bringing timeless treasures (like handcrafted brass bowls, peacock diyas, and zari pouches) and presenting them inside luxury, high-end packaging. Whether it is a grand wedding, a sweet baby shower, a warm housewarming, or an executive corporate event, we elevate the experience.',
+    ourStorySection2Label: 'Core Philosophy',
+    ourStorySection2Title: 'The Pillars of {storeName}',
+    ourStoryPillars: JSON.stringify([
+      {
+        icon: "fa-solid fa-gift",
+        title: "Artisanal Curation",
+        desc: "We handpick every element, pairing traditional Hyderabad craftsmanship (intricate brass engravings, silk zari) with premium dry fruits and hand-poured fragrances."
+      },
+      {
+        icon: "fa-solid fa-wand-magic-sparkles",
+        title: "Deep Personalization",
+        desc: "From handwritten calligraphy gift tags to custom-colored rigid box packaging, we tailor every detail to match your celebration's theme, color palette, and style."
+      },
+      {
+        icon: "fa-solid fa-shield-heart",
+        title: "Quality Assurance",
+        desc: "Every brass bowl is hand-polished, every chocolate is checked for freshness, and every box is structurally verified to ensure safe transit and exquisite reception."
+      },
+      {
+        icon: "fa-solid fa-leaf",
+        title: "Eco-Conscious Curation",
+        desc: "We prioritize reusable, sustainable materials like solid brass, hand-woven bamboo, and jute detailing to ensure your return gifts are both beautiful and kind to earth."
+      }
+    ])
   });
   const [settingsLoading, setSettingsLoading] = useState(true);
   const [settingsMessage, setSettingsMessage] = useState(null);
@@ -160,7 +188,7 @@ export default function Settings() {
 
   const handleAddTag = () => {
     try {
-      const tags = JSON.parse(settingsData.aboutTags || '[]');
+      const tags = typeof settingsData.aboutTags === 'string' ? JSON.parse(settingsData.aboutTags || '[]') : (settingsData.aboutTags || []);
       tags.push('New Tag');
       setSettingsData(prev => ({ ...prev, aboutTags: JSON.stringify(tags) }));
     } catch(e) {
@@ -170,7 +198,7 @@ export default function Settings() {
 
   const handleRemoveTag = (index) => {
     try {
-      const tags = JSON.parse(settingsData.aboutTags || '[]');
+      const tags = typeof settingsData.aboutTags === 'string' ? JSON.parse(settingsData.aboutTags || '[]') : (settingsData.aboutTags || []);
       tags.splice(index, 1);
       setSettingsData(prev => ({ ...prev, aboutTags: JSON.stringify(tags) }));
     } catch(e) {}
@@ -178,7 +206,7 @@ export default function Settings() {
 
   const handleTagChange = (index, value) => {
     try {
-      const tags = JSON.parse(settingsData.aboutTags || '[]');
+      const tags = typeof settingsData.aboutTags === 'string' ? JSON.parse(settingsData.aboutTags || '[]') : (settingsData.aboutTags || []);
       tags[index] = value;
       setSettingsData(prev => ({ ...prev, aboutTags: JSON.stringify(tags) }));
     } catch(e) {}
@@ -186,7 +214,59 @@ export default function Settings() {
 
   const getTags = () => {
     try {
+      if (Array.isArray(settingsData.aboutTags)) return settingsData.aboutTags;
       return JSON.parse(settingsData.aboutTags || '[]');
+    } catch(e) {
+      return [];
+    }
+  };
+
+  const handleAddPillar = () => {
+    try {
+      const pillars = typeof settingsData.ourStoryPillars === 'string' ? JSON.parse(settingsData.ourStoryPillars || '[]') : (settingsData.ourStoryPillars || []);
+      pillars.push({ icon: 'fa-solid fa-star', title: 'New Pillar', desc: 'Description' });
+      setSettingsData(prev => ({ ...prev, ourStoryPillars: JSON.stringify(pillars) }));
+    } catch(e) {
+      setSettingsData(prev => ({ ...prev, ourStoryPillars: JSON.stringify([{ icon: 'fa-solid fa-star', title: 'New Pillar', desc: 'Description' }]) }));
+    }
+  };
+
+  const handleRemovePillar = (index) => {
+    try {
+      const pillars = typeof settingsData.ourStoryPillars === 'string' ? JSON.parse(settingsData.ourStoryPillars || '[]') : (settingsData.ourStoryPillars || []);
+      pillars.splice(index, 1);
+      setSettingsData(prev => ({ ...prev, ourStoryPillars: JSON.stringify(pillars) }));
+    } catch(e) {}
+  };
+
+  const handlePillarChange = (index, field, value) => {
+    try {
+      const pillars = typeof settingsData.ourStoryPillars === 'string' ? JSON.parse(settingsData.ourStoryPillars || '[]') : (settingsData.ourStoryPillars || []);
+      pillars[index][field] = value;
+      setSettingsData(prev => ({ ...prev, ourStoryPillars: JSON.stringify(pillars) }));
+    } catch(e) {}
+  };
+
+  const handleMovePillar = (index, dir) => {
+    try {
+      const pillars = typeof settingsData.ourStoryPillars === 'string' ? JSON.parse(settingsData.ourStoryPillars || '[]') : (settingsData.ourStoryPillars || []);
+      if (dir === 'up' && index > 0) {
+        const temp = pillars[index];
+        pillars[index] = pillars[index - 1];
+        pillars[index - 1] = temp;
+      } else if (dir === 'down' && index < pillars.length - 1) {
+        const temp = pillars[index];
+        pillars[index] = pillars[index + 1];
+        pillars[index + 1] = temp;
+      }
+      setSettingsData(prev => ({ ...prev, ourStoryPillars: JSON.stringify(pillars) }));
+    } catch(e) {}
+  };
+
+  const getPillars = () => {
+    try {
+      if (Array.isArray(settingsData.ourStoryPillars)) return settingsData.ourStoryPillars;
+      return JSON.parse(settingsData.ourStoryPillars || '[]');
     } catch(e) {
       return [];
     }
@@ -536,6 +616,67 @@ export default function Settings() {
                 <div className="form-group">
                   <label className="form-label">About Button Text *</label>
                   <input type="text" name="aboutButtonText" className="form-input" required value={settingsData.aboutButtonText || ''} onChange={handleSettingsChange} />
+                </div>
+
+                <h4 style={{ color: 'var(--color-purple-dark)', borderBottom: '1px solid #ddd', paddingBottom: '8px', margin: '20px 0 15px 0' }}>Our Story Page - Section 1</h4>
+                <div className="form-group">
+                  <label className="form-label">Small Label</label>
+                  <input type="text" name="ourStorySection1Label" className="form-input" value={settingsData.ourStorySection1Label || ''} onChange={handleSettingsChange} />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Main Heading</label>
+                  <input type="text" name="ourStorySection1Title" className="form-input" value={settingsData.ourStorySection1Title || ''} onChange={handleSettingsChange} />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Paragraph 1</label>
+                  <textarea name="ourStorySection1Paragraph1" className="form-input" rows="4" value={settingsData.ourStorySection1Paragraph1 || ''} onChange={handleSettingsChange}></textarea>
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Paragraph 2</label>
+                  <textarea name="ourStorySection1Paragraph2" className="form-input" rows="4" value={settingsData.ourStorySection1Paragraph2 || ''} onChange={handleSettingsChange}></textarea>
+                </div>
+
+                <h4 style={{ color: 'var(--color-purple-dark)', borderBottom: '1px solid #ddd', paddingBottom: '8px', margin: '20px 0 15px 0' }}>Our Story Page - Section 2 (Pillars)</h4>
+                <div className="form-group">
+                  <label className="form-label">Small Label</label>
+                  <input type="text" name="ourStorySection2Label" className="form-input" value={settingsData.ourStorySection2Label || ''} onChange={handleSettingsChange} />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Main Heading</label>
+                  <input type="text" name="ourStorySection2Title" className="form-input" value={settingsData.ourStorySection2Title || ''} onChange={handleSettingsChange} />
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">Pillar Cards</label>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                    {getPillars().map((pillar, idx) => (
+                      <div key={idx} style={{ padding: '15px', border: '1px solid #ddd', borderRadius: '8px', background: '#f9f9f9', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <strong>Card {idx + 1}</strong>
+                          <div style={{ display: 'flex', gap: '5px' }}>
+                            <button type="button" onClick={() => handleMovePillar(idx, 'up')} disabled={idx === 0} className="btn-admin-secondary" style={{ padding: '5px 10px' }}><i className="fa-solid fa-arrow-up"></i></button>
+                            <button type="button" onClick={() => handleMovePillar(idx, 'down')} disabled={idx === getPillars().length - 1} className="btn-admin-secondary" style={{ padding: '5px 10px' }}><i className="fa-solid fa-arrow-down"></i></button>
+                            <button type="button" onClick={() => handleRemovePillar(idx)} className="btn-admin-secondary" style={{ background: '#fee2e2', color: '#ef4444', border: '1px solid #fca5a5', padding: '5px 10px' }}><i className="fa-solid fa-trash"></i></button>
+                          </div>
+                        </div>
+                        <div className="form-group" style={{ marginBottom: '5px' }}>
+                          <label className="form-label">Icon (FontAwesome Class)</label>
+                          <input type="text" className="form-input" value={pillar.icon || ''} onChange={(e) => handlePillarChange(idx, 'icon', e.target.value)} placeholder="e.g. fa-solid fa-gift" />
+                        </div>
+                        <div className="form-group" style={{ marginBottom: '5px' }}>
+                          <label className="form-label">Title</label>
+                          <input type="text" className="form-input" value={pillar.title || ''} onChange={(e) => handlePillarChange(idx, 'title', e.target.value)} />
+                        </div>
+                        <div className="form-group" style={{ marginBottom: '0' }}>
+                          <label className="form-label">Description</label>
+                          <textarea className="form-input" rows="2" value={pillar.desc || ''} onChange={(e) => handlePillarChange(idx, 'desc', e.target.value)}></textarea>
+                        </div>
+                      </div>
+                    ))}
+                    <button type="button" onClick={handleAddPillar} className="btn-admin-secondary" style={{ width: 'fit-content' }}>
+                      <i className="fa-solid fa-plus"></i> Add New Pillar
+                    </button>
+                  </div>
                 </div>
 
                 <button type="submit" className="btn-admin mt-2">Save Content</button>

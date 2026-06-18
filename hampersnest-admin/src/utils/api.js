@@ -2,10 +2,9 @@
 // In development, Vite runs on port 5173, so point to backend on port 5000.
 // In production, we serve from the same domain/port, so use relative path.
 export const API_BASE = import.meta.env.VITE_API_URL || 
-  (window.location.hostname === 'localhost' || window.location.hostname.endsWith('.localhost')
+  (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.hostname.endsWith('.localhost')
     ? `${window.location.protocol}//localhost:5000`
     : '');
-
 
 export const apiRequest = async (endpoint, options = {}) => {
   const token = localStorage.getItem('adminToken');
@@ -28,7 +27,12 @@ export const apiRequest = async (endpoint, options = {}) => {
   const response = await fetch(`${API_BASE}${endpoint}`, config);
 
   if (response.status === 401) {
-    // If unauthorized, clear invalid token and redirect to login page
+    if (endpoint === '/api/auth/login') {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.message || 'Invalid username or password');
+    }
+    
+    // If unauthorized and not logging in, clear invalid token and redirect to login page
     localStorage.removeItem('adminToken');
     // Don't redirect if we are already trying to login
     if (!window.location.pathname.endsWith('/login')) {

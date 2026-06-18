@@ -116,8 +116,14 @@ export default function ProductCard({ product }) {
         <p className="card-price">
           <span className="price-prefix">From </span>{formatPrice(product.price)}
         </p>
-        <p className="card-desc">
-          {product.description || <span style={{ visibility: 'hidden' }}>&nbsp;</span>}
+        <p className="card-desc" style={{
+          display: '-webkit-box',
+          WebkitLineClamp: 2,
+          WebkitBoxOrient: 'vertical',
+          overflow: 'hidden',
+          textOverflow: 'ellipsis'
+        }}>
+          {product.shortDescription || product.description || <span style={{ visibility: 'hidden' }}>&nbsp;</span>}
         </p>
         <div style={{ display: 'flex', gap: '8px', marginTop: '4px' }}>
           <button

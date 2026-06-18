@@ -1,5 +1,15 @@
 import { jsPDF } from 'jspdf';
 
+// Helper to clean text for jsPDF to prevent encoding issues
+const cleanText = (text) => {
+  if (!text) return '';
+  return text
+    .replace(/[\u2018\u2019]/g, "'")
+    .replace(/[\u201C\u201D]/g, '"')
+    .replace(/[^\x20-\x7E]/g, '')
+    .trim();
+};
+
 // Helper to load image as base64
 const loadImageAsBase64 = async (url, targetAspectRatio) => {
   try {
@@ -43,8 +53,8 @@ const loadImageAsBase64 = async (url, targetAspectRatio) => {
 
         // Higher resolution canvas for premium PDF quality
         const canvas = document.createElement('canvas');
-        canvas.width = 800; // high res width
-        canvas.height = 800 / targetAspectRatio;
+        canvas.width = 1200; // high res width
+        canvas.height = 1200 / targetAspectRatio;
         const ctx = canvas.getContext('2d');
         
         ctx.fillStyle = '#FFFFFF';
@@ -150,7 +160,7 @@ export const generateCatalogPdf = async (products, mode = 'download', onProgress
   const marginX = 15;
   const marginY = 35;
   const cardWidth = (pageWidth - (marginX * 2) - 10) / 2;
-  const cardHeight = 110;
+  const cardHeight = 120;
   
   let currentPage = 2;
   
@@ -184,7 +194,7 @@ export const generateCatalogPdf = async (products, mode = 'download', onProgress
     
     // Card image box dimensions
     const destW = cardWidth - 4;
-    const destH = 50;
+    const destH = 75;
     const targetAspectRatio = destW / destH;
     
     // Load Image
@@ -210,30 +220,34 @@ export const generateCatalogPdf = async (products, mode = 'download', onProgress
     doc.setTextColor(purple);
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(12);
-    const titleLines = doc.splitTextToSize(product.name, cardWidth - 8);
-    doc.text(titleLines.slice(0, 2), x + 4, y + 60);
-    
-    // Category Badge
-    doc.setFillColor(gold);
-    doc.roundedRect(x + 4, y + 70, 30, 6, 1, 1, 'F');
-    doc.setTextColor(255, 255, 255);
-    doc.setFontSize(8);
-    // Fake category resolve if it's an ID (we assume caller maps it, or we just print what we have)
-    doc.text('PREMIUM', x + 19, y + 74.5, { align: 'center' });
+    const cleanTitle = cleanText(product.name);
+    const titleLines = doc.splitTextToSize(cleanTitle, cardWidth - 8);
+    // Max 2 lines. If longer, slice and add ellipsis
+    let finalTitleLines = titleLines.slice(0, 2);
+    if (titleLines.length > 2) {
+      finalTitleLines[1] = finalTitleLines[1].replace(/\s+\S*$/, '') + '...';
+    }
+    doc.text(finalTitleLines, x + 4, y + 85);
     
     // Description
     doc.setTextColor(gray);
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(9);
-    const desc = product.description || (product.details ? product.details.join(', ') : '');
-    const descLines = doc.splitTextToSize(desc, cardWidth - 8);
-    doc.text(descLines.slice(0, 3), x + 4, y + 82);
+    const desc = product.shortDescription || product.description || '';
+    const cleanDesc = cleanText(desc);
+    const descLines = doc.splitTextToSize(cleanDesc, cardWidth - 8);
+    // Max 2 lines. If longer, slice and add ellipsis
+    let finalDescLines = descLines.slice(0, 2);
+    if (descLines.length > 2) {
+      finalDescLines[1] = finalDescLines[1].replace(/\s+\S*$/, '') + '...';
+    }
+    doc.text(finalDescLines, x + 4, y + 98);
     
     // Price
     doc.setTextColor(purple);
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(14);
-    doc.text(`Rs. ${product.price.toLocaleString()}`, x + 4, y + 104);
+    doc.text(`Rs. ${product.price.toLocaleString()}`, x + 4, y + 115);
   }
 
   const filename = `HampersNest-Catalog-${new Date().toLocaleDateString('en-GB').replace(/\//g, '-')}.pdf`;

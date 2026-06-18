@@ -38,7 +38,8 @@ export default function Products() {
     subCategory: '',
     image: '',
     description: '',
-    detailsText: '', // text area split by newlines
+    shortDescription: '',
+    rating: 4.5,
     isFeatured: false,
     originalPrice: '',
     isActive: true,
@@ -160,7 +161,8 @@ export default function Products() {
       subCategory: '',
       image: '',
       description: '',
-      detailsText: '',
+      shortDescription: '',
+      rating: 4.5,
       isFeatured: false,
       originalPrice: '',
       isActive: true,
@@ -213,7 +215,8 @@ export default function Products() {
       subCategory: product.subCategory || '',
       image: product.image || '',
       description: product.description || '',
-      detailsText: product.details ? product.details.join('\n') : '',
+      shortDescription: product.shortDescription || '',
+      rating: product.rating !== undefined ? product.rating : 4.5,
       isFeatured: !!product.isFeatured,
       originalPrice: product.originalPrice ? product.originalPrice.toString() : '',
       isActive: product.isActive !== false,
@@ -262,12 +265,6 @@ export default function Products() {
 
     setFormSubmitting(true);
     
-    // Parse details text area into array of lines, removing empty lines
-    const details = formData.detailsText
-      .split('\n')
-      .map(line => line.trim())
-      .filter(line => line.length > 0);
-
     let finalPrice = 0;
     let finalOriginalPrice = 0;
 
@@ -344,7 +341,8 @@ export default function Products() {
         subCategory: formData.subCategory || '',
         image: uploadedImages[0] || '/assets/hero_banner.png',
         description: formData.description,
-        details,
+        shortDescription: formData.shortDescription,
+        rating: Number(formData.rating) || 4.5,
         isFeatured: formData.isFeatured,
         originalPrice: finalOriginalPrice,
         isActive: formData.isActive,
@@ -846,6 +844,22 @@ export default function Products() {
                   return null;
                 })()}
 
+                <div className="form-group" style={{ marginBottom: '15px' }}>
+                  <label className="form-label" htmlFor="prod-rating">Product Rating</label>
+                  <input
+                    type="number"
+                    id="prod-rating"
+                    name="rating"
+                    className="form-input"
+                    placeholder="e.g. 4.5"
+                    step="0.1"
+                    min="0"
+                    max="5"
+                    value={formData.rating}
+                    onChange={handleInputChange}
+                  />
+                </div>
+
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
                   <div className="form-group">
                     <label className="form-label" htmlFor="prod-cat">Category *</label>
@@ -1035,32 +1049,29 @@ export default function Products() {
 
 
                 <div className="form-group">
-                  <label className="form-label" htmlFor="prod-desc">Brief Description</label>
+                  <label className="form-label" htmlFor="prod-short-desc">Short Description</label>
                   <textarea
-                    id="prod-desc"
-                    name="description"
+                    id="prod-short-desc"
+                    name="shortDescription"
                     className="form-textarea"
                     rows="2"
-                    placeholder="Short marketing text shown in catalogs..."
-                    value={formData.description}
+                    placeholder="Brief description for cards and catalog (max 120 chars)..."
+                    value={formData.shortDescription}
                     onChange={handleInputChange}
                   ></textarea>
                 </div>
 
                 <div className="form-group">
-                  <label className="form-label" htmlFor="prod-details">Items Inside Hamper (One specification per line)</label>
+                  <label className="form-label" htmlFor="prod-desc">Full Description</label>
                   <textarea
-                    id="prod-details"
-                    name="detailsText"
+                    id="prod-desc"
+                    name="description"
                     className="form-textarea"
                     rows="4"
-                    placeholder="e.g.&#10;1 x Engraved Traditional Brass Bowl&#10;2 x Aromatic Jasmine Candles&#10;1 x Custom Greeting Card"
-                    value={formData.detailsText}
+                    placeholder="Full product description for detail pages..."
+                    value={formData.description}
                     onChange={handleInputChange}
                   ></textarea>
-                  <small style={{ color: 'var(--color-gray-text)', fontSize: '0.75rem' }}>
-                    Press Enter to start a new line for each detail. These will show as bullet points on the product page.
-                  </small>
                 </div>
 
                 <div style={{ padding: '15px', background: '#F8F9FA', borderRadius: '8px', marginTop: '15px', border: '1px solid #E9ECEF' }}>

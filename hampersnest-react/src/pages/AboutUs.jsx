@@ -29,6 +29,18 @@ const visionPillars = [
 
 export default function AboutUs() {
   const { settings } = useCart();
+  
+  const getPillars = () => {
+    try {
+      if (settings?.ourStoryPillars) {
+        return typeof settings.ourStoryPillars === 'string' 
+          ? JSON.parse(settings.ourStoryPillars) 
+          : settings.ourStoryPillars;
+      }
+    } catch(e) {}
+    return visionPillars;
+  };
+  const activePillars = getPillars();
   useEffect(() => {
     const revealElements = document.querySelectorAll('.reveal, .reveal-heading, .pillar-card');
     const observer = new IntersectionObserver(
@@ -97,14 +109,10 @@ export default function AboutUs() {
         <div className="container">
           <div className="about-grid">
             <div className="about-left reveal">
-              <span className="section-subtitle" style={{ textAlign: 'left', marginBottom: '0.8rem' }}>The Curation Studio</span>
-              <h3>Where Tradition <br />Meets Luxury</h3>
-              <p className="about-text" style={{ fontSize: '0.95rem', marginBottom: '1rem' }}>
-                Established in Hyderabad, {settings?.storeName || 'Hampers Nest'} was founded on a simple belief: <em>a return gift is a physical representation of your gratitude and celebration.</em> We believe that generic, mass-produced items lack the warmth and elegance that your guests deserve.
-              </p>
-              <p className="about-text" style={{ fontSize: '0.95rem' }}>
-                Our curation studio collaborates with local Indian artisans, bringing timeless treasures (like handcrafted brass bowls, peacock diyas, and zari pouches) and presenting them inside luxury, high-end packaging. Whether it is a grand wedding, a sweet baby shower, a warm housewarming, or an executive corporate event, we elevate the experience.
-              </p>
+              <span className="section-subtitle" style={{ textAlign: 'left', marginBottom: '0.8rem' }}>{settings?.ourStorySection1Label || 'The Curation Studio'}</span>
+              <h3 dangerouslySetInnerHTML={{ __html: (settings?.ourStorySection1Title || 'Where Tradition <br />Meets Luxury').replace(/{storeName}/g, settings?.storeName || 'Hampers Nest') }}></h3>
+              <p className="about-text" style={{ fontSize: '0.95rem', marginBottom: '1rem' }} dangerouslySetInnerHTML={{ __html: (settings?.ourStorySection1Paragraph1 || 'Established in Hyderabad, {storeName} was founded on a simple belief: <em>a return gift is a physical representation of your gratitude and celebration.</em> We believe that generic, mass-produced items lack the warmth and elegance that your guests deserve.').replace(/{storeName}/g, settings?.storeName || 'Hampers Nest') }}></p>
+              <p className="about-text" style={{ fontSize: '0.95rem' }} dangerouslySetInnerHTML={{ __html: (settings?.ourStorySection1Paragraph2 || 'Our curation studio collaborates with local Indian artisans, bringing timeless treasures (like handcrafted brass bowls, peacock diyas, and zari pouches) and presenting them inside luxury, high-end packaging. Whether it is a grand wedding, a sweet baby shower, a warm housewarming, or an executive corporate event, we elevate the experience.').replace(/{storeName}/g, settings?.storeName || 'Hampers Nest') }}></p>
             </div>
 
             <div className="about-right reveal" style={{ transitionDelay: '0.2s' }}>
@@ -120,11 +128,11 @@ export default function AboutUs() {
       {/* Vision Pillars Grid */}
       <section style={{ background: 'var(--color-lavender)', padding: '3.5rem 0' }}>
         <div className="container">
-          <span className="section-subtitle">Core Philosophy</span>
-          <h2 className="section-title">The Pillars of {settings?.storeName || 'Hampers Nest'}</h2>
+          <span className="section-subtitle">{settings?.ourStorySection2Label || 'Core Philosophy'}</span>
+          <h2 className="section-title" dangerouslySetInnerHTML={{ __html: (settings?.ourStorySection2Title || 'The Pillars of {storeName}').replace(/{storeName}/g, settings?.storeName || 'Hampers Nest') }}></h2>
           
           <div className="pillars-grid reveal" style={{ marginTop: '2rem' }}>
-            {visionPillars.map((pillar, idx) => (
+            {activePillars.map((pillar, idx) => (
               <div
                 key={idx}
                 className="pillar-card reveal-category"

@@ -19,13 +19,7 @@ export default function ProductDetailTemplate({ product, displayRelated = [] }) 
   const [activeMediaIndex, setActiveMediaIndex] = useState(0);
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
 
-  // Accordion Toggles
-  const [accordions, setAccordions] = useState({
-    inclusions: true,
-    specs: false,
-    shipping: false,
-    faqs: false,
-  });
+
 
   // Reset states on product change
   useEffect(() => {
@@ -51,12 +45,7 @@ export default function ProductDetailTemplate({ product, displayRelated = [] }) 
 
   const unitPrice = product.price;
 
-  const toggleAccordion = (section) => {
-    setAccordions((prev) => ({
-      ...prev,
-      [section]: !prev[section],
-    }));
-  };
+
 
   const handleAddToBasket = (e) => {
     e.preventDefault();
@@ -210,11 +199,11 @@ export default function ProductDetailTemplate({ product, displayRelated = [] }) 
                   {Array.from({ length: 5 }).map((_, i) => (
                     <i
                       key={i}
-                      className={i < Math.floor(product.rating || 5) ? "fa-solid fa-star" : "fa-regular fa-star"}
+                      className={i < Math.floor(product.rating || 4.5) ? "fa-solid fa-star" : "fa-regular fa-star"}
                     ></i>
                   ))}
                 </div>
-                <span className="rating-count">({product.rating || 5.0} Rating / Verified Client Reviews)</span>
+                <span className="rating-count">({product.rating || 4.5} Rating / Verified Client Reviews)</span>
               </div>
 
               <div className="product-price-block" style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', marginBottom: '1rem' }}>
@@ -454,72 +443,7 @@ export default function ProductDetailTemplate({ product, displayRelated = [] }) 
               </button>
             </div>
 
-            {/* Accordion Tabs */}
-            {product.details && product.details.length > 0 && (
-              <div className="product-accordions-group">
-                
-                {/* Inclusions */}
-                <div className={`accordion-item ${accordions.inclusions ? 'open' : ''}`}>
-                  <button className="accordion-header" onClick={() => toggleAccordion('inclusions')}>
-                    <span>Hamper Inclusions</span>
-                    <i className={`fa-solid ${accordions.inclusions ? 'fa-chevron-up' : 'fa-chevron-down'}`}></i>
-                  </button>
-                  {accordions.inclusions && (
-                    <div className="accordion-content">
-                      <ul className="details-list-check">
-                        {product.details.map((detail, idx) => (
-                          <li key={idx}>
-                            <i className="fa-solid fa-check text-gold"></i> {detail}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-                </div>
 
-                {/* Specifications */}
-                <div className={`accordion-item ${accordions.specs ? 'open' : ''}`}>
-                  <button className="accordion-header" onClick={() => toggleAccordion('specs')}>
-                    <span>Specifications</span>
-                    <i className={`fa-solid ${accordions.specs ? 'fa-chevron-up' : 'fa-chevron-down'}`}></i>
-                  </button>
-                  {accordions.specs && (
-                    <div className="accordion-content">
-                      <table className="specs-table">
-                        <tbody>
-                          <tr>
-                            <td><strong>Category</strong></td>
-                            <td>{product.category} Return Gift Hamper</td>
-                          </tr>
-                          <tr>
-                            <td><strong>Storage</strong></td>
-                            <td>Store dry items in a cool, dry place.</td>
-                          </tr>
-                        </tbody>
-                      </table>
-                    </div>
-                  )}
-                </div>
-
-                {/* FAQs */}
-                <div className={`accordion-item ${accordions.faqs ? 'open' : ''}`}>
-                  <button className="accordion-header" onClick={() => toggleAccordion('faqs')}>
-                    <span>Frequently Asked Questions</span>
-                    <i className={`fa-solid ${accordions.faqs ? 'fa-chevron-up' : 'fa-chevron-down'}`}></i>
-                  </button>
-                  {accordions.faqs && (
-                    <div className="accordion-content">
-                      <p style={{ fontSize: '0.85rem', lineHeight: 1.6, color: 'var(--color-charcoal)' }}>
-                        <strong>Q: Can I replace items in the hamper?</strong>
-                        <br />
-                        A: Yes! Please contact us via WhatsApp to customize.
-                      </p>
-                    </div>
-                  )}
-                </div>
-
-              </div>
-            )}
           </div>
         </div>
 
