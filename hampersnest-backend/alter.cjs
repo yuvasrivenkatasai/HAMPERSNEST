@@ -31,7 +31,7 @@ const sequelize = new Sequelize({
   username: dbUser,
   password: dbPassword,
   dialectOptions,
-  logging: console.log
+  logging: false
 });
 
 (async () => {
