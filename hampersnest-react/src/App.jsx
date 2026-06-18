@@ -45,7 +45,7 @@ function AppInner() {
           <Route path="/product/:id" element={<ProductDetail />} />
           
           {/* Dynamic Policy Routing */}
-          <Route path="/policies/:slug" element={<PolicyPage />} />
+          <Route path="/policies/:id" element={<PolicyPage />} />
           
           {/* Universal 404 Catch-All Redirect */}
           <Route path="*" element={<Navigate to="/" replace />} />

@@ -76,7 +76,7 @@ export default function Footer() {
           {settings?.customPolicies && settings.customPolicies.filter(p => p.isPublished).map((policy, index, array) => (
               <React.Fragment key={policy.id}>
                 <Link 
-                  to={policy.isCustom ? `/policy/${policy.id}` : `/${policy.id}`} 
+                  to={`/policies/${policy.id}`} 
                   style={{ color: 'rgba(255,255,255,0.7)', transition: 'color 0.2s' }}
                 >
                   {policy.title}

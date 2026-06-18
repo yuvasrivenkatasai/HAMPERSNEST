@@ -78,8 +78,8 @@ export default function Home() {
     fetchTestimonials();
   }, []);
 
-  // Get first 6 featured products dynamically from context
-  const featuredProducts = (products || []).filter((p) => p.isFeatured).slice(0, 6);
+  // Get first 8 featured products dynamically from context
+  const featuredProducts = (products || []).filter((p) => p.isFeatured).slice(0, 8);
 
   // Testimonial slider auto-slide
   useEffect(() => {
@@ -227,35 +227,38 @@ export default function Home() {
       </section>
 
       {/* TRUST SIGNALS */}
-      <section style={{ background: '#fff', borderBottom: '1px solid #eaeaea', padding: '15px 0' }}>
-        <div className="container" style={{ display: 'flex', justifyContent: 'center', gap: '30px', flexWrap: 'wrap' }}>
-          <div 
-            className="trust-signal-item"
-            onClick={() => navigate('/collections?category=customized-gifts')}
-            style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: '500', color: 'var(--color-text-dark)', fontSize: '0.95rem' }}
-          >
-            <span style={{ color: 'var(--color-gold)' }}>⭐</span> Customized Gifts
+      <section className="trust-signals-section">
+        <div className="container trust-signals-container">
+          <div className="trust-signal-item" onClick={() => navigate('/collections?category=customized-gifts')}>
+            <svg viewBox="0 0 24 24" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" fill="rgba(200, 169, 107, 0.15)" />
+            </svg>
+            Customized Gifts
           </div>
-          <div 
-            className="trust-signal-item"
-            onClick={() => document.getElementById('shipping-info')?.scrollIntoView({ behavior: 'smooth' })}
-            style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: '500', color: 'var(--color-text-dark)', fontSize: '0.95rem' }}
-          >
-            <span style={{ color: 'var(--color-gold)' }}>🚚</span> Pan India Delivery
+          <div className="trust-signal-item" onClick={() => document.getElementById('shipping-info')?.scrollIntoView({ behavior: 'smooth' })}>
+            <svg viewBox="0 0 24 24" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="1" y="3" width="15" height="13" rx="2" fill="rgba(200, 169, 107, 0.15)" />
+              <polygon points="16 8 20 8 23 11 23 16 16 16 16 8" fill="rgba(200, 169, 107, 0.15)" />
+              <circle cx="5.5" cy="18.5" r="2.5" fill="var(--color-gold)" />
+              <circle cx="18.5" cy="18.5" r="2.5" fill="var(--color-gold)" />
+            </svg>
+            Pan India Delivery
           </div>
-          <div 
-            className="trust-signal-item"
-            onClick={() => document.getElementById('bulk-orders')?.scrollIntoView({ behavior: 'smooth' })}
-            style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: '500', color: 'var(--color-text-dark)', fontSize: '0.95rem' }}
-          >
-            <span style={{ color: 'var(--color-gold)' }}>🎁</span> Bulk Orders Available
+          <div className="trust-signal-item" onClick={() => document.getElementById('bulk-orders')?.scrollIntoView({ behavior: 'smooth' })}>
+            <svg viewBox="0 0 24 24" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="20 12 20 22 4 22 4 12" fill="rgba(200, 169, 107, 0.15)" />
+              <rect x="2" y="7" width="20" height="5" rx="1" fill="rgba(200, 169, 107, 0.25)" />
+              <line x1="12" y1="22" x2="12" y2="7" />
+              <path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z" />
+              <path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z" />
+            </svg>
+            Bulk Orders Available
           </div>
-          <div 
-            className="trust-signal-item"
-            onClick={() => window.open(`https://wa.me/${settings?.whatsappNumber}`, '_blank')}
-            style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: '500', color: 'var(--color-text-dark)', fontSize: '0.95rem' }}
-          >
-            <span style={{ color: 'var(--color-gold)' }}>💬</span> WhatsApp Support
+          <div className="trust-signal-item" onClick={() => window.open(`https://wa.me/${settings?.whatsappNumber}`, '_blank')}>
+            <svg viewBox="0 0 24 24" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" fill="rgba(200, 169, 107, 0.15)" />
+            </svg>
+            WhatsApp Support
           </div>
         </div>
       </section>
@@ -279,6 +282,9 @@ export default function Home() {
                 <div className="shop-card-content">
                   <h3 className="shop-card-name">{product.name}</h3>
                   <p className="shop-card-inr">{formatPrice(product.price)}</p>
+                  <p className="shop-card-desc">
+                    {product.description || <span style={{ visibility: 'hidden' }}>&nbsp;</span>}
+                  </p>
                   <div className="collection-card-action-row">
                     <button
                       className="shop-card-btn"
@@ -343,7 +349,7 @@ export default function Home() {
           Explore our most loved customized gift hampers. Handpicked and tailored perfectly for premium weddings, baby showers, and celebrations.
         </p>
 
-        <div className="collections-grid reveal active">
+        <div className="collections-grid-4col reveal active">
           {products && products.slice(0, 4).map((product) => (
             <ProductCard key={product.id} product={product} />
           ))}
