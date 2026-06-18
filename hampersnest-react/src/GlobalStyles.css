@@ -7499,3 +7499,17 @@ footer h4,
 .policy-text-block i {
   font-style: italic;
 }
+
+/* Trust Signals Item */
+.trust-signal-item {
+  cursor: pointer;
+  transition: transform 0.3s ease, color 0.3s ease;
+  user-select: none;
+}
+.trust-signal-item:hover {
+  transform: translateY(-2px) scale(1.02);
+  color: var(--color-purple);
+}
+.trust-signal-item:hover span {
+  filter: brightness(1.1);
+}

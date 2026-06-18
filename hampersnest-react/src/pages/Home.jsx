@@ -229,16 +229,32 @@ export default function Home() {
       {/* TRUST SIGNALS */}
       <section style={{ background: '#fff', borderBottom: '1px solid #eaeaea', padding: '15px 0' }}>
         <div className="container" style={{ display: 'flex', justifyContent: 'center', gap: '30px', flexWrap: 'wrap' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: '500', color: 'var(--color-text-dark)', fontSize: '0.95rem' }}>
+          <div 
+            className="trust-signal-item"
+            onClick={() => navigate('/collections?category=customized-gifts')}
+            style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: '500', color: 'var(--color-text-dark)', fontSize: '0.95rem' }}
+          >
             <span style={{ color: 'var(--color-gold)' }}>⭐</span> Customized Gifts
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: '500', color: 'var(--color-text-dark)', fontSize: '0.95rem' }}>
+          <div 
+            className="trust-signal-item"
+            onClick={() => document.getElementById('shipping-info')?.scrollIntoView({ behavior: 'smooth' })}
+            style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: '500', color: 'var(--color-text-dark)', fontSize: '0.95rem' }}
+          >
             <span style={{ color: 'var(--color-gold)' }}>🚚</span> Pan India Delivery
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: '500', color: 'var(--color-text-dark)', fontSize: '0.95rem' }}>
+          <div 
+            className="trust-signal-item"
+            onClick={() => document.getElementById('bulk-orders')?.scrollIntoView({ behavior: 'smooth' })}
+            style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: '500', color: 'var(--color-text-dark)', fontSize: '0.95rem' }}
+          >
             <span style={{ color: 'var(--color-gold)' }}>🎁</span> Bulk Orders Available
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: '500', color: 'var(--color-text-dark)', fontSize: '0.95rem' }}>
+          <div 
+            className="trust-signal-item"
+            onClick={() => window.open(`https://wa.me/${settings?.whatsappNumber}`, '_blank')}
+            style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: '500', color: 'var(--color-text-dark)', fontSize: '0.95rem' }}
+          >
             <span style={{ color: 'var(--color-gold)' }}>💬</span> WhatsApp Support
           </div>
         </div>
@@ -293,7 +309,7 @@ export default function Home() {
       </section>
 
       {/* BULK & CORPORATE ORDERS */}
-      <section className="bulk-order-section">
+      <section id="bulk-orders" className="bulk-order-section">
         <div className="bulk-order-inner reveal">
           <span className="bulk-order-subtitle">Bulk & Corporate Orders</span>
           <h2 className="bulk-order-title">Need 50, 100 or 500 Gifts?</h2>
@@ -459,6 +475,17 @@ export default function Home() {
               Request A Quote <i className="fa-solid fa-arrow-right"></i>
             </Link>
           </div>
+        </div>
+      </section>
+
+      {/* DELIVERY INFORMATION SECTION */}
+      <section id="shipping-info" style={{ padding: '4rem 0', background: 'var(--color-ivory)', textAlign: 'center', borderTop: '1px solid #eaeaea' }}>
+        <div className="container reveal">
+          <span className="section-subtitle">Shipping & Delivery</span>
+          <h2 className="section-title">Pan India Delivery</h2>
+          <p style={{ maxWidth: '600px', margin: '1rem auto 0', color: 'var(--color-charcoal)', fontSize: '1.05rem', lineHeight: '1.6' }}>
+            We ensure safe, secure, and timely delivery of your luxury hampers across India. Each package is carefully handled to ensure your gifts arrive in pristine condition, no matter the destination.
+          </p>
         </div>
       </section>
 
