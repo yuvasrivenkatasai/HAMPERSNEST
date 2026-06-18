@@ -2,7 +2,7 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { User, AuditLog } from '../database/models.js';
 
-const JWT_SECRET = process.env.JWT_SECRET;
+// JWT secret loaded dynamically for ESM compatibility
 
 // All available module permission keys
 const ALL_MODULES = ['dashboard', 'orders', 'products', 'inventory', 'categories', 'inquiries', 'testimonials', 'policies', 'users', 'settings', 'category_showcase'];
@@ -29,7 +29,7 @@ export const loginUser = async (req, res) => {
       if (user.isActive === false) {
         return res.status(403).json({ message: 'Account is disabled. Please contact Super Admin.' });
       }
-      const token = jwt.sign({ id: user.id }, JWT_SECRET, {
+      const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET || 'hampersnest_secure_jwt_2026', {
         expiresIn: '30d'
       });
 

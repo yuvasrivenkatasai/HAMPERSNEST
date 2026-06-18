@@ -2,9 +2,8 @@ import jwt from 'jsonwebtoken';
 import { User } from '../database/models.js';
 import { getDefaultPermissions } from '../controllers/authController.js';
 
-const JWT_SECRET = process.env.JWT_SECRET;
-
 export const protect = async (req, res, next) => {
+  const JWT_SECRET = process.env.JWT_SECRET || 'hampersnest_secure_jwt_2026';
   let token;
 
   if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
