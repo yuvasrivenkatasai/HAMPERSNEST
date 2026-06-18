@@ -160,7 +160,7 @@ export const generateCatalogPdf = async (products, mode = 'download', onProgress
   const marginX = 15;
   const marginY = 35;
   const cardWidth = (pageWidth - (marginX * 2) - 10) / 2;
-  const cardHeight = 120;
+  const cardHeight = 115;
   
   let currentPage = 2;
   
@@ -227,7 +227,7 @@ export const generateCatalogPdf = async (products, mode = 'download', onProgress
     if (titleLines.length > 2) {
       finalTitleLines[1] = finalTitleLines[1].replace(/\s+\S*$/, '') + '...';
     }
-    doc.text(finalTitleLines, x + 4, y + 85);
+    doc.text(finalTitleLines, x + 4, y + 82);
     
     // Description
     doc.setTextColor(gray);
@@ -241,13 +241,13 @@ export const generateCatalogPdf = async (products, mode = 'download', onProgress
     if (descLines.length > 2) {
       finalDescLines[1] = finalDescLines[1].replace(/\s+\S*$/, '') + '...';
     }
-    doc.text(finalDescLines, x + 4, y + 98);
+    doc.text(finalDescLines, x + 4, y + 94);
     
     // Price
     doc.setTextColor(purple);
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(14);
-    doc.text(`Rs. ${product.price.toLocaleString()}`, x + 4, y + 115);
+    doc.text(`Rs. ${product.price.toLocaleString()}`, x + 4, y + 110);
   }
 
   const filename = `HampersNest-Catalog-${new Date().toLocaleDateString('en-GB').replace(/\//g, '-')}.pdf`;
