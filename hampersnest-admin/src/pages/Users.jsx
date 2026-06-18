@@ -12,9 +12,10 @@ const ALL_MODULES = [
   { key: 'policies', label: 'Policies', icon: 'fa-solid fa-file-contract' },
   { key: 'users', label: 'Users & Roles', icon: 'fa-solid fa-users-gear' },
   { key: 'settings', label: 'Settings', icon: 'fa-solid fa-sliders' },
+  { key: 'category_showcase', label: 'Category Showcase', icon: 'fa-solid fa-icons' }
 ];
 
-const ALL_PERMISSIONS = ['dashboard', 'orders', 'products', 'inventory', 'categories', 'inquiries', 'testimonials', 'policies', 'users', 'settings'];
+const ALL_PERMISSIONS = ['dashboard', 'orders', 'products', 'inventory', 'categories', 'inquiries', 'testimonials', 'policies', 'users', 'settings', 'category_showcase'];
 
 const ROLES = ['Super Admin', 'Admin', 'Manager', 'Staff'];
 

@@ -484,9 +484,7 @@ header.scrolled {
    ========================================== */
 .luxury-hero {
   position: relative;
-  min-height: 70vh;
-  /* Changed from 100vh to reduce excess space below the banner */
-  min-height: 70dvh;
+  /* Removed min-height to fix empty space issue */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -7797,5 +7795,262 @@ footer h4,
   .trust-signal-item svg {
     width: 16px;
     height: 16px;
+  }
+}
+
+/* ==========================================
+   SHOP BY CATEGORY – LUXURY IMAGE CARDS
+   ========================================== */
+.shop-by-category-section {
+  padding: 1.5rem 0 3rem;
+  background-color: var(--color-ivory);
+  overflow: hidden;
+  position: relative;
+}
+
+/* ---- Card Strip ---- */
+.category-cards-strip-wrapper {
+  width: 100vw;
+  margin-left: calc(-50vw + 50%);
+  overflow: hidden;
+  position: relative;
+  padding: 10px 0 30px;
+  /* Fading edges */
+  -webkit-mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
+  mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
+}
+
+.category-cards-strip {
+  display: flex;
+  gap: 20px;
+  width: max-content;
+  padding: 0 5vw;
+}
+
+.category-cards-strip.animated {
+  animation: slowScrollCategory 35s linear infinite;
+}
+
+.category-cards-strip.animated:hover {
+  animation-play-state: paused;
+}
+
+@keyframes slowScrollCategory {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(calc(-50% - 10px)); }
+}
+
+/* ---- Individual Card ---- */
+.luxury-category-card {
+  position: relative;
+  border-radius: 20px;
+  overflow: hidden;
+  background: var(--color-white);
+  border: 1px solid rgba(200, 169, 107, 0.15);
+  box-shadow: 0 6px 22px rgba(74, 29, 95, 0.06);
+  text-decoration: none;
+  cursor: pointer;
+  transition: transform 0.3s cubic-bezier(0.165, 0.84, 0.44, 1),
+              box-shadow 0.3s cubic-bezier(0.165, 0.84, 0.44, 1),
+              border-color 0.3s ease;
+  
+  /* Compact Dimensions */
+  width: 160px;
+  height: 160px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  /* Stagger fade-in — starts hidden */
+  opacity: 0;
+  transform: translateY(30px);
+}
+
+.luxury-category-card.card-visible {
+  animation: categoryCardFadeIn 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+  animation-delay: calc(var(--card-index, 0) * 100ms);
+}
+
+@keyframes categoryCardFadeIn {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ---- Hover State ---- */
+.luxury-category-card:hover {
+  transform: translateY(-4px) scale(1.03);
+  box-shadow: 0 12px 30px rgba(200, 169, 107, 0.25);
+  border-color: var(--color-gold);
+}
+
+.luxury-category-card:hover .category-image-wrapper img {
+  transform: scale(1.08);
+}
+
+.luxury-category-card:hover .category-card-overlay {
+  opacity: 1;
+}
+
+.luxury-category-card:hover .category-card-name {
+  color: var(--color-purple-dark);
+}
+
+/* ---- Image Wrapper ---- */
+.category-image-wrapper {
+  position: relative;
+  width: 100%;
+  height: 75%;
+  overflow: hidden;
+  border-radius: 20px 20px 0 0;
+  background: var(--color-lavender);
+}
+
+.category-image-wrapper img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.5s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+
+/* Gold shimmer overlay on hover */
+.category-card-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    transparent 40%,
+    rgba(200, 169, 107, 0.12) 100%
+  );
+  opacity: 0;
+  transition: opacity 0.35s ease;
+  pointer-events: none;
+}
+
+/* ---- Label Row ---- */
+.category-card-label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 25%;
+  padding: 0 10px;
+  border-top: 1px solid rgba(200, 169, 107, 0.1);
+  background: var(--color-white);
+}
+
+.category-card-name {
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-size: 0.95rem;
+  color: var(--color-purple);
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%;
+}
+
+/* ==========================================
+   FEATURED CATEGORY CARD  (Explore All)
+   ========================================== */
+.featured-category-card {
+  border: 1.5px solid var(--color-gold);
+  box-shadow: 0 8px 28px rgba(200, 169, 107, 0.18);
+}
+
+.featured-category-card:hover {
+  box-shadow: 0 18px 48px rgba(200, 169, 107, 0.32);
+}
+
+.featured-gradient-bg {
+  width: 100%;
+  height: 100%;
+  background:
+    linear-gradient(135deg,
+      var(--color-purple) 0%,
+      #5a2275 30%,
+      #6b2c8a 55%,
+      var(--color-purple) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Subtle gold shimmer sweep across the featured card */
+.featured-gradient-bg::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    105deg,
+    transparent 35%,
+    rgba(200, 169, 107, 0.15) 50%,
+    transparent 65%
+  );
+  transform: translateX(-120%);
+  animation: featuredShimmer 6s ease-in-out infinite;
+}
+
+@keyframes featuredShimmer {
+  0%, 70%, 100% { transform: translateX(-120%); }
+  85% { transform: translateX(120%); }
+}
+
+.featured-icon {
+  font-size: 2.5rem;
+  color: var(--color-gold);
+  z-index: 1;
+  filter: drop-shadow(0 4px 16px rgba(200, 169, 107, 0.4));
+}
+
+/* ==========================================
+   RESPONSIVE
+   ========================================== */
+@media (max-width: 1024px) {
+  .luxury-category-card {
+    width: 140px;
+    height: 140px;
+  }
+}
+
+@media (max-width: 768px) {
+  /* On mobile, use native swipe instead of CSS animation if preferred, 
+     but keeping animation makes it luxurious. We'll use native swipe. */
+  .category-cards-strip-wrapper {
+    mask-image: none;
+    -webkit-mask-image: none;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding: 10px 20px 20px;
+    margin-left: -20px;
+    width: calc(100% + 40px);
+  }
+  
+  .category-cards-strip-wrapper::-webkit-scrollbar {
+    display: none;
+  }
+
+  .category-cards-strip {
+    padding: 0;
+    width: max-content;
+  }
+  
+  .category-cards-strip.animated {
+    animation: none; /* Disable auto-scroll on mobile to allow swipe */
+  }
+
+  .luxury-category-card {
+    width: 120px;
+    height: 120px;
+    scroll-snap-align: start;
+  }
+  
+  .category-card-name {
+    font-size: 0.8rem;
   }
 }

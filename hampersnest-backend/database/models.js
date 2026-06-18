@@ -581,6 +581,46 @@ export const Testimonial = sequelize.define('Testimonial', {
   timestamps: true
 });
 
+// 11. Category Showcase Model (for Homepage)
+export const CategoryShowcase = sequelize.define('CategoryShowcase', {
+  id: {
+    type: DataTypes.INTEGER,
+    autoIncrement: true,
+    primaryKey: true
+  },
+  name: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
+  icon: {
+    type: DataTypes.STRING,
+    defaultValue: 'fa-solid fa-gift'
+  },
+  image: {
+    type: DataTypes.TEXT,
+    allowNull: true
+  },
+  isFeatured: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false
+  },
+  targetCollection: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
+  sortOrder: {
+    type: DataTypes.INTEGER,
+    defaultValue: 0
+  },
+  isActive: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: true
+  }
+}, {
+  tableName: 'category_showcase',
+  timestamps: true
+});
+
 // Associations
 Category.hasMany(Product, { foreignKey: 'category', sourceKey: 'id', as: 'products' });
 Product.belongsTo(Category, { foreignKey: 'category', targetKey: 'id', as: 'categoryDetails' });

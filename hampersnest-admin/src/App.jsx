@@ -14,6 +14,7 @@ import Settings from './pages/Settings';
 import Users from './pages/Users';
 import Testimonials from './pages/Testimonials';
 import Policies from './pages/Policies';
+import CategoryShowcaseManager from './pages/CategoryShowcaseManager';
 
 // All modules with their sidebar config
 const ALL_SIDEBAR_ITEMS = [
@@ -30,6 +31,7 @@ const ALL_SIDEBAR_ITEMS = [
 const ADMIN_SIDEBAR_ITEMS = [
   { path: '/users', permission: 'users', icon: 'fa-solid fa-users-gear', label: 'Users & Roles' },
   { path: '/settings', permission: 'settings', icon: 'fa-solid fa-sliders', label: 'Settings' },
+  { path: '/category-showcase', permission: 'category_showcase', icon: 'fa-solid fa-icons', label: 'Category Showcase' },
 ];
 
 // Helper: check if a user has a given permission
@@ -280,6 +282,7 @@ export default function App() {
                   <Route path="/policies" element={<ProtectedRoute permissionKey="policies" userPermissions={userPermissions}><Policies /></ProtectedRoute>} />
                   <Route path="/settings" element={<ProtectedRoute permissionKey="settings" userPermissions={userPermissions}><Settings /></ProtectedRoute>} />
                   <Route path="/users" element={<ProtectedRoute permissionKey="users" userPermissions={userPermissions}><Users /></ProtectedRoute>} />
+                  <Route path="/category-showcase" element={<ProtectedRoute permissionKey="category_showcase" userPermissions={userPermissions}><CategoryShowcaseManager /></ProtectedRoute>} />
                   <Route path="*" element={<Navigate to="/" replace />} />
                 </Routes>
               </AdminLayout>

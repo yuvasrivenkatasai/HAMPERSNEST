@@ -6,6 +6,7 @@ import { useCurrency } from '../context/CurrencyContext';
 import { API_BASE } from '../config';
 import SEO from '../components/SEO';
 import ProductCard from '../components/ProductCard';
+import ShopByCategory from '../components/ShopByCategory';
 
 const DEFAULT_TESTIMONIALS = [
   {
@@ -226,6 +227,9 @@ export default function Home() {
         </div>
       </section>
 
+      {/* SHOP BY CATEGORY SHOWCASE */}
+      <ShopByCategory />
+
       {/* TRUST SIGNALS */}
       <section className="trust-signals-section">
         <div className="container trust-signals-container">
@@ -235,7 +239,7 @@ export default function Home() {
             </svg>
             Customized Gifts
           </div>
-          <div className="trust-signal-item" onClick={() => document.getElementById('shipping-info')?.scrollIntoView({ behavior: 'smooth' })}>
+          <div className="trust-signal-item">
             <svg viewBox="0 0 24 24" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <rect x="1" y="3" width="15" height="13" rx="2" fill="rgba(200, 169, 107, 0.15)" />
               <polygon points="16 8 20 8 23 11 23 16 16 16 16 8" fill="rgba(200, 169, 107, 0.15)" />
@@ -481,17 +485,6 @@ export default function Home() {
               Request A Quote <i className="fa-solid fa-arrow-right"></i>
             </Link>
           </div>
-        </div>
-      </section>
-
-      {/* DELIVERY INFORMATION SECTION */}
-      <section id="shipping-info" style={{ padding: '4rem 0', background: 'var(--color-ivory)', textAlign: 'center', borderTop: '1px solid #eaeaea' }}>
-        <div className="container reveal">
-          <span className="section-subtitle">Shipping & Delivery</span>
-          <h2 className="section-title">Pan India Delivery</h2>
-          <p style={{ maxWidth: '600px', margin: '1rem auto 0', color: 'var(--color-charcoal)', fontSize: '1.05rem', lineHeight: '1.6' }}>
-            We ensure safe, secure, and timely delivery of your luxury hampers across India. Each package is carefully handled to ensure your gifts arrive in pristine condition, no matter the destination.
-          </p>
         </div>
       </section>
 

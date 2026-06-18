@@ -5,7 +5,7 @@ import { User, AuditLog } from '../database/models.js';
 const JWT_SECRET = process.env.JWT_SECRET;
 
 // All available module permission keys
-const ALL_MODULES = ['dashboard', 'orders', 'products', 'inventory', 'categories', 'inquiries', 'testimonials', 'policies', 'users', 'settings'];
+const ALL_MODULES = ['dashboard', 'orders', 'products', 'inventory', 'categories', 'inquiries', 'testimonials', 'policies', 'users', 'settings', 'category_showcase'];
 
 // Default permissions for each role
 // Super Admin always gets full access. All others are fully customizable.
@@ -41,8 +41,9 @@ export const loginUser = async (req, res) => {
         ipAddress: req.ip || 'Unknown'
       });
 
-      // Resolve permissions: use stored permissions, or generate defaults from role
-      const permissions = user.permissions || getDefaultPermissions(user.role);
+      // Resolve permissions: Super Admin always gets all, others use stored or defaults
+      let permissions = user.permissions || getDefaultPermissions(user.role);
+      if (user.role === 'Super Admin') permissions = [...ALL_MODULES];
 
       res.json({
         _id: user.id,
@@ -64,7 +65,9 @@ export const loginUser = async (req, res) => {
 // @access  Private
 export const verifyUser = async (req, res) => {
   try {
-    const permissions = req.user.permissions || getDefaultPermissions(req.user.role);
+    let permissions = req.user.permissions || getDefaultPermissions(req.user.role);
+    if (req.user.role === 'Super Admin') permissions = [...ALL_MODULES];
+    
     res.json({
       _id: req.user.id,
       username: req.user.username,
