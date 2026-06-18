@@ -343,14 +343,14 @@ header.scrolled {
 /* Desktop logo: 70-80px, brand 28px/600 */
 @media (min-width: 1025px) {
   .logo-wrapper img {
-    height: 58px;
+    height: 58px !important;
   }
 }
 
 /* Mobile logo: 55-60px, brand 22px/600 */
 @media (max-width: 1024px) {
   .logo-wrapper img {
-    height: 50px;
+    height: 50px !important;
   }
 }
 
@@ -3274,7 +3274,7 @@ footer {
   }
 
   .logo-wrapper img {
-    height: 38px !important;
+    height: 59px !important;
     width: auto !important;
   }
 
