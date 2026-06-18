@@ -11,6 +11,8 @@ export default function CategoryShowcaseManager() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingShowcase, setEditingShowcase] = useState(null);
   const [uploading, setUploading] = useState(false);
+  const [selectedImageFile, setSelectedImageFile] = useState(null);
+  const [selectedImagePreview, setSelectedImagePreview] = useState('');
   
   const [formData, setFormData] = useState({
     name: '',
@@ -62,6 +64,15 @@ export default function CategoryShowcaseManager() {
     }
   };
 
+  const handleCloseModal = () => {
+    if (selectedImagePreview && selectedImagePreview.startsWith('blob:')) {
+      URL.revokeObjectURL(selectedImagePreview);
+    }
+    setSelectedImageFile(null);
+    setSelectedImagePreview('');
+    setIsModalOpen(false);
+  };
+
   const handleOpenAddModal = () => {
     setEditingShowcase(null);
     setFormData({
@@ -73,6 +84,8 @@ export default function CategoryShowcaseManager() {
       sortOrder: showcases.length > 0 ? Math.max(...showcases.map(s => s.sortOrder || 0)) + 1 : 0,
       isActive: true
     });
+    setSelectedImageFile(null);
+    setSelectedImagePreview('');
     setIsModalOpen(true);
   };
 
@@ -87,53 +100,72 @@ export default function CategoryShowcaseManager() {
       sortOrder: showcase.sortOrder,
       isActive: showcase.isActive
     });
+    setSelectedImageFile(null);
+    setSelectedImagePreview(showcase.image || '');
     setIsModalOpen(true);
   };
 
-  const handleImageUpload = async (e) => {
+  const handleImageSelected = (e) => {
     const file = e.target.files[0];
     if (!file) return;
-    setUploading(true);
-    try {
-      const fd = new FormData();
-      fd.append('image', file);
-      const token = localStorage.getItem('adminToken');
-      const response = await fetch(`${API_BASE}/api/upload?folder=general`, {
-        method: 'POST',
-        headers: { 'Authorization': `Bearer ${token}` },
-        body: fd
-      });
-      const data = await response.json();
-      if (response.ok) {
-        setFormData(prev => ({ ...prev, image: data.url }));
-      } else {
-        alert('Upload failed: ' + (data.message || 'Unknown error'));
-      }
-    } catch (err) {
-      alert('Upload error: ' + err.message);
-    } finally {
-      setUploading(false);
+    setSelectedImageFile(file);
+    setSelectedImagePreview(URL.createObjectURL(file));
+  };
+
+  const handleRemoveImage = () => {
+    if (selectedImagePreview && selectedImagePreview.startsWith('blob:')) {
+      URL.revokeObjectURL(selectedImagePreview);
     }
+    setSelectedImageFile(null);
+    setSelectedImagePreview('');
+    setFormData(prev => ({ ...prev, image: '' }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setUploading(true);
     try {
+      let imageUrl = formData.image;
+
+      if (selectedImageFile) {
+        const fd = new FormData();
+        fd.append('image', selectedImageFile);
+        const token = localStorage.getItem('adminToken');
+        const response = await fetch(`${API_BASE}/api/upload?folder=showcase`, {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${token}` },
+          body: fd
+        });
+        const data = await response.json();
+        if (!response.ok) {
+          throw new Error(data.message || 'Image upload failed');
+        }
+        imageUrl = data.url;
+      }
+
+      const payload = {
+        ...formData,
+        image: imageUrl
+      };
+
       if (editingShowcase) {
         await apiRequest(`/api/category-showcase/${editingShowcase.id}`, {
           method: 'PUT',
-          body: formData
+          body: payload
         });
       } else {
         await apiRequest('/api/category-showcase', {
           method: 'POST',
-          body: formData
+          body: payload
         });
       }
-      setIsModalOpen(false);
+
+      handleCloseModal();
       fetchShowcases();
     } catch (err) {
       alert(err.message || 'Failed to save showcase');
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -280,7 +312,7 @@ export default function CategoryShowcaseManager() {
           <div className="modal-content" style={{ maxWidth: '520px' }}>
             <div className="modal-header">
               <h3>{editingShowcase ? 'Edit Category' : 'Add Category'}</h3>
-              <button type="button" className="modal-close" onClick={() => setIsModalOpen(false)}>
+              <button type="button" className="modal-close" onClick={handleCloseModal} disabled={uploading}>
                 <i className="fa-solid fa-xmark"></i>
               </button>
             </div>
@@ -298,17 +330,17 @@ export default function CategoryShowcaseManager() {
                 {/* Image Upload (OPTIONAL) */}
                 <div className="form-group">
                   <label className="form-label">Category Image</label>
-                  {formData.image ? (
+                  {selectedImagePreview ? (
                     <div style={{ position: 'relative', display: 'inline-block', marginBottom: '10px' }}>
-                      <img src={formData.image} alt="Category" style={{ width: '120px', height: '120px', borderRadius: '16px', objectFit: 'cover', border: '2px solid var(--color-gold)', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }} />
-                      <button type="button" onClick={() => setFormData({...formData, image: ''})}
+                      <img src={selectedImagePreview} alt="Category" style={{ width: '120px', height: '120px', borderRadius: '16px', objectFit: 'cover', border: '2px solid var(--color-gold)', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }} />
+                      <button type="button" onClick={handleRemoveImage}
                         style={{ position: 'absolute', top: '-8px', right: '-8px', width: '24px', height: '24px', borderRadius: '50%', background: '#EF4444', color: '#fff', border: 'none', fontSize: '0.7rem', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                         <i className="fa-solid fa-xmark"></i>
                       </button>
                     </div>
                   ) : (
                     <label style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', width: '120px', height: '120px', borderRadius: '16px', border: '2px dashed #D1D5DB', cursor: 'pointer', background: '#FAFAFA', transition: 'all 0.2s ease' }}>
-                      <input type="file" accept="image/*" style={{ display: 'none' }} onChange={handleImageUpload} />
+                      <input type="file" accept="image/*" style={{ display: 'none' }} onChange={handleImageSelected} />
                       {uploading ? (
                         <i className="fa-solid fa-spinner fa-spin" style={{ fontSize: '1.5rem', color: 'var(--color-gold)' }}></i>
                       ) : (
@@ -368,8 +400,14 @@ export default function CategoryShowcaseManager() {
                 </div>
               </div>
               <div className="modal-footer">
-                <button type="button" className="btn-admin-secondary" onClick={() => setIsModalOpen(false)}>Cancel</button>
-                <button type="submit" className="btn-admin">{editingShowcase ? 'Save Changes' : 'Add Category'}</button>
+                <button type="button" className="btn-admin-secondary" onClick={handleCloseModal} disabled={uploading}>Cancel</button>
+                <button type="submit" className="btn-admin" disabled={uploading}>
+                  {uploading ? (
+                    <><i className="fa-solid fa-spinner fa-spin" style={{ marginRight: '6px' }}></i> Saving...</>
+                  ) : (
+                    editingShowcase ? 'Save Changes' : 'Add Category'
+                  )}
+                </button>
               </div>
             </form>
           </div>
