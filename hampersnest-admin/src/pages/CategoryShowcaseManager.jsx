@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { apiRequest } from '../utils/api';
-
-const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:5000';
+import { apiRequest, API_BASE } from '../utils/api';
 
 export default function CategoryShowcaseManager() {
   const [showcases, setShowcases] = useState([]);
