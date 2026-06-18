@@ -38,7 +38,7 @@ sequelize = new Sequelize({
   username: dbUser,
   password: dbPassword,
   dialectOptions,
-  logging: false,
+  logging: console.log,
   pool: {
     max: 3,
     min: 0,

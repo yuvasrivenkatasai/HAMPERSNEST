@@ -119,6 +119,12 @@ export const createProduct = async (req, res) => {
 
     res.status(201).json(createdProduct);
   } catch (error) {
+    console.error('================ PRODUCT CREATE ERROR ================');
+    console.error(error);
+    if (error.parent) {
+      console.error('Parent error details:', error.parent);
+    }
+    console.error('======================================================');
     res.status(500).json({ message: error.message });
   }
 };
@@ -154,6 +160,12 @@ export const updateProduct = async (req, res) => {
       res.status(404).json({ message: 'Product not found' });
     }
   } catch (error) {
+    console.error('================ PRODUCT UPDATE ERROR ================');
+    console.error(error);
+    if (error.parent) {
+      console.error('Parent error details:', error.parent);
+    }
+    console.error('======================================================');
     res.status(error.statusCode || 500).json({ message: error.message });
   }
 };
