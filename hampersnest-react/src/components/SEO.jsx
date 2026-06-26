@@ -8,7 +8,7 @@ export default function SEO({ title, description, keywords, ogTitle, ogDescripti
   const siteName = settings?.storeName || 'Hampers Nest';
 
   const getAbsoluteImageUrl = (img) => {
-    if (!img) return typeof window !== 'undefined' ? window.location.origin + '/favicon.svg' : '';
+    if (!img) return typeof window !== 'undefined' ? window.location.origin + '/favicon.png' : '';
     if (img.startsWith('http')) return img;
     return typeof window !== 'undefined' ? window.location.origin + img : img;
   };
@@ -19,7 +19,7 @@ export default function SEO({ title, description, keywords, ogTitle, ogDescripti
     <Helmet>
       {/* Standard Meta */}
       <title>{finalTitle}</title>
-      <meta name="description" content={description || settings?.announcementBannerText || ''} />
+      <meta name="description" content={description || 'Luxury return gifts, wedding hampers, housewarming gifts, and premium gifting solutions.'} />
       {keywords && <meta name="keywords" content={keywords} />}
       <meta name="robots" content="index, follow" />
 

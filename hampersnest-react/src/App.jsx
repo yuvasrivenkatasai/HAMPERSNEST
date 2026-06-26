@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Suspense, lazy } from 'react';
 import { HelmetProvider } from 'react-helmet-async';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { CartProvider, useCart } from './context/CartContext';
@@ -12,14 +12,14 @@ import FloatingButtons from './components/FloatingButtons';
 import QuoteModal from './components/QuoteModal';
 import ScrollToTop from './components/ScrollToTop';
 
-import Home from './pages/Home';
-import Collections from './pages/Collections';
-import FeaturedGifts from './pages/FeaturedGifts';
-import Gallery from './pages/Gallery';
-import AboutUs from './pages/AboutUs';
-import Contact from './pages/Contact';
-import ProductDetail from './pages/ProductDetail';
-import PolicyPage from './pages/PolicyPage';
+const Home = lazy(() => import('./pages/Home'));
+const Collections = lazy(() => import('./pages/Collections'));
+const FeaturedGifts = lazy(() => import('./pages/FeaturedGifts'));
+const Gallery = lazy(() => import('./pages/Gallery'));
+const AboutUs = lazy(() => import('./pages/AboutUs'));
+const Contact = lazy(() => import('./pages/Contact'));
+const ProductDetail = lazy(() => import('./pages/ProductDetail'));
+const PolicyPage = lazy(() => import('./pages/PolicyPage'));
 
 import './GlobalStyles.css';
 
@@ -35,21 +35,23 @@ function AppInner() {
 
       {/* Page Routing */}
       <main style={{ flex: '1 0 auto' }}>
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/collections" element={<Collections />} />
-          <Route path="/featured" element={<FeaturedGifts />} />
-          <Route path="/gallery" element={<Gallery />} />
-          <Route path="/about" element={<AboutUs />} />
-          <Route path="/contact" element={<Contact />} />
-          <Route path="/product/:id" element={<ProductDetail />} />
-          
-          {/* Dynamic Policy Routing */}
-          <Route path="/policies/:id" element={<PolicyPage />} />
-          
-          {/* Universal 404 Catch-All Redirect */}
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
+        <Suspense fallback={<div style={{ textAlign: 'center', padding: '10rem 2rem' }}><i className="fa-solid fa-spinner fa-spin" style={{ fontSize: '3rem', color: 'var(--color-gold)' }}></i></div>}>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/collections" element={<Collections />} />
+            <Route path="/featured" element={<FeaturedGifts />} />
+            <Route path="/gallery" element={<Gallery />} />
+            <Route path="/about" element={<AboutUs />} />
+            <Route path="/contact" element={<Contact />} />
+            <Route path="/product/:id" element={<ProductDetail />} />
+            
+            {/* Dynamic Policy Routing */}
+            <Route path="/policies/:id" element={<PolicyPage />} />
+            
+            {/* Universal 404 Catch-All Redirect */}
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </Suspense>
       </main>
 
       {/* Visit Our Studio section & Follow Our Journey rendered on all pages */}

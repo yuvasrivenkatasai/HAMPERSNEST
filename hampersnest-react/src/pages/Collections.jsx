@@ -4,6 +4,7 @@ import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useCurrency } from '../context/CurrencyContext';
 import SEO from '../components/SEO';
+import Breadcrumbs from '../components/Breadcrumbs';
 
 export default function Collections() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -271,6 +272,10 @@ export default function Collections() {
       </div>
 
       <div className="container" style={{ paddingTop: '1rem' }}>
+        <Breadcrumbs customCrumbs={[
+          { name: 'Collections', path: '/collections' },
+          ...(activeCategory !== 'All' ? [{ name: getCategoryLabel(activeCategory), path: `/collections?category=${activeCategory}` }] : [])
+        ]} />
 
         {/* === MASTER CATEGORY TABS === */}
         <div className="category-tabs reveal" style={{ display: 'flex', justifyContent: 'center', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
@@ -519,7 +524,7 @@ function CollectionCard({ product, animationDelay, onAddToCart, onViewDetails })
       style={{ animationDelay: `${animationDelay}ms` }}
     >
       <div className="card-img-wrapper" onClick={onViewDetails} style={{ cursor: 'pointer' }}>
-        <img src={product.image} alt={product.name} />
+        <img src={product.image} alt={product.name} loading="lazy" />
       </div>
       <div className="card-content">
         <h3 className="card-title" onClick={onViewDetails} style={{ cursor: 'pointer' }}>

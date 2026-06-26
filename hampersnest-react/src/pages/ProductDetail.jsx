@@ -5,6 +5,7 @@ import { useCart } from '../context/CartContext';
 import ProductDetailTemplate from '../components/ProductDetailTemplate';
 import SEO from '../components/SEO';
 import { API_BASE } from '../config.js';
+import Breadcrumbs from '../components/Breadcrumbs';
 
 export default function ProductDetail() {
   const { id } = useParams();
@@ -222,6 +223,7 @@ export default function ProductDetail() {
 
   return (
     <div className="page-container">
+
       <SEO 
         title={`${product.name} | Customized Gift Hampers Hyderabad | ${settings?.storeName || 'Hampers Nest'}`}
         description={`${product.description} Customizable packaging, ribbons, and gift tags available. Order directly via WhatsApp.`}
@@ -230,6 +232,14 @@ export default function ProductDetail() {
         schema={productSchema}
       />
       
+      <div className="container" style={{ paddingTop: '20px' }}>
+        <Breadcrumbs customCrumbs={[
+          { name: 'Collections', path: '/collections' },
+          { name: product.category, path: `/collections?category=${product.category}` },
+          { name: product.name, path: `/product/${product.id}` }
+        ]} />
+      </div>
+
       <ProductDetailTemplate product={product} displayRelated={displayRelated} />
       
       <SeoKeywordsSection />
