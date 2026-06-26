@@ -377,8 +377,17 @@ export const Inquiry = sequelize.define('Inquiry', {
     defaultValue: 'Unassigned'
   },
   history: {
-    type: DataTypes.JSON,
-    defaultValue: []
+    type: DataTypes.TEXT,
+    get() {
+      const val = this.getDataValue('history');
+      if (!val) return [];
+      try {
+        return typeof val === 'string' ? JSON.parse(val) : val;
+      } catch(e) { return []; }
+    },
+    set(val) {
+      this.setDataValue('history', typeof val === 'string' ? val : JSON.stringify(val || []));
+    }
   }
 }, {
   tableName: 'inquiries',

@@ -2,9 +2,13 @@ import { sequelize } from './database/db.js';
 
 async function run() {
   try {
-    const [cols] = await sequelize.query("SELECT column_name, data_type FROM user_tab_columns WHERE table_name = 'products'");
-    console.log('Columns in products:');
-    console.log(cols);
+    for (const table of ['products', 'orders', 'inquiries']) {
+      const [cols] = await sequelize.query(
+        `SELECT column_name, data_type FROM user_tab_columns WHERE LOWER(table_name) = '${table.toLowerCase()}'`
+      );
+      console.log(`\nColumns in ${table}:`);
+      console.table(cols);
+    }
   } catch (e) {
     console.error('Error:', e);
   } finally {

@@ -54,8 +54,8 @@ router.post('/', protect, upload.single('image'), async (req, res) => {
   }
 
   try {
-    // Parse target directory from query param (allow products, gallery, general, hero)
-    const allowedFolders = ['products', 'gallery', 'general', 'hero'];
+    // Parse target directory from query param (allow products, gallery, general, hero, showcase)
+    const allowedFolders = ['products', 'gallery', 'general', 'hero', 'showcase'];
     const folder = allowedFolders.includes(req.query.folder) ? req.query.folder : 'general';
 
     console.log('[DEBUG UPLOAD] Image Upload Endpoint Called:');
@@ -146,7 +146,7 @@ router.post('/video', protect, upload.single('video'), async (req, res) => {
   }
 
   try {
-    const allowedFolders = ['products', 'gallery', 'general', 'hero'];
+    const allowedFolders = ['products', 'gallery', 'general', 'hero', 'showcase'];
     const folder = allowedFolders.includes(req.query.folder) ? req.query.folder : 'general';
 
     console.log('[DEBUG VIDEO UPLOAD] Video Upload Endpoint Called:');
