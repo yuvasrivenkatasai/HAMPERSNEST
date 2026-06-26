@@ -10,7 +10,7 @@ const __dirname = path.dirname(__filename);
 const outputDir = path.resolve(__dirname, '../dist');
 
 // Define canonical domain
-const DOMAIN = 'https://hampersnest.com';
+const DOMAIN = 'https://hampersnest.in';
 
 // Define static routes
 const staticRoutes = [

@@ -4,13 +4,14 @@ import { useCart } from '../context/CartContext';
 
 export default function SEO({ title, description, keywords, ogTitle, ogDescription, ogImage, canonicalUrl, schema }) {
   const { settings } = useCart();
+  const DOMAIN = 'https://hampersnest.in';
   const currentUrl = typeof window !== 'undefined' ? window.location.href : '';
   const siteName = settings?.storeName || 'Hampers Nest';
 
   const getAbsoluteImageUrl = (img) => {
-    if (!img) return typeof window !== 'undefined' ? window.location.origin + '/favicon.png' : '';
+    if (!img) return DOMAIN + '/favicon.png';
     if (img.startsWith('http')) return img;
-    return typeof window !== 'undefined' ? window.location.origin + img : img;
+    return DOMAIN + img;
   };
 
   const finalTitle = title ? `${title} | ${siteName}` : siteName;
