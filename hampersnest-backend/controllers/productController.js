@@ -45,8 +45,20 @@ export const getProducts = async (req, res) => {
       ...(limit !== null && { limit, offset })
     });
 
+    const categoryIds = [...new Set(rows.map(r => r.category).concat(rows.map(r => r.subCategory)).filter(Boolean))];
+    const categories = await Category.findAll({ where: { id: categoryIds } });
+    const categoryMap = {};
+    categories.forEach(c => categoryMap[c.id] = c.name);
+
+    const products = rows.map(r => {
+      const p = r.toJSON();
+      p.categoryName = categoryMap[p.category] || p.category;
+      p.subcategoryName = p.subCategory ? (categoryMap[p.subCategory] || p.subCategory) : '';
+      return p;
+    });
+
     res.json({
-      products: rows,
+      products: products,
       total: count,
       page: isAll ? 1 : page,
       totalPages: isAll ? 1 : Math.ceil(count / limit)
@@ -63,7 +75,19 @@ export const getProductById = async (req, res) => {
   try {
     const product = await Product.findOne({ where: { id: req.params.id } });
     if (product) {
-      res.json(product);
+      const p = product.toJSON();
+      
+      if (p.category) {
+        const cat = await Category.findByPk(p.category);
+        p.categoryName = cat ? cat.name : p.category;
+      }
+      
+      if (p.subCategory) {
+        const subCat = await Category.findByPk(p.subCategory);
+        p.subcategoryName = subCat ? subCat.name : p.subCategory;
+      }
+      
+      res.json(p);
     } else {
       res.status(404).json({ message: 'Product not found' });
     }

@@ -235,7 +235,7 @@ export default function ProductDetail() {
       <div className="container" style={{ paddingTop: '20px' }}>
         <Breadcrumbs customCrumbs={[
           { name: 'Collections', path: '/collections' },
-          { name: product.category, path: `/collections?category=${product.category}` },
+          { name: product.subcategoryName || product.categoryName || product.category, path: `/collections?category=${product.category}` },
           { name: product.name, path: `/product/${product.id}` }
         ]} />
       </div>

@@ -34,17 +34,9 @@ if (dbWalletPath) {
 }
 
 sequelize = new Sequelize({
-  dialect: 'oracle',
-  username: dbUser,
-  password: dbPassword,
-  dialectOptions,
-  logging: false,
-  pool: {
-    max: 3,
-    min: 0,
-    idle: 5000,
-    evict: 5000
-  }
+  dialect: 'sqlite',
+  storage: './database.sqlite',
+  logging: false
 });
 
 
@@ -60,7 +52,7 @@ export const connectDB = async () => {
     const { User, Category } = await import('./models.js');
 
     // Automatically sync models to database (Disabled to prevent schema resets on restart)
-    // await sequelize.sync({ alter: false });
+    await sequelize.sync();
     console.log('Database connection verified.');
 
     // Seed default admin user securely

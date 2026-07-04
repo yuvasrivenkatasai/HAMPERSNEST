@@ -191,7 +191,7 @@ export default function ProductDetailTemplate({ product, displayRelated = [] }) 
           <div className="product-detail-info-wrapper">
             {/* 2. Product Header */}
             <div className="product-header-block">
-              <span className="product-category-tag">{product.category} Collection</span>
+              <span className="product-category-tag">{product.subcategoryName || product.categoryName || product.category} Collection</span>
               <h1 className="product-detail-title">{product.name}</h1>
               
               <div className="product-rating-row">
