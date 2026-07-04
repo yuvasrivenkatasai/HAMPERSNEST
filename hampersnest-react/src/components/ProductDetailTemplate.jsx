@@ -6,7 +6,7 @@ import ProductCard from './ProductCard';
 import { API_BASE } from '../config.js';
 
 export default function ProductDetailTemplate({ product, displayRelated = [] }) {
-  const { addToCart, toggleWishlist, isInWishlist, setQuoteModalOpen } = useCart();
+  const { addToCart, toggleWishlist, isInWishlist, setQuoteModalOpen, settings } = useCart();
   const { formatPrice } = useCurrency();
 
   const isWishlisted = isInWishlist(product.id);
@@ -191,7 +191,7 @@ export default function ProductDetailTemplate({ product, displayRelated = [] }) 
           <div className="product-detail-info-wrapper">
             {/* 2. Product Header */}
             <div className="product-header-block">
-              <span className="product-category-tag">{product.subcategoryName || product.categoryName || product.category} Collection</span>
+              <span className="product-category-tag">{(product.subcategoryName || product.categoryName || settings?.categories?.find(c => c.id === product.subCategory)?.label || settings?.categories?.find(c => c.id === product.category)?.label || product.category)} Collection</span>
               <h1 className="product-detail-title">{product.name}</h1>
               
               <div className="product-rating-row">

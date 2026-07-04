@@ -78,6 +78,7 @@ const sequelize = new Sequelize({
       // Product columns added in later sessions
       'ALTER TABLE "products" ADD "shortDescription" CLOB',
       'ALTER TABLE "products" ADD "originalPrice" NUMBER(10) DEFAULT 0',
+      'ALTER TABLE "products" ADD "discountPrice" NUMBER(10) DEFAULT 0',
       'ALTER TABLE "products" ADD "sku" VARCHAR2(255)',
       'ALTER TABLE "products" ADD "isActive" NUMBER(1) DEFAULT 1',
       // User columns added for RBAC
