@@ -92,7 +92,13 @@ const loadImageAsBase64 = async (url, targetAspectRatio) => {
   }
 };
 
-export const generateCatalogPdf = async (products, mode = 'download', onProgress) => {
+export const generateCatalogPdf = async (products, mode = 'download', onProgress, options = {}) => {
+  const {
+    showPrice = true,
+    showDescription = true,
+    showSpecs = false,
+    useWatermark = false
+  } = options;
   const doc = new jsPDF({
     orientation: 'portrait',
     unit: 'mm',
@@ -197,8 +203,19 @@ export const generateCatalogPdf = async (products, mode = 'download', onProgress
     const destH = 75;
     const targetAspectRatio = destW / destH;
     
+    // Select Image Url
+    let targetImageUrl = product.image;
+    if (useWatermark && targetImageUrl) {
+      // Assuming original is like /uploads/products/abc.jpg and watermarked is /uploads/products/abc_watermarked.webp
+      const parts = targetImageUrl.split('.');
+      if (parts.length > 1) {
+        parts.pop(); // remove extension
+        targetImageUrl = parts.join('.') + '_watermarked.webp';
+      }
+    }
+
     // Load Image
-    const base64Img = await loadImageAsBase64(product.image, targetAspectRatio);
+    const base64Img = await loadImageAsBase64(targetImageUrl, targetAspectRatio);
     if (base64Img) {
       try {
         // Image at top of card, height 50mm
@@ -222,7 +239,6 @@ export const generateCatalogPdf = async (products, mode = 'download', onProgress
     doc.setFontSize(12);
     const cleanTitle = cleanText(product.name);
     const titleLines = doc.splitTextToSize(cleanTitle, cardWidth - 8);
-    // Max 2 lines. If longer, slice and add ellipsis
     let finalTitleLines = titleLines.slice(0, 2);
     if (titleLines.length > 2) {
       finalTitleLines[1] = finalTitleLines[1].replace(/\s+\S*$/, '') + '...';
@@ -230,24 +246,37 @@ export const generateCatalogPdf = async (products, mode = 'download', onProgress
     doc.text(finalTitleLines, x + 4, y + 82);
     
     // Description
-    doc.setTextColor(gray);
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(9);
-    const desc = product.shortDescription || product.description || '';
-    const cleanDesc = cleanText(desc);
-    const descLines = doc.splitTextToSize(cleanDesc, cardWidth - 8);
-    // Max 2 lines. If longer, slice and add ellipsis
-    let finalDescLines = descLines.slice(0, 2);
-    if (descLines.length > 2) {
-      finalDescLines[1] = finalDescLines[1].replace(/\s+\S*$/, '') + '...';
+    if (showDescription) {
+      doc.setTextColor(gray);
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(9);
+      const desc = product.shortDescription || product.description || '';
+      const cleanDesc = cleanText(desc);
+      const descLines = doc.splitTextToSize(cleanDesc, cardWidth - 8);
+      let finalDescLines = descLines.slice(0, 2);
+      if (descLines.length > 2) {
+        finalDescLines[1] = finalDescLines[1].replace(/\s+\S*$/, '') + '...';
+      }
+      doc.text(finalDescLines, x + 4, y + 94);
     }
-    doc.text(finalDescLines, x + 4, y + 94);
     
+    // Specs (Details)
+    if (showSpecs && product.details && product.details.length > 0) {
+      doc.setTextColor(gray);
+      doc.setFont('helvetica', 'italic');
+      doc.setFontSize(8);
+      const specsText = product.details.map(d => cleanText(d)).join(' • ');
+      const specLines = doc.splitTextToSize(specsText, cardWidth - 8);
+      doc.text(specLines.slice(0, 1), x + 4, showDescription ? y + 104 : y + 94); // fit on one line
+    }
+
     // Price
-    doc.setTextColor(purple);
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(14);
-    doc.text(`Rs. ${product.price.toLocaleString()}`, x + 4, y + 110);
+    if (showPrice) {
+      doc.setTextColor(purple);
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(14);
+      doc.text(`Rs. ${product.price.toLocaleString()}`, x + 4, y + 110);
+    }
   }
 
   const filename = `HampersNest-Catalog-${new Date().toLocaleDateString('en-GB').replace(/\//g, '-')}.pdf`;

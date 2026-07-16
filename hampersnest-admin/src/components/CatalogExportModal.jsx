@@ -4,6 +4,15 @@ import { generateCatalogPdf } from '../utils/pdfGenerator';
 export default function CatalogExportModal({ isOpen, onClose, products, categories, selectedProductIds }) {
   const [exportMode, setExportMode] = useState(selectedProductIds?.length > 0 ? 'SELECTED' : 'ALL');
   const [selectedCategory, setSelectedCategory] = useState('');
+  const [selectedSubcategory, setSelectedSubcategory] = useState('');
+  
+  // Sort and Display Options
+  const [sortBy, setSortBy] = useState('NAME_ASC');
+  const [showPrice, setShowPrice] = useState(true);
+  const [showDescription, setShowDescription] = useState(true);
+  const [showSpecs, setShowSpecs] = useState(false);
+  const [useWatermark, setUseWatermark] = useState(false);
+  
   const [generating, setGenerating] = useState(false);
   const [progress, setProgress] = useState(0);
 
@@ -18,6 +27,8 @@ export default function CatalogExportModal({ isOpen, onClose, products, categori
       filteredProducts = products.filter(p => selectedProductIds.includes(p.id));
     } else if (exportMode === 'CATEGORY' && selectedCategory) {
       filteredProducts = products.filter(p => p.category === selectedCategory);
+    } else if (exportMode === 'SUBCATEGORY' && selectedSubcategory) {
+      filteredProducts = products.filter(p => p.subCategory === selectedSubcategory);
     }
 
     if (filteredProducts.length === 0) {
@@ -27,13 +38,35 @@ export default function CatalogExportModal({ isOpen, onClose, products, categori
     }
 
     // Attach human readable categories if possible
-    const enrichedProducts = filteredProducts.map(p => ({
+    let enrichedProducts = filteredProducts.map(p => ({
       ...p,
       categoryName: categories.find(c => c.id === p.category)?.name || p.category
     }));
 
+    // Apply Sorting
+    enrichedProducts.sort((a, b) => {
+      if (sortBy === 'NAME_ASC') {
+        return a.name.localeCompare(b.name);
+      } else if (sortBy === 'PRICE_ASC') {
+        return a.price - b.price;
+      } else if (sortBy === 'PRICE_DESC') {
+        return b.price - a.price;
+      } else if (sortBy === 'CATEGORY') {
+        const catA = a.categoryName || '';
+        const catB = b.categoryName || '';
+        if (catA === catB) return a.name.localeCompare(b.name);
+        return catA.localeCompare(catB);
+      }
+      return 0;
+    });
+
     try {
-      await generateCatalogPdf(enrichedProducts, mode, (prog) => setProgress(prog));
+      await generateCatalogPdf(enrichedProducts, mode, (prog) => setProgress(prog), {
+        showPrice,
+        showDescription,
+        showSpecs,
+        useWatermark
+      });
     } catch (err) {
       console.error(err);
       alert('Failed to generate catalog. Check console for details.');
@@ -73,6 +106,7 @@ export default function CatalogExportModal({ isOpen, onClose, products, categori
                 <option value="SELECTED">Selected Products ({selectedProductIds.length})</option>
               )}
               <option value="CATEGORY">By Category</option>
+              <option value="SUBCATEGORY">By Subcategory</option>
             </select>
           </div>
 
@@ -92,6 +126,60 @@ export default function CatalogExportModal({ isOpen, onClose, products, categori
               </select>
             </div>
           )}
+
+          {exportMode === 'SUBCATEGORY' && (
+            <div className="form-group" style={{ marginTop: '15px' }}>
+              <label className="form-label">Select Subcategory</label>
+              <select 
+                className="form-select"
+                value={selectedSubcategory}
+                onChange={(e) => setSelectedSubcategory(e.target.value)}
+                disabled={generating}
+              >
+                <option value="">-- Choose Subcategory --</option>
+                {categories.flatMap(c => c.subcategories || []).map(sc => (
+                  <option key={sc.id} value={sc.id}>{sc.name}</option>
+                ))}
+              </select>
+            </div>
+          )}
+
+          <div className="form-group" style={{ marginTop: '15px' }}>
+            <label className="form-label">Sort By</label>
+            <select 
+              className="form-select"
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+              disabled={generating}
+            >
+              <option value="NAME_ASC">Name (A-Z)</option>
+              <option value="PRICE_ASC">Price (Low to High)</option>
+              <option value="PRICE_DESC">Price (High to Low)</option>
+              <option value="CATEGORY">Category</option>
+            </select>
+          </div>
+
+          <div className="form-group" style={{ marginTop: '15px' }}>
+            <label className="form-label">Display Options</label>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginTop: '8px' }}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.85rem' }}>
+                <input type="checkbox" checked={showPrice} onChange={(e) => setShowPrice(e.target.checked)} disabled={generating} />
+                Show Price
+              </label>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.85rem' }}>
+                <input type="checkbox" checked={showDescription} onChange={(e) => setShowDescription(e.target.checked)} disabled={generating} />
+                Show Description
+              </label>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.85rem' }}>
+                <input type="checkbox" checked={showSpecs} onChange={(e) => setShowSpecs(e.target.checked)} disabled={generating} />
+                Show Specifications
+              </label>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.85rem' }}>
+                <input type="checkbox" checked={useWatermark} onChange={(e) => setUseWatermark(e.target.checked)} disabled={generating} />
+                Use Watermarked Images
+              </label>
+            </div>
+          </div>
 
           {generating && (
             <div style={{ marginTop: '20px' }}>

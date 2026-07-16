@@ -46,19 +46,7 @@ export default function ProductDetail() {
 
   const product = localProduct;
 
-  // Customization States
-  const [giftTag, setGiftTag] = useState('');
-  const [selectedAddOns, setSelectedAddOns] = useState({
-    candle: false,
-    chocolates: false,
-    bottle: false,
-    calligraphy: false,
-  });
-  const [quantity, setQuantity] = useState(1);
 
-  // Gallery States
-  const [activeMediaIndex, setActiveMediaIndex] = useState(0);
-  const [isLightboxOpen, setIsLightboxOpen] = useState(false);
 
   // Accordion Toggles
   const [accordions, setAccordions] = useState({
@@ -68,19 +56,8 @@ export default function ProductDetail() {
     faqs: false,
   });
 
-  // Scroll to top on product change
+    // Scroll to top on product change
   useEffect(() => {
-    setActiveMediaIndex(0);
-    setIsLightboxOpen(false);
-    // Reset selections
-    setGiftTag('');
-    setSelectedAddOns({
-      candle: false,
-      chocolates: false,
-      bottle: false,
-      calligraphy: false,
-    });
-    setQuantity(1);
 
     // Track product view in backend database
     if (id) {
@@ -137,46 +114,6 @@ export default function ProductDetail() {
   }
 
   const isWishlisted = isInWishlist(product.id);
-
-  const addOnDetails = {
-    candle: { name: 'Scented Wax Candle', price: 99 },
-    chocolates: { name: 'Extra Chocolates (Pack of 4)', price: 149 },
-    bottle: { name: 'Premium Hydration Flask', price: 299 },
-    calligraphy: { name: 'Calligraphy Message Card', price: 49 },
-  };
-
-  // Calculate Added Price
-  const addedPrice = 
-    Object.keys(selectedAddOns).reduce((total, key) => {
-      return total + (selectedAddOns[key] ? addOnDetails[key].price : 0);
-    }, 0);
-
-  const unitPrice = product.price + addedPrice;
-  const totalPrice = unitPrice * quantity;
-
-  // Toggle Accordion Section
-  const toggleAccordion = (section) => {
-    setAccordions((prev) => ({
-      ...prev,
-      [section]: !prev[section],
-    }));
-  };
-
-  // Handle Add to Basket
-  const handleAddToBasket = (e) => {
-    e.preventDefault();
-    
-    // Gather active add-on names
-    const activeAddOns = Object.keys(selectedAddOns)
-      .filter((key) => selectedAddOns[key])
-      .map((key) => addOnDetails[key].name);
-
-    addToCart(product, quantity, {
-      giftTag,
-      addOns: activeAddOns,
-      addedPrice,
-    });
-  };
 
 
 

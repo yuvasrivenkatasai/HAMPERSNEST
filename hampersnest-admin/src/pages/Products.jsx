@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { apiRequest, API_BASE, apiDownload } from '../utils/api';
 import CatalogExportModal from '../components/CatalogExportModal';
+import BulkVariantModal from '../components/BulkVariantModal';
+import BulkImageImportModal from '../components/BulkImageImportModal';
 
 export default function Products() {
   const [products, setProducts] = useState([]);
@@ -14,11 +16,11 @@ export default function Products() {
   const [search, setSearch] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('All');
   
-  // Catalog Modal state
-  const [catalogModalOpen, setCatalogModalOpen] = useState(false);
-  
-  // Import modal states
+  // Export/Import/Catalog State
   const [importModalOpen, setImportModalOpen] = useState(false);
+  const [catalogModalOpen, setCatalogModalOpen] = useState(false);
+  const [bulkVariantModalOpen, setBulkVariantModalOpen] = useState(false);
+  const [imageImportModalOpen, setImageImportModalOpen] = useState(false);
   const [importMode, setImportMode] = useState('CREATE_ONLY');
   const [importFile, setImportFile] = useState(null);
   const [importing, setImporting] = useState(false);
@@ -47,8 +49,20 @@ export default function Products() {
     videoUrls: [],
     customGiftTagEnabled: true,
     addonsEnabled: true,
+    customAddons: [],
     customizationText: 'Make your gift extra special by adding a custom gift tag and selecting add-ons.',
-    deliveryInfoText: 'Standard Delivery: 3-5 business days. Express Delivery available at checkout.'
+    deliveryInfoText: 'Standard Delivery: 3-5 business days. Express Delivery available at checkout.',
+    watermarkSettings: {
+      enabled: true,
+      type: 'Brand Name',
+      text: 'Hampers Nest',
+      position: 'Bottom Right',
+      opacity: 18,
+      opacity: 18,
+      size: 'Medium'
+    },
+    variantsEnabled: false,
+    variants: []
   });
   const [formSubmitting, setFormSubmitting] = useState(false);
   const [uploadingGallery, setUploadingGallery] = useState(false);
@@ -170,8 +184,25 @@ export default function Products() {
       videoUrls: [],
       customGiftTagEnabled: true,
       addonsEnabled: true,
+      customAddons: [
+        { name: 'Scented Wax Candle', price: 99 },
+        { name: 'Extra Chocolates (Pack of 4)', price: 149 },
+        { name: 'Premium Hydration Flask', price: 299 },
+        { name: 'Calligraphy Message Card', price: 49 }
+      ],
       customizationText: 'Make your gift extra special by adding a custom gift tag and selecting add-ons.',
-      deliveryInfoText: 'Standard Delivery: 3-5 business days. Express Delivery available at checkout.'
+      deliveryInfoText: 'Standard Delivery: 3-5 business days. Express Delivery available at checkout.',
+      watermarkSettings: {
+        enabled: true,
+        type: 'Brand Name',
+        text: 'Hampers Nest',
+        position: 'Bottom Right',
+        opacity: 18,
+        opacity: 18,
+        size: 'Medium'
+      },
+      variantsEnabled: false,
+      variants: []
     });
     setModalOpen(true);
   };
@@ -224,8 +255,26 @@ export default function Products() {
       videoUrls: Array.isArray(product.videoUrls) ? product.videoUrls : [],
       customGiftTagEnabled: product.customGiftTagEnabled !== false,
       addonsEnabled: product.addonsEnabled !== false,
+      customAddons: Array.isArray(product.customAddons) && product.customAddons.length > 0 
+        ? product.customAddons 
+        : (product.addonsEnabled !== false ? [
+          { name: 'Scented Wax Candle', price: 99 },
+          { name: 'Extra Chocolates (Pack of 4)', price: 149 },
+          { name: 'Premium Hydration Flask', price: 299 },
+          { name: 'Calligraphy Message Card', price: 49 }
+        ] : []),
       customizationText: product.customizationText || 'Make your gift extra special by adding a custom gift tag and selecting add-ons.',
-      deliveryInfoText: product.deliveryInfoText || 'Standard Delivery: 3-5 business days. Express Delivery available at checkout.'
+      deliveryInfoText: product.deliveryInfoText || 'Standard Delivery: 3-5 business days. Express Delivery available at checkout.',
+      watermarkSettings: product.watermarkSettings || {
+        enabled: true,
+        type: 'Brand Name',
+        text: 'Hampers Nest',
+        position: 'Bottom Right',
+        opacity: 18,
+        size: 'Medium'
+      },
+      variantsEnabled: !!product.variantsEnabled,
+      variants: Array.isArray(product.variants) ? product.variants : []
     });
     setModalOpen(true);
   };
@@ -251,6 +300,49 @@ export default function Products() {
       [name]: type === 'checkbox' ? checked : value
     }));
   };
+
+  const handleAddVariant = () => {
+    setFormData(prev => ({
+      ...prev,
+      variants: [...prev.variants, { id: Date.now().toString(), name: '', price: '', sku: '', stock: '', isDefault: prev.variants.length === 0 }]
+    }));
+  };
+
+  const handleUpdateVariant = (index, field, value) => {
+    const updated = [...formData.variants];
+    updated[index][field] = value;
+    if (field === 'isDefault' && value === true) {
+      updated.forEach((v, i) => { if (i !== index) v.isDefault = false; });
+    }
+    setFormData(prev => ({ ...prev, variants: updated }));
+  };
+
+  const handleRemoveVariant = (index) => {
+    const updated = formData.variants.filter((_, i) => i !== index);
+    if (updated.length > 0 && !updated.some(v => v.isDefault)) {
+      updated[0].isDefault = true;
+    }
+    setFormData(prev => ({ ...prev, variants: updated }));
+  };
+
+  const handleAddCustomAddon = () => {
+    setFormData(prev => ({
+      ...prev,
+      customAddons: [...prev.customAddons, { name: '', price: '' }]
+    }));
+  };
+
+  const handleUpdateCustomAddon = (index, field, value) => {
+    const updated = [...formData.customAddons];
+    updated[index][field] = value;
+    setFormData(prev => ({ ...prev, customAddons: updated }));
+  };
+
+  const handleRemoveCustomAddon = (index) => {
+    const updated = formData.customAddons.filter((_, i) => i !== index);
+    setFormData(prev => ({ ...prev, customAddons: updated }));
+  };
+
 
   const handleFormSubmit = async (e) => {
     e.preventDefault();
@@ -289,8 +381,13 @@ export default function Products() {
         if (item.file) {
           const formDataObj = new FormData();
           formDataObj.append('image', item.file);
-          
-          const response = await fetch(`${API_BASE}/api/upload?folder=products&productId=${formData.id}`, {
+          let uploadUrl = `${API_BASE}/api/upload?folder=products&productId=${formData.id}`;
+          if (formData.watermarkSettings && formData.watermarkSettings.enabled) {
+            const wm = formData.watermarkSettings;
+            uploadUrl += `&watermarkEnabled=true&watermarkType=${encodeURIComponent(wm.type)}&watermarkText=${encodeURIComponent(wm.text)}&watermarkPosition=${encodeURIComponent(wm.position)}&watermarkOpacity=${encodeURIComponent(wm.opacity / 100)}&watermarkSize=${encodeURIComponent(wm.size)}`;
+          }
+
+          const response = await fetch(uploadUrl, {
             method: 'POST',
             headers: { ...(token ? { 'Authorization': `Bearer ${token}` } : {}) },
             body: formDataObj
@@ -302,7 +399,12 @@ export default function Products() {
           }
 
           const data = await response.json();
-          uploadedImages.push(data.url);
+          // If a watermarked version was generated, save that, otherwise save the original
+          if (data.watermarkedUrl) {
+            uploadedImages.push(data.watermarkedUrl);
+          } else {
+            uploadedImages.push(data.url);
+          }
         } else {
           uploadedImages.push(item.url);
         }
@@ -351,7 +453,11 @@ export default function Products() {
         customGiftTagEnabled: formData.customGiftTagEnabled,
         addonsEnabled: formData.addonsEnabled,
         customizationText: formData.customizationText,
-        deliveryInfoText: formData.deliveryInfoText
+        deliveryInfoText: formData.deliveryInfoText,
+        watermarkSettings: formData.watermarkSettings,
+        variantsEnabled: formData.variantsEnabled,
+        variants: formData.variants,
+        customAddons: formData.customAddons.filter(a => a.name.trim() !== '')
       };
 
       if (editingProduct) {
@@ -389,6 +495,17 @@ export default function Products() {
     } catch (err) {
       console.error(err);
       alert(err.message || 'Failed to update status');
+    }
+  };
+
+  const handleDuplicateProduct = async (product) => {
+    try {
+      const duplicated = await apiRequest(`/api/products/${product.id}/duplicate`, { method: 'POST' });
+      setProducts(prev => [duplicated, ...(Array.isArray(prev) ? prev : [])]);
+      openEditModal(duplicated);
+    } catch (err) {
+      console.error(err);
+      alert(err.message || 'Failed to duplicate product');
     }
   };
 
@@ -450,6 +567,34 @@ export default function Products() {
     }
   };
 
+  const executeBulkWatermark = async () => {
+    if (!window.confirm(`Queue watermark regeneration for ${selectedIds.length} products?`)) return;
+    try {
+      await apiRequest('/api/products/bulk-watermark', {
+        method: 'POST',
+        body: { ids: selectedIds }
+      });
+      alert('Bulk watermark regeneration queued in background.');
+      setSelectedIds([]);
+    } catch (err) {
+      alert('Bulk watermark failed: ' + err.message);
+    }
+  };
+
+  const executeBulkVariants = async (action, payload) => {
+    try {
+      await apiRequest('/api/products/bulk-variants', {
+        method: 'POST',
+        body: { ids: selectedIds, action, payload }
+      });
+      alert('Bulk variant update applied successfully.');
+      setBulkVariantModalOpen(false);
+      fetchProducts();
+    } catch (err) {
+      alert('Bulk variant update failed: ' + err.message);
+    }
+  };
+
   if (loading) {
     return (
       <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '60vh', flexDirection: 'column', gap: '15px' }}>
@@ -500,8 +645,14 @@ export default function Products() {
               <button className="btn-admin-secondary" onClick={() => apiDownload('/api/products/export/excel', 'products.xlsx')}>
                 <i className="fa-solid fa-file-excel"></i> Export Excel
               </button>
+              <button className="btn-admin-secondary" onClick={() => apiDownload('/api/products/export/images-zip', 'product_images.zip')}>
+                <i className="fa-solid fa-file-zipper"></i> Export Images (ZIP)
+              </button>
               <button className="btn-admin-secondary" onClick={() => setImportModalOpen(true)}>
                 <i className="fa-solid fa-file-import"></i> Import CSV
+              </button>
+              <button className="btn-admin-secondary" onClick={() => setImageImportModalOpen(true)}>
+                <i className="fa-solid fa-file-image"></i> Import Images (ZIP)
               </button>
               <button className="btn-admin" style={{ background: 'var(--color-gold)' }} onClick={() => setCatalogModalOpen(true)}>
                 <i className="fa-solid fa-file-pdf"></i> PDF Catalog
@@ -596,11 +747,26 @@ export default function Products() {
         selectedProductIds={selectedIds}
       />
 
+      {/* BULK IMAGE IMPORT MODAL */}
+      <BulkImageImportModal
+        isOpen={imageImportModalOpen}
+        onClose={() => setImageImportModalOpen(false)}
+        onComplete={fetchProducts}
+      />
+
       {error && (
         <div style={{ background: '#FFF5F5', color: '#E53E3E', padding: '1rem', borderRadius: '6px', marginBottom: '1rem', textAlign: 'center' }}>
           {error}
         </div>
       )}
+
+      {/* BULK VARIANT MODAL */}
+      <BulkVariantModal 
+        isOpen={bulkVariantModalOpen}
+        onClose={() => setBulkVariantModalOpen(false)}
+        selectedIds={selectedIds}
+        onExecute={executeBulkVariants}
+      />
 
       {/* Floating Bulk Action Bar */}
       {selectedIds.length > 0 && (
@@ -615,6 +781,8 @@ export default function Products() {
           <button className="btn-admin-secondary" onClick={() => executeBulkUpdate({ isActive: false })}>Deactivate</button>
           <button className="btn-admin-secondary" onClick={() => executeBulkUpdate({ isFeatured: true })}>Feature</button>
           <button className="btn-admin-secondary" onClick={() => executeBulkUpdate({ isFeatured: false })}>Unfeature</button>
+          <button className="btn-admin-secondary" onClick={executeBulkWatermark}>Apply Watermark</button>
+          <button className="btn-admin-secondary" onClick={() => setBulkVariantModalOpen(true)}>Manage Variants</button>
           <div style={{ display: 'flex', gap: '5px' }}>
             <select className="form-select" value={bulkCategory} onChange={e => setBulkCategory(e.target.value)} style={{ padding: '0.4rem' }}>
               <option value="">Move to Category...</option>
@@ -741,6 +909,14 @@ export default function Products() {
                                 title="Edit Product"
                               >
                                 <i className="fa-solid fa-pen-to-square"></i>
+                              </button>
+                              <button
+                                className="btn-admin-secondary"
+                                style={{ padding: '0.4rem 0.6rem', fontSize: '0.72rem' }}
+                                onClick={() => handleDuplicateProduct(product)}
+                                title="Duplicate Product"
+                              >
+                                <i className="fa-solid fa-copy"></i>
                               </button>
                               <button
                                 className="btn-admin"
@@ -1045,7 +1221,177 @@ export default function Products() {
                     )}
                   </div>
                 </div>
+                <div style={{ padding: '15px', background: '#F8F9FA', borderRadius: '8px', marginTop: '15px', border: '1px solid #E9ECEF' }}>
+                  <h4 style={{ margin: '0 0 10px 0', color: 'var(--color-purple)' }}>Image Watermark</h4>
+                  <div className="form-group" style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '15px' }}>
+                    <input
+                      type="checkbox"
+                      id="wm-enabled"
+                      checked={formData.watermarkSettings?.enabled !== false}
+                      onChange={(e) => setFormData(prev => ({...prev, watermarkSettings: {...prev.watermarkSettings, enabled: e.target.checked}}))}
+                      style={{ width: '18px', height: '18px', cursor: 'pointer' }}
+                    />
+                    <label htmlFor="wm-enabled" style={{ fontWeight: '500', cursor: 'pointer', fontSize: '0.9rem' }}>
+                      Enable Watermark
+                    </label>
+                  </div>
+                  {formData.watermarkSettings?.enabled !== false && (
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+                      <div className="form-group">
+                        <label className="form-label">Watermark Type</label>
+                        <select
+                          className="form-input"
+                          value={formData.watermarkSettings?.type || 'Brand Name'}
+                          onChange={(e) => setFormData(prev => ({...prev, watermarkSettings: {...prev.watermarkSettings, type: e.target.value}}))}
+                        >
+                          <option value="Logo">Logo</option>
+                          <option value="Brand Name">Brand Name</option>
+                          <option value="Logo + Brand Name">Logo + Brand Name</option>
+                        </select>
+                      </div>
+                      <div className="form-group">
+                        <label className="form-label">Watermark Text</label>
+                        <input
+                          type="text"
+                          className="form-input"
+                          value={formData.watermarkSettings?.text || 'Hampers Nest'}
+                          onChange={(e) => setFormData(prev => ({...prev, watermarkSettings: {...prev.watermarkSettings, text: e.target.value}}))}
+                        />
+                      </div>
+                      <div className="form-group">
+                        <label className="form-label">Position</label>
+                        <select
+                          className="form-input"
+                          value={formData.watermarkSettings?.position || 'Bottom Right'}
+                          onChange={(e) => setFormData(prev => ({...prev, watermarkSettings: {...prev.watermarkSettings, position: e.target.value}}))}
+                        >
+                          <option value="Bottom Right">Bottom Right</option>
+                          <option value="Bottom Left">Bottom Left</option>
+                          <option value="Top Right">Top Right</option>
+                          <option value="Top Left">Top Left</option>
+                          <option value="Center">Center</option>
+                        </select>
+                      </div>
+                      <div className="form-group">
+                        <label className="form-label">Opacity (%)</label>
+                        <input
+                          type="number"
+                          min="1"
+                          max="100"
+                          className="form-input"
+                          value={formData.watermarkSettings?.opacity || 18}
+                          onChange={(e) => setFormData(prev => ({...prev, watermarkSettings: {...prev.watermarkSettings, opacity: parseInt(e.target.value) || 18}}))}
+                        />
+                      </div>
+                      <div className="form-group">
+                        <label className="form-label">Size</label>
+                        <select
+                          className="form-input"
+                          value={formData.watermarkSettings?.size || 'Medium'}
+                          onChange={(e) => setFormData(prev => ({...prev, watermarkSettings: {...prev.watermarkSettings, size: e.target.value}}))}
+                        >
+                          <option value="Small">Small</option>
+                          <option value="Medium">Medium</option>
+                          <option value="Large">Large</option>
+                        </select>
+                      </div>
+                      
+                      {editingProduct && (
+                        <div style={{ gridColumn: '1 / -1', marginTop: '10px' }}>
+                          <button
+                            type="button"
+                            className="btn-admin-secondary"
+                            onClick={async () => {
+                              try {
+                                await apiRequest(`/api/products/${editingProduct.id}/watermark`, { method: 'POST' });
+                                alert('Watermark regeneration queued successfully!');
+                              } catch(e) {
+                                alert('Failed to regenerate watermark: ' + e.message);
+                              }
+                            }}
+                          >
+                            <i className="fa-solid fa-arrows-rotate"></i> Regenerate Watermark
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
 
+                {/* Product Size Variants */}
+                <div style={{ padding: '15px', background: '#F8F9FA', borderRadius: '8px', marginTop: '15px', border: '1px solid #E9ECEF' }}>
+                  <h4 style={{ margin: '0 0 10px 0', color: 'var(--color-purple)' }}>Product Size Variants</h4>
+                  <div className="form-group" style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '15px' }}>
+                    <input
+                      type="checkbox"
+                      id="var-enabled"
+                      checked={formData.variantsEnabled}
+                      onChange={(e) => setFormData(prev => ({...prev, variantsEnabled: e.target.checked}))}
+                      style={{ width: '18px', height: '18px', cursor: 'pointer' }}
+                    />
+                    <label htmlFor="var-enabled" style={{ fontWeight: '500', cursor: 'pointer', fontSize: '0.9rem' }}>
+                      Enable Size Variants (e.g., Small, Medium, Large)
+                    </label>
+                  </div>
+                  
+                  {formData.variantsEnabled && (
+                    <div>
+                      {formData.variants.map((variant, index) => (
+                        <div key={variant.id} style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr 1fr 1fr auto auto', gap: '10px', alignItems: 'center', marginBottom: '10px', padding: '10px', background: '#fff', border: '1px solid #ddd', borderRadius: '4px' }}>
+                          <input 
+                            type="text" 
+                            className="form-input" 
+                            placeholder="Name (e.g., Small)" 
+                            value={variant.name} 
+                            onChange={(e) => handleUpdateVariant(index, 'name', e.target.value)} 
+                          />
+                          <input 
+                            type="number" 
+                            className="form-input" 
+                            placeholder="Price" 
+                            value={variant.price} 
+                            onChange={(e) => handleUpdateVariant(index, 'price', e.target.value)} 
+                          />
+                          <input 
+                            type="text" 
+                            className="form-input" 
+                            placeholder="SKU" 
+                            value={variant.sku} 
+                            onChange={(e) => handleUpdateVariant(index, 'sku', e.target.value)} 
+                          />
+                          <input 
+                            type="number" 
+                            className="form-input" 
+                            placeholder="Stock" 
+                            value={variant.stock} 
+                            onChange={(e) => handleUpdateVariant(index, 'stock', e.target.value)} 
+                          />
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                            <input 
+                              type="radio" 
+                              name="defaultVariant" 
+                              checked={variant.isDefault} 
+                              onChange={() => handleUpdateVariant(index, 'isDefault', true)} 
+                              style={{ cursor: 'pointer' }}
+                            />
+                            <span style={{ fontSize: '0.8rem' }}>Default</span>
+                          </div>
+                          <button 
+                            type="button" 
+                            onClick={() => handleRemoveVariant(index)} 
+                            className="btn-admin-secondary" 
+                            style={{ padding: '4px 8px', color: 'red' }}
+                          >
+                            <i className="fa-solid fa-trash"></i>
+                          </button>
+                        </div>
+                      ))}
+                      <button type="button" className="btn-admin-secondary" onClick={handleAddVariant} style={{ marginTop: '5px' }}>
+                        <i className="fa-solid fa-plus"></i> Add Size
+                      </button>
+                    </div>
+                  )}
+                </div>
 
 
                 <div className="form-group">
@@ -1105,6 +1451,52 @@ export default function Products() {
                       </label>
                     </div>
                   </div>
+
+                  {formData.addonsEnabled && (
+                    <div className="form-group" style={{ marginBottom: '20px', padding: '15px', background: '#fff', border: '1px solid #e0e0e0', borderRadius: '8px' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                        <label className="form-label" style={{ margin: 0 }}>Custom Add-ons Options</label>
+                        <button type="button" className="btn btn-secondary" onClick={handleAddCustomAddon} style={{ padding: '4px 10px', fontSize: '0.8rem' }}>
+                          <i className="fa-solid fa-plus"></i> Add Option
+                        </button>
+                      </div>
+                      
+                      {formData.customAddons.length === 0 ? (
+                        <p style={{ fontSize: '0.85rem', color: '#888', fontStyle: 'italic' }}>No custom add-ons configured. The Add-ons section will be hidden for this product.</p>
+                      ) : (
+                        <div style={{ display: 'grid', gap: '10px' }}>
+                          {formData.customAddons.map((addon, index) => (
+                            <div key={index} style={{ display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
+                              <input
+                                type="text"
+                                className="form-input"
+                                placeholder="Add-on Name (e.g. Greeting Card)"
+                                value={addon.name}
+                                onChange={(e) => handleUpdateCustomAddon(index, 'name', e.target.value)}
+                                style={{ flex: 2 }}
+                              />
+                              <input
+                                type="number"
+                                className="form-input"
+                                placeholder="Price (+₹)"
+                                value={addon.price}
+                                onChange={(e) => handleUpdateCustomAddon(index, 'price', e.target.value)}
+                                style={{ flex: 1 }}
+                              />
+                              <button 
+                                type="button" 
+                                className="btn btn-danger" 
+                                onClick={() => handleRemoveCustomAddon(index)}
+                                style={{ padding: '8px', minWidth: '40px', flexShrink: 0 }}
+                              >
+                                <i className="fa-solid fa-trash"></i>
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
 
                   <div className="form-group" style={{ marginBottom: '10px' }}>
                     <label className="form-label" htmlFor="prod-cust-text">Customization Section Text</label>

@@ -9,7 +9,10 @@ import {
   bulkUpdateProducts,
   duplicateProduct,
   incrementProductViews, 
-  incrementProductClicks 
+  incrementProductClicks,
+  bulkWatermarkProducts,
+  regenerateWatermark,
+  bulkUpdateVariants
 } from '../controllers/productController.js';
 import { protect, requirePermission } from '../middleware/auth.js';
 
@@ -18,7 +21,10 @@ import {
   exportProductsCsv, 
   exportProductsExcel, 
   downloadProductsCsvTemplate, 
-  importProductsCsv 
+  importProductsCsv,
+  exportProductImagesZip,
+  importProductImagesZipPreview,
+  importProductImagesZipCommit
 } from '../controllers/exportImportController.js';
 
 const router = express.Router();
@@ -27,8 +33,11 @@ const upload = multer({ dest: 'uploads/' });
 // Export/Import routes (requires 'products' permission)
 router.get('/export/csv', protect, requirePermission('products'), exportProductsCsv);
 router.get('/export/excel', protect, requirePermission('products'), exportProductsExcel);
+router.get('/export/images-zip', protect, requirePermission('products'), exportProductImagesZip);
 router.get('/template/csv', protect, requirePermission('products'), downloadProductsCsvTemplate);
 router.post('/import/csv', protect, requirePermission('products'), upload.single('file'), importProductsCsv);
+router.post('/import/images-zip/preview', protect, requirePermission('products'), upload.single('file'), importProductImagesZipPreview);
+router.post('/import/images-zip/commit', protect, requirePermission('products'), importProductImagesZipCommit);
 
 // Public routes
 router.get('/', getProducts);
@@ -39,7 +48,10 @@ router.post('/:id/click', incrementProductClicks);
 // Protected routes (requires 'products' permission)
 router.post('/', protect, requirePermission('products'), createProduct);
 router.post('/bulk-update', protect, requirePermission('products'), bulkUpdateProducts);
+router.post('/bulk-variants', protect, requirePermission('products'), bulkUpdateVariants);
+router.post('/bulk-watermark', protect, requirePermission('products'), bulkWatermarkProducts);
 router.post('/:id/duplicate', protect, requirePermission('products'), duplicateProduct);
+router.post('/:id/watermark', protect, requirePermission('products'), regenerateWatermark);
 router.put('/:id', protect, requirePermission('products'), updateProduct);
 
 // Protected routes (requires 'products' permission for delete too)

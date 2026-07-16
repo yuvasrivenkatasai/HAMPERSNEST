@@ -7,6 +7,7 @@ import { fileURLToPath } from 'url';
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import dotenv from 'dotenv';
 import { protect } from '../middleware/auth.js';
+import { generateWatermarkedImage } from '../utils/imageProcessor.js';
 
 dotenv.config();
 
@@ -72,13 +73,48 @@ router.post('/', protect, upload.single('image'), async (req, res) => {
     }
     console.log('  - final uploadSubfolder:', uploadSubfolder);
 
-    // Generate a unique filename with .webp extension
-    const filename = `${Date.now()}-${Math.round(Math.random() * 1e9)}.webp`;
+    // Generate a unique filename prefix
+    const filenamePrefix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
+    const filename = `${filenamePrefix}.webp`;
 
     // Process image buffer and convert to WebP using sharp
     const webpBuffer = await sharp(req.file.buffer)
       .webp({ quality: 80 })
       .toBuffer();
+      
+    // Generate different sizes
+    const largeBuffer = await sharp(req.file.buffer).resize(1200, 1200, { fit: 'inside', withoutEnlargement: true }).webp({ quality: 80 }).toBuffer();
+    const mediumBuffer = await sharp(req.file.buffer).resize(800, 800, { fit: 'inside', withoutEnlargement: true }).webp({ quality: 80 }).toBuffer();
+    const thumbnailBuffer = await sharp(req.file.buffer).resize(400, 400, { fit: 'cover' }).webp({ quality: 80 }).toBuffer();
+
+    const variants = [
+      { suffix: '', buffer: webpBuffer },
+      { suffix: '_large', buffer: largeBuffer },
+      { suffix: '_medium', buffer: mediumBuffer },
+      { suffix: '_thumbnail', buffer: thumbnailBuffer },
+    ];
+
+    // Generate watermarked version if options are provided
+    let watermarkedFilename = null;
+    let watermarkedImageUrl = null;
+    
+    // Parse watermark options from body or query
+    const applyWatermark = req.body.watermarkEnabled === 'true' || req.query.watermarkEnabled === 'true';
+    if (applyWatermark) {
+      const watermarkOptions = {
+        enableWatermark: true,
+        watermarkText: req.body.watermarkText || req.query.watermarkText || 'Hampers Nest',
+        position: req.body.watermarkPosition || req.query.watermarkPosition || 'Bottom Right',
+        opacity: parseFloat(req.body.watermarkOpacity || req.query.watermarkOpacity || '0.18'),
+        size: req.body.watermarkSize || req.query.watermarkSize || 'Medium'
+      };
+      
+      watermarkedFilename = filename.replace('.webp', '_watermarked.webp');
+      
+      for (const variant of variants) {
+         variant.watermarkedBuffer = await generateWatermarkedImage(variant.buffer, watermarkOptions);
+      }
+    }
 
     const metadata = await sharp(webpBuffer).metadata();
     const dimensions = `${metadata.width}x${metadata.height}`;
@@ -94,22 +130,41 @@ router.post('/', protect, upload.single('image'), async (req, res) => {
       console.log(`R2 Credentials detected. Uploading to Cloudflare R2 folder: ${uploadSubfolder}...`);
       
       const bucketName = process.env.R2_BUCKET_NAME;
-      const key = `${uploadSubfolder}/${filename}`;
-      const command = new PutObjectCommand({
-        Bucket: bucketName,
-        Key: key,
-        Body: webpBuffer,
-        ContentType: 'image/webp',
-      });
-
-      await r2Client.send(command);
-
-      // Clean public URL trailing slash
       const publicUrlBase = process.env.R2_PUBLIC_URL.endsWith('/') 
         ? process.env.R2_PUBLIC_URL.slice(0, -1) 
         : process.env.R2_PUBLIC_URL;
+      
+      for (const variant of variants) {
+        const vFilename = `${filenamePrefix}${variant.suffix}.webp`;
+        const key = `${uploadSubfolder}/${vFilename}`;
+        const command = new PutObjectCommand({
+          Bucket: bucketName,
+          Key: key,
+          Body: variant.buffer,
+          ContentType: 'image/webp',
+        });
+        await r2Client.send(command);
         
-      imageUrl = `${publicUrlBase}/${key}`;
+        if (variant.suffix === '') {
+          imageUrl = `${publicUrlBase}/${key}`;
+        }
+        
+        if (applyWatermark && variant.watermarkedBuffer) {
+          const wFilename = `${filenamePrefix}${variant.suffix}_watermarked.webp`;
+          const wmKey = `${uploadSubfolder}/${wFilename}`;
+          const wmCommand = new PutObjectCommand({
+            Bucket: bucketName,
+            Key: wmKey,
+            Body: variant.watermarkedBuffer,
+            ContentType: 'image/webp',
+          });
+          await r2Client.send(wmCommand);
+          if (variant.suffix === '') {
+            watermarkedImageUrl = `${publicUrlBase}/${wmKey}`;
+          }
+        }
+      }
+      
       console.log(`Successfully uploaded to R2: ${imageUrl}`);
     } else {
       console.log(`No R2 Credentials config. Falling back to local storage uploads folder: ${uploadSubfolder}...`);
@@ -120,17 +175,36 @@ router.post('/', protect, upload.single('image'), async (req, res) => {
         fs.mkdirSync(uploadDir, { recursive: true });
       }
 
-      const filePath = path.join(uploadDir, filename);
-      await fs.promises.writeFile(filePath, webpBuffer);
+      for (const variant of variants) {
+        const vFilename = `${filenamePrefix}${variant.suffix}.webp`;
+        const filePath = path.join(uploadDir, vFilename);
+        await fs.promises.writeFile(filePath, variant.buffer);
+        
+        if (applyWatermark && variant.watermarkedBuffer) {
+          const wFilename = `${filenamePrefix}${variant.suffix}_watermarked.webp`;
+          const wmFilePath = path.join(uploadDir, wFilename);
+          await fs.promises.writeFile(wmFilePath, variant.watermarkedBuffer);
+        }
+      }
       
       // Return relative/absolute URL
       const host = req.get('host');
       const protocol = req.protocol;
       imageUrl = `${protocol}://${host}/uploads/${uploadSubfolder}/${filename}`;
+      if (applyWatermark) {
+        watermarkedImageUrl = `${protocol}://${host}/uploads/${uploadSubfolder}/${watermarkedFilename}`;
+      }
       console.log(`Successfully saved locally: ${imageUrl}`);
     }
 
-    res.status(200).json({ url: imageUrl, filename, size: sizeStr, dimensions });
+    res.status(200).json({ 
+      url: imageUrl, 
+      watermarkedUrl: watermarkedImageUrl,
+      filename, 
+      watermarkedFilename,
+      size: sizeStr, 
+      dimensions 
+    });
   } catch (error) {
     console.error('Image processing/upload failed:', error);
     res.status(500).json({ message: `Image upload failed: ${error.message}` });

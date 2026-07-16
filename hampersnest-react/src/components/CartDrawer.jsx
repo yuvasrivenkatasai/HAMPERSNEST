@@ -162,11 +162,18 @@ export default function CartDrawer() {
                       <span className="cart-item-price">{formatPrice(item.price)}</span>
                       
                       {/* Customization Details */}
-                      {item.customizations.giftTag && (
+                      {(item.customizations.giftTag || item.customizations.variant) && (
                         <div className="cart-item-customizations">
-                          <div style={{ fontStyle: 'italic' }}>
-                            • Tag Msg: "{item.customizations.giftTag}"
-                          </div>
+                          {item.customizations.variant && (
+                            <div style={{ fontStyle: 'italic', marginBottom: '2px' }}>
+                              • Size: {item.customizations.variant.name}
+                            </div>
+                          )}
+                          {item.customizations.giftTag && (
+                            <div style={{ fontStyle: 'italic' }}>
+                              • Tag Msg: "{item.customizations.giftTag}"
+                            </div>
+                          )}
                         </div>
                       )}
 

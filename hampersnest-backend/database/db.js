@@ -51,9 +51,24 @@ export const connectDB = async () => {
     // Import models before syncing to register them with sequelize
     const { User, Category } = await import('./models.js');
 
-    // Automatically sync models to database (Disabled to prevent schema resets on restart)
+    // Automatically sync models to database (Disabled alter to prevent schema resets on restart)
     await sequelize.sync();
-    console.log('Database connection verified.');
+    
+    // Safely add missing columns to Products table (bypassing SQLite backup table bug)
+    try {
+      await sequelize.query('ALTER TABLE Products ADD COLUMN watermarkSettings TEXT;');
+    } catch (e) { /* Column already exists */ }
+    try {
+      await sequelize.query('ALTER TABLE Products ADD COLUMN variantsEnabled BOOLEAN DEFAULT 0;');
+    } catch (e) { /* Column already exists */ }
+    try {
+      await sequelize.query('ALTER TABLE Products ADD COLUMN variants TEXT;');
+    } catch (e) { /* Column already exists */ }
+    try {
+      await sequelize.query('ALTER TABLE Products ADD COLUMN customAddons TEXT;');
+    } catch (e) { /* Column already exists */ }
+
+    console.log('Database connection verified and schema synced (manual alter).');
 
     // Seed default admin user securely
     const adminExists = await User.count();
@@ -92,7 +107,7 @@ export const connectDB = async () => {
       console.log('Default categories seeded successfully.');
     }
   } catch (error) {
-    console.error(`Database connection/sync error: ${error.message}`);
+    console.error('Database connection/sync error:', error);
     process.exit(1);
   }
 };

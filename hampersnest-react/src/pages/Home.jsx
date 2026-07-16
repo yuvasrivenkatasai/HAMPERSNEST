@@ -276,7 +276,11 @@ export default function Home() {
           <div className="shop-collections-grid reveal" style={{ marginTop: '2.5rem' }}>
             {featuredProducts.map((product) => (
               <div key={product.id} className="shop-product-card">
-                <div className="shop-card-img">
+                <div 
+                  className="shop-card-img" 
+                  onClick={() => { navigate(`/product/${product.id}`); window.scrollTo(0,0); }} 
+                  style={{ cursor: 'pointer' }}
+                >
                   <img
                     src={product.image || product.images?.[0] || '/assets/hero_banner.png'}
                     alt={product.name}
@@ -284,7 +288,13 @@ export default function Home() {
                   />
                 </div>
                 <div className="shop-card-content">
-                  <h3 className="shop-card-name">{product.name}</h3>
+                  <h3 
+                    className="shop-card-name" 
+                    onClick={() => { navigate(`/product/${product.id}`); window.scrollTo(0,0); }} 
+                    style={{ cursor: 'pointer' }}
+                  >
+                    {product.name}
+                  </h3>
                   <p className="shop-card-inr">{formatPrice(product.price)}</p>
                   <p className="shop-card-desc">
                     {product.description || <span style={{ visibility: 'hidden' }}>&nbsp;</span>}

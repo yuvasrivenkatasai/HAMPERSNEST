@@ -191,6 +191,17 @@ export const Product = sequelize.define('Product', {
     type: DataTypes.BOOLEAN,
     defaultValue: true
   },
+  customAddons: {
+    type: DataTypes.TEXT,
+    get() {
+      const val = this.getDataValue('customAddons');
+      if (!val) return [];
+      try { return typeof val === 'string' ? JSON.parse(val) : val; } catch(e) { return []; }
+    },
+    set(val) {
+      this.setDataValue('customAddons', typeof val === 'string' ? val : JSON.stringify(val || []));
+    }
+  },
   customizationText: {
     type: DataTypes.TEXT,
     defaultValue: 'Make your gift extra special by adding a custom gift tag and selecting add-ons.'
@@ -214,6 +225,40 @@ export const Product = sequelize.define('Product', {
   isActive: {
     type: DataTypes.BOOLEAN,
     defaultValue: true
+  },
+  watermarkSettings: {
+    type: DataTypes.TEXT,
+    defaultValue: JSON.stringify({
+      enabled: true,
+      type: 'Brand Name',
+      text: 'Hampers Nest',
+      position: 'Bottom Right',
+      opacity: 0.18,
+      size: 'Medium'
+    }),
+    get() {
+      const val = this.getDataValue('watermarkSettings');
+      if (!val) return null;
+      try { return typeof val === 'string' ? JSON.parse(val) : val; } catch(e) { return null; }
+    },
+    set(val) {
+      this.setDataValue('watermarkSettings', typeof val === 'string' ? val : JSON.stringify(val || {}));
+    }
+  },
+  variantsEnabled: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false
+  },
+  variants: {
+    type: DataTypes.TEXT,
+    get() {
+      const val = this.getDataValue('variants');
+      if (!val) return [];
+      try { return typeof val === 'string' ? JSON.parse(val) : val; } catch(e) { return []; }
+    },
+    set(val) {
+      this.setDataValue('variants', typeof val === 'string' ? val : JSON.stringify(val || []));
+    }
   }
 }, {
   tableName: 'products',

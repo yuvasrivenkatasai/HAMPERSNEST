@@ -114,6 +114,11 @@ export default function Collections() {
     setCurrentPage(1);
   }, [queryCategory, storefrontCategories]);
 
+  // Save current collection URL for smart back navigation
+  useEffect(() => {
+    sessionStorage.setItem('last_visited_collection', window.location.pathname + window.location.search);
+  }, [searchParams, currentPage, activeCategory, activeSubcategory, searchQuery]);
+
   // Reset page when search or sort changes
   useEffect(() => {
     setCurrentPage(1);

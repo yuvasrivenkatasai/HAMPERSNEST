@@ -95,14 +95,16 @@ export const CartProvider = ({ children }) => {
     const { 
       giftTag = '', 
       addOns = [],
-      addedPrice = 0
+      addedPrice = 0,
+      variant = null
     } = customizations;
     
-    const finalPrice = product.price + addedPrice;
+    const finalPrice = product.price + addedPrice + (variant && typeof variant.price === 'number' ? variant.price - product.price : 0);
     
     // Create a unique cart item ID based on product ID, customizations, and add-ons
     const sortedAddOns = [...addOns].sort().join(',');
-    const cartItemId = `${product.id}-${giftTag.trim()}-${sortedAddOns}`;
+    const variantStr = variant ? `-${variant.name}` : '';
+    const cartItemId = `${product.id}${variantStr}-${giftTag.trim()}-${sortedAddOns}`;
 
     setCart((prevCart) => {
       const existingItemIndex = prevCart.findIndex((item) => item.cartItemId === cartItemId);
@@ -126,7 +128,8 @@ export const CartProvider = ({ children }) => {
             quantity: Number(Math.max(5, quantity)),
             customizations: {
               giftTag: giftTag.trim(),
-              addOns
+              addOns,
+              variant
             }
           }
         ];
@@ -194,6 +197,9 @@ export const CartProvider = ({ children }) => {
 
     let orderDetailsText = cart.map((item, idx) => {
       let customStr = '';
+      if (item.customizations.variant) {
+        customStr += `\n   - Size: ${item.customizations.variant.name}`;
+      }
       if (item.customizations.giftTag) {
         customStr += `\n   - Tag Msg: "${item.customizations.giftTag}"`;
       }
