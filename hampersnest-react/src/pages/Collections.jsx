@@ -64,7 +64,7 @@ export default function Collections() {
       const y = productsGridRef.current.getBoundingClientRect().top + window.pageYOffset + yOffset;
       window.scrollTo({ top: y, behavior: 'smooth' });
     }
-  };
+  }; 
 
   const handleHashtagClick = (hashtagText) => {
     const cleanText = hashtagText.replace(/^#/, '').trim();
