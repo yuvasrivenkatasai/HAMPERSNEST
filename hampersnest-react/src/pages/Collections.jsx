@@ -57,8 +57,8 @@ export default function Collections() {
   const handleCategoryLabelChange = (label) => {
     handleHashtagClick(label);
   };
-
-  const scrollToGrid = () => {
+ 
+  const scrollToGrid = () => { 
     if (productsGridRef.current) {
       const yOffset = -80; // offset for fixed header
       const y = productsGridRef.current.getBoundingClientRect().top + window.pageYOffset + yOffset;
