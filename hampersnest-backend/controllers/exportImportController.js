@@ -6,7 +6,6 @@ import ExcelJS from 'exceljs';
 import csvParser from 'csv-parser';
 import { createRequire } from 'module';
 const require = createRequire(import.meta.url);
-import { ZipArchive } from 'archiver';
 import path from 'path';
 import { Product, Order, Inquiry, Category } from '../database/models.js';
 

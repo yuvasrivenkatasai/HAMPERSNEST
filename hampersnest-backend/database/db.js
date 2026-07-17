@@ -14,6 +14,8 @@ const dbService = process.env.DB_SERVICE_NAME || 'XEPDB1';
 const dbWalletPath = process.env.DB_WALLET_PATH;
 const dbWalletPassword = process.env.DB_WALLET_PASSWORD;
 
+const dbDialect = process.env.DB_DIALECT || 'sqlite';
+
 let sequelize;
 
 const dialectOptions = {};
@@ -33,20 +35,34 @@ if (dbWalletPath) {
   }
 }
 
-sequelize = new Sequelize({
-  dialect: 'sqlite',
-  storage: './database.sqlite',
-  logging: false
-});
+if (dbDialect === 'oracle') {
+  sequelize = new Sequelize({
+    dialect: 'oracle',
+    username: dbUser,
+    password: dbPassword,
+    dialectOptions,
+    logging: false
+  });
+} else {
+  sequelize = new Sequelize({
+    dialect: 'sqlite',
+    storage: './database.sqlite',
+    logging: false
+  });
+}
 
 
 export const connectDB = async () => {
   try {
     await sequelize.authenticate();
-    if (dbWalletPath) {
-      console.log(`SQL Database Connected to Oracle Cloud via Wallet: ${dbService}`);
+    if (dbDialect === 'oracle') {
+      if (dbWalletPath) {
+        console.log(`SQL Database Connected to Oracle Cloud via Wallet: ${dbService}`);
+      } else {
+        console.log(`SQL Database Connected to Oracle using: ${dbHost}:${dbPort}/${dbService}`);
+      }
     } else {
-      console.log(`SQL Database Connected to Oracle using: ${dbHost}:${dbPort}/${dbService}`);
+      console.log(`SQL Database Connected to SQLite: ./database.sqlite`);
     }
     // Import models before syncing to register them with sequelize
     const { User, Category } = await import('./models.js');
@@ -54,19 +70,34 @@ export const connectDB = async () => {
     // Automatically sync models to database (Disabled alter to prevent schema resets on restart)
     await sequelize.sync();
     
-    // Safely add missing columns to Products table (bypassing SQLite backup table bug)
-    try {
-      await sequelize.query('ALTER TABLE Products ADD COLUMN watermarkSettings TEXT;');
-    } catch (e) { /* Column already exists */ }
-    try {
-      await sequelize.query('ALTER TABLE Products ADD COLUMN variantsEnabled BOOLEAN DEFAULT 0;');
-    } catch (e) { /* Column already exists */ }
-    try {
-      await sequelize.query('ALTER TABLE Products ADD COLUMN variants TEXT;');
-    } catch (e) { /* Column already exists */ }
-    try {
-      await sequelize.query('ALTER TABLE Products ADD COLUMN customAddons TEXT;');
-    } catch (e) { /* Column already exists */ }
+    // Safely add missing columns to Products table (bypassing SQLite backup table bug / keeping Oracle aligned)
+    if (dbDialect === 'sqlite') {
+      try {
+        await sequelize.query('ALTER TABLE Products ADD COLUMN watermarkSettings TEXT;');
+      } catch (e) { /* Column already exists */ }
+      try {
+        await sequelize.query('ALTER TABLE Products ADD COLUMN variantsEnabled BOOLEAN DEFAULT 0;');
+      } catch (e) { /* Column already exists */ }
+      try {
+        await sequelize.query('ALTER TABLE Products ADD COLUMN variants TEXT;');
+      } catch (e) { /* Column already exists */ }
+      try {
+        await sequelize.query('ALTER TABLE Products ADD COLUMN customAddons TEXT;');
+      } catch (e) { /* Column already exists */ }
+    } else if (dbDialect === 'oracle') {
+      try {
+        await sequelize.query('ALTER TABLE "products" ADD "watermarkSettings" CLOB');
+      } catch (e) { /* Column already exists */ }
+      try {
+        await sequelize.query('ALTER TABLE "products" ADD "variantsEnabled" NUMBER(1) DEFAULT 0');
+      } catch (e) { /* Column already exists */ }
+      try {
+        await sequelize.query('ALTER TABLE "products" ADD "variants" CLOB');
+      } catch (e) { /* Column already exists */ }
+      try {
+        await sequelize.query('ALTER TABLE "products" ADD "customAddons" CLOB');
+      } catch (e) { /* Column already exists */ }
+    }
 
     console.log('Database connection verified and schema synced (manual alter).');
 

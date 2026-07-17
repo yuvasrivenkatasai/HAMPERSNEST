@@ -3,7 +3,7 @@ const https = require('https');
 async function testEndpoint(method, path) {
   return new Promise((resolve) => {
     const options = {
-      hostname: 'api.iamyourdad.site',
+      hostname: 'api.hampersnest.in',
       port: 443,
       path: path,
       method: method,
