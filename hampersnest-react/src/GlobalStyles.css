@@ -8335,3 +8335,43 @@ footer h4,
   height: 100%;
   object-fit: cover;
 }
+
+/* ==========================================
+   PRODUCT CARD IMAGE CAROUSEL
+   ========================================== */
+.card-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(255, 255, 255, 0.85);
+  color: var(--color-charcoal);
+  border: none;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 15;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  transition: all 0.2s ease;
+  opacity: 0;
+}
+
+.collection-card:hover .card-arrow {
+  opacity: 1;
+}
+
+.card-arrow:hover {
+  background: var(--color-white);
+  color: var(--color-gold);
+}
+
+.card-arrow.prev {
+  left: 8px;
+}
+
+.card-arrow.next {
+  right: 8px;
+}

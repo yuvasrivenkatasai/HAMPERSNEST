@@ -1,4 +1,4 @@
-import React, { memo } from 'react';
+import React, { useState, useEffect, useRef, memo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useCurrency } from '../context/CurrencyContext';
@@ -9,15 +9,83 @@ const ProductCard = memo(({ product, animationDelay = 0 }) => {
   const { formatPrice } = useCurrency();
   const isWishlisted = isInWishlist(product.id);
 
-  // Normalise: support both legacy single `image` and new `images[]`
-  const mediaList = product.images && product.images.length > 0
-    ? [product.image, ...product.images, ...(product.videos || [])]
-    : [product.image];
+  // Normalize media list (deduplicate if image is in images array)
+  let initialMedia = [];
+  if (product.images && product.images.length > 0) {
+    initialMedia = [...product.images];
+    if (product.image && !initialMedia.includes(product.image)) {
+      initialMedia.unshift(product.image);
+    }
+  } else if (product.image) {
+    initialMedia = [product.image];
+  } else {
+    initialMedia = ['/assets/hero_banner.png'];
+  }
+  
+  const mediaList = initialMedia;
+
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [isHovered, setIsHovered] = useState(false);
+  const timerRef = useRef(null);
+  let touchStartX = useRef(0);
+  let touchStartY = useRef(0);
+
+  // Auto-slider logic
+  const startTimer = () => {
+    if (mediaList.length > 1) {
+      clearInterval(timerRef.current);
+      timerRef.current = setInterval(() => {
+        setActiveIndex(prev => (prev + 1) % mediaList.length);
+      }, 2000); // 2 seconds
+    }
+  };
+
+  useEffect(() => {
+    startTimer();
+    return () => clearInterval(timerRef.current);
+  }, [mediaList.length]);
+
+  const handleNext = (e) => {
+    e.stopPropagation();
+    e.preventDefault();
+    setActiveIndex(prev => (prev + 1) % mediaList.length);
+    startTimer(); // Reset timer
+  };
+
+  const handlePrev = (e) => {
+    e.stopPropagation();
+    e.preventDefault();
+    setActiveIndex(prev => (prev - 1 + mediaList.length) % mediaList.length);
+    startTimer(); // Reset timer
+  };
+
+  const handleTouchStart = (e) => {
+    touchStartX.current = e.touches[0].clientX;
+    touchStartY.current = e.touches[0].clientY;
+  };
+
+  const handleTouchEnd = (e) => {
+    if (mediaList.length <= 1) return;
+    const touchEndX = e.changedTouches[0].clientX;
+    const touchEndY = e.changedTouches[0].clientY;
+    
+    // Prevent swipe on vertical scroll
+    if (Math.abs(touchStartY.current - touchEndY) > 40) return;
+
+    if (touchStartX.current - touchEndX > 50) {
+      setActiveIndex(prev => (prev + 1) % mediaList.length);
+      startTimer();
+    }
+    if (touchStartX.current - touchEndX < -50) {
+      setActiveIndex(prev => (prev - 1 + mediaList.length) % mediaList.length);
+      startTimer();
+    }
+  };
 
   const handleAddToCart = (e) => {
     e.stopPropagation();
     e.preventDefault();
-    addToCart(product, 5, {
+    addToCart(product, 1, {
       giftTag: '',
       wrappingStyle: 'Standard',
       ribbonColor: 'None'
@@ -40,8 +108,16 @@ const ProductCard = memo(({ product, animationDelay = 0 }) => {
     <div 
       className="collection-card reveal-category active"
       style={{ animationDelay: `${animationDelay}ms` }}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
     >
-      <div className="card-img-wrapper" onClick={handleViewDetails} style={{ cursor: 'pointer', position: 'relative' }}>
+      <div 
+        className="card-img-wrapper" 
+        onClick={handleViewDetails} 
+        style={{ cursor: 'pointer', position: 'relative', overflow: 'hidden' }}
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+      >
         
         {/* Top Right: Wishlist */}
         <button
@@ -60,11 +136,40 @@ const ProductCard = memo(({ product, animationDelay = 0 }) => {
           </span>
         )}
 
-        <img
-          src={product.image || (product.images && product.images[0]) || '/assets/hero_banner.png'}
-          alt={product.name}
-          loading="lazy"
-        />
+        {/* Carousel Inner */}
+        <div 
+          className="card-media-carousel" 
+          style={{ 
+            display: 'flex', 
+            height: '100%', 
+            transition: 'transform 0.4s ease-in-out',
+            transform: `translateX(-${activeIndex * 100}%)` 
+          }}
+        >
+          {mediaList.map((url, idx) => (
+            <div key={idx} className="card-carousel-slide" style={{ minWidth: '100%', height: '100%' }}>
+              <img
+                src={url}
+                alt={`${product.name} - ${idx + 1}`}
+                loading={idx === 0 ? "eager" : "lazy"}
+                style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+              />
+            </div>
+          ))}
+        </div>
+
+        {/* Desktop Hover Arrows */}
+        {mediaList.length > 1 && isHovered && (
+          <>
+            <button className="card-arrow prev" onClick={handlePrev}>
+              <i className="fa-solid fa-chevron-left"></i>
+            </button>
+            <button className="card-arrow next" onClick={handleNext}>
+              <i className="fa-solid fa-chevron-right"></i>
+            </button>
+          </>
+        )}
+
         {/* Inventory Badge Overlay */}
         {product.stockQuantity === 0 ? (
           <span className="card-stock-badge out-of-stock" style={{
@@ -103,6 +208,7 @@ const ProductCard = memo(({ product, animationDelay = 0 }) => {
             Only {product.stockQuantity} Left
           </span>
         ) : null}
+        
         <div className="card-overlay" onClick={(e) => e.stopPropagation()}>
           {product.stockQuantity === 0 ? (
             <button className="card-overlay-btn" disabled style={{ background: '#64748b', color: '#cbd5e1', cursor: 'not-allowed' }}>
