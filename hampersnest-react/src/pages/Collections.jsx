@@ -181,7 +181,8 @@ export default function Collections() {
   }, [activeCategory, activeSubcategory, searchQuery, sortBy, products]);
 
   // Pagination Logic
-  const itemsPerPage = 8;
+  const isViewAll = searchParams.get('view') === 'all';
+  const itemsPerPage = isViewAll ? Math.max(filteredProducts.length, 1) : 24;
   const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
 
   const paginatedProducts = useMemo(() => {
@@ -404,11 +405,12 @@ export default function Collections() {
 
             {/* Pagination Controls */}
             {totalPages > 1 && (
-              <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', marginTop: '3rem', marginBottom: '1rem' }} className="reveal">
+              <div className="reveal pagination-container" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', marginTop: '3rem', marginBottom: '1rem' }}>
                 {/* Prev Button */}
                 <button
                   onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
                   disabled={currentPage === 1}
+                  className="pagination-btn-prev"
                   style={{
                     padding: '8px 16px',
                     border: '1px solid var(--color-beige)',
@@ -428,36 +430,43 @@ export default function Collections() {
                 </button>
 
                 {/* Page Numbers */}
-                {Array.from({ length: totalPages }).map((_, idx) => {
-                  const pageNum = idx + 1;
-                  const isActive = currentPage === pageNum;
-                  return (
-                    <button
-                      key={pageNum}
-                      onClick={() => setCurrentPage(pageNum)}
-                      style={{
-                        width: '38px',
-                        height: '38px',
-                        border: isActive ? 'none' : '1px solid var(--color-beige)',
-                        background: isActive ? 'var(--gold-gradient)' : 'var(--color-white)',
-                        color: isActive ? 'var(--color-white)' : 'var(--color-purple-dark)',
-                        borderRadius: '8px',
-                        cursor: 'pointer',
-                        fontWeight: 600,
-                        fontSize: '0.85rem',
-                        transition: 'all 0.2s ease',
-                        boxShadow: isActive ? 'var(--shadow-gold)' : 'none'
-                      }}
-                    >
-                      {pageNum}
-                    </button>
-                  );
-                })}
+                <div className="pagination-numbers-desktop" style={{ display: 'flex', gap: '8px' }}>
+                  {Array.from({ length: totalPages }).map((_, idx) => {
+                    const pageNum = idx + 1;
+                    const isActive = currentPage === pageNum;
+                    return (
+                      <button
+                        key={pageNum}
+                        onClick={() => setCurrentPage(pageNum)}
+                        style={{
+                          width: '38px',
+                          height: '38px',
+                          border: isActive ? 'none' : '1px solid var(--color-beige)',
+                          background: isActive ? 'var(--gold-gradient)' : 'var(--color-white)',
+                          color: isActive ? 'var(--color-white)' : 'var(--color-purple-dark)',
+                          borderRadius: '8px',
+                          cursor: 'pointer',
+                          fontWeight: 600,
+                          fontSize: '0.85rem',
+                          transition: 'all 0.2s ease',
+                          boxShadow: isActive ? 'var(--shadow-gold)' : 'none'
+                        }}
+                      >
+                        {pageNum}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                <div className="pagination-mobile-text" style={{ display: 'none', fontWeight: 600, color: 'var(--color-purple-dark)', fontSize: '0.9rem', padding: '0 10px' }}>
+                  Page {currentPage} of {totalPages}
+                </div>
 
                 {/* Next Button */}
                 <button
                   onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
                   disabled={currentPage === totalPages}
+                  className="pagination-btn-next"
                   style={{
                     padding: '8px 16px',
                     border: '1px solid var(--color-beige)',

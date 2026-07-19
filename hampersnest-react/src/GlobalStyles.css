@@ -8058,3 +8058,21 @@ footer h4,
     font-size: 0.8rem;
   }
 }
+/* Pagination Mobile Fix */
+@media (max-width: 768px) {
+  .pagination-numbers-desktop {
+    display: none !important;
+  }
+  .pagination-mobile-text {
+    display: block !important;
+  }
+  .pagination-container {
+    justify-content: space-between !important;
+    width: 100%;
+    padding: 0 1rem;
+  }
+  .pagination-btn-prev, .pagination-btn-next {
+    flex: 1;
+    justify-content: center;
+  }
+}

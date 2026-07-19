@@ -85,7 +85,7 @@ export default function Header() {
                 Home
               </NavLink>
               <NavLink 
-                to="/collections" 
+                to="/collections?view=all" 
                 className={({ isActive }) => isActive ? 'active' : ''} 
                 onClick={closeMobileMenu}
               >
