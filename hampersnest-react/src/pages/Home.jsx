@@ -275,46 +275,7 @@ export default function Home() {
 
           <div className="shop-collections-grid reveal" style={{ marginTop: '2.5rem' }}>
             {featuredProducts.map((product) => (
-              <div key={product.id} className="shop-product-card">
-                <div 
-                  className="shop-card-img" 
-                  onClick={() => { navigate(`/product/${product.id}`); window.scrollTo(0,0); }} 
-                  style={{ cursor: 'pointer' }}
-                >
-                  <img
-                    src={product.image || product.images?.[0] || '/assets/hero_banner.png'}
-                    alt={product.name}
-                    loading="lazy"
-                  />
-                </div>
-                <div className="shop-card-content">
-                  <h3 
-                    className="shop-card-name" 
-                    onClick={() => { navigate(`/product/${product.id}`); window.scrollTo(0,0); }} 
-                    style={{ cursor: 'pointer' }}
-                  >
-                    {product.name}
-                  </h3>
-                  <p className="shop-card-inr">{formatPrice(product.price)}</p>
-                  <p className="shop-card-desc">
-                    {product.description || <span style={{ visibility: 'hidden' }}>&nbsp;</span>}
-                  </p>
-                  <div className="collection-card-action-row">
-                    <button
-                      className="shop-card-btn"
-                      onClick={() => addToCart(product, 1, { giftTag: '', wrappingStyle: 'Standard', ribbonColor: 'None' })}
-                    >
-                      <i className="fa-solid fa-cart-shopping"></i> Add To Cart
-                    </button>
-                    <Link
-                      to={`/product/${product.id}`}
-                      className="card-link-text"
-                    >
-                      View Details <i className="fa-solid fa-arrow-right"></i>
-                    </Link>
-                  </div>
-                </div>
-              </div>
+              <ProductCard key={product.id} product={product} />
             ))}
           </div>
 

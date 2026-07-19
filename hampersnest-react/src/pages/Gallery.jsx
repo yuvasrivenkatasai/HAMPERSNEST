@@ -3,12 +3,13 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useCurrency } from '../context/CurrencyContext';
+import ProductCard from '../components/ProductCard';
 import SEO from '../components/SEO';
 
 
 export default function Gallery() {
   const navigate = useNavigate();
-  const { products, addToCart, settings } = useCart();
+  const { products, settings } = useCart();
   const [activeCategory, setActiveCategory] = useState('All');
 
   // Active dataset is purely products to match Collections functionality
@@ -58,16 +59,6 @@ export default function Gallery() {
     revealElements.forEach((el) => observer.observe(el));
     return () => observer.disconnect();
   }, [filteredItems]);
-
-  const handleAddToCart = (e, product) => {
-    e.stopPropagation();
-    addToCart(product, 1, { giftTag: '', wrappingStyle: 'Standard', ribbonColor: 'None' });
-  };
-
-  const handleViewDetails = (product) => {
-    navigate(`/product/${product.id || product._id}`);
-    window.scrollTo(0, 0);
-  };
 
   const gallerySchema = {
     "@context": "https://schema.org",
@@ -136,59 +127,16 @@ export default function Gallery() {
         {/* Collections Grid */ }
         <div className="collections-grid-4col reveal">
           {filteredItems.map((product, idx) => (
-            <CollectionCard
-              key={product.id || product._id || idx}
-              product={product}
-              animationDelay={(idx % 8) * 60}
-              onAddToCart={(e) => handleAddToCart(e, product)}
-              onViewDetails={() => handleViewDetails(product)}
+            <ProductCard 
+              key={product.id} 
+              product={product} 
+              animationDelay={idx * 100} 
             />
           ))}
         </div>
       </div>
 
       <SeoKeywordsSection />
-    </div>
-  );
-}
-
-// ── Isolated collection card with currency-aware price ──────────────────────────
-function CollectionCard({ product, animationDelay, onAddToCart, onViewDetails }) {
-  const { formatPrice } = useCurrency();
-
-  return (
-    <div
-      className="collection-card product-card-fadein"
-      style={{ animationDelay: `${animationDelay}ms` }}
-    >
-      <div className="card-img-wrapper" onClick={onViewDetails} style={{ cursor: 'pointer' }}>
-        <img src={product.image} alt={product.name} />
-      </div>
-      <div className="card-content">
-        <h3 className="card-title" onClick={onViewDetails} style={{ cursor: 'pointer' }}>
-          {product.name}
-        </h3>
-        <p className="card-price">
-          <span className="price-prefix">From </span>{formatPrice(product.price)}
-        </p>
-        <p className="card-desc">
-          {product.description || <span style={{ visibility: 'hidden' }}>&nbsp;</span>}
-        </p>
-        <div className="collection-card-action-row">
-          <button
-            onClick={onAddToCart}
-            className="shop-card-btn"
-          >
-            <i className="fa-solid fa-cart-shopping"></i> Add To Cart
-          </button>
-          <button
-            onClick={onViewDetails}
-            className="card-link-text"
-          >
-            View Details <i className="fa-solid fa-arrow-right"></i>
-          </button>
-        </div>
-      </div>
     </div>
   );
 }

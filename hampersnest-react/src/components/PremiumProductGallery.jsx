@@ -17,8 +17,6 @@ const PremiumProductGallery = memo(({ product }) => {
   const [isPaused, setIsPaused] = useState(false);
   const [imageLoadedStatus, setImageLoadedStatus] = useState({});
   const [isMobile, setIsMobile] = useState(false);
-  const [zoomStyle, setZoomStyle] = useState({});
-  const [isZoomed, setIsZoomed] = useState(false);
   
   const timerRef = useRef(null);
   const inactivityTimerRef = useRef(null);
@@ -76,14 +74,12 @@ const PremiumProductGallery = memo(({ product }) => {
   let touchStartY = 0;
   
   const handleTouchStart = (e) => {
-    if (isZoomed) return;
     touchStartX = e.touches[0].clientX;
     touchStartY = e.touches[0].clientY;
     handleInteract();
   };
 
   const handleTouchEnd = (e) => {
-    if (isZoomed) return;
     const touchEndX = e.changedTouches[0].clientX;
     const touchEndY = e.changedTouches[0].clientY;
     
@@ -96,40 +92,6 @@ const PremiumProductGallery = memo(({ product }) => {
     if (touchStartX - touchEndX < -50) {
       setActiveIndex(prev => (prev - 1 + allMedia.length) % allMedia.length);
     }
-  };
-
-  // Desktop Hover Zoom
-  const handleMouseMove = (e) => {
-    if (isMobile || allMedia[activeIndex].type === 'video') return;
-    const { left, top, width, height } = e.target.getBoundingClientRect();
-    const x = ((e.clientX - left) / width) * 100;
-    const y = ((e.clientY - top) / height) * 100;
-    setZoomStyle({
-      transformOrigin: `${x}% ${y}%`,
-      transform: 'scale(2)'
-    });
-    setIsZoomed(true);
-    handleInteract();
-  };
-
-  const handleMouseLeave = () => {
-    if (isMobile) return;
-    setZoomStyle({ transformOrigin: 'center center', transform: 'scale(1)' });
-    setIsZoomed(false);
-    setIsPaused(false);
-  };
-
-  // Mobile Pinch/Double Tap Zoom mock
-  const handleDoubleTap = () => {
-    if (!isMobile || allMedia[activeIndex].type === 'video') return;
-    if (isZoomed) {
-      setZoomStyle({ transformOrigin: 'center center', transform: 'scale(1)' });
-      setIsZoomed(false);
-    } else {
-      setZoomStyle({ transformOrigin: 'center center', transform: 'scale(2)' });
-      setIsZoomed(true);
-    }
-    handleInteract();
   };
 
   const handleImageLoad = (idx) => {
@@ -176,11 +138,9 @@ const PremiumProductGallery = memo(({ product }) => {
       <div 
         className="hero-media-wrapper"
         onMouseEnter={() => setIsPaused(true)}
-        onMouseLeave={handleMouseLeave}
-        onMouseMove={handleMouseMove}
+        onMouseLeave={() => setIsPaused(false)}
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
-        onClick={handleDoubleTap}
       >
         {/* Wishlist Button - Top Right */}
         <button
@@ -220,7 +180,6 @@ const PremiumProductGallery = memo(({ product }) => {
                     onLoad={() => handleImageLoad(idx)}
                     onError={() => handleImageError(idx)}
                     className={`hero-image ${imageLoadedStatus[idx] === true ? 'loaded' : ''}`}
-                    style={idx === activeIndex ? zoomStyle : {}}
                   />
                 </picture>
               ) : (
