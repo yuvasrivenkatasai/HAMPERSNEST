@@ -57,20 +57,20 @@ export default function Collections() {
   const handleCategoryLabelChange = (label) => {
     handleHashtagClick(label);
   };
- 
-  const scrollToGrid = () => { 
+
+  const scrollToGrid = () => {
     if (productsGridRef.current) {
       const yOffset = -80; // offset for fixed header
       const y = productsGridRef.current.getBoundingClientRect().top + window.pageYOffset + yOffset;
       window.scrollTo({ top: y, behavior: 'smooth' });
     }
-  }; 
+  };
 
   const handleHashtagClick = (hashtagText) => {
     const cleanText = hashtagText.replace(/^#/, '').trim();
     const catId = getCategoryIdByLabel(cleanText);
     const categoryObj = storefrontCategories.find(c => c.id === catId);
-    
+
     if (categoryObj) {
       if (categoryObj.parentId) {
         // It's a subcategory
@@ -92,8 +92,8 @@ export default function Collections() {
   useEffect(() => {
     if (queryCategory) {
       const match = storefrontCategories.find(
-        c => c.id.toLowerCase() === queryCategory.toLowerCase() || 
-             c.label.toLowerCase() === queryCategory.toLowerCase()
+        c => c.id.toLowerCase() === queryCategory.toLowerCase() ||
+          c.label.toLowerCase() === queryCategory.toLowerCase()
       );
       if (match) {
         if (match.parentId) {
@@ -161,8 +161,8 @@ export default function Collections() {
       const q = searchQuery.toLowerCase().trim();
       result = result.filter(
         p => p.name.toLowerCase().includes(q) ||
-             (p.description && p.description.toLowerCase().includes(q)) ||
-             getCategoryLabel(p.category).toLowerCase().includes(q)
+          (p.description && p.description.toLowerCase().includes(q)) ||
+          getCategoryLabel(p.category).toLowerCase().includes(q)
       );
     }
 
@@ -240,9 +240,9 @@ export default function Collections() {
 
   return (
     <div className="page-container">
-      <SEO 
-        title={activeCategory === 'All' 
-          ? `Shop Premium Gift Hampers & Return Gifts | ${settings?.storeName || 'Hampers Nest'}` 
+      <SEO
+        title={activeCategory === 'All'
+          ? `Shop Premium Gift Hampers & Return Gifts | ${settings?.storeName || 'Hampers Nest'}`
           : `Shop Premium ${getCategoryLabel(activeCategory)} Return Gifts | ${settings?.storeName || 'Hampers Nest'}`}
         description={activeCategory === 'All'
           ? "Browse our collections of hand-crafted return gifts, wedding hampers, housewarming kits, and corporate gifting. Custom styling and ribbon packaging available."
@@ -321,7 +321,7 @@ export default function Collections() {
               </button>
             ))}
             {activeSubcategory && (
-              <button 
+              <button
                 onClick={() => handleSubcategoryChange(null)}
                 style={{ background: 'none', border: 'none', color: 'var(--color-gold-dark)', fontSize: '0.85rem', cursor: 'pointer', textDecoration: 'underline' }}
               >
