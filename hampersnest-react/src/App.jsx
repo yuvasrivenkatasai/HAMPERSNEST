@@ -20,6 +20,7 @@ const AboutUs = lazy(() => import('./pages/AboutUs'));
 const Contact = lazy(() => import('./pages/Contact'));
 const ProductDetail = lazy(() => import('./pages/ProductDetail'));
 const PolicyPage = lazy(() => import('./pages/PolicyPage'));
+const Wishlist = lazy(() => import('./pages/Wishlist'));
 
 import './GlobalStyles.css';
 
@@ -44,6 +45,7 @@ function AppInner() {
             <Route path="/about" element={<AboutUs />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/product/:id" element={<ProductDetail />} />
+            <Route path="/wishlist" element={<Wishlist />} />
             
             {/* Dynamic Policy Routing */}
             <Route path="/policies/:id" element={<PolicyPage />} />

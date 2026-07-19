@@ -5,6 +5,7 @@ import { useCart } from '../context/CartContext';
 import { useCurrency } from '../context/CurrencyContext';
 import SEO from '../components/SEO';
 import Breadcrumbs from '../components/Breadcrumbs';
+import ProductCard from '../components/ProductCard';
 
 export default function Collections() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -393,12 +394,10 @@ export default function Collections() {
           <>
             <div className="collections-grid-4col reveal">
               {paginatedProducts.map((product, idx) => (
-                <CollectionCard
+                <ProductCard
                   key={product.id}
                   product={product}
                   animationDelay={(idx % 8) * 60}
-                  onAddToCart={(e) => handleAddToCart(e, product)}
-                  onViewDetails={() => handleViewDetails(product)}
                 />
               ))}
             </div>
@@ -523,47 +522,6 @@ export default function Collections() {
           </div>
         </div>
 
-      </div>
-    </div>
-  );
-}
-
-// ── Isolated collection card with currency-aware price ──────────────────────────
-function CollectionCard({ product, animationDelay, onAddToCart, onViewDetails }) {
-  const { formatPrice } = useCurrency();
-
-  return (
-    <div
-      className="collection-card product-card-fadein"
-      style={{ animationDelay: `${animationDelay}ms` }}
-    >
-      <div className="card-img-wrapper" onClick={onViewDetails} style={{ cursor: 'pointer' }}>
-        <img src={product.image} alt={product.name} loading="lazy" />
-      </div>
-      <div className="card-content">
-        <h3 className="card-title" onClick={onViewDetails} style={{ cursor: 'pointer' }}>
-          {product.name}
-        </h3>
-        <p className="card-price">
-          <span className="price-prefix">From </span>{formatPrice(product.price)}
-        </p>
-        <p className="card-desc">
-          {product.description || <span style={{ visibility: 'hidden' }}>&nbsp;</span>}
-        </p>
-        <div className="collection-card-action-row">
-          <button
-            onClick={onAddToCart}
-            className="shop-card-btn"
-          >
-            <i className="fa-solid fa-cart-shopping"></i> Add To Cart
-          </button>
-          <button
-            onClick={onViewDetails}
-            className="card-link-text"
-          >
-            View Details <i className="fa-solid fa-arrow-right"></i>
-          </button>
-        </div>
       </div>
     </div>
   );

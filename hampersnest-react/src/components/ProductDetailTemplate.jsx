@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useCurrency } from '../context/CurrencyContext';
 import ProductCard from './ProductCard';
+import PremiumProductGallery from './PremiumProductGallery';
 import { API_BASE } from '../config.js';
 
 export default function ProductDetailTemplate({ product, displayRelated = [] }) {
@@ -34,15 +35,10 @@ export default function ProductDetailTemplate({ product, displayRelated = [] }) 
   const [selectedAddOnIndices, setSelectedAddOnIndices] = useState([]);
 
   // Gallery States
-  const [activeMediaIndex, setActiveMediaIndex] = useState(0);
-  const [isLightboxOpen, setIsLightboxOpen] = useState(false);
-
-
-
+  // Managed by PremiumProductGallery component now
+  
   // Reset states on product change
   useEffect(() => {
-    setActiveMediaIndex(0);
-    setIsLightboxOpen(false);
     setGiftTag('');
     setQuantity(5);
     setSelectedAddOnIndices([]);
@@ -96,59 +92,8 @@ export default function ProductDetailTemplate({ product, displayRelated = [] }) 
     setQuoteModalOpen(true);
   };
 
-  const allMedia = [
-    { type: 'image', url: product.image },
-    ...(product.images || []).map(url => ({ type: 'image', url })),
-    ...(product.videoUrls || []).map(url => ({ type: 'video', url }))
-  ];
-  const activeMedia = allMedia[activeMediaIndex] || allMedia[0];
-
-  let touchStartX = 0;
-  const handleTouchStart = (e) => { touchStartX = e.touches[0].clientX; };
-  const handleTouchEnd = (e) => {
-    const touchEndX = e.changedTouches[0].clientX;
-    if (touchStartX - touchEndX > 50) setActiveMediaIndex((p) => (p + 1) % allMedia.length); // Swipe left
-    if (touchStartX - touchEndX < -50) setActiveMediaIndex((p) => (p - 1 + allMedia.length) % allMedia.length); // Swipe right
-  };
-
-  const nextMedia = (e) => {
-    e.stopPropagation();
-    setActiveMediaIndex((prev) => (prev + 1) % allMedia.length);
-  };
-
-  const prevMedia = (e) => {
-    e.stopPropagation();
-    setActiveMediaIndex((prev) => (prev - 1 + allMedia.length) % allMedia.length);
-  };
-
   return (
     <>
-      {/* FULLSCREEN LIGHTBOX */}
-      {isLightboxOpen && (
-        <div className="gallery-lightbox active" onClick={() => setIsLightboxOpen(false)}>
-          <button className="lightbox-close" onClick={() => setIsLightboxOpen(false)}>
-            <i className="fa-solid fa-xmark"></i>
-          </button>
-          <div className="lightbox-content-wrapper" onClick={e => e.stopPropagation()}>
-            {activeMedia.type === 'image' ? (
-              <img src={activeMedia.url} alt={product.name} className="lightbox-media" />
-            ) : (
-              <video src={activeMedia.url} controls autoPlay className="lightbox-media" />
-            )}
-          </div>
-          {allMedia.length > 1 && (
-            <>
-              <button className="lightbox-prev" onClick={prevMedia}>
-                <i className="fa-solid fa-chevron-left"></i>
-              </button>
-              <button className="lightbox-next" onClick={nextMedia}>
-                <i className="fa-solid fa-chevron-right"></i>
-              </button>
-            </>
-          )}
-        </div>
-      )}
-
       {/* Breadcrumbs & Smart Back Navigation */}
       <div className="breadcrumb-bar">
         <div className="container" style={{ padding: '8px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.8rem', color: '#777' }}>
@@ -187,50 +132,7 @@ export default function ProductDetailTemplate({ product, displayRelated = [] }) 
           
           {/* 1. Product Gallery */}
           <div className="product-detail-visual-wrapper">
-            <div className="product-media-gallery">
-              {/* Main Active Media */}
-              <div 
-                className="product-image-container-frame" 
-                onClick={() => setIsLightboxOpen(true)}
-                onTouchStart={handleTouchStart}
-                onTouchEnd={handleTouchEnd}
-                style={{ cursor: 'zoom-in' }}
-              >
-                {activeMedia.type === 'image' ? (
-                  <img src={activeMedia.url} alt={product.name} className="product-main-zoom-image" />
-                ) : (
-                  <video src={activeMedia.url} controls muted className="product-main-zoom-image" style={{ objectFit: 'contain', background: '#000' }} />
-                )}
-                
-                {activeMedia.type === 'video' && !isLightboxOpen && (
-                  <div className="video-play-indicator">
-                    <i className="fa-solid fa-play"></i>
-                  </div>
-                )}
-              </div>
-
-              {/* Thumbnails */}
-              {allMedia.length > 1 && (
-                <div className="media-thumbnails">
-                  {allMedia.map((media, idx) => (
-                    <div 
-                      key={idx} 
-                      className={`thumbnail-item ${idx === activeMediaIndex ? 'active' : ''}`}
-                      onClick={() => setActiveMediaIndex(idx)}
-                    >
-                      {media.type === 'image' ? (
-                        <img src={media.url} alt={`Thumbnail ${idx}`} />
-                      ) : (
-                        <div className="video-thumbnail">
-                          <video src={media.url} />
-                          <i className="fa-solid fa-play"></i>
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
+            <PremiumProductGallery product={product} />
 
             <div className="product-trust-badges" style={{ marginTop: '20px' }}>
               <div className="trust-badge-item">

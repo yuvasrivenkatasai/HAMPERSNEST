@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import React, { memo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useCurrency } from '../context/CurrencyContext';
 
-export default function ProductCard({ product }) {
+const ProductCard = memo(({ product, animationDelay = 0 }) => {
   const navigate = useNavigate();
   const { addToCart, toggleWishlist, isInWishlist } = useCart();
   const { formatPrice } = useCurrency();
@@ -37,23 +37,29 @@ export default function ProductCard({ product }) {
   };
 
   return (
-    <div className="collection-card reveal-category active">
-      <div className="card-img-wrapper" onClick={handleViewDetails} style={{ cursor: 'pointer' }}>
-        <div className="card-actions-top">
-          <button
-            onClick={handleWishlist}
-            className={`action-icon-btn wishlist-btn ${isWishlisted ? 'active' : ''}`}
-            aria-label={isWishlisted ? "Remove from Wishlist" : "Add to Wishlist"}
-          >
-            <i className={isWishlisted ? "fa-solid fa-heart" : "fa-regular fa-heart"}></i>
-          </button>
-          {/* Multi-image indicator */}
-          {mediaList.length > 1 && (
-            <span className="card-img-count-badge">
-              <i className="fa-solid fa-images"></i> {mediaList.length}
-            </span>
-          )}
-        </div>
+    <div 
+      className="collection-card reveal-category active"
+      style={{ animationDelay: `${animationDelay}ms` }}
+    >
+      <div className="card-img-wrapper" onClick={handleViewDetails} style={{ cursor: 'pointer', position: 'relative' }}>
+        
+        {/* Top Right: Wishlist */}
+        <button
+          onClick={handleWishlist}
+          className={`action-icon-btn wishlist-btn ${isWishlisted ? 'active' : ''}`}
+          aria-label={isWishlisted ? "Remove from Wishlist" : "Add to Wishlist"}
+          style={{ position: 'absolute', top: '10px', right: '10px', zIndex: 10 }}
+        >
+          <i className={isWishlisted ? "fa-solid fa-heart" : "fa-regular fa-heart"}></i>
+        </button>
+        
+        {/* Top Left: Multi-image indicator */}
+        {mediaList.length > 1 && (
+          <span className="card-img-count-badge" style={{ position: 'absolute', top: '10px', left: '10px', zIndex: 10 }}>
+            <i className="fa-solid fa-images"></i> {mediaList.length}
+          </span>
+        )}
+
         <img
           src={product.image || (product.images && product.images[0]) || '/assets/hero_banner.png'}
           alt={product.name}
@@ -137,4 +143,6 @@ export default function ProductCard({ product }) {
       </div>
     </div>
   );
-}
+});
+
+export default ProductCard;

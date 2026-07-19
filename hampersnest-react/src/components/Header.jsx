@@ -4,7 +4,7 @@ import { useCart } from '../context/CartContext';
 import { useCurrency } from '../context/CurrencyContext';
 
 export default function Header() {
-  const { cartCount, setCartOpen, settings = {} } = useCart();
+  const { cartCount, setCartOpen, settings = {}, wishlist } = useCart();
   const { currency, toggleCurrency } = useCurrency();
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -145,6 +145,18 @@ export default function Header() {
                 $ USD
               </button>
             </div>
+
+            {/* Wishlist Icon */}
+            <Link
+              to="/wishlist"
+              className="nav-cart-btn"
+              aria-label="View Wishlist"
+              onClick={closeMobileMenu}
+              style={{ marginRight: '8px' }}
+            >
+              <i className="fa-solid fa-heart"></i>
+              {wishlist.length > 0 && <span className="nav-cart-badge" style={{ background: '#e24e4e' }}>{wishlist.length}</span>}
+            </Link>
 
             {/* Cart Icon */}
             <button

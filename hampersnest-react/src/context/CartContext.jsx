@@ -90,6 +90,30 @@ export const CartProvider = ({ children }) => {
     localStorage.setItem('hampers_nest_wishlist', JSON.stringify(wishlist));
   }, [wishlist]);
 
+  // Sync state across tabs
+  useEffect(() => {
+    const handleStorageChange = (e) => {
+      if (e.key === 'hampers_nest_wishlist') {
+        try {
+          const newWishlist = JSON.parse(e.newValue);
+          setWishlist(Array.isArray(newWishlist) ? newWishlist : []);
+        } catch {
+          setWishlist([]);
+        }
+      } else if (e.key === 'hampers_nest_cart') {
+        try {
+          const newCart = JSON.parse(e.newValue);
+          setCart(Array.isArray(newCart) ? newCart.map(item => ({ ...item, quantity: Math.max(5, item.quantity || 5) })) : []);
+        } catch {
+          setCart([]);
+        }
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
+
   // Cart operations
   const addToCart = (product, quantity = 5, customizations = {}) => {
     const { 
