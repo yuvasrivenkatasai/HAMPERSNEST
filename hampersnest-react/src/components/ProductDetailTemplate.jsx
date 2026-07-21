@@ -175,9 +175,11 @@ export default function ProductDetailTemplate({ product, displayRelated = [] }) 
 
           {/* RIGHT COLUMN: Info, Customizations, Actions */}
           <div className="product-detail-info-wrapper">
-            {/* 2. Product Header (Desktop Only) */}
-            <div className="product-header-block desktop-only">
-              <span className="product-category-tag">{(product.subcategoryName || product.categoryName || settings?.categories?.find(c => c.id === product.subCategory)?.label || settings?.categories?.find(c => c.id === product.category)?.label || product.category)} Collection</span>
+            {/* 2. Product Header */}
+            <div className="product-header-block">
+              {/* Desktop Only Title & Rating (Hidden on mobile) */}
+              <div className="desktop-only">
+                <span className="product-category-tag">{(product.subcategoryName || product.categoryName || settings?.categories?.find(c => c.id === product.subCategory)?.label || settings?.categories?.find(c => c.id === product.category)?.label || product.category)} Collection</span>
               <h1 className="product-detail-title">{product.name}</h1>
               
               <div className="product-rating-row">
@@ -190,6 +192,7 @@ export default function ProductDetailTemplate({ product, displayRelated = [] }) 
                   ))}
                 </div>
                 <span className="rating-count">({product.rating || 4.5} Rating / Verified Client Reviews)</span>
+              </div>
               </div>
 
               <div className="product-price-block" style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', marginBottom: '1rem' }}>
@@ -327,10 +330,10 @@ export default function ProductDetailTemplate({ product, displayRelated = [] }) 
                     <h5 style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--color-purple)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '0.5rem' }}>
                       Customization Available:
                     </h5>
-                    <div className="modal-features-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                    <div className="modal-features-grid customization-features-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
                       {custItems.map((feat, idx) => (
-                        <span key={idx} style={{ fontSize: '0.85rem', color: '#555', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                          <i className="fa-solid fa-check" style={{ color: 'var(--color-gold)' }}></i> {feat}
+                        <span key={idx} style={{ fontSize: '0.85rem', color: '#555', display: 'flex', alignItems: 'flex-start', gap: '8px', lineHeight: '1.4' }}>
+                          <i className="fa-solid fa-check" style={{ color: 'var(--color-gold)', flexShrink: 0, marginTop: '3px' }}></i> {feat}
                         </span>
                       ))}
                     </div>

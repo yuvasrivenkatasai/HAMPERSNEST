@@ -152,7 +152,6 @@ export default function Header() {
               className="nav-cart-btn"
               aria-label="View Wishlist"
               onClick={closeMobileMenu}
-              style={{ marginRight: '8px' }}
             >
               <i className="fa-solid fa-heart"></i>
               {wishlist.length > 0 && <span className="nav-cart-badge" style={{ background: '#e24e4e' }}>{wishlist.length}</span>}

@@ -71,11 +71,20 @@ export default function ShopByCategory() {
   if (loading || showcases.length === 0) return null;
 
   // Sort: featured first, then by sortOrder
-  const sorted = [...showcases].sort((a, b) => {
+  const sorted = [...[...showcases].sort((a, b) => {
     if (a.isFeatured && !b.isFeatured) return -1;
     if (!a.isFeatured && b.isFeatured) return 1;
     return (a.sortOrder || 0) - (b.sortOrder || 0);
-  });
+  })];
+
+  const PRICE_CATEGORIES = [
+    { id: 'price-under-100', name: 'Under ₹100', isPrice: true, priceFilter: 'under-100' },
+    { id: 'price-100-200', name: '₹100–₹200', isPrice: true, priceFilter: '100-200' },
+    { id: 'price-200-300', name: '₹200–₹300', isPrice: true, priceFilter: '200-300' },
+    { id: 'price-300-plus', name: '₹300 & Above', isPrice: true, priceFilter: '300-plus' }
+  ];
+
+  const finalCategories = [...PRICE_CATEGORIES, ...sorted];
 
   return (
     <section className="shop-by-category-section" ref={sectionRef}>
@@ -85,19 +94,23 @@ export default function ShopByCategory() {
 
         <div className="category-cards-strip-wrapper" ref={scrollRef}>
           <div className={`category-cards-strip ${animationEnabled ? 'animated' : ''}`}>
-            {sorted.map((showcase, idx) => {
+            {finalCategories.map((showcase, idx) => {
             const imgSrc = showcase.image || getDefaultImage(showcase.name);
             const isFeatured = showcase.isFeatured;
 
             return (
               <Link
                 key={showcase.id || idx}
-                to={isFeatured ? '/collections' : `/collections?category=${encodeURIComponent(showcase.targetCollection)}`}
+                to={showcase.isPrice ? `/collections?price=${showcase.priceFilter}` : (isFeatured ? '/collections' : `/collections?category=${encodeURIComponent(showcase.targetCollection)}`)}
                 className={`luxury-category-card ${isFeatured ? 'featured-category-card' : ''} ${isVisible ? 'card-visible' : ''}`}
                 style={{ '--card-index': idx }}
               >
                 <div className="category-image-wrapper">
-                  {isFeatured && !showcase.image ? (
+                  {showcase.isPrice ? (
+                    <div className="featured-gradient-bg">
+                      <i className="fa-solid fa-indian-rupee-sign featured-icon"></i>
+                    </div>
+                  ) : isFeatured && !showcase.image ? (
                     <div className="featured-gradient-bg">
                       <i className="fa-solid fa-gem featured-icon"></i>
                     </div>
@@ -119,20 +132,24 @@ export default function ShopByCategory() {
           })}
             
             {/* Duplicate for infinite marquee if animation is enabled */}
-            {animationEnabled && sorted.map((showcase, idx) => {
+            {animationEnabled && finalCategories.map((showcase, idx) => {
               const imgSrc = showcase.image || getDefaultImage(showcase.name);
               const isFeatured = showcase.isFeatured;
 
               return (
                 <Link
                   key={`dup-${showcase.id || idx}`}
-                  to={isFeatured ? '/collections' : `/collections?category=${encodeURIComponent(showcase.targetCollection)}`}
+                  to={showcase.isPrice ? `/collections?price=${showcase.priceFilter}` : (isFeatured ? '/collections' : `/collections?category=${encodeURIComponent(showcase.targetCollection)}`)}
                   className={`luxury-category-card ${isFeatured ? 'featured-category-card' : ''} ${isVisible ? 'card-visible' : ''}`}
                   style={{ '--card-index': idx }}
                   aria-hidden="true"
                 >
                   <div className="category-image-wrapper">
-                    {isFeatured && !showcase.image ? (
+                    {showcase.isPrice ? (
+                      <div className="featured-gradient-bg">
+                        <i className="fa-solid fa-indian-rupee-sign featured-icon"></i>
+                      </div>
+                    ) : isFeatured && !showcase.image ? (
                       <div className="featured-gradient-bg">
                         <i className="fa-solid fa-gem featured-icon"></i>
                       </div>

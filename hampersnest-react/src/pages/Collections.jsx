@@ -184,6 +184,19 @@ export default function Collections() {
       result = result.filter(p => p.subCategory === activeSubcategory);
     }
 
+    // 1.5 Price Filter
+    const activePriceFilter = searchParams.get('price');
+    if (activePriceFilter) {
+      result = result.filter(p => {
+        const price = p.price || 0;
+        if (activePriceFilter === 'under-100') return price < 100;
+        if (activePriceFilter === '100-200') return price >= 100 && price <= 200;
+        if (activePriceFilter === '200-300') return price >= 200 && price <= 300;
+        if (activePriceFilter === '300-plus') return price > 300;
+        return true;
+      });
+    }
+
     // 2. Search Filter
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase().trim();
@@ -206,7 +219,7 @@ export default function Collections() {
     }
 
     return result;
-  }, [activeCategory, activeSubcategory, searchQuery, sortBy, products]);
+  }, [activeCategory, activeSubcategory, searchQuery, sortBy, products, searchParams]);
 
   // Pagination Logic
   const isViewAll = searchParams.get('view') === 'all';
@@ -388,7 +401,7 @@ export default function Collections() {
         {/* Results Counter */}
         <div
           style={{ marginBottom: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', color: '#666', fontSize: '0.85rem' }}
-          className="reveal-heading"
+          className="reveal-heading results-counter-bar"
         >
           <span>Showing {paginatedProducts.length} of {filteredProducts.length} products</span>
           {searchQuery && (

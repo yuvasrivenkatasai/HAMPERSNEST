@@ -2,6 +2,139 @@ import React, { useState, useEffect, useRef, useCallback, memo } from 'react';
 import { useCart } from '../context/CartContext';
 import WishlistButton from './WishlistButton';
 
+const LightboxViewer = ({ allMedia, activeIndex, setActiveIndex, onClose }) => {
+  const [scale, setScale] = useState(1);
+  const [pan, setPan] = useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+  
+  const touchState = useRef({
+    initialDist: 0, initialScale: 1, lastTap: 0,
+    startX: 0, startY: 0, panStartX: 0, panStartY: 0
+  });
+
+  useEffect(() => {
+    setScale(1);
+    setPan({ x: 0, y: 0 });
+  }, [activeIndex]);
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') onClose();
+      if (e.key === 'ArrowRight') setActiveIndex((p) => (p + 1) % allMedia.length);
+      if (e.key === 'ArrowLeft') setActiveIndex((p) => (p - 1 + allMedia.length) % allMedia.length);
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [allMedia.length, onClose, setActiveIndex]);
+
+  useEffect(() => {
+    document.body.style.overflow = 'hidden';
+    return () => { document.body.style.overflow = ''; };
+  }, []);
+
+  const handleTouchStart = (e) => {
+    if (e.touches.length === 2) {
+      const dist = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
+      touchState.current.initialDist = dist;
+      touchState.current.initialScale = scale;
+    } else if (e.touches.length === 1) {
+      const now = Date.now();
+      if (now - touchState.current.lastTap < 300) {
+        if (scale > 1) { setScale(1); setPan({ x: 0, y: 0 }); }
+        else setScale(2.5);
+      }
+      touchState.current.lastTap = now;
+      touchState.current.startX = e.touches[0].clientX;
+      touchState.current.startY = e.touches[0].clientY;
+      touchState.current.panStartX = pan.x;
+      touchState.current.panStartY = pan.y;
+      setIsDragging(scale > 1);
+    }
+  };
+
+  const handleTouchMove = (e) => {
+    if (e.touches.length === 2) {
+      const dist = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
+      const newScale = Math.min(Math.max(1, touchState.current.initialScale * (dist / touchState.current.initialDist)), 4);
+      setScale(newScale);
+    } else if (e.touches.length === 1 && scale > 1) {
+      const dx = e.touches[0].clientX - touchState.current.startX;
+      const dy = e.touches[0].clientY - touchState.current.startY;
+      setPan({ x: touchState.current.panStartX + dx, y: touchState.current.panStartY + dy });
+    }
+  };
+
+  const handleTouchEnd = (e) => {
+    if (scale === 1 && e.changedTouches.length === 1 && !isDragging) {
+      const dx = e.changedTouches[0].clientX - touchState.current.startX;
+      if (dx > 50) setActiveIndex((p) => (p - 1 + allMedia.length) % allMedia.length);
+      else if (dx < -50) setActiveIndex((p) => (p + 1) % allMedia.length);
+    }
+    if (scale <= 1) setPan({ x: 0, y: 0 });
+    setIsDragging(false);
+  };
+
+  const handleWheel = (e) => {
+    e.preventDefault();
+    const newScale = Math.min(Math.max(1, scale - e.deltaY * 0.01), 4);
+    setScale(newScale);
+    if (newScale === 1) setPan({ x: 0, y: 0 });
+  };
+
+  const activeMedia = allMedia[activeIndex];
+
+  return (
+    <div className="gallery-lightbox active" onClick={onClose} style={{ touchAction: 'none' }}>
+      <button className="lightbox-close" onClick={onClose} aria-label="Close Lightbox">
+        <i className="fa-solid fa-xmark"></i>
+      </button>
+      
+      <div className="lightbox-counter" style={{ position: 'absolute', bottom: '20px', left: '50%', transform: 'translateX(-50%)', color: '#fff', fontSize: '1rem', fontWeight: 600, background: 'rgba(0,0,0,0.5)', padding: '4px 12px', borderRadius: '20px', zIndex: 1002 }}>
+        {activeIndex + 1} / {allMedia.length}
+      </div>
+
+      <div 
+        className="lightbox-content-wrapper" 
+        onClick={e => e.stopPropagation()}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+        onWheel={handleWheel}
+        style={{ overflow: 'hidden', display: 'flex', justifyContent: 'center', alignItems: 'center', width: '100%', height: '100%' }}
+      >
+        {activeMedia.type === 'image' ? (
+          <img 
+            src={activeMedia.url} 
+            alt="Preview" 
+            className="lightbox-media"
+            style={{ 
+              transform: `translate(${pan.x}px, ${pan.y}px) scale(${scale})`,
+              transition: scale === 1 && !isDragging ? 'transform 0.3s ease' : 'none',
+              willChange: 'transform',
+              maxHeight: '90vh',
+              maxWidth: '90vw',
+              objectFit: 'contain'
+            }} 
+            draggable={false}
+          />
+        ) : (
+          <video src={activeMedia.url} controls autoPlay className="lightbox-media" style={{ maxHeight: '90vh', maxWidth: '90vw' }} />
+        )}
+      </div>
+
+      {allMedia.length > 1 && (
+        <>
+          <button className="lightbox-prev" onClick={(e) => { e.stopPropagation(); setActiveIndex((p) => (p - 1 + allMedia.length) % allMedia.length); }}>
+            <i className="fa-solid fa-chevron-left"></i>
+          </button>
+          <button className="lightbox-next" onClick={(e) => { e.stopPropagation(); setActiveIndex((p) => (p + 1) % allMedia.length); }}>
+            <i className="fa-solid fa-chevron-right"></i>
+          </button>
+        </>
+      )}
+    </div>
+  );
+};
 const PremiumProductGallery = memo(({ product }) => {
   const { toggleWishlist, isInWishlist } = useCart();
   const isWishlisted = isInWishlist(product.id);
@@ -111,28 +244,12 @@ const PremiumProductGallery = memo(({ product }) => {
       
       {/* Lightbox */}
       {isLightboxOpen && (
-        <div className="gallery-lightbox active" onClick={() => setIsLightboxOpen(false)}>
-          <button className="lightbox-close" onClick={() => setIsLightboxOpen(false)} aria-label="Close Lightbox">
-            <i className="fa-solid fa-xmark"></i>
-          </button>
-          <div className="lightbox-content-wrapper" onClick={e => e.stopPropagation()}>
-            {activeMedia.type === 'image' ? (
-              <img src={activeMedia.url} alt={product.name} className="lightbox-media" />
-            ) : (
-              <video src={activeMedia.url} controls autoPlay className="lightbox-media" />
-            )}
-          </div>
-          {allMedia.length > 1 && (
-            <>
-              <button className="lightbox-prev" onClick={(e) => { e.stopPropagation(); setActiveIndex((p) => (p - 1 + allMedia.length) % allMedia.length); }}>
-                <i className="fa-solid fa-chevron-left"></i>
-              </button>
-              <button className="lightbox-next" onClick={(e) => { e.stopPropagation(); setActiveIndex((p) => (p + 1) % allMedia.length); }}>
-                <i className="fa-solid fa-chevron-right"></i>
-              </button>
-            </>
-          )}
-        </div>
+        <LightboxViewer 
+          allMedia={allMedia}
+          activeIndex={activeIndex}
+          setActiveIndex={setActiveIndex}
+          onClose={() => setIsLightboxOpen(false)}
+        />
       )}
 
       {/* Main Hero Wrapper */}
@@ -175,6 +292,8 @@ const PremiumProductGallery = memo(({ product }) => {
                     onLoad={() => handleImageLoad(idx)}
                     onError={() => handleImageError(idx)}
                     className={`hero-image ${imageLoadedStatus[idx] === true ? 'loaded' : ''}`}
+                    onClick={() => setIsLightboxOpen(true)}
+                    style={{ cursor: 'zoom-in' }}
                   />
                 </picture>
               ) : (

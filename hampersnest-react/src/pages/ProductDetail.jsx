@@ -169,13 +169,6 @@ export default function ProductDetail() {
         schema={productSchema}
       />
       
-      <div className="container" style={{ paddingTop: '20px' }}>
-        <Breadcrumbs customCrumbs={[
-          { name: 'Collections', path: '/collections' },
-          { name: product.subcategoryName || product.categoryName || (settings?.categories?.find(c => c.id === product.subCategory)?.label) || (settings?.categories?.find(c => c.id === product.category)?.label) || product.category, path: `/collections?category=${product.category}` },
-          { name: product.name, path: `/product/${product.id}` }
-        ]} />
-      </div>
 
       <ProductDetailTemplate product={product} displayRelated={displayRelated} />
       

@@ -7220,19 +7220,14 @@ footer h4,
   border: 2px solid transparent;
   cursor: pointer;
   overflow: hidden;
-  opacity: 0.6;
   transition: 0.3s;
   position: relative;
 }
 
 .thumbnail-item.active {
   border-color: var(--color-purple);
-  opacity: 1;
 }
 
-.thumbnail-item:hover {
-  opacity: 1;
-}
 
 .thumbnail-item img,
 .thumbnail-item video {
@@ -8314,13 +8309,11 @@ footer h4,
   overflow: hidden;
   cursor: pointer;
   border: 2px solid transparent;
-  opacity: 0.6;
   transition: all 0.2s ease;
 }
 
 .thumbnail-item.active {
   border-color: var(--color-gold);
-  opacity: 1;
 }
 
 .thumbnail-item img,
@@ -8451,5 +8444,108 @@ footer h4,
 @media (max-width: 991px) {
   .desktop-only {
     display: none !important;
+  }
+}
+
+/* ==========================================================================
+   MOBILE COLLECTIONS PAGE SPACING OPTIMIZATIONS
+   ========================================================================== */
+@media (max-width: 767px) {
+  /* Reduce top banner size */
+  .page-header-banner {
+    padding: 1.5rem 0 !important;
+  }
+  
+  .page-header-banner h2 {
+    margin-bottom: 0.5rem !important;
+  }
+  
+  .page-header-banner p {
+    margin-bottom: 0.75rem !important;
+  }
+
+  /* Category Tabs */
+  .category-tabs {
+    margin-bottom: 0.75rem !important;
+    gap: 8px !important;
+  }
+  
+  .category-tab {
+    padding: 6px 14px !important;
+    font-size: 0.85rem !important;
+  }
+
+  /* Subcategory Chips */
+  .subcategory-chips {
+    margin-bottom: 1rem !important;
+    gap: 6px !important; 
+  }
+
+  .subcategory-chip {
+    padding: 4px 12px !important; 
+    font-size: 0.8rem !important;
+  }
+
+  /* Filter Bar (Search & Sort) */
+  .filter-bar {
+    margin-bottom: 0.75rem !important;
+  }
+
+  .filter-bar .search-input-wrapper input {
+    padding: 8px 12px 8px 36px !important; 
+  }
+
+  .filter-bar .sort-select {
+    padding: 8px 12px !important; 
+  }
+
+  /* Product Count & Clear Filters */
+  .results-counter-bar {
+    margin-bottom: 0.75rem !important;
+  }
+
+  /* Customization Features Grid on Product Details */
+  .customization-features-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* ==========================================================================
+     MOBILE HEADER SPACING OPTIMIZATIONS
+     ========================================================================== */
+  #header .nav-container {
+    justify-content: space-between !important;
+    padding-left: 15px !important;
+    padding-right: 15px !important;
+  }
+  
+  /* Give logo a maximum width so it doesn't push the icons */
+  #header .logo-container {
+    max-width: 50% !important;
+    display: flex;
+    align-items: center;
+  }
+  
+  /* Group actions neatly */
+  #header .header-actions {
+    gap: 12px !important; /* Reduce gap slightly to keep them grouped */
+    justify-content: flex-end !important;
+    flex: 1; /* Allow actions to take remaining space */
+  }
+
+  /* Fix Badge Overlap */
+  #header .nav-cart-btn {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px; /* Slight padding to prevent touching */
+  }
+
+  #header .nav-cart-badge {
+    top: -5px !important;
+    right: -8px !important;
+    min-width: 16px !important;
+    height: 16px !important;
+    font-size: 0.65rem !important;
   }
 }
