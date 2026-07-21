@@ -1,6 +1,6 @@
 import SeoKeywordsSection from '../components/SeoKeywordsSection';
 import React, { useEffect, useState, useMemo } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import SEO from '../components/SEO';
 import ProductCard from '../components/ProductCard';
@@ -9,9 +9,26 @@ export default function FeaturedGifts() {
   const navigate = useNavigate();
   const { products, addToCart, toggleWishlist, isInWishlist, settings } = useCart();
   
+  const location = useLocation();
+
+  const savedState = useMemo(() => {
+    try {
+      const saved = sessionStorage.getItem(`featured_state_${location.key}`);
+      return saved ? JSON.parse(saved) : null;
+    } catch {
+      return null;
+    }
+  }, [location.key]);
+
   // State for desktop filtering
-  const [activeFilter, setActiveFilter] = useState('All');
+  const [activeFilter, setActiveFilter] = useState(savedState?.activeFilter || 'All');
   const [isDesktop, setIsDesktop] = useState(window.innerWidth >= 1024);
+
+  useEffect(() => {
+    sessionStorage.setItem(`featured_state_${location.key}`, JSON.stringify({
+      activeFilter
+    }));
+  }, [activeFilter, location.key]);
 
   // Handle window resize to toggle desktop/mobile view
   useEffect(() => {

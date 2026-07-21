@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback, memo } from 'react';
 import { useCart } from '../context/CartContext';
+import WishlistButton from './WishlistButton';
 
 const PremiumProductGallery = memo(({ product }) => {
   const { toggleWishlist, isInWishlist } = useCart();
@@ -143,13 +144,7 @@ const PremiumProductGallery = memo(({ product }) => {
         onTouchEnd={handleTouchEnd}
       >
         {/* Wishlist Button - Top Right */}
-        <button
-          onClick={(e) => { e.stopPropagation(); toggleWishlist(product.id); }}
-          className={`gallery-wishlist-btn ${isWishlisted ? 'active' : ''}`}
-          aria-label="Toggle Wishlist"
-        >
-          <i className={isWishlisted ? "fa-solid fa-heart" : "fa-regular fa-heart"}></i>
-        </button>
+        <WishlistButton productId={product.id} absolute />
 
         {/* Zoom Button - Bottom Right */}
         <button

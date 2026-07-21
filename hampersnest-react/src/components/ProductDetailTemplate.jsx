@@ -4,6 +4,7 @@ import { useCart } from '../context/CartContext';
 import { useCurrency } from '../context/CurrencyContext';
 import ProductCard from './ProductCard';
 import PremiumProductGallery from './PremiumProductGallery';
+import WishlistButton from './WishlistButton';
 import { API_BASE } from '../config.js';
 
 export default function ProductDetailTemplate({ product, displayRelated = [] }) {
@@ -104,9 +105,13 @@ export default function ProductDetailTemplate({ product, displayRelated = [] }) 
           </div>
           <button 
             onClick={() => {
-              const lastVisited = sessionStorage.getItem('last_visited_collection');
-              if (lastVisited) navigate(lastVisited);
-              else navigate('/collections');
+              if (window.history.length > 2 || (window.history.state && window.history.state.idx > 0)) {
+                 navigate(-1);
+              } else {
+                 const lastVisited = sessionStorage.getItem('last_visited_collection');
+                 if (lastVisited) navigate(lastVisited);
+                 else navigate('/collections');
+              }
             }}
             style={{
               background: 'none',
@@ -130,6 +135,24 @@ export default function ProductDetailTemplate({ product, displayRelated = [] }) 
       <div className="container product-detail-section" style={{ paddingTop: '0.5rem' }}>
         <div className="product-detail-layout-grid">
           
+          {/* MOBILE ONLY HEADER */}
+          <div className="product-header-block mobile-only" style={{ marginBottom: '-1rem' }}>
+            <span className="product-category-tag">{(product.subcategoryName || product.categoryName || settings?.categories?.find(c => c.id === product.subCategory)?.label || settings?.categories?.find(c => c.id === product.category)?.label || product.category)} Collection</span>
+            <h1 className="product-detail-title">{product.name}</h1>
+            
+            <div className="product-rating-row">
+              <div className="stars-gold">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <i
+                    key={i}
+                    className={i < Math.floor(product.rating || 4.5) ? "fa-solid fa-star" : "fa-regular fa-star"}
+                  ></i>
+                ))}
+              </div>
+              <span className="rating-count">({product.rating || 4.5} Rating / Verified Client Reviews)</span>
+            </div>
+          </div>
+
           {/* 1. Product Gallery */}
           <div className="product-detail-visual-wrapper">
             <PremiumProductGallery product={product} />
@@ -152,8 +175,8 @@ export default function ProductDetailTemplate({ product, displayRelated = [] }) 
 
           {/* RIGHT COLUMN: Info, Customizations, Actions */}
           <div className="product-detail-info-wrapper">
-            {/* 2. Product Header */}
-            <div className="product-header-block">
+            {/* 2. Product Header (Desktop Only) */}
+            <div className="product-header-block desktop-only">
               <span className="product-category-tag">{(product.subcategoryName || product.categoryName || settings?.categories?.find(c => c.id === product.subCategory)?.label || settings?.categories?.find(c => c.id === product.category)?.label || product.category)} Collection</span>
               <h1 className="product-detail-title">{product.name}</h1>
               
@@ -432,26 +455,7 @@ export default function ProductDetailTemplate({ product, displayRelated = [] }) 
                 </button>
 
                 {/* 9. Wishlist Button */}
-                <button
-                  type="button"
-                  onClick={() => toggleWishlist(product.id)}
-                  className={`btn btn-secondary ${isWishlisted ? 'active' : ''}`}
-                  style={{
-                    width: '48px',
-                    height: '48px',
-                    padding: 0,
-                    borderRadius: '50%',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    borderColor: isWishlisted ? '#e24e4e' : 'var(--color-gold)',
-                    color: isWishlisted ? '#e24e4e' : 'var(--color-gold)',
-                    flexShrink: 0
-                  }}
-                  aria-label="Toggle Wishlist"
-                >
-                  <i className={isWishlisted ? 'fa-solid fa-heart' : 'fa-regular fa-heart'}></i>
-                </button>
+                <WishlistButton productId={product.id} style={{ width: '48px', height: '48px', flexShrink: 0 }} />
               </div>
               <div style={{ marginTop: '0.5rem', fontSize: '0.8rem', color: 'var(--color-charcoal)', fontWeight: '500', display: 'flex', alignItems: 'center', gap: '6px' }}>
                 <i className="fa-solid fa-circle-info" style={{ color: 'var(--color-gold)' }}></i> Minimum Order Quantity: 5 Pieces

@@ -1,6 +1,6 @@
 import SeoKeywordsSection from '../components/SeoKeywordsSection';
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { Link, useSearchParams, useNavigate } from 'react-router-dom';
+import { Link, useSearchParams, useNavigate, useLocation } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useCurrency } from '../context/CurrencyContext';
 import SEO from '../components/SEO';
@@ -13,12 +13,34 @@ export default function Collections() {
   const { products, addToCart, settings } = useCart();
   const navigate = useNavigate();
 
-  const [activeCategory, setActiveCategory] = useState('All');
-  const [activeSubcategory, setActiveSubcategory] = useState(null);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [sortBy, setSortBy] = useState('featured');
-  const [currentPage, setCurrentPage] = useState(1);
+  const location = useLocation();
+
+  const savedState = useMemo(() => {
+    try {
+      const saved = sessionStorage.getItem(`collections_state_${location.key}`);
+      return saved ? JSON.parse(saved) : null;
+    } catch {
+      return null;
+    }
+  }, [location.key]);
+
+  const [activeCategory, setActiveCategory] = useState(savedState?.activeCategory || 'All');
+  const [activeSubcategory, setActiveSubcategory] = useState(savedState?.activeSubcategory || null);
+  const [searchQuery, setSearchQuery] = useState(savedState?.searchQuery || '');
+  const [sortBy, setSortBy] = useState(savedState?.sortBy || 'featured');
+  const [currentPage, setCurrentPage] = useState(savedState?.currentPage || 1);
   const productsGridRef = React.useRef(null);
+  const isInitialMount = React.useRef(true);
+
+  useEffect(() => {
+    sessionStorage.setItem(`collections_state_${location.key}`, JSON.stringify({
+      activeCategory,
+      activeSubcategory,
+      searchQuery,
+      sortBy,
+      currentPage
+    }));
+  }, [activeCategory, activeSubcategory, searchQuery, sortBy, currentPage, location.key]);
 
   const storefrontCategories = useMemo(() => {
     const configuredCategories = Array.isArray(settings?.categories) ? settings.categories : [];
@@ -91,6 +113,9 @@ export default function Collections() {
 
   // Sync category from URL search parameter
   useEffect(() => {
+    let expectedCategory = 'All';
+    let expectedSubcategory = null;
+
     if (queryCategory) {
       const match = storefrontCategories.find(
         c => c.id.toLowerCase() === queryCategory.toLowerCase() ||
@@ -98,21 +123,19 @@ export default function Collections() {
       );
       if (match) {
         if (match.parentId) {
-          setActiveCategory(match.parentId);
-          setActiveSubcategory(match.id);
+          expectedCategory = match.parentId;
+          expectedSubcategory = match.id;
         } else {
-          setActiveCategory(match.id);
-          setActiveSubcategory(null);
+          expectedCategory = match.id;
         }
-      } else {
-        setActiveCategory('All');
-        setActiveSubcategory(null);
       }
-    } else {
-      setActiveCategory('All');
-      setActiveSubcategory(null);
     }
-    setCurrentPage(1);
+
+    if (activeCategory !== expectedCategory || activeSubcategory !== expectedSubcategory) {
+      setActiveCategory(expectedCategory);
+      setActiveSubcategory(expectedSubcategory);
+      setCurrentPage(1);
+    }
   }, [queryCategory, storefrontCategories]);
 
   // Save current collection URL for smart back navigation
@@ -122,6 +145,10 @@ export default function Collections() {
 
   // Reset page when search or sort changes
   useEffect(() => {
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      return;
+    }
     setCurrentPage(1);
   }, [searchQuery, sortBy]);
 

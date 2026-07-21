@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, memo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useCurrency } from '../context/CurrencyContext';
+import WishlistButton from './WishlistButton';
 
 const ProductCard = memo(({ product, animationDelay = 0 }) => {
   const navigate = useNavigate();
@@ -101,7 +102,6 @@ const ProductCard = memo(({ product, animationDelay = 0 }) => {
   const handleViewDetails = (e) => {
     e.preventDefault();
     navigate(`/product/${product.id}`);
-    window.scrollTo(0, 0);
   };
 
   return (
@@ -120,14 +120,7 @@ const ProductCard = memo(({ product, animationDelay = 0 }) => {
       >
         
         {/* Top Right: Wishlist */}
-        <button
-          onClick={handleWishlist}
-          className={`action-icon-btn wishlist-btn ${isWishlisted ? 'active' : ''}`}
-          aria-label={isWishlisted ? "Remove from Wishlist" : "Add to Wishlist"}
-          style={{ position: 'absolute', top: '10px', right: '10px', zIndex: 10 }}
-        >
-          <i className={isWishlisted ? "fa-solid fa-heart" : "fa-regular fa-heart"}></i>
-        </button>
+        <WishlistButton productId={product.id} absolute />
         
         {/* Top Left: Multi-image indicator */}
         {mediaList.length > 1 && (

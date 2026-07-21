@@ -2026,17 +2026,11 @@ header.scrolled {
 }
 
 .testimonial-track {
-  position: relative;
-  height: 350px;
+  display: grid;
   width: 100%;
 }
 
 .testimonial-slide {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
   opacity: 0;
   visibility: hidden;
   transition: opacity 0.8s ease, visibility 0.8s ease;
@@ -3582,7 +3576,7 @@ footer {
 
   /* Testimonial slider heights */
   .testimonial-track {
-    height: 250px !important;
+    height: auto !important;
   }
 
   .testimonial-slide {
@@ -8374,4 +8368,88 @@ footer h4,
 
 .card-arrow.next {
   right: 8px;
+}
+
+/* ==========================================================================
+   WISHLIST LUXURY BUTTON ENHANCEMENT
+   ========================================================================== */
+.wishlist-luxury-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--color-white, #ffffff);
+  border: 1px solid rgba(75, 32, 103, 0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.2s ease, background 0.2s ease;
+  z-index: 10;
+  color: #4B2067; /* Hampers Nest luxury purple */
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
+  padding: 0;
+}
+
+.wishlist-luxury-btn.is-absolute {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+}
+
+/* Icon base */
+.wishlist-luxury-btn i {
+  font-size: 1.15rem;
+  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), color 0.25s ease;
+  -webkit-text-stroke: 1.5px #4B2067;
+  display: block;
+  margin-top: 2px; /* optical alignment */
+}
+
+/* Unselected state */
+.wishlist-luxury-btn:not(.active) i {
+  color: transparent;
+}
+
+/* Hover state (Desktop only) */
+@media (hover: hover) and (pointer: fine) {
+  .wishlist-luxury-btn:hover {
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+  }
+}
+
+/* Selected state */
+.wishlist-luxury-btn.active i {
+  color: #4B2067;
+  -webkit-text-stroke: 0px;
+  filter: drop-shadow(0 0 2px rgba(75, 32, 103, 0.4));
+  animation: wishlist-fill-pop 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* Click animation */
+.wishlist-luxury-btn:active {
+  transform: scale(0.92);
+}
+
+@keyframes wishlist-fill-pop {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.15); }
+  100% { transform: scale(1); }
+}
+
+/* ==========================================================================
+   RESPONSIVE VISIBILITY UTILITIES
+   ========================================================================== */
+@media (min-width: 992px) {
+  .mobile-only {
+    display: none !important;
+  }
+}
+
+@media (max-width: 991px) {
+  .desktop-only {
+    display: none !important;
+  }
 }

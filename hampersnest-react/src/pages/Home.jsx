@@ -396,9 +396,10 @@ export default function Home() {
                   opacity: idx === activeSlide ? 1 : 0,
                   transform: idx === activeSlide ? 'translateY(0)' : 'translateY(20px)',
                   transition: 'all 0.5s ease',
-                  position: idx === activeSlide ? 'relative' : 'absolute',
                   pointerEvents: idx === activeSlide ? 'auto' : 'none',
-                  width: '100%'
+                  gridArea: '1 / 1',
+                  width: '100%',
+                  height: '100%'
                 }}
               >
                 <div className="testimonial-rating">
