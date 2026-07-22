@@ -212,8 +212,58 @@ export const CartProvider = ({ children }) => {
   };
 
   // Calculate totals
-  const cartCount = cart.reduce((total, item) => total + item.quantity, 0);
-  const cartTotal = cart.reduce((total, item) => total + (item.price * item.quantity), 0);
+  const getCartTotals = () => {
+    let count = 0;
+    let subtotal = 0;
+    let discountTotal = 0;
+    
+    const productQtyMap = {};
+    cart.forEach(item => {
+      productQtyMap[item.id] = (productQtyMap[item.id] || 0) + item.quantity;
+      count += item.quantity;
+    });
+
+    const bulkSettings = settings?.bulkDiscountSettings;
+    const isDiscountEnabled = bulkSettings?.enabled && bulkSettings?.rules && bulkSettings.rules.length > 0;
+    const sortedRulesDesc = isDiscountEnabled ? [...bulkSettings.rules].sort((a, b) => b.minQty - a.minQty) : [];
+    const sortedRulesAsc = isDiscountEnabled ? [...bulkSettings.rules].sort((a, b) => a.minQty - b.minQty) : [];
+
+    cart.forEach(item => {
+      const lineSubtotal = item.price * item.quantity;
+      subtotal += lineSubtotal;
+
+      if (isDiscountEnabled) {
+        const totalQtyForProduct = productQtyMap[item.id];
+        const rule = sortedRulesDesc.find(r => totalQtyForProduct >= r.minQty);
+        if (rule) {
+          discountTotal += lineSubtotal * (rule.discountPercent / 100);
+        }
+      }
+    });
+
+    const finalTotal = subtotal - discountTotal;
+
+    const upsales = {};
+    if (isDiscountEnabled) {
+      cart.forEach(item => {
+         const totalQtyForProduct = productQtyMap[item.id];
+         const nextRule = sortedRulesAsc.find(r => totalQtyForProduct < r.minQty);
+         if (nextRule && !upsales[item.id]) { // only compute once per product
+            upsales[item.id] = {
+               productName: item.name,
+               qtyNeeded: nextRule.minQty - totalQtyForProduct,
+               discountPercent: nextRule.discountPercent
+            };
+         }
+      });
+    }
+
+    return { count, subtotal, discountTotal, finalTotal, upsales, productQtyMap, sortedRulesDesc };
+  };
+
+  const cartTotals = getCartTotals();
+  const cartCount = cartTotals.count;
+  const cartTotal = cartTotals.finalTotal;
 
   // Generate Whatsapp Checkout Message
   const getWhatsappCheckoutUrl = (userDetails = {}, orderId = null) => {
@@ -240,7 +290,7 @@ export const CartProvider = ({ children }) => {
     const dateStr = userDetails.deliveryDate ? `*Required Date:* ${userDetails.deliveryDate}\n` : '';
     const notesStr = userDetails.notes ? `*Notes:* ${userDetails.notes}\n` : '';
 
-    const message = `Hi ${settings?.storeName || 'Hampers Nest'}!\n\nI would like to place an order / get a quote for the following hampers:\n\n${orderDetailsText}\n\n*Total Items:* ${cartCount}\n*Estimated Subtotal:* ₹${cartTotal}\n\n${nameStr}${phoneStr}${eventStr}${dateStr}${notesStr}Please confirm availability and share the catalog. Thank you!`;
+    const message = `Hi ${settings?.storeName || 'Hampers Nest'}!\n\nI would like to place an order / get a quote for the following hampers:\n\n${orderDetailsText}\n\n*Total Items:* ${cartCount}\n*Estimated Subtotal:* ₹${cartTotals.subtotal.toFixed(2)}${cartTotals.discountTotal > 0 ? `\n*Bulk Discount Saved:* -₹${cartTotals.discountTotal.toFixed(2)}` : ''}\n*Estimated Total:* ₹${cartTotal.toFixed(2)}\n\n${nameStr}${phoneStr}${eventStr}${dateStr}${notesStr}Please confirm availability and share the catalog. Thank you!`;
 
     return `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
   };
@@ -267,6 +317,7 @@ export const CartProvider = ({ children }) => {
         isInWishlist,
         cartCount,
         cartTotal,
+        cartTotals,
         getWhatsappCheckoutUrl,
         settings
       }}

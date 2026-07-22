@@ -383,8 +383,7 @@ export default function Products() {
           formDataObj.append('image', item.file);
           let uploadUrl = `${API_BASE}/api/upload?folder=products&productId=${formData.id}`;
           if (formData.watermarkSettings && formData.watermarkSettings.enabled) {
-            const wm = formData.watermarkSettings;
-            uploadUrl += `&watermarkEnabled=true&watermarkType=${encodeURIComponent(wm.type)}&watermarkText=${encodeURIComponent(wm.text)}&watermarkPosition=${encodeURIComponent(wm.position)}&watermarkOpacity=${encodeURIComponent(wm.opacity / 100)}&watermarkSize=${encodeURIComponent(wm.size)}`;
+            uploadUrl += `&watermarkEnabled=true`;
           }
 
           const response = await fetch(uploadUrl, {

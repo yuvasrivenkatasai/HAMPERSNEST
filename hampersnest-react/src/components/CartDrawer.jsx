@@ -8,8 +8,9 @@ export default function CartDrawer() {
     cart,
     cartOpen,
     setCartOpen,
-    cartTotal,
     cartCount,
+    cartTotal,
+    cartTotals,
     updateQuantity,
     removeFromCart,
     getWhatsappCheckoutUrl
@@ -177,32 +178,52 @@ export default function CartDrawer() {
                         </div>
                       )}
 
+                      {/* Upselling Message per Product */}
+                      {cartTotals?.upsales?.[item.id] && (
+                        <div style={{ 
+                          marginTop: '6px', 
+                          background: 'rgba(251, 191, 36, 0.1)', 
+                          border: '1px dashed var(--color-gold)', 
+                          padding: '6px', 
+                          borderRadius: '6px',
+                          fontSize: '0.75rem',
+                          color: 'var(--color-gold-dark)'
+                        }}>
+                          🎁 Add <strong>{cartTotals.upsales[item.id].qtyNeeded} more pieces</strong> to unlock <strong>{cartTotals.upsales[item.id].discountPercent}% OFF</strong>
+                        </div>
+                      )}
+
                       {/* Quantity & Delete Actions */}
-                      <div className="cart-item-actions">
-                        <div className="cart-item-qty">
+                      <div className="cart-item-actions-wrapper" style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                        <div className="cart-item-actions">
+                          <div className="cart-item-qty">
+                            <button
+                              onClick={() => updateQuantity(item.cartItemId, item.quantity - 1)}
+                              disabled={item.quantity <= 5}
+                              aria-label="Decrease quantity"
+                              style={{ opacity: item.quantity <= 5 ? 0.5 : 1, cursor: item.quantity <= 5 ? 'not-allowed' : 'pointer' }}
+                            >
+                              <i className="fa-solid fa-minus"></i>
+                            </button>
+                            <span>{item.quantity}</span>
+                            <button
+                              onClick={() => updateQuantity(item.cartItemId, item.quantity + 1)}
+                              aria-label="Increase quantity"
+                            >
+                              <i className="fa-solid fa-plus"></i>
+                            </button>
+                          </div>
                           <button
-                            onClick={() => updateQuantity(item.cartItemId, item.quantity - 1)}
-                            disabled={item.quantity <= 5}
-                            aria-label="Decrease quantity"
-                            style={{ opacity: item.quantity <= 5 ? 0.5 : 1, cursor: item.quantity <= 5 ? 'not-allowed' : 'pointer' }}
+                            onClick={() => removeFromCart(item.cartItemId)}
+                            className="cart-item-remove"
+                            title="Remove item"
                           >
-                            <i className="fa-solid fa-minus"></i>
-                          </button>
-                          <span>{item.quantity}</span>
-                          <button
-                            onClick={() => updateQuantity(item.cartItemId, item.quantity + 1)}
-                            aria-label="Increase quantity"
-                          >
-                            <i className="fa-solid fa-plus"></i>
+                            <i className="fa-solid fa-trash-can"></i> Remove
                           </button>
                         </div>
-                        <button
-                          onClick={() => removeFromCart(item.cartItemId)}
-                          className="cart-item-remove"
-                          title="Remove item"
-                        >
-                          <i className="fa-solid fa-trash-can"></i> Remove
-                        </button>
+                        <div style={{ fontSize: '0.75rem', color: '#6B7280', display: 'flex', alignItems: 'center', gap: '6px', marginTop: '2px' }}>
+                          <i className="fa-solid fa-circle-info" style={{ color: '#9CA3AF' }}></i> Minimum Order: 5 Pieces
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -302,10 +323,29 @@ export default function CartDrawer() {
               <span>Total Items:</span>
               <span>{cartCount}</span>
             </div>
-            <div className="cart-summary-row cart-summary-total">
-              <span>Subtotal:</span>
-              <span>{formatPrice(cartTotal)}</span>
-            </div>
+            
+            {cartTotals?.discountTotal > 0 ? (
+              <>
+                <div className="cart-summary-row" style={{ fontSize: '0.9rem', color: '#666' }}>
+                  <span>Subtotal:</span>
+                  <span>{formatPrice(cartTotals.subtotal)}</span>
+                </div>
+                <div className="cart-summary-row" style={{ fontSize: '0.9rem', color: '#16a34a' }}>
+                  <span>Bulk Discount:</span>
+                  <span>-{formatPrice(cartTotals.discountTotal)}</span>
+                </div>
+                <div className="cart-summary-row cart-summary-total">
+                  <span>Total:</span>
+                  <span>{formatPrice(cartTotal)}</span>
+                </div>
+              </>
+            ) : (
+              <div className="cart-summary-row cart-summary-total">
+                <span>Subtotal:</span>
+                <span>{formatPrice(cartTotal)}</span>
+              </div>
+            )}
+            
             <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '4px' }}>
               <span className="cart-currency-badge">{currency === 'INR' ? '₹ INR' : '$ USD'}</span>
             </div>

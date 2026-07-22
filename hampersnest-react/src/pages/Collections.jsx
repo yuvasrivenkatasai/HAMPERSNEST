@@ -10,6 +10,9 @@ import ProductCard from '../components/ProductCard';
 export default function Collections() {
   const [searchParams, setSearchParams] = useSearchParams();
   const queryCategory = searchParams.get('category');
+  const minPriceFilter = searchParams.get('min');
+  const maxPriceFilter = searchParams.get('max');
+  
   const { products, addToCart, settings } = useCart();
   const navigate = useNavigate();
 
@@ -185,15 +188,12 @@ export default function Collections() {
     }
 
     // 1.5 Price Filter
-    const activePriceFilter = searchParams.get('price');
-    if (activePriceFilter) {
+    if (minPriceFilter !== null || maxPriceFilter !== null) {
+      const min = minPriceFilter !== null ? Number(minPriceFilter) : 0;
+      const max = maxPriceFilter !== null ? Number(maxPriceFilter) : Infinity;
       result = result.filter(p => {
         const price = p.price || 0;
-        if (activePriceFilter === 'under-100') return price < 100;
-        if (activePriceFilter === '100-200') return price >= 100 && price <= 200;
-        if (activePriceFilter === '200-300') return price >= 200 && price <= 300;
-        if (activePriceFilter === '300-plus') return price > 300;
-        return true;
+        return price >= min && price <= max;
       });
     }
 
@@ -219,7 +219,7 @@ export default function Collections() {
     }
 
     return result;
-  }, [activeCategory, activeSubcategory, searchQuery, sortBy, products, searchParams]);
+  }, [activeCategory, activeSubcategory, searchQuery, sortBy, products, searchParams, minPriceFilter, maxPriceFilter]);
 
   // Pagination Logic
   const isViewAll = searchParams.get('view') === 'all';
@@ -279,15 +279,42 @@ export default function Collections() {
     }
   };
 
+  let seoTitle = activeCategory === 'All'
+    ? `Shop Premium Gift Hampers & Return Gifts | ${settings?.storeName || 'Hampers Nest'}`
+    : `Shop Premium ${getCategoryLabel(activeCategory)} Return Gifts | ${settings?.storeName || 'Hampers Nest'}`;
+    
+  let seoDescription = activeCategory === 'All'
+    ? "Browse our collections of hand-crafted return gifts, wedding hampers, housewarming kits, and corporate gifting. Custom styling and ribbon packaging available."
+    : `Explore luxury curated ${getCategoryLabel(activeCategory)} return gifts and gift hampers by Hampers Nest. Custom packaging and quick delivery options.`;
+    
+  let collectionHeaderTitle = 'Our Collections';
+
+  if (minPriceFilter !== null || maxPriceFilter !== null) {
+    const minText = minPriceFilter ? `₹${minPriceFilter}` : '';
+    const maxText = maxPriceFilter ? `₹${maxPriceFilter}` : '';
+    let priceRangeLabel = '';
+    
+    if (minPriceFilter && maxPriceFilter) {
+      priceRangeLabel = `${minText} – ${maxText}`;
+    } else if (minPriceFilter) {
+      priceRangeLabel = `Above ${minText}`;
+    } else if (maxPriceFilter) {
+      priceRangeLabel = `Under ${maxText}`;
+    }
+    
+    seoTitle = `Products ${priceRangeLabel} | Hampers Nest`;
+    seoDescription = `Browse premium return gifts and luxury hampers ${priceRangeLabel} at Hampers Nest. Perfect for weddings, housewarmings, and special occasions.`;
+    collectionHeaderTitle = `Showing Products ${priceRangeLabel}`;
+  } else if (searchQuery) {
+    seoTitle = `Search Results for "${searchQuery}" | Hampers Nest`;
+    collectionHeaderTitle = `Search Results for "${searchQuery}"`;
+  }
+
   return (
     <div className="page-container">
       <SEO
-        title={activeCategory === 'All'
-          ? `Shop Premium Gift Hampers & Return Gifts | ${settings?.storeName || 'Hampers Nest'}`
-          : `Shop Premium ${getCategoryLabel(activeCategory)} Return Gifts | ${settings?.storeName || 'Hampers Nest'}`}
-        description={activeCategory === 'All'
-          ? "Browse our collections of hand-crafted return gifts, wedding hampers, housewarming kits, and corporate gifting. Custom styling and ribbon packaging available."
-          : `Explore luxury curated ${getCategoryLabel(activeCategory)} return gifts and gift hampers by Hampers Nest. Custom packaging and quick delivery options.`}
+        title={seoTitle}
+        description={seoDescription}
         keywords={activeCategory === 'All'
           ? "gift collections, return gifts hyderabad, premium hampers, custom hampersnest, hampersnest collections"
           : `${getCategoryLabel(activeCategory).toLowerCase()} return gifts, ${getCategoryLabel(activeCategory).toLowerCase()} hampers hyderabad, hampersnest`}
@@ -297,7 +324,7 @@ export default function Collections() {
       <div className="page-header-banner">
         <div className="container" style={{ padding: 0 }}>
           <span className="section-subtitle" style={{ marginBottom: '0.5rem' }}>Premium Gifting</span>
-          <h2>Our Collections</h2>
+          <h2>{collectionHeaderTitle}</h2>
           <p style={{ marginBottom: '1.25rem' }}>
             Discover handcrafted luxury hampers curated for every celebration
           </p>

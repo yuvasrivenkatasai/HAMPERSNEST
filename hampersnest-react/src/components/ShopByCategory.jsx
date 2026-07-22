@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { API_BASE } from '../config';
+import { useCart } from '../context/CartContext';
 
 // Smart Default Category Images — maps keywords in category names to real product images
 const DEFAULT_CATEGORY_IMAGES = {
@@ -77,100 +78,124 @@ export default function ShopByCategory() {
     return (a.sortOrder || 0) - (b.sortOrder || 0);
   })];
 
-  const PRICE_CATEGORIES = [
-    { id: 'price-under-100', name: 'Under ₹100', isPrice: true, priceFilter: 'under-100' },
-    { id: 'price-100-200', name: '₹100–₹200', isPrice: true, priceFilter: '100-200' },
-    { id: 'price-200-300', name: '₹200–₹300', isPrice: true, priceFilter: '200-300' },
-    { id: 'price-300-plus', name: '₹300 & Above', isPrice: true, priceFilter: '300-plus' }
-  ];
+  const { settings } = useCart();
+  const priceRangeCards = (settings?.priceRangeCards || []).filter(c => c.isActive).sort((a,b) => a.sortOrder - b.sortOrder);
 
-  const finalCategories = [...PRICE_CATEGORIES, ...sorted];
+  // Render a generic strip of cards to perfectly reuse the design
+  const renderCardStrip = (items, isBudget) => (
+    <div className="category-cards-strip-wrapper" ref={isBudget ? null : scrollRef}>
+      <div className={`category-cards-strip ${animationEnabled ? 'animated' : ''}`}>
+        {items.map((showcase, idx) => {
+          const imgSrc = showcase.image || (!isBudget ? getDefaultImage(showcase.name) : UNIVERSAL_FALLBACK);
+          const isFeatured = showcase.isFeatured;
+          
+          let linkTarget = '/collections';
+          if (isBudget) {
+            const queryParams = new URLSearchParams();
+            if (showcase.minPrice) queryParams.set('min', showcase.minPrice);
+            if (showcase.maxPrice) queryParams.set('max', showcase.maxPrice);
+            linkTarget = `/collections?${queryParams.toString()}`;
+          } else if (!isFeatured) {
+            linkTarget = `/collections?category=${encodeURIComponent(showcase.targetCollection)}`;
+          }
+
+          return (
+            <Link
+              key={showcase.id || idx}
+              to={linkTarget}
+              className={`luxury-category-card ${isFeatured ? 'featured-category-card' : ''} ${isVisible ? 'card-visible' : ''}`}
+              style={{ '--card-index': idx }}
+            >
+              <div className="category-image-wrapper">
+                {isFeatured && !showcase.image && !isBudget ? (
+                  <div className="featured-gradient-bg">
+                    <i className="fa-solid fa-gem featured-icon"></i>
+                  </div>
+                ) : (
+                  <img
+                    src={imgSrc}
+                    alt={showcase.name}
+                    loading="lazy"
+                  />
+                )}
+                {/* Gold overlay on hover */}
+                <div className="category-card-overlay"></div>
+              </div>
+              <div className="category-card-label">
+                <span className="category-card-name">{showcase.name}</span>
+              </div>
+            </Link>
+          );
+        })}
+        
+        {/* Duplicate for infinite marquee if animation is enabled */}
+        {animationEnabled && items.map((showcase, idx) => {
+          const imgSrc = showcase.image || (!isBudget ? getDefaultImage(showcase.name) : UNIVERSAL_FALLBACK);
+          const isFeatured = showcase.isFeatured;
+          
+          let linkTarget = '/collections';
+          if (isBudget) {
+            const queryParams = new URLSearchParams();
+            if (showcase.minPrice) queryParams.set('min', showcase.minPrice);
+            if (showcase.maxPrice) queryParams.set('max', showcase.maxPrice);
+            linkTarget = `/collections?${queryParams.toString()}`;
+          } else if (!isFeatured) {
+            linkTarget = `/collections?category=${encodeURIComponent(showcase.targetCollection)}`;
+          }
+
+          return (
+            <Link
+              key={`dup-${showcase.id || idx}`}
+              to={linkTarget}
+              className={`luxury-category-card ${isFeatured ? 'featured-category-card' : ''} ${isVisible ? 'card-visible' : ''}`}
+              style={{ '--card-index': idx }}
+              aria-hidden="true"
+            >
+              <div className="category-image-wrapper">
+                {isFeatured && !showcase.image && !isBudget ? (
+                  <div className="featured-gradient-bg">
+                    <i className="fa-solid fa-gem featured-icon"></i>
+                  </div>
+                ) : (
+                  <img
+                    src={imgSrc}
+                    alt={showcase.name}
+                    loading="lazy"
+                  />
+                )}
+                <div className="category-card-overlay"></div>
+              </div>
+              <div className="category-card-label">
+                <span className="category-card-name">{showcase.name}</span>
+              </div>
+            </Link>
+          );
+        })}
+      </div>
+    </div>
+  );
 
   return (
-    <section className="shop-by-category-section" ref={sectionRef}>
-      <div className="container">
-        <span className="section-subtitle">Curated For Every Occasion</span>
-        <h2 className="section-title" style={{ marginBottom: '2.5rem' }}>Shop By Category</h2>
-
-        <div className="category-cards-strip-wrapper" ref={scrollRef}>
-          <div className={`category-cards-strip ${animationEnabled ? 'animated' : ''}`}>
-            {finalCategories.map((showcase, idx) => {
-            const imgSrc = showcase.image || getDefaultImage(showcase.name);
-            const isFeatured = showcase.isFeatured;
-
-            return (
-              <Link
-                key={showcase.id || idx}
-                to={showcase.isPrice ? `/collections?price=${showcase.priceFilter}` : (isFeatured ? '/collections' : `/collections?category=${encodeURIComponent(showcase.targetCollection)}`)}
-                className={`luxury-category-card ${isFeatured ? 'featured-category-card' : ''} ${isVisible ? 'card-visible' : ''}`}
-                style={{ '--card-index': idx }}
-              >
-                <div className="category-image-wrapper">
-                  {showcase.isPrice ? (
-                    <div className="featured-gradient-bg">
-                      <i className="fa-solid fa-indian-rupee-sign featured-icon"></i>
-                    </div>
-                  ) : isFeatured && !showcase.image ? (
-                    <div className="featured-gradient-bg">
-                      <i className="fa-solid fa-gem featured-icon"></i>
-                    </div>
-                  ) : (
-                    <img
-                      src={imgSrc}
-                      alt={showcase.name}
-                      loading="lazy"
-                    />
-                  )}
-                  {/* Gold overlay on hover */}
-                  <div className="category-card-overlay"></div>
-                </div>
-                <div className="category-card-label">
-                  <span className="category-card-name">{showcase.name}</span>
-                </div>
-              </Link>
-            );
-          })}
-            
-            {/* Duplicate for infinite marquee if animation is enabled */}
-            {animationEnabled && finalCategories.map((showcase, idx) => {
-              const imgSrc = showcase.image || getDefaultImage(showcase.name);
-              const isFeatured = showcase.isFeatured;
-
-              return (
-                <Link
-                  key={`dup-${showcase.id || idx}`}
-                  to={showcase.isPrice ? `/collections?price=${showcase.priceFilter}` : (isFeatured ? '/collections' : `/collections?category=${encodeURIComponent(showcase.targetCollection)}`)}
-                  className={`luxury-category-card ${isFeatured ? 'featured-category-card' : ''} ${isVisible ? 'card-visible' : ''}`}
-                  style={{ '--card-index': idx }}
-                  aria-hidden="true"
-                >
-                  <div className="category-image-wrapper">
-                    {showcase.isPrice ? (
-                      <div className="featured-gradient-bg">
-                        <i className="fa-solid fa-indian-rupee-sign featured-icon"></i>
-                      </div>
-                    ) : isFeatured && !showcase.image ? (
-                      <div className="featured-gradient-bg">
-                        <i className="fa-solid fa-gem featured-icon"></i>
-                      </div>
-                    ) : (
-                      <img
-                        src={imgSrc}
-                        alt={showcase.name}
-                        loading="lazy"
-                      />
-                    )}
-                    <div className="category-card-overlay"></div>
-                  </div>
-                  <div className="category-card-label">
-                    <span className="category-card-name">{showcase.name}</span>
-                  </div>
-                </Link>
-              );
-            })}
+    <>
+      {priceRangeCards.length > 0 && (
+        <section className="shop-by-category-section" ref={sectionRef} style={{ paddingBottom: '0' }}>
+          <div className="container">
+            <span className="section-subtitle">Gifts For Every Price Range</span>
+            <h2 className="section-title" style={{ marginBottom: '2.5rem' }}>Shop By Budget</h2>
+            {renderCardStrip(priceRangeCards, true)}
           </div>
-        </div>
-      </div>
-    </section>
+        </section>
+      )}
+
+      {sorted.length > 0 && (
+        <section className="shop-by-category-section" style={{ paddingTop: priceRangeCards.length > 0 ? '4rem' : undefined }}>
+          <div className="container">
+            <span className="section-subtitle">Curated For Every Occasion</span>
+            <h2 className="section-title" style={{ marginBottom: '2.5rem' }}>Shop By Category</h2>
+            {renderCardStrip(sorted, false)}
+          </div>
+        </section>
+      )}
+    </>
   );
 }

@@ -61,6 +61,35 @@ export const getSettings = async (req, res) => {
       }
     }
 
+    // Auto-initialize bulkDiscountSettings
+    if (!settingsObj.bulkDiscountSettings) {
+      const defaultBulkDiscountSettings = {
+        enabled: true,
+        ruleType: 'Product Quantity',
+        heading: '🎉 Bulk Order Discounts',
+        footerNote: '✓ Automatically applied at checkout.',
+        rules: [
+          { minQty: 50, discountPercent: 5 },
+          { minQty: 100, discountPercent: 10 },
+          { minQty: 200, discountPercent: 15 }
+        ]
+      };
+      settingsObj.bulkDiscountSettings = defaultBulkDiscountSettings;
+      await Setting.upsert({ key: 'bulkDiscountSettings', value: defaultBulkDiscountSettings });
+    }
+
+    // Auto-initialize priceRangeCards
+    if (!settingsObj.priceRangeCards) {
+      const defaultPriceRangeCards = [
+        { id: 'price-under-100', name: 'Under ₹100', slug: 'under-100', minPrice: 0, maxPrice: 100, image: '/assets/price_under_100.png', sortOrder: 1, isActive: true },
+        { id: 'price-100-200', name: '₹100–₹200', slug: '100-200', minPrice: 100, maxPrice: 200, image: '/assets/price_100_200.png', sortOrder: 2, isActive: true },
+        { id: 'price-200-300', name: '₹200–₹300', slug: '200-300', minPrice: 200, maxPrice: 300, image: '/assets/price_200_300.png', sortOrder: 3, isActive: true },
+        { id: 'price-300-plus', name: '₹300 & Above', slug: '300-plus', minPrice: 300, maxPrice: null, image: '/assets/price_300_plus.png', sortOrder: 4, isActive: true }
+      ];
+      settingsObj.priceRangeCards = defaultPriceRangeCards;
+      await Setting.upsert({ key: 'priceRangeCards', value: defaultPriceRangeCards });
+    }
+
     // Fetch categories from the Categories table
     const categoriesDb = await Category.findAll({ order: [['createdAt', 'ASC']] });
     const categoriesFormatted = categoriesDb.map(c => ({

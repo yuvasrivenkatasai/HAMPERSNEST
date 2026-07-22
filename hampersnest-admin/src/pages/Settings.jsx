@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { apiRequest } from '../utils/api';
+import BulkDiscountManager from './BulkDiscountManager';
+import PriceRangeManager from './PriceRangeManager';
 
 export default function Settings() {
   const [currentPassword, setCurrentPassword] = useState('');
@@ -530,6 +532,11 @@ export default function Settings() {
                   <input type="url" name="twitterUrl" className="form-input" value={settingsData.twitterUrl || ''} onChange={handleSettingsChange} placeholder="https://twitter.com/..." />
                 </div>
               </div>
+
+              <BulkDiscountManager settingsData={settingsData} setSettingsData={setSettingsData} />
+              
+              <PriceRangeManager settingsData={settingsData} setSettingsData={setSettingsData} />
+
 
               <button type="submit" className="btn-admin mt-2">
                 Save Store Settings

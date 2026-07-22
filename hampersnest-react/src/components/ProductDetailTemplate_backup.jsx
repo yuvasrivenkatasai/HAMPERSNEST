@@ -156,6 +156,21 @@ export default function ProductDetailTemplate({ product, displayRelated = [] }) 
           {/* 1. Product Gallery */}
           <div className="product-detail-visual-wrapper">
             <PremiumProductGallery product={product} />
+
+            <div className="product-trust-badges" style={{ marginTop: '20px' }}>
+              <div className="trust-badge-item">
+                <i className="fa-solid fa-truck-fast"></i>
+                <span>Fast Shipping</span>
+              </div>
+              <div className="trust-badge-item">
+                <i className="fa-solid fa-gift"></i>
+                <span>Premium Quality</span>
+              </div>
+              <div className="trust-badge-item">
+                <i className="fa-solid fa-lock"></i>
+                <span>Secure Packing</span>
+              </div>
+            </div>
           </div>
 
           {/* RIGHT COLUMN: Info, Customizations, Actions */}
@@ -179,21 +194,6 @@ export default function ProductDetailTemplate({ product, displayRelated = [] }) 
                 <span className="rating-count">({product.rating || 4.5} Rating / Verified Client Reviews)</span>
               </div>
               </div>
-
-            <div className="product-trust-badges" style={{ marginTop: '5px', marginBottom: '15px' }}>
-              <div className="trust-badge-item">
-                <i className="fa-solid fa-truck-fast"></i>
-                <span>Fast Shipping</span>
-              </div>
-              <div className="trust-badge-item">
-                <i className="fa-solid fa-gift"></i>
-                <span>Premium Quality</span>
-              </div>
-              <div className="trust-badge-item">
-                <i className="fa-solid fa-lock"></i>
-                <span>Secure Packing</span>
-              </div>
-            </div>
 
               <div className="product-price-block" style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', marginBottom: '1rem' }}>
                 <span className="current-price">{formatPrice(unitPrice)}</span>
@@ -317,100 +317,6 @@ export default function ProductDetailTemplate({ product, displayRelated = [] }) 
 
             {/* Customization Form */}
             <div className="product-customizer-box">
-              
-              {/* 1. Minimum Order Quantity */}
-              <div style={{ marginTop: '0.5rem', fontSize: '0.8rem', color: 'var(--color-charcoal)', fontWeight: '500', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <i className="fa-solid fa-circle-info" style={{ color: 'var(--color-gold)' }}></i> Minimum Order Quantity: 5 Pieces
-              </div>
-
-              {/* 2. Bulk Discount Card */}
-              {settings?.bulkDiscountSettings?.enabled && settings.bulkDiscountSettings.rules?.length > 0 && (
-                <div style={{
-                  background: '#F9FAFB',
-                  border: '1px solid var(--color-gold-light)',
-                  borderRadius: '12px',
-                  padding: '16px',
-                  marginBottom: '1.5rem',
-                  boxShadow: '0 2px 8px rgba(0,0,0,0.02)'
-                }}>
-                  <h4 style={{ 
-                    margin: '0 0 12px 0', 
-                    color: 'var(--color-purple)', 
-                    fontSize: '0.95rem',
-                    textAlign: 'center'
-                  }}>
-                    {settings.bulkDiscountSettings.heading || '🎉 Bulk Order Discounts'}
-                  </h4>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', borderTop: '1px dashed var(--color-beige)', borderBottom: '1px dashed var(--color-beige)', padding: '12px 0', margin: '0 0 12px 0' }}>
-                    {[...settings.bulkDiscountSettings.rules].sort((a,b) => a.minQty - b.minQty).map((rule, idx) => (
-                      <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <span style={{ fontSize: '0.9rem', fontWeight: 600, color: '#4B5563' }}>{rule.minQty}+ Pieces</span>
-                        <span style={{ 
-                          background: 'var(--color-gold-light)', 
-                          color: 'var(--color-gold-dark)', 
-                          padding: '2px 10px', 
-                          borderRadius: '12px', 
-                          fontSize: '0.75rem', 
-                          fontWeight: 700 
-                        }}>SAVE {rule.discountPercent}%</span>
-                      </div>
-                    ))}
-                  </div>
-                  <p style={{ textAlign: 'center', fontSize: '0.75rem', color: '#6B7280', margin: 0 }}>
-                    {settings.bulkDiscountSettings.footerNote || '✓ Automatically applied at checkout.'}
-                  </p>
-                </div>
-              )}
-
-              {/* 3. Quantity Selector and Purchase Actions */}
-              <div className="action-row-buying" style={{ display: 'flex', gap: '10px', alignItems: 'center', marginBottom: '2rem', flexWrap: 'wrap' }}>
-                <div className="qty-picker-detail" style={{ height: '48px', flexShrink: 0 }}>
-                  <button
-                    type="button"
-                    onClick={() => setQuantity(Math.max(5, quantity - 1))}
-                    disabled={effectiveStock === 0 || quantity <= 5}
-                    aria-label="Decrease quantity"
-                  >
-                    <i className="fa-solid fa-minus"></i>
-                  </button>
-                  <span className="qty-value">{effectiveStock === 0 ? 0 : quantity}</span>
-                  <button
-                    type="button"
-                    onClick={() => setQuantity(quantity + 1)}
-                    disabled={effectiveStock === 0 || quantity >= effectiveStock}
-                    aria-label="Increase quantity"
-                  >
-                    <i className="fa-solid fa-plus"></i>
-                  </button>
-                </div>
-
-                <button
-                  type="button"
-                  onClick={handleAddToBasket}
-                  disabled={effectiveStock === 0}
-                  className="btn btn-primary buy-btn-cart"
-                  style={{ 
-                    flex: 1, 
-                    height: '48px', 
-                    padding: 0, 
-                    minWidth: '150px',
-                    background: effectiveStock === 0 ? '#CBD5E1' : 'var(--gold-gradient)',
-                    borderColor: effectiveStock === 0 ? '#CBD5E1' : 'var(--color-gold)',
-                    color: effectiveStock === 0 ? '#64748B' : 'var(--color-white)',
-                    cursor: effectiveStock === 0 ? 'not-allowed' : 'pointer',
-                    boxShadow: effectiveStock === 0 ? 'none' : 'var(--shadow-gold)'
-                  }}
-                >
-                  {effectiveStock === 0 ? (
-                    'Out of Stock'
-                  ) : (
-                    <>Add To Cart <i className="fa-solid fa-cart-shopping" style={{ marginLeft: '6px' }}></i></>
-                  )}
-                </button>
-
-                <WishlistButton productId={product.id} style={{ width: '48px', height: '48px', flexShrink: 0 }} />
-              </div>
-
               {/* 4. Customization Available */}
               {(() => {
                 const custItems = (product.customization && product.customization.length > 0)
@@ -420,7 +326,7 @@ export default function ProductDetailTemplate({ product, displayRelated = [] }) 
                 if (custItems.length === 0) return null;
 
                 return (
-                  <div style={{ paddingBottom: '0.8rem', borderBottom: '1px solid var(--color-beige)', marginBottom: '1rem' }}>
+                  <div style={{ paddingBottom: '0.8rem', borderBottom: '1px solid var(--color-beige)' }}>
                     <h5 style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--color-purple)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '0.5rem' }}>
                       Customization Available:
                     </h5>
@@ -444,7 +350,7 @@ export default function ProductDetailTemplate({ product, displayRelated = [] }) 
                 if (delItems.length === 0) return null;
 
                 return (
-                  <div style={{ padding: '0.85rem', background: '#F8F9FA', borderRadius: '8px', border: '1px solid #E9ECEF', marginBottom: '1.5rem' }}>
+                  <div style={{ padding: '0.85rem', background: '#F8F9FA', borderRadius: '8px', border: '1px solid #E9ECEF' }}>
                     <h5 style={{ margin: '0 0 8px 0', fontSize: '0.9rem', color: 'var(--color-charcoal)' }}>
                       <i className="fa-solid fa-truck" style={{ marginRight: '6px', color: 'var(--color-gold)' }}></i> Delivery Information
                     </h5>
@@ -459,7 +365,7 @@ export default function ProductDetailTemplate({ product, displayRelated = [] }) 
 
               <h3 className="customizer-section-title">Personalize Your Hamper</h3>
 
-              {/* 6. Gift Tag Message */}
+              {/* 6. Personalize Your Hamper */}
               {product.customGiftTagEnabled !== false && (
                 <div className="customizer-row">
                   <label className="customizer-label" htmlFor="gift-tag-msg">
@@ -476,7 +382,7 @@ export default function ProductDetailTemplate({ product, displayRelated = [] }) 
                 </div>
               )}
 
-              {/* 7. Add-ons Selection */}
+              {/* Add-ons Selection */}
               {product.addonsEnabled !== false && (
                 <div className="customizer-row" style={{ marginTop: '1rem' }}>
                   <label className="customizer-label" style={{ marginBottom: '8px', display: 'block' }}>
@@ -503,13 +409,67 @@ export default function ProductDetailTemplate({ product, displayRelated = [] }) 
                   </div>
                 </div>
               )}
+              {/* Quantity Selector and Purchase Actions */}
+              <div className="action-row-buying" style={{ display: 'flex', gap: '10px', alignItems: 'center', marginTop: '1.5rem', flexWrap: 'wrap' }}>
+                {/* 7. Quantity Selector */}
+                <div className="qty-picker-detail" style={{ height: '48px', flexShrink: 0 }}>
+                  <button
+                    type="button"
+                    onClick={() => setQuantity(Math.max(5, quantity - 1))}
+                    disabled={effectiveStock === 0 || quantity <= 5}
+                    aria-label="Decrease quantity"
+                  >
+                    <i className="fa-solid fa-minus"></i>
+                  </button>
+                  <span className="qty-value">{effectiveStock === 0 ? 0 : quantity}</span>
+                  <button
+                    type="button"
+                    onClick={() => setQuantity(quantity + 1)}
+                    disabled={effectiveStock === 0 || quantity >= effectiveStock}
+                    aria-label="Increase quantity"
+                  >
+                    <i className="fa-solid fa-plus"></i>
+                  </button>
+                </div>
 
-              {/* 8. Request Customization Button */}
+                {/* 8. Add To Cart Button */}
+                <button
+                  type="button"
+                  onClick={handleAddToBasket}
+                  disabled={effectiveStock === 0}
+                  className="btn btn-primary buy-btn-cart"
+                  style={{ 
+                    flex: 1, 
+                    height: '48px', 
+                    padding: 0, 
+                    minWidth: '150px',
+                    background: effectiveStock === 0 ? '#CBD5E1' : 'var(--gold-gradient)',
+                    borderColor: effectiveStock === 0 ? '#CBD5E1' : 'var(--color-gold)',
+                    color: effectiveStock === 0 ? '#64748B' : 'var(--color-white)',
+                    cursor: effectiveStock === 0 ? 'not-allowed' : 'pointer',
+                    boxShadow: effectiveStock === 0 ? 'none' : 'var(--shadow-gold)'
+                  }}
+                >
+                  {effectiveStock === 0 ? (
+                    'Out of Stock'
+                  ) : (
+                    <>Add To Cart <i className="fa-solid fa-cart-shopping" style={{ marginLeft: '6px' }}></i></>
+                  )}
+                </button>
+
+                {/* 9. Wishlist Button */}
+                <WishlistButton productId={product.id} style={{ width: '48px', height: '48px', flexShrink: 0 }} />
+              </div>
+              <div style={{ marginTop: '0.5rem', fontSize: '0.8rem', color: 'var(--color-charcoal)', fontWeight: '500', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <i className="fa-solid fa-circle-info" style={{ color: 'var(--color-gold)' }}></i> Minimum Order Quantity: 5 Pieces
+              </div>
+
+              {/* 10. Request Customization Button */}
               <button
                 type="button"
                 onClick={handleRequestCustomization}
                 className="modal-customize-btn"
-                style={{ marginTop: '1.5rem', width: '100%' }}
+                style={{ marginTop: '1rem', width: '100%' }}
               >
                 <i className="fa-solid fa-wand-magic-sparkles"></i> Request Customization
               </button>

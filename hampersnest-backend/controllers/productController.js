@@ -169,31 +169,42 @@ const applyWatermarkToProduct = async (product, req) => {
 
   const wmOptions = product.watermarkSettings || { enabled: false };
   const urlObj = new URL(product.image);
-  let originalPath = urlObj.pathname.replace('_watermarked', '');
-  const absoluteOriginalPath = path.join(__dirname, '../public', originalPath);
   
-  if (!fs.existsSync(absoluteOriginalPath)) return false;
+  // Extract base filename (without _watermarked or _original)
+  let baseRelativePath = urlObj.pathname.replace('_watermarked', '').replace('_original', '');
+  
+  const absoluteBasePath = path.join(__dirname, '../public', baseRelativePath);
+  const absoluteOriginalPath = absoluteBasePath.replace('.webp', '_original.webp');
+  
+  // If original backup doesn't exist, but base does, rename base to original to back it up safely
+  if (!fs.existsSync(absoluteOriginalPath) && fs.existsSync(absoluteBasePath)) {
+    await fs.promises.rename(absoluteBasePath, absoluteOriginalPath);
+  }
 
-  const buffer = await fs.promises.readFile(absoluteOriginalPath);
+  // Determine which file to read from: always prefer _original.webp if it exists
+  const sourcePath = fs.existsSync(absoluteOriginalPath) ? absoluteOriginalPath : absoluteBasePath;
+  
+  if (!fs.existsSync(sourcePath)) return false;
+
+  const buffer = await fs.promises.readFile(sourcePath);
   const protocol = req.protocol;
   const host = req.get('host');
   
   if (wmOptions.enabled) {
     const watermarkedBuffer = await generateWatermarkedImage(buffer, {
       enableWatermark: true,
-      watermarkText: wmOptions.text,
-      position: wmOptions.position,
-      opacity: Number(wmOptions.opacity) / 100,
-      size: wmOptions.size
+      position: wmOptions.position || 'Top Left'
     });
     
-    const watermarkedRelativePath = originalPath.replace('.webp', '_watermarked.webp');
-    const absoluteWatermarkedPath = path.join(__dirname, '../public', watermarkedRelativePath);
-    
-    await fs.promises.writeFile(absoluteWatermarkedPath, watermarkedBuffer);
-    product.image = `${protocol}://${host}${watermarkedRelativePath}`;
+    // Save to base path to have cleaner URLs and fulfill V2 requirements
+    await fs.promises.writeFile(absoluteBasePath, watermarkedBuffer);
+    product.image = `${protocol}://${host}${baseRelativePath}`;
   } else {
-    product.image = `${protocol}://${host}${originalPath}`;
+    // If disabled, we might want to restore original to base
+    if (fs.existsSync(absoluteOriginalPath)) {
+      await fs.promises.copyFile(absoluteOriginalPath, absoluteBasePath);
+    }
+    product.image = `${protocol}://${host}${baseRelativePath}`;
   }
   return true;
 };
@@ -372,16 +383,24 @@ export const regenerateWatermark = async (req, res) => {
 
     const wmOptions = product.watermarkSettings || { enabled: false };
     
-    // Extract relative path from URL (e.g. /uploads/products/123/123456_watermarked.webp)
+    // Extract base filename (without _watermarked or _original)
     const urlObj = new URL(product.image);
-    let originalPath = urlObj.pathname.replace('_watermarked', '');
-    const absoluteOriginalPath = path.join(__dirname, '../public', originalPath);
+    let baseRelativePath = urlObj.pathname.replace('_watermarked', '').replace('_original', '');
+    const absoluteBasePath = path.join(__dirname, '../public', baseRelativePath);
+    const absoluteOriginalPath = absoluteBasePath.replace('.webp', '_original.webp');
     
-    if (!fs.existsSync(absoluteOriginalPath)) {
+    // If original backup doesn't exist, but base does, rename base to original to back it up safely
+    if (!fs.existsSync(absoluteOriginalPath) && fs.existsSync(absoluteBasePath)) {
+      await fs.promises.rename(absoluteBasePath, absoluteOriginalPath);
+    }
+
+    const sourcePath = fs.existsSync(absoluteOriginalPath) ? absoluteOriginalPath : absoluteBasePath;
+
+    if (!fs.existsSync(sourcePath)) {
       return res.status(404).json({ message: 'Original image file not found on server' });
     }
 
-    const buffer = await fs.promises.readFile(absoluteOriginalPath);
+    const buffer = await fs.promises.readFile(sourcePath);
     const protocol = req.protocol;
     const host = req.get('host');
     
@@ -389,19 +408,16 @@ export const regenerateWatermark = async (req, res) => {
       // Apply watermark
       const watermarkedBuffer = await generateWatermarkedImage(buffer, {
         enableWatermark: true,
-        watermarkText: wmOptions.text,
-        position: wmOptions.position,
-        opacity: Number(wmOptions.opacity) / 100,
-        size: wmOptions.size
+        position: wmOptions.position || 'Top Left'
       });
       
-      const watermarkedRelativePath = originalPath.replace('.webp', '_watermarked.webp');
-      const absoluteWatermarkedPath = path.join(__dirname, '../public', watermarkedRelativePath);
-      
-      await fs.promises.writeFile(absoluteWatermarkedPath, watermarkedBuffer);
-      product.image = `${protocol}://${host}${watermarkedRelativePath}`;
+      await fs.promises.writeFile(absoluteBasePath, watermarkedBuffer);
+      product.image = `${protocol}://${host}${baseRelativePath}`;
     } else {
-      product.image = `${protocol}://${host}${originalPath}`;
+      if (fs.existsSync(absoluteOriginalPath)) {
+        await fs.promises.copyFile(absoluteOriginalPath, absoluteBasePath);
+      }
+      product.image = `${protocol}://${host}${baseRelativePath}`;
     }
 
     await product.save();

@@ -101,18 +101,11 @@ router.post('/', protect, upload.single('image'), async (req, res) => {
     // Parse watermark options from body or query
     const applyWatermark = req.body.watermarkEnabled === 'true' || req.query.watermarkEnabled === 'true';
     if (applyWatermark) {
-      const watermarkOptions = {
-        enableWatermark: true,
-        watermarkText: req.body.watermarkText || req.query.watermarkText || 'Hampers Nest',
-        position: req.body.watermarkPosition || req.query.watermarkPosition || 'Bottom Right',
-        opacity: parseFloat(req.body.watermarkOpacity || req.query.watermarkOpacity || '0.18'),
-        size: req.body.watermarkSize || req.query.watermarkSize || 'Medium'
-      };
-      
       watermarkedFilename = filename.replace('.webp', '_watermarked.webp');
       
       for (const variant of variants) {
-         variant.watermarkedBuffer = await generateWatermarkedImage(variant.buffer, watermarkOptions);
+         // V2 logic uses official-watermark.png exclusively and ignores text/opacity overrides.
+         variant.watermarkedBuffer = await generateWatermarkedImage(variant.buffer, { enableWatermark: true });
       }
     }
 

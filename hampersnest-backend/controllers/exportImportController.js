@@ -408,11 +408,7 @@ export const importProductImagesZipCommit = async (req, res) => {
 
         if (applyWatermark) {
           const watermarkOptions = {
-            enableWatermark: true,
-            watermarkText: 'Hampers Nest',
-            position: 'Bottom Right',
-            opacity: 0.18,
-            size: 'Medium'
+            enableWatermark: true
           };
           const watermarkedBuffer = await generateWatermarkedImage(webpBuffer, watermarkOptions);
           const watermarkedFilename = filename.replace('.webp', '_watermarked.webp');
