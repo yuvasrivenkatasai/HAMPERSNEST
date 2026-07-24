@@ -166,6 +166,65 @@ export const createProduct = async (req, res) => {
   }
 };
 
+// @desc    Bulk create products
+// @route   POST /api/products/bulk
+// @access  Private/Admin
+export const bulkCreateProducts = async (req, res) => {
+  if (!Array.isArray(req.body)) {
+    return res.status(400).json({ message: 'Payload must be an array of products' });
+  }
+
+  try {
+    const productsToCreate = req.body.map(p => {
+      const uniqueId = p.id || crypto.randomUUID();
+      return {
+        id: uniqueId,
+        name: p.name,
+        sku: p.sku || uniqueId.substring(0, 8).toUpperCase(),
+        price: Number(p.price) || 0,
+        discountPrice: p.discountPrice ? Number(p.discountPrice) : 0,
+        originalPrice: p.originalPrice ? Number(p.originalPrice) : 0,
+        image: p.image || '/assets/hero_banner.png',
+        images: Array.isArray(p.images) ? p.images : [],
+        videoUrls: Array.isArray(p.videoUrls) ? p.videoUrls : [],
+        category: p.category,
+        masterCategory: p.masterCategory || p.category,
+        subCategory: p.subCategory || '',
+        occasion: p.occasion || '',
+        tags: Array.isArray(p.tags) ? p.tags : [],
+        stockQuantity: p.stockQuantity !== undefined ? Number(p.stockQuantity) : 0,
+        rating: p.rating ? Number(p.rating) : 4.5,
+        description: p.description || '',
+        shortDescription: p.shortDescription || '',
+        details: Array.isArray(p.details) ? p.details : [],
+        customization: p.customization || '',
+        shipping: p.shipping || '',
+        watermarkSettings: p.watermarkSettings || { enabled: false },
+        customGiftTagEnabled: !!p.customGiftTagEnabled,
+        customizationText: p.customizationText || '',
+        deliveryInfoText: p.deliveryInfoText || '',
+        addonsEnabled: !!p.addonsEnabled,
+        customAddons: Array.isArray(p.customAddons) ? p.customAddons : [],
+        variants: Array.isArray(p.variants) ? p.variants : [],
+        variantsEnabled: !!p.variantsEnabled,
+        isFeatured: !!p.isFeatured,
+        isActive: p.isActive !== undefined ? !!p.isActive : true
+      };
+    });
+
+    const createdProducts = await Product.bulkCreate(productsToCreate, { validate: true });
+    res.status(201).json({ success: true, count: createdProducts.length });
+  } catch (error) {
+    console.error('================ PRODUCT BULK CREATE ERROR ================');
+    console.error(error);
+    if (error.parent) {
+      console.error('Parent error details:', error.parent);
+    }
+    console.error('======================================================');
+    res.status(500).json({ message: error.message });
+  }
+};
+
 const applyWatermarkToProduct = async (product, req) => {
   if (!product.image) return false;
 

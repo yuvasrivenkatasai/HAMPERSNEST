@@ -3,6 +3,7 @@ import {
   getProducts, 
   getProductById, 
   createProduct, 
+  bulkCreateProducts,
   updateProduct, 
   deleteProduct,
   bulkDeleteProducts,
@@ -47,6 +48,7 @@ router.post('/:id/click', incrementProductClicks);
 
 // Protected routes (requires 'products' permission)
 router.post('/', protect, requirePermission('products'), createProduct);
+router.post('/bulk', protect, requirePermission('products'), bulkCreateProducts);
 router.post('/bulk-update', protect, requirePermission('products'), bulkUpdateProducts);
 router.post('/bulk-variants', protect, requirePermission('products'), bulkUpdateVariants);
 router.post('/bulk-watermark', protect, requirePermission('products'), bulkWatermarkProducts);

@@ -103,8 +103,7 @@ export default function BulkImportWizard({ isOpen, onClose, categories, setCateg
           
           if (!zipFilesMap[dirPath]) zipFilesMap[dirPath] = {};
           
-          const blob = await fileInfo.async("blob");
-          zipFilesMap[dirPath][fileName] = new File([blob], fileName, { type: getMimeType(fileName) });
+          zipFilesMap[dirPath][fileName] = { fileInfo, fileName, type: getMimeType(fileName) };
         }
       }
       
@@ -405,116 +404,133 @@ export default function BulkImportWizard({ isOpen, onClose, categories, setCateg
       }
       setProgressPercent(25);
 
-      // 3. Import Products
+      // 3. Import Products (Stream & Batch Architecture)
       const totalProds = parsedProductsRef.current.length;
+      const batchSize = 100; // Batch size to optimize database locking & memory
       
-      for (let i = 0; i < totalProds; i++) {
-        const pData = parsedProductsRef.current[i];
+      for (let batchStart = 0; batchStart < totalProds; batchStart += batchSize) {
+        const batchEnd = Math.min(batchStart + batchSize, totalProds);
+        const batchItems = parsedProductsRef.current.slice(batchStart, batchEnd);
         
-        setProgressMsg(`Processing Product ${i+1} of ${totalProds}: ${pData.name}`);
-        setProgressPercent(25 + Math.round((i / totalProds) * 70));
+        setProgressMsg(`Processing Batch ${Math.floor(batchStart/batchSize) + 1}... (${batchStart} to ${batchEnd} of ${totalProds})`);
+        setProgressPercent(25 + Math.round((batchStart / totalProds) * 70));
 
-        if (pData._action === 'SKIP' || pData._status === 'FAILED') {
-          if (pData._status === 'FAILED') errCount++;
-          else skipCount++;
-          continue;
-        }
+        let batchPayloadsToCreate = [];
+        
+        for (const pData of batchItems) {
+          if (pData._action === 'SKIP' || pData._status === 'FAILED') {
+            if (pData._status === 'FAILED') errCount++;
+            else skipCount++;
+            continue;
+          }
 
-        try {
-          // Resolve Category IDs
-          const pCat = localCategories.find(c => c.name.toLowerCase() === pData._categoryName.toLowerCase() && !c.parentId);
-          const pSubcat = pData._subcategoryName ? localCategories.find(c => c.parentId === pCat?.id && c.name.toLowerCase() === pData._subcategoryName.toLowerCase()) : null;
+          try {
+            // Resolve Category IDs
+            const pCat = localCategories.find(c => c.name.toLowerCase() === pData._categoryName.toLowerCase() && !c.parentId);
+            const pSubcat = pData._subcategoryName ? localCategories.find(c => c.parentId === pCat?.id && c.name.toLowerCase() === pData._subcategoryName.toLowerCase()) : null;
 
-          if (!pCat) throw new Error(`Category ${pData._categoryName} not found.`);
+            if (!pCat) throw new Error(`Category ${pData._categoryName} not found.`);
 
-          // Upload Media
-          let coverUrl = '';
-          let galleryUrls = [];
-          let videoUrls = [];
+            // Upload Media (Lazy Blob Extraction)
+            let coverUrl = '';
+            let galleryUrls = [];
+            let videoUrls = [];
 
-          const media = pData._media;
-          
-          if (media) {
-             // We can upload in parallel using Promise.all for speed
-             const uploadPromises = [];
+            const media = pData._media;
+            
+            if (media) {
+               const uploadPromises = [];
 
-             const uploadFile = async (file, type) => {
-               const formDataObj = new FormData();
-               formDataObj.append(type === 'video' ? 'video' : 'image', file);
-               
-               let uploadUrl = type === 'video' 
-                 ? `${API_BASE}/api/upload/video?folder=products` 
-                 : `${API_BASE}/api/upload?folder=products&watermarkEnabled=true`; // Auto watermark
+               const uploadFile = async (fileObj, type) => {
+                 let file = fileObj;
+                 // Perform lazy extraction directly before upload
+                 if (fileObj && fileObj.fileInfo) {
+                     const blob = await fileObj.fileInfo.async("blob");
+                     file = new File([blob], fileObj.fileName, { type: fileObj.type });
+                 }
+
+                 const formDataObj = new FormData();
+                 formDataObj.append(type === 'video' ? 'video' : 'image', file);
                  
-               const res = await fetch(uploadUrl, {
-                 method: 'POST',
-                 headers: { ...(token ? { 'Authorization': `Bearer ${token}` } : {}) },
-                 body: formDataObj
+                 let uploadUrl = type === 'video' 
+                   ? `${API_BASE}/api/upload/video?folder=products` 
+                   : `${API_BASE}/api/upload?folder=products&watermarkEnabled=true`; // Auto watermark
+                   
+                 const res = await fetch(uploadUrl, {
+                   method: 'POST',
+                   headers: { ...(token ? { 'Authorization': `Bearer ${token}` } : {}) },
+                   body: formDataObj
+                 });
+                 if (!res.ok) throw new Error('Upload failed');
+                 const data = await res.json();
+                 return data.watermarkedUrl || data.url;
+               };
+
+               if (media.cover) uploadPromises.push(uploadFile(media.cover, 'image').then(url => coverUrl = url));
+               media.gallery.forEach(g => uploadPromises.push(uploadFile(g, 'image').then(url => galleryUrls.push(url))));
+               media.videos.forEach(v => uploadPromises.push(uploadFile(v, 'video').then(url => videoUrls.push(url))));
+
+               await Promise.allSettled(uploadPromises);
+            }
+
+            const payload = {
+              id: pData._action === 'UPDATE' ? pData._existingId : generateUUID(),
+              name: pData.name,
+              sku: pData.sku,
+              price: pData.price,
+              originalPrice: pData.originalPrice,
+              category: pCat.id,
+              subCategory: pSubcat ? pSubcat.id : '',
+              description: pData.description,
+              shortDescription: pData.shortDescription,
+              rating: pData.rating,
+              moq: pData.moq,
+              stock: pData.stock,
+              isActive: pData.isActive,
+              isFeatured: pData.isFeatured,
+              customGiftTagEnabled: pData.customGiftTagEnabled,
+              customizationText: pData.customizationText,
+              deliveryInfoText: pData.deliveryInfoText,
+              variantsEnabled: pData.variantsEnabled,
+              variants: pData.variants,
+              addonsEnabled: pData.addonsEnabled,
+              customAddons: pData.customAddons,
+            };
+            
+            if (coverUrl || galleryUrls.length > 0) {
+               payload.image = coverUrl || (galleryUrls.length > 0 ? galleryUrls[0] : '/assets/hero_banner.png');
+               payload.images = galleryUrls;
+            }
+            if (videoUrls.length > 0) {
+               payload.videoUrls = videoUrls;
+            }
+
+            if (pData._action === 'UPDATE') {
+               await apiRequest(`/api/products/${pData._existingId}`, {
+                 method: 'PUT',
+                 body: payload
                });
-               if (!res.ok) throw new Error('Upload failed');
-               const data = await res.json();
-               return data.watermarkedUrl || data.url;
-             };
-
-             if (media.cover) uploadPromises.push(uploadFile(media.cover, 'image').then(url => coverUrl = url));
-             media.gallery.forEach(g => uploadPromises.push(uploadFile(g, 'image').then(url => galleryUrls.push(url))));
-             media.videos.forEach(v => uploadPromises.push(uploadFile(v, 'video').then(url => videoUrls.push(url))));
-
-             await Promise.allSettled(uploadPromises);
+               updatedCount++;
+            } else {
+               batchPayloadsToCreate.push(payload);
+            }
+          } catch (err) {
+             errCount++;
+             currentErrors.push(`[${pData.name}] ${err.message}`);
           }
+        } // End of inner batch loop
 
-          // Construct Payload matching Existing API
-          const payload = {
-            id: pData._action === 'UPDATE' ? pData._existingId : generateUUID(),
-            name: pData.name,
-            sku: pData.sku,
-            price: pData.price,
-            originalPrice: pData.originalPrice,
-            category: pCat.id,
-            subCategory: pSubcat ? pSubcat.id : '',
-            description: pData.description,
-            shortDescription: pData.shortDescription,
-            rating: pData.rating,
-            moq: pData.moq,
-            stock: pData.stock,
-            isActive: pData.isActive,
-            isFeatured: pData.isFeatured,
-            customGiftTagEnabled: pData.customGiftTagEnabled,
-            customizationText: pData.customizationText,
-            deliveryInfoText: pData.deliveryInfoText,
-            variantsEnabled: pData.variantsEnabled,
-            variants: pData.variants,
-            addonsEnabled: pData.addonsEnabled,
-            customAddons: pData.customAddons,
-          };
-          
-          // Only override media if new media was found in ZIP, otherwise keep existing on UPDATE
-          if (coverUrl || galleryUrls.length > 0) {
-             payload.image = coverUrl || (galleryUrls.length > 0 ? galleryUrls[0] : '/assets/hero_banner.png');
-             payload.images = galleryUrls;
+        if (batchPayloadsToCreate.length > 0) {
+          try {
+            await apiRequest('/api/products/bulk', {
+              method: 'POST',
+              body: batchPayloadsToCreate
+            });
+            createdCount += batchPayloadsToCreate.length;
+          } catch (bulkErr) {
+            errCount += batchPayloadsToCreate.length;
+            currentErrors.push(`Bulk Insert Failed for ${batchPayloadsToCreate.length} items: ${bulkErr.message}`);
           }
-          if (videoUrls.length > 0) {
-             payload.videoUrls = videoUrls;
-          }
-
-          // Call Existing Product Service
-          if (pData._action === 'UPDATE') {
-             await apiRequest(`/api/products/${pData._existingId}`, {
-               method: 'PUT',
-               body: payload
-             });
-             updatedCount++;
-          } else {
-             await apiRequest('/api/products', {
-               method: 'POST',
-               body: payload
-             });
-             createdCount++;
-          }
-
-        } catch (err) {
-           errCount++;
-           currentErrors.push(`[${pData.name}] ${err.message}`);
         }
       }
 
