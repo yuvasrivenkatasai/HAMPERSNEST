@@ -276,9 +276,17 @@ export default function ProductDetailTemplate({ product, displayRelated = [] }) 
 
               {/* Product Size Variants UI */}
               {product.variantsEnabled && Array.isArray(product.variants) && product.variants.length > 0 && (
-                <div className="product-variants-container" style={{ marginBottom: '1.5rem', marginTop: '1rem' }}>
-                  <h4 style={{ fontSize: '0.9rem', marginBottom: '8px', color: 'var(--color-charcoal)' }}>Select Size:</h4>
-                  <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                <div className="product-variants-container" style={{ marginBottom: '1rem', marginTop: '0.75rem' }}>
+                  <h4 style={{ fontSize: '0.9rem', marginBottom: '12px', color: 'var(--color-charcoal)' }}>Select Size:</h4>
+                  <div style={{ 
+                    display: 'flex', 
+                    gap: '12px', 
+                    flexWrap: 'nowrap',
+                    overflowX: 'auto',
+                    paddingBottom: '8px',
+                    WebkitOverflowScrolling: 'touch',
+                    scrollbarWidth: 'none'
+                  }}>
                     {product.variants.map((variant) => {
                       const isSelected = selectedVariant && selectedVariant.id === variant.id;
                       const isOutOfStock = variant.stock === 0;
@@ -288,22 +296,51 @@ export default function ProductDetailTemplate({ product, displayRelated = [] }) 
                           onClick={() => !isOutOfStock && setSelectedVariant(variant)}
                           disabled={isOutOfStock}
                           style={{
-                            padding: '8px 16px',
-                            borderRadius: '50px',
-                            border: `2px solid ${isSelected ? 'var(--color-gold)' : '#e0e0e0'}`,
-                            background: isSelected ? 'var(--color-gold-light)' : '#fff',
-                            color: isSelected ? 'var(--color-charcoal)' : '#555',
-                            fontWeight: isSelected ? '600' : '500',
+                            flex: '0 0 auto',
+                            width: '120px',
+                            height: '80px',
+                            borderRadius: '12px',
+                            border: `1px solid ${isSelected ? 'var(--color-gold)' : '#e0e0e0'}`,
+                            background: isSelected ? 'var(--color-ivory)' : '#fff',
+                            color: 'var(--color-charcoal)',
                             cursor: isOutOfStock ? 'not-allowed' : 'pointer',
                             opacity: isOutOfStock ? 0.5 : 1,
                             transition: 'all 0.3s ease',
                             display: 'flex',
                             flexDirection: 'column',
                             alignItems: 'center',
-                            minWidth: '80px'
+                            justifyContent: 'center',
+                            position: 'relative',
+                            boxShadow: isSelected ? '0 4px 15px rgba(200, 169, 107, 0.2)' : '0 2px 5px rgba(0,0,0,0.03)',
+                            transform: isSelected ? 'translateY(-2px)' : 'none',
+                          }}
+                          onMouseEnter={(e) => {
+                             if (!isOutOfStock && !isSelected) {
+                                e.currentTarget.style.transform = 'translateY(-2px)';
+                                e.currentTarget.style.boxShadow = '0 4px 10px rgba(0,0,0,0.08)';
+                                e.currentTarget.style.borderColor = 'var(--color-gold)';
+                             }
+                          }}
+                          onMouseLeave={(e) => {
+                             if (!isOutOfStock && !isSelected) {
+                                e.currentTarget.style.transform = 'none';
+                                e.currentTarget.style.boxShadow = '0 2px 5px rgba(0,0,0,0.03)';
+                                e.currentTarget.style.borderColor = '#e0e0e0';
+                             }
                           }}
                         >
-                          <span>{variant.name}</span>
+                          {isSelected && (
+                            <i className="fa-solid fa-check" style={{
+                              position: 'absolute',
+                              top: '6px',
+                              right: '6px',
+                              color: 'var(--color-gold)',
+                              fontSize: '0.75rem'
+                            }}></i>
+                          )}
+                          <i className="fa-solid fa-gift" style={{ color: 'var(--color-gold)', marginBottom: '4px', fontSize: '1.1rem' }}></i>
+                          <span style={{ fontSize: '0.85rem', fontWeight: isSelected ? '600' : '500', marginBottom: '2px' }}>{variant.name}</span>
+                          <span style={{ fontSize: '0.8rem', color: isSelected ? 'var(--color-gold-dark)' : '#666', fontWeight: '500' }}>₹{variant.price}</span>
                         </button>
                       );
                     })}
@@ -330,11 +367,11 @@ export default function ProductDetailTemplate({ product, displayRelated = [] }) 
                   border: '1px solid var(--color-gold-light)',
                   borderRadius: '12px',
                   padding: '16px',
-                  marginBottom: '1.5rem',
+                  marginBottom: '1rem',
                   boxShadow: '0 2px 8px rgba(0,0,0,0.02)'
                 }}>
                   <h4 style={{ 
-                    margin: '0 0 12px 0', 
+                    margin: '0 0 8px 0', 
                     color: 'var(--color-purple)', 
                     fontSize: '0.95rem',
                     textAlign: 'center'
@@ -363,7 +400,7 @@ export default function ProductDetailTemplate({ product, displayRelated = [] }) 
               )}
 
               {/* 3. Quantity Selector and Purchase Actions */}
-              <div className="action-row-buying" style={{ display: 'flex', gap: '10px', alignItems: 'center', marginBottom: '2rem', flexWrap: 'wrap' }}>
+              <div className="action-row-buying" style={{ display: 'flex', gap: '10px', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap' }}>
                 <div className="qty-picker-detail" style={{ height: '48px', flexShrink: 0 }}>
                   <button
                     type="button"
@@ -411,55 +448,63 @@ export default function ProductDetailTemplate({ product, displayRelated = [] }) 
                 <WishlistButton productId={product.id} style={{ width: '48px', height: '48px', flexShrink: 0 }} />
               </div>
 
-              {/* 4. Customization Available */}
-              {(() => {
-                const custItems = (product.customization && product.customization.length > 0)
-                  ? product.customization
-                  : (product.customizationText ? product.customizationText.split('\n').map(i => i.trim()).filter(Boolean) : []);
+              </div>
+          </div>
+        </div>
 
-                if (custItems.length === 0) return null;
+        {/* --- DESKTOP GRID --- */}
+        <div className="product-secondary-info-grid">
+          {/* 4. Customization Available */}
+          {(() => {
+            const custItems = (product.customization && product.customization.length > 0)
+              ? product.customization
+              : (product.customizationText ? product.customizationText.split('\n').map(i => i.trim()).filter(Boolean) : []);
 
-                return (
-                  <div style={{ paddingBottom: '0.8rem', borderBottom: '1px solid var(--color-beige)', marginBottom: '1rem' }}>
-                    <h5 style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--color-purple)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '0.5rem' }}>
-                      Customization Available:
-                    </h5>
-                    <div className="modal-features-grid customization-features-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
-                      {custItems.map((feat, idx) => (
-                        <span key={idx} style={{ fontSize: '0.85rem', color: '#555', display: 'flex', alignItems: 'flex-start', gap: '8px', lineHeight: '1.4' }}>
-                          <i className="fa-solid fa-check" style={{ color: 'var(--color-gold)', flexShrink: 0, marginTop: '3px' }}></i> {feat}
-                        </span>
-                      ))}
-                    </div>
+            if (custItems.length === 0) return null;
+
+            return (
+              <div className="secondary-info-card">
+                <h5 style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--color-purple)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '1rem', marginTop: 0 }}>
+                  Customization Available:
+                </h5>
+                <div className="modal-features-grid customization-features-grid" style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '8px' }}>
+                  {custItems.map((feat, idx) => (
+                    <span key={idx} style={{ fontSize: '0.85rem', color: '#555', display: 'flex', alignItems: 'flex-start', gap: '8px', lineHeight: '1.4' }}>
+                      <i className="fa-solid fa-check" style={{ color: 'var(--color-gold)', flexShrink: 0, marginTop: '3px' }}></i> {feat}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            );
+          })()}
+
+          {/* 5. Delivery Information */}
+          {(() => {
+            const delItems = (product.shipping && product.shipping.length > 0)
+              ? product.shipping
+              : (product.deliveryInfoText ? product.deliveryInfoText.split('\n').map(i => i.trim()).filter(Boolean) : []);
+
+            if (delItems.length === 0) return null;
+
+            return (
+              <div className="secondary-info-card">
+                <h5 style={{ margin: '0 0 1rem 0', fontSize: '0.9rem', color: 'var(--color-charcoal)' }}>
+                  <i className="fa-solid fa-truck" style={{ marginRight: '6px', color: 'var(--color-gold)' }}></i> Delivery Information
+                </h5>
+                {delItems.map((item, idx) => (
+                  <div key={idx} style={{ fontSize: '0.85rem', color: '#666', lineHeight: '1.5', display: 'flex', alignItems: 'flex-start', gap: '8px', marginBottom: '4px' }}>
+                    <i className="fa-solid fa-truck-fast" style={{ fontSize: '0.75rem', marginTop: '4px', color: '#999' }}></i> {item}
                   </div>
-                );
-              })()}
+                ))}
+              </div>
+            );
+          })()}
 
-              {/* 5. Delivery Information */}
-              {(() => {
-                const delItems = (product.shipping && product.shipping.length > 0)
-                  ? product.shipping
-                  : (product.deliveryInfoText ? product.deliveryInfoText.split('\n').map(i => i.trim()).filter(Boolean) : []);
-
-                if (delItems.length === 0) return null;
-
-                return (
-                  <div style={{ padding: '0.85rem', background: '#F8F9FA', borderRadius: '8px', border: '1px solid #E9ECEF', marginBottom: '1.5rem' }}>
-                    <h5 style={{ margin: '0 0 8px 0', fontSize: '0.9rem', color: 'var(--color-charcoal)' }}>
-                      <i className="fa-solid fa-truck" style={{ marginRight: '6px', color: 'var(--color-gold)' }}></i> Delivery Information
-                    </h5>
-                    {delItems.map((item, idx) => (
-                      <div key={idx} style={{ fontSize: '0.85rem', color: '#666', lineHeight: '1.5', display: 'flex', alignItems: 'flex-start', gap: '8px', marginBottom: '4px' }}>
-                        <i className="fa-solid fa-truck-fast" style={{ fontSize: '0.75rem', marginTop: '4px', color: '#999' }}></i> {item}
-                      </div>
-                    ))}
-                  </div>
-                );
-              })()}
-
-              <h3 className="customizer-section-title">Personalize Your Hamper</h3>
-
-              {/* 6. Gift Tag Message */}
+          {/* 6. Personalize Your Hamper */}
+          {(product.customGiftTagEnabled !== false || product.addonsEnabled !== false || true) && (
+            <div className="secondary-info-card">
+              <h3 className="customizer-section-title" style={{ fontSize: '1rem' }}>Personalize Your Hamper</h3>
+              
               {product.customGiftTagEnabled !== false && (
                 <div className="customizer-row">
                   <label className="customizer-label" htmlFor="gift-tag-msg">
@@ -476,7 +521,6 @@ export default function ProductDetailTemplate({ product, displayRelated = [] }) 
                 </div>
               )}
 
-              {/* 7. Add-ons Selection */}
               {product.addonsEnabled !== false && (
                 <div className="customizer-row" style={{ marginTop: '1rem' }}>
                   <label className="customizer-label" style={{ marginBottom: '8px', display: 'block' }}>
@@ -504,19 +548,16 @@ export default function ProductDetailTemplate({ product, displayRelated = [] }) 
                 </div>
               )}
 
-              {/* 8. Request Customization Button */}
               <button
                 type="button"
                 onClick={handleRequestCustomization}
                 className="modal-customize-btn"
-                style={{ marginTop: '1.5rem', width: '100%' }}
+                style={{ marginTop: 'auto', width: '100%', paddingTop: '12px', paddingBottom: '12px', alignSelf: 'flex-start' }}
               >
                 <i className="fa-solid fa-wand-magic-sparkles"></i> Request Customization
               </button>
             </div>
-
-
-          </div>
+          )}
         </div>
 
         {/* 11. Related Products */}

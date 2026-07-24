@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { apiRequest, API_BASE } from '../utils/api';
+import PriceRangeManager from './PriceRangeManager';
 
 export default function CategoryShowcaseManager() {
   const [showcases, setShowcases] = useState([]);
@@ -413,6 +414,11 @@ export default function CategoryShowcaseManager() {
           </div>
         </div>
       )}
+
+      {/* Price Range Manager Section */}
+      <div style={{ marginTop: '2rem' }}>
+        <PriceRangeManager />
+      </div>
     </div>
   );
 }

@@ -318,9 +318,9 @@ const PremiumProductGallery = memo(({ product }) => {
         )}
       </div>
 
-      {/* Mobile Pagination Dots */}
-      {isMobile && allMedia.length > 1 && (
-        <div className="mobile-dots">
+      {/* Pagination Dots */}
+      {allMedia.length > 1 && (
+        <div className="mobile-dots" style={{ marginBottom: '8px' }}>
           {allMedia.map((_, idx) => (
             <span 
               key={idx} 

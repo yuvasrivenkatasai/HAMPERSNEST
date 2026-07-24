@@ -32,7 +32,22 @@ export default function Collections() {
   const [searchQuery, setSearchQuery] = useState(savedState?.searchQuery || '');
   const [sortBy, setSortBy] = useState(savedState?.sortBy || 'featured');
   const [currentPage, setCurrentPage] = useState(savedState?.currentPage || 1);
+  const [showPopularSearches, setShowPopularSearches] = useState(false);
+  const [hasScrolledCategories, setHasScrolledCategories] = useState(false);
+  const [scrollProgress, setScrollProgress] = useState(0);
+
+  const handleCategoryScroll = (e) => {
+    if (!hasScrolledCategories) {
+      setHasScrolledCategories(true);
+    }
+    const { scrollLeft, scrollWidth, clientWidth } = e.target;
+    if (scrollWidth > clientWidth) {
+      const progress = (scrollLeft / (scrollWidth - clientWidth)) * 100;
+      setScrollProgress(progress);
+    }
+  };
   const productsGridRef = React.useRef(null);
+  const subcategoriesRef = React.useRef(null);
   const isInitialMount = React.useRef(true);
 
   useEffect(() => {
@@ -156,16 +171,30 @@ export default function Collections() {
   }, [searchQuery, sortBy]);
 
   // Handle category tab click & update URL params
-  const handleCategoryChange = (category) => {
-    setActiveCategory(category);
+  const handleCategoryChange = (catId) => {
+    setActiveCategory(catId);
     setActiveSubcategory(null);
     setCurrentPage(1);
-    if (category === 'All') {
-      searchParams.delete('category');
+    setSearchQuery('');
+    
+    if (catId !== 'All') {
+      searchParams.set('category', catId);
+      setSearchParams(searchParams);
+      setTimeout(() => {
+        if (subcategoriesRef.current) {
+          const yOffset = -90; // Just below the sticky header
+          const y = subcategoriesRef.current.getBoundingClientRect().top + window.pageYOffset + yOffset;
+          window.scrollTo({ top: y, behavior: 'smooth' });
+        } else if (productsGridRef.current) {
+          const yOffset = -90;
+          const y = productsGridRef.current.getBoundingClientRect().top + window.pageYOffset + yOffset;
+          window.scrollTo({ top: y, behavior: 'smooth' });
+        }
+      }, 100);
     } else {
-      searchParams.set('category', category);
+      searchParams.delete('category');
+      setSearchParams(searchParams);
     }
-    setSearchParams(searchParams);
   };
 
   const handleSubcategoryChange = (subcatId) => {
@@ -321,7 +350,7 @@ export default function Collections() {
         schema={collectionSchema}
       />
       {/* Header Banner */}
-      <div className="page-header-banner">
+      <div className="page-header-banner mobile-compact-hero" style={{ padding: '2.5rem 0' }}>
         <div className="container" style={{ padding: 0 }}>
           <span className="section-subtitle" style={{ marginBottom: '0.5rem' }}>Premium Gifting</span>
           <h2>{collectionHeaderTitle}</h2>
@@ -330,43 +359,64 @@ export default function Collections() {
           </p>
 
           {/* Top Banner SEO Tags */}
-          <div className="trending-tags-banner">
-            <span className="trending-label">Popular Searches:</span>
-            {popularSearches.length > 0 ? popularSearches.map(term => (
-              <button key={term} onClick={() => handleHashtagClick(term)} className="trending-tag-btn">#{term}</button>
-            )) : (
-              <>
-                <button onClick={() => handleHashtagClick('WeddingReturnGifts')} className="trending-tag-btn">#WeddingReturnGifts</button>
-                <button onClick={() => handleHashtagClick('BabyShowerHampers')} className="trending-tag-btn">#BabyShowerHampers</button>
-                <button onClick={() => handleHashtagClick('CorporateGifts')} className="trending-tag-btn">#CorporateGifts</button>
-              </>
-            )}
+          <div className={`trending-tags-banner ${showPopularSearches ? '' : 'mobile-hide-tags'}`}>
+            <button 
+              className="mobile-show-tags-btn" 
+              onClick={() => setShowPopularSearches(!showPopularSearches)}
+            >
+              {showPopularSearches ? 'Hide Popular Searches' : 'Show Popular Searches'}
+            </button>
+            <div className="popular-searches-container">
+              <span className="trending-label">Popular Searches:</span>
+              {popularSearches.length > 0 ? popularSearches.map(term => (
+                <button key={term} onClick={() => handleHashtagClick(term)} className="trending-tag-btn">#{term}</button>
+              )) : (
+                <>
+                  <button onClick={() => handleHashtagClick('WeddingReturnGifts')} className="trending-tag-btn">#WeddingReturnGifts</button>
+                  <button onClick={() => handleHashtagClick('BabyShowerHampers')} className="trending-tag-btn">#BabyShowerHampers</button>
+                  <button onClick={() => handleHashtagClick('CorporateGifts')} className="trending-tag-btn">#CorporateGifts</button>
+                </>
+              )}
+            </div>
           </div>
         </div>
       </div>
 
-      <div className="container" style={{ paddingTop: '1rem' }}>
+      <div className="container" style={{ paddingTop: '8px' }}>
         <Breadcrumbs customCrumbs={[
           { name: 'Collections', path: '/collections' },
           ...(activeCategory !== 'All' ? [{ name: getCategoryLabel(activeCategory), path: `/collections?category=${activeCategory}` }] : [])
         ]} />
 
-        {/* === MASTER CATEGORY TABS === */}
-        <div className="category-tabs reveal" style={{ display: 'flex', justifyContent: 'center', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
-          {mainCategories.map((cat) => (
-            <button
-              key={cat.id}
-              onClick={() => handleCategoryChange(cat.id)}
-              className={`category-tab ${activeCategory === cat.id ? 'active' : ''}`}
-            >
-              {cat.label}
-            </button>
-          ))}
+        <div className="mobile-sticky-category-wrapper mobile-sticky-category">
+          {/* Top Right Arrow Indicator */}
+          <div className={`mobile-scroll-arrow d-md-none ${hasScrolledCategories ? 'fade-out' : ''}`}>
+            <i className="fa-solid fa-angles-right"></i>
+          </div>
+
+          <div ref={subcategoriesRef} onScroll={handleCategoryScroll} className="category-tabs reveal mobile-horizontal-scroll" style={{ display: 'flex', justifyContent: 'flex-start', marginBottom: '4px', flexWrap: 'wrap', position: 'relative' }}>
+            {mainCategories.map((cat) => (
+              <button
+                key={cat.id}
+                onClick={() => handleCategoryChange(cat.id)}
+                className={`category-tab ${activeCategory === cat.id ? 'active' : ''}`}
+              >
+                {cat.label}
+              </button>
+            ))}
+          </div>
+          
+          {/* Custom Scroll Progress Line */}
+          <div className="mobile-scroll-progress-container d-md-none">
+            <div className="mobile-scroll-progress-track">
+              <div className="mobile-scroll-progress-thumb" style={{ left: `${scrollProgress}%`, transform: `translateX(-${scrollProgress}%)` }}></div>
+            </div>
+          </div>
         </div>
 
         {/* === SUBCATEGORY CHIPS === */}
-        {activeSubcategoriesList.length > 0 && (
-          <div className="subcategory-chips reveal" style={{ display: 'flex', justifyContent: 'center', gap: '10px', flexWrap: 'wrap', marginBottom: '2rem' }}>
+        {activeSubcategoriesList.length > 0 && activeCategory !== 'All' && (
+          <div className="subcategory-chips reveal mobile-horizontal-scroll" style={{ display: 'flex', justifyContent: 'center', gap: '10px', flexWrap: 'wrap', marginBottom: '16px' }}>
             {activeSubcategoriesList.map(subcat => (
               <button
                 key={subcat.id}
@@ -400,7 +450,7 @@ export default function Collections() {
         )}
 
         {/* === SEARCH + SORT BAR === */}
-        <div className="filter-bar reveal" ref={productsGridRef} style={{ marginBottom: '1.5rem' }}>
+        <div className="filter-bar reveal mobile-merged-filter" ref={productsGridRef} style={{ marginBottom: '12px' }}>
           <div className="search-input-wrapper">
             <i className="fa-solid fa-magnifying-glass"></i>
             <input
@@ -427,7 +477,7 @@ export default function Collections() {
 
         {/* Results Counter */}
         <div
-          style={{ marginBottom: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', color: '#666', fontSize: '0.85rem' }}
+          style={{ marginBottom: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', color: '#666', fontSize: '0.85rem' }}
           className="reveal-heading results-counter-bar"
         >
           <span>Showing {paginatedProducts.length} of {filteredProducts.length} products</span>

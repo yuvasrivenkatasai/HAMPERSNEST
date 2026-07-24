@@ -2,16 +2,20 @@ import React, { useState } from 'react';
 import { generateCatalogPdf } from '../utils/pdfGenerator';
 
 export default function CatalogExportModal({ isOpen, onClose, products, categories, selectedProductIds }) {
+  // Export Selection (Independent)
   const [exportMode, setExportMode] = useState(selectedProductIds?.length > 0 ? 'SELECTED' : 'ALL');
+  
+  // Sort By (Independent)
+  const [sortBy, setSortBy] = useState('NAME_ASC');
+  
+  // Category & Subcategory filtering (Appears only when Sort By = Category)
   const [selectedCategory, setSelectedCategory] = useState('');
   const [selectedSubcategory, setSelectedSubcategory] = useState('');
   
-  // Sort and Display Options
-  const [sortBy, setSortBy] = useState('NAME_ASC');
+  // Display Options
   const [showPrice, setShowPrice] = useState(true);
   const [showDescription, setShowDescription] = useState(true);
   const [showSpecs, setShowSpecs] = useState(false);
-  const [useWatermark, setUseWatermark] = useState(false);
   
   const [generating, setGenerating] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -22,42 +26,48 @@ export default function CatalogExportModal({ isOpen, onClose, products, categori
     setGenerating(true);
     setProgress(0);
 
+    // 1. Filter by Export Selection
     let filteredProducts = products;
     if (exportMode === 'SELECTED') {
       filteredProducts = products.filter(p => selectedProductIds.includes(p.id));
-    } else if (exportMode === 'CATEGORY' && selectedCategory) {
-      filteredProducts = products.filter(p => p.category === selectedCategory);
-    } else if (exportMode === 'SUBCATEGORY' && selectedSubcategory) {
-      filteredProducts = products.filter(p => p.subCategory === selectedSubcategory);
+    } else if (exportMode === 'FEATURED') {
+      filteredProducts = products.filter(p => p.isFeatured === true || p.featured === true);
+    } else if (exportMode === 'IN_STOCK') {
+      filteredProducts = products.filter(p => p.stock > 0 || (p.variants && p.variants.some(v => v.stock > 0)));
+    } else if (exportMode === 'OUT_OF_STOCK') {
+      filteredProducts = products.filter(p => p.stock <= 0 && (!p.variants || !p.variants.some(v => v.stock > 0)));
+    }
+
+    // 2. Filter by Category / Subcategory if Sort By = Category
+    if (sortBy === 'CATEGORY') {
+      if (selectedCategory) {
+        filteredProducts = filteredProducts.filter(p => p.category === selectedCategory || p.categoryId === selectedCategory);
+      }
+      if (selectedSubcategory) {
+        filteredProducts = filteredProducts.filter(p => p.subCategory === selectedSubcategory || p.subcategoryId === selectedSubcategory);
+      }
     }
 
     if (filteredProducts.length === 0) {
-      alert('No products found for the selected criteria.');
+      alert('No products available for the selected filters.');
       setGenerating(false);
       return;
     }
 
     // Attach human readable categories if possible
-    let enrichedProducts = filteredProducts.map(p => ({
-      ...p,
-      categoryName: categories.find(c => c.id === p.category)?.name || p.category
-    }));
-
-    // Apply Sorting
-    enrichedProducts.sort((a, b) => {
-      if (sortBy === 'NAME_ASC') {
-        return a.name.localeCompare(b.name);
-      } else if (sortBy === 'PRICE_ASC') {
-        return a.price - b.price;
-      } else if (sortBy === 'PRICE_DESC') {
-        return b.price - a.price;
-      } else if (sortBy === 'CATEGORY') {
-        const catA = a.categoryName || '';
-        const catB = b.categoryName || '';
-        if (catA === catB) return a.name.localeCompare(b.name);
-        return catA.localeCompare(catB);
+    let enrichedProducts = filteredProducts.map(p => {
+      const catObj = categories.find(c => c.id === p.category);
+      let catName = catObj?.name || p.category;
+      let subcatName = p.subCategory;
+      if (catObj && catObj.subcategories) {
+        const subcatObj = catObj.subcategories.find(sc => sc.id === p.subCategory);
+        if (subcatObj) subcatName = subcatObj.name;
       }
-      return 0;
+      return {
+        ...p,
+        categoryName: catName,
+        subcategoryName: subcatName || p.subCategory
+      };
     });
 
     try {
@@ -65,7 +75,11 @@ export default function CatalogExportModal({ isOpen, onClose, products, categori
         showPrice,
         showDescription,
         showSpecs,
-        useWatermark
+        sortBy,
+        exportMode,
+        selectedCategory,
+        selectedSubcategory,
+        categories
       });
     } catch (err) {
       console.error(err);
@@ -77,6 +91,11 @@ export default function CatalogExportModal({ isOpen, onClose, products, categori
       }
     }
   };
+
+  // Subcategories belonging to the selected category
+  const availableSubcategories = selectedCategory 
+    ? categories.find(c => c.id === selectedCategory)?.subcategories || []
+    : [];
 
   return (
     <div className="modal-backdrop" onClick={(e) => e.target.classList.contains('modal-backdrop') && !generating && onClose()}>
@@ -105,44 +124,11 @@ export default function CatalogExportModal({ isOpen, onClose, products, categori
               {selectedProductIds?.length > 0 && (
                 <option value="SELECTED">Selected Products ({selectedProductIds.length})</option>
               )}
-              <option value="CATEGORY">By Category</option>
-              <option value="SUBCATEGORY">By Subcategory</option>
+              <option value="FEATURED">Featured Products</option>
+              <option value="IN_STOCK">In Stock Products</option>
+              <option value="OUT_OF_STOCK">Out of Stock Products</option>
             </select>
           </div>
-
-          {exportMode === 'CATEGORY' && (
-            <div className="form-group" style={{ marginTop: '15px' }}>
-              <label className="form-label">Select Category</label>
-              <select 
-                className="form-select"
-                value={selectedCategory}
-                onChange={(e) => setSelectedCategory(e.target.value)}
-                disabled={generating}
-              >
-                <option value="">-- Choose Category --</option>
-                {categories.map(c => (
-                  <option key={c.id} value={c.id}>{c.name}</option>
-                ))}
-              </select>
-            </div>
-          )}
-
-          {exportMode === 'SUBCATEGORY' && (
-            <div className="form-group" style={{ marginTop: '15px' }}>
-              <label className="form-label">Select Subcategory</label>
-              <select 
-                className="form-select"
-                value={selectedSubcategory}
-                onChange={(e) => setSelectedSubcategory(e.target.value)}
-                disabled={generating}
-              >
-                <option value="">-- Choose Subcategory --</option>
-                {categories.flatMap(c => c.subcategories || []).map(sc => (
-                  <option key={sc.id} value={sc.id}>{sc.name}</option>
-                ))}
-              </select>
-            </div>
-          )}
 
           <div className="form-group" style={{ marginTop: '15px' }}>
             <label className="form-label">Sort By</label>
@@ -159,6 +145,43 @@ export default function CatalogExportModal({ isOpen, onClose, products, categori
             </select>
           </div>
 
+          {sortBy === 'CATEGORY' && (
+            <div style={{ padding: '15px', background: '#F8F9FA', borderRadius: '6px', marginTop: '15px', border: '1px solid #E9ECEF' }}>
+              <div className="form-group">
+                <label className="form-label" style={{ fontSize: '0.85rem' }}>Select Category</label>
+                <select 
+                  className="form-select"
+                  value={selectedCategory}
+                  onChange={(e) => {
+                    setSelectedCategory(e.target.value);
+                    setSelectedSubcategory(''); // reset subcat on cat change
+                  }}
+                  disabled={generating}
+                >
+                  <option value="">All Categories</option>
+                  {categories.map(c => (
+                    <option key={c.id} value={c.id}>{c.name}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="form-group" style={{ marginTop: '12px' }}>
+                <label className="form-label" style={{ fontSize: '0.85rem' }}>Select Subcategory</label>
+                <select 
+                  className="form-select"
+                  value={selectedSubcategory}
+                  onChange={(e) => setSelectedSubcategory(e.target.value)}
+                  disabled={generating || !selectedCategory}
+                >
+                  <option value="">All Subcategories</option>
+                  {availableSubcategories.map(sc => (
+                    <option key={sc.id} value={sc.id}>{sc.name}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+          )}
+
           <div className="form-group" style={{ marginTop: '15px' }}>
             <label className="form-label">Display Options</label>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginTop: '8px' }}>
@@ -173,10 +196,6 @@ export default function CatalogExportModal({ isOpen, onClose, products, categori
               <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.85rem' }}>
                 <input type="checkbox" checked={showSpecs} onChange={(e) => setShowSpecs(e.target.checked)} disabled={generating} />
                 Show Specifications
-              </label>
-              <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.85rem' }}>
-                <input type="checkbox" checked={useWatermark} onChange={(e) => setUseWatermark(e.target.checked)} disabled={generating} />
-                Use Watermarked Images
               </label>
             </div>
           </div>
@@ -199,7 +218,7 @@ export default function CatalogExportModal({ isOpen, onClose, products, categori
           <button 
             className="btn-admin-secondary" 
             onClick={() => handleGenerate('preview')} 
-            disabled={generating || (exportMode === 'CATEGORY' && !selectedCategory)}
+            disabled={generating}
             style={{ display: 'flex', gap: '6px', alignItems: 'center' }}
           >
             <i className="fa-solid fa-eye"></i> Preview
@@ -207,7 +226,7 @@ export default function CatalogExportModal({ isOpen, onClose, products, categori
           <button 
             className="btn-admin" 
             onClick={() => handleGenerate('download')} 
-            disabled={generating || (exportMode === 'CATEGORY' && !selectedCategory)}
+            disabled={generating}
             style={{ display: 'flex', gap: '6px', alignItems: 'center' }}
           >
             <i className="fa-solid fa-download"></i> Download PDF

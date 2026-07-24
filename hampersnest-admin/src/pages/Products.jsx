@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { apiRequest, API_BASE, apiDownload } from '../utils/api';
+import BulkImportWizard from '../components/BulkImportWizard';
 import CatalogExportModal from '../components/CatalogExportModal';
 import BulkVariantModal from '../components/BulkVariantModal';
 import BulkImageImportModal from '../components/BulkImageImportModal';
@@ -17,14 +18,10 @@ export default function Products() {
   const [categoryFilter, setCategoryFilter] = useState('All');
   
   // Export/Import/Catalog State
-  const [importModalOpen, setImportModalOpen] = useState(false);
   const [catalogModalOpen, setCatalogModalOpen] = useState(false);
+  const [bulkImportOpen, setBulkImportOpen] = useState(false);
   const [bulkVariantModalOpen, setBulkVariantModalOpen] = useState(false);
   const [imageImportModalOpen, setImageImportModalOpen] = useState(false);
-  const [importMode, setImportMode] = useState('CREATE_ONLY');
-  const [importFile, setImportFile] = useState(null);
-  const [importing, setImporting] = useState(false);
-  const [importResult, setImportResult] = useState(null);
   
   // Bulk selection states
   const [selectedIds, setSelectedIds] = useState([]);
@@ -56,8 +53,7 @@ export default function Products() {
       enabled: true,
       type: 'Brand Name',
       text: 'Hampers Nest',
-      position: 'Bottom Right',
-      opacity: 18,
+      position: 'Top Left',
       opacity: 18,
       size: 'Medium'
     },
@@ -197,7 +193,6 @@ export default function Products() {
         type: 'Brand Name',
         text: 'Hampers Nest',
         position: 'Bottom Right',
-        opacity: 18,
         opacity: 18,
         size: 'Medium'
       },
@@ -647,11 +642,8 @@ export default function Products() {
               <button className="btn-admin-secondary" onClick={() => apiDownload('/api/products/export/images-zip', 'product_images.zip')}>
                 <i className="fa-solid fa-file-zipper"></i> Export Images (ZIP)
               </button>
-              <button className="btn-admin-secondary" onClick={() => setImportModalOpen(true)}>
-                <i className="fa-solid fa-file-import"></i> Import CSV
-              </button>
-              <button className="btn-admin-secondary" onClick={() => setImageImportModalOpen(true)}>
-                <i className="fa-solid fa-file-image"></i> Import Images (ZIP)
+              <button className="btn-admin-secondary" onClick={() => setBulkImportOpen(true)}>
+                <i className="fa-solid fa-boxes-packing"></i> Bulk Import
               </button>
               <button className="btn-admin" style={{ background: 'var(--color-gold)' }} onClick={() => setCatalogModalOpen(true)}>
                 <i className="fa-solid fa-file-pdf"></i> PDF Catalog
@@ -664,78 +656,16 @@ export default function Products() {
         </div>
       </div>
 
-      {/* IMPORT MODAL */}
-      {importModalOpen && (
-        <div className="modal-backdrop" onClick={(e) => e.target.classList.contains('modal-backdrop') && setImportModalOpen(false)}>
-          <div className="modal-content" style={{ maxWidth: '500px' }}>
-            <div className="modal-header">
-              <h3>Import Products via CSV</h3>
-              <button className="modal-close" onClick={() => { setImportModalOpen(false); setImportResult(null); }}>
-                <i className="fa-solid fa-xmark"></i>
-              </button>
-            </div>
-            <div className="modal-body">
-              {!importResult ? (
-                <>
-                  <p style={{ fontSize: '0.9rem', color: 'var(--color-gray-text)', marginBottom: '15px' }}>
-                    Upload a CSV file to import products. Download the <a href={`${API_BASE}/api/products/template/csv`} style={{ color: 'var(--color-purple)' }}>template here</a>.
-                  </p>
-                  <div className="form-group">
-                    <label className="form-label">Import Mode</label>
-                    <select className="form-select" value={importMode} onChange={(e) => setImportMode(e.target.value)}>
-                      <option value="CREATE_ONLY">Create New Only (Skip Existing SKUs)</option>
-                      <option value="UPDATE_ONLY">Update Existing (Skip New SKUs)</option>
-                      <option value="CREATE_UPDATE">Create + Update</option>
-                    </select>
-                  </div>
-                  <div className="form-group">
-                    <label className="form-label">CSV File</label>
-                    <input type="file" accept=".csv" className="form-input" onChange={(e) => setImportFile(e.target.files[0])} style={{ padding: '8px' }} />
-                  </div>
-                </>
-              ) : (
-                <div style={{ padding: '20px', background: '#F3E8FF', borderRadius: '8px', textAlign: 'center' }}>
-                  <i className="fa-solid fa-circle-check" style={{ color: 'var(--color-purple)', fontSize: '2rem', marginBottom: '10px' }}></i>
-                  <h4>Import Complete</h4>
-                  <ul style={{ listStyle: 'none', padding: 0, marginTop: '15px', display: 'grid', gap: '10px' }}>
-                    <li><strong>Total Rows Processed:</strong> {importResult.totalRows}</li>
-                    <li style={{ color: '#16A34A' }}><strong>Created:</strong> {importResult.createdCount}</li>
-                    <li style={{ color: '#2563EB' }}><strong>Updated:</strong> {importResult.updatedCount}</li>
-                    <li style={{ color: '#6B7280' }}><strong>Skipped:</strong> {importResult.skippedCount}</li>
-                    <li style={{ color: '#DC2626' }}><strong>Errors:</strong> {importResult.errorCount}</li>
-                  </ul>
-                </div>
-              )}
-            </div>
-            <div className="modal-footer">
-              {!importResult ? (
-                <>
-                  <button className="btn-admin-secondary" onClick={() => setImportModalOpen(false)}>Cancel</button>
-                  <button className="btn-admin" disabled={importing || !importFile} onClick={async () => {
-                    setImporting(true);
-                    const formData = new FormData();
-                    formData.append('file', importFile);
-                    formData.append('mode', importMode);
-                    try {
-                      const res = await apiRequest('/api/products/import/csv', { method: 'POST', body: formData });
-                      setImportResult(res);
-                      fetchProducts();
-                    } catch (err) {
-                      alert(err.message);
-                    } finally {
-                      setImporting(false);
-                    }
-                  }}>
-                    {importing ? 'Importing...' : 'Start Import'}
-                  </button>
-                </>
-              ) : (
-                <button className="btn-admin" onClick={() => { setImportModalOpen(false); setImportResult(null); }}>Done</button>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
+
+      {/* BULK IMPORT MODAL */}
+      <BulkImportWizard 
+        isOpen={bulkImportOpen} 
+        onClose={() => setBulkImportOpen(false)} 
+        categories={categories}
+        setCategories={setCategories}
+        products={products}
+        setProducts={setProducts}
+      />
 
       {/* CATALOG EXPORT MODAL */}
       <CatalogExportModal 
@@ -746,12 +676,6 @@ export default function Products() {
         selectedProductIds={selectedIds}
       />
 
-      {/* BULK IMAGE IMPORT MODAL */}
-      <BulkImageImportModal
-        isOpen={imageImportModalOpen}
-        onClose={() => setImageImportModalOpen(false)}
-        onComplete={fetchProducts}
-      />
 
       {error && (
         <div style={{ background: '#FFF5F5', color: '#E53E3E', padding: '1rem', borderRadius: '6px', marginBottom: '1rem', textAlign: 'center' }}>
@@ -1261,13 +1185,13 @@ export default function Products() {
                         <label className="form-label">Position</label>
                         <select
                           className="form-input"
-                          value={formData.watermarkSettings?.position || 'Bottom Right'}
+                          value={formData.watermarkSettings?.position || 'Top Left'}
                           onChange={(e) => setFormData(prev => ({...prev, watermarkSettings: {...prev.watermarkSettings, position: e.target.value}}))}
                         >
-                          <option value="Bottom Right">Bottom Right</option>
-                          <option value="Bottom Left">Bottom Left</option>
-                          <option value="Top Right">Top Right</option>
                           <option value="Top Left">Top Left</option>
+                          <option value="Top Right">Top Right</option>
+                          <option value="Bottom Left">Bottom Left</option>
+                          <option value="Bottom Right">Bottom Right</option>
                           <option value="Center">Center</option>
                         </select>
                       </div>

@@ -81,11 +81,18 @@ export default function ShopByCategory() {
   const { settings } = useCart();
   const priceRangeCards = (settings?.priceRangeCards || []).filter(c => c.isActive).sort((a,b) => a.sortOrder - b.sortOrder);
 
+  // Combine price range cards and regular categories into one list
+  const combinedItems = [
+    ...priceRangeCards.map(c => ({ ...c, _isBudget: true })),
+    ...sorted.map(c => ({ ...c, _isBudget: false }))
+  ];
+
   // Render a generic strip of cards to perfectly reuse the design
-  const renderCardStrip = (items, isBudget) => (
-    <div className="category-cards-strip-wrapper" ref={isBudget ? null : scrollRef}>
+  const renderCardStrip = (items) => (
+    <div className="category-cards-strip-wrapper" ref={scrollRef}>
       <div className={`category-cards-strip ${animationEnabled ? 'animated' : ''}`}>
         {items.map((showcase, idx) => {
+          const isBudget = showcase._isBudget;
           const imgSrc = showcase.image || (!isBudget ? getDefaultImage(showcase.name) : UNIVERSAL_FALLBACK);
           const isFeatured = showcase.isFeatured;
           
@@ -104,7 +111,7 @@ export default function ShopByCategory() {
               key={showcase.id || idx}
               to={linkTarget}
               className={`luxury-category-card ${isFeatured ? 'featured-category-card' : ''} ${isVisible ? 'card-visible' : ''}`}
-              style={{ '--card-index': idx }}
+              style={{ '--card-index': idx, marginLeft: !isBudget && idx === priceRangeCards.length ? '2rem' : undefined }}
             >
               <div className="category-image-wrapper">
                 {isFeatured && !showcase.image && !isBudget ? (
@@ -130,6 +137,7 @@ export default function ShopByCategory() {
         
         {/* Duplicate for infinite marquee if animation is enabled */}
         {animationEnabled && items.map((showcase, idx) => {
+          const isBudget = showcase._isBudget;
           const imgSrc = showcase.image || (!isBudget ? getDefaultImage(showcase.name) : UNIVERSAL_FALLBACK);
           const isFeatured = showcase.isFeatured;
           
@@ -148,7 +156,7 @@ export default function ShopByCategory() {
               key={`dup-${showcase.id || idx}`}
               to={linkTarget}
               className={`luxury-category-card ${isFeatured ? 'featured-category-card' : ''} ${isVisible ? 'card-visible' : ''}`}
-              style={{ '--card-index': idx }}
+              style={{ '--card-index': idx, marginLeft: !isBudget && idx === priceRangeCards.length ? '2rem' : undefined }}
               aria-hidden="true"
             >
               <div className="category-image-wrapper">
@@ -177,22 +185,12 @@ export default function ShopByCategory() {
 
   return (
     <>
-      {priceRangeCards.length > 0 && (
-        <section className="shop-by-category-section" ref={sectionRef} style={{ paddingBottom: '0' }}>
-          <div className="container">
-            <span className="section-subtitle">Gifts For Every Price Range</span>
-            <h2 className="section-title" style={{ marginBottom: '2.5rem' }}>Shop By Budget</h2>
-            {renderCardStrip(priceRangeCards, true)}
-          </div>
-        </section>
-      )}
-
-      {sorted.length > 0 && (
-        <section className="shop-by-category-section" style={{ paddingTop: priceRangeCards.length > 0 ? '4rem' : undefined }}>
+      {combinedItems.length > 0 && (
+        <section className="shop-by-category-section" ref={sectionRef}>
           <div className="container">
             <span className="section-subtitle">Curated For Every Occasion</span>
             <h2 className="section-title" style={{ marginBottom: '2.5rem' }}>Shop By Category</h2>
-            {renderCardStrip(sorted, false)}
+            {renderCardStrip(combinedItems)}
           </div>
         </section>
       )}

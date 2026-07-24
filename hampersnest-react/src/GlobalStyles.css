@@ -8549,3 +8549,204 @@ footer h4,
     font-size: 0.65rem !important;
   }
 }
+/* ==========================================================================
+   DESKTOP PRODUCT DETAILS REDESIGN
+   ========================================================================== */
+@media (min-width: 992px) {
+  .product-secondary-info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin-top: 2rem;
+    width: 100%;
+  }
+
+  .secondary-info-card {
+    background: #fff;
+    border: 1px solid var(--color-beige);
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+
+  .secondary-info-card > :last-child {
+    margin-bottom: 0 !important;
+  }
+  
+  .secondary-info-card .customizer-section-title {
+    margin-top: 0;
+  }
+}
+
+
+/* Mobile Fallbacks for Redesigned Cards */
+@media (max-width: 991px) {
+  .product-secondary-info-grid {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  /* Customization Available fallback */
+  .secondary-info-card.customization-card {
+    padding-bottom: 0.8rem;
+    border-bottom: 1px solid var(--color-beige);
+    margin-bottom: 1rem;
+  }
+
+  /* Delivery Info fallback */
+  .secondary-info-card.delivery-card {
+    padding: 0.85rem;
+    background: #F8F9FA;
+    border-radius: 8px;
+    border: 1px solid #E9ECEF;
+    margin-bottom: 1.5rem;
+  }
+
+  /* Personalize Your Hamper fallback is natively handled without wrappers */
+}
+
+
+/* --- Product Detail Mobile Spacing --- */
+@media (max-width: 767px) {
+  .secondary-info-card .modal-customize-btn {
+    margin-top: 16px !important;
+    margin-bottom: 24px !important;
+  }
+}
+
+@keyframes fadeOut {
+  from { opacity: 1; visibility: visible; }
+  to { opacity: 0; visibility: hidden; }
+}
+
+@media (max-width: 768px) {
+  .mobile-compact-hero {
+    padding: 0.5rem 0 !important;
+  }
+  .mobile-horizontal-scroll {
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    justify-content: flex-start !important;
+    padding-bottom: 8px !important;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .mobile-horizontal-scroll::-webkit-scrollbar {
+    display: none;
+  }
+  .mobile-sticky-category {
+    position: sticky !important;
+    top: 60px !important;
+    z-index: 99 !important;
+    background: var(--color-ivory) !important;
+    padding: 12px 0 4px 0 !important;
+    margin-bottom: 8px !important;
+  }
+  .mobile-sticky-category::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 35px;
+    background: linear-gradient(to right, rgba(250, 247, 243, 0), rgba(250, 247, 243, 1));
+    pointer-events: none;
+  }
+  .category-tab {
+    padding: 6px 14px !important;
+    font-size: 0.85rem !important;
+    border-radius: 14px !important;
+  }
+  .category-tab.active {
+    background: var(--color-ivory) !important;
+    color: var(--color-charcoal) !important;
+    border: 1px solid var(--color-gold) !important;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05) !important;
+  }
+  .subcategory-chips {
+    margin-bottom: 1rem !important;
+    gap: 6px !important; 
+  }
+  .subcategory-chip {
+    padding: 4px 10px !important; 
+    font-size: 0.8rem !important;
+    border-radius: 12px !important;
+  }
+  .mobile-merged-filter {
+    display: flex !important;
+    gap: 8px !important;
+    align-items: stretch !important;
+  }
+  .mobile-merged-filter .search-input-wrapper {
+    flex: 1 !important;
+    margin-bottom: 0 !important;
+  }
+  .mobile-merged-filter select {
+    flex: 0 0 40% !important;
+  }
+  .mobile-hide-tags .popular-searches-container {
+    display: none !important;
+  }
+  .mobile-show-tags-btn {
+    display: block !important;
+    background: none;
+    border: none;
+    color: var(--color-gold);
+    font-size: 0.85rem;
+    margin-bottom: 10px;
+    text-decoration: underline;
+  }
+  .mobile-scroll-arrow {
+    position: absolute;
+    top: -4px;
+    right: 16px;
+    font-size: 14px;
+    color: var(--color-gold);
+    opacity: 0.8;
+    animation: slideSubtle 2.5s ease-in-out infinite;
+    transition: opacity 0.5s ease;
+    z-index: 10;
+  }
+  .mobile-scroll-arrow.fade-out {
+    opacity: 0;
+    animation: none;
+    pointer-events: none;
+  }
+  .mobile-scroll-progress-container {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 8px;
+    margin-top: 4px;
+  }
+  .mobile-scroll-progress-track {
+    width: 50px;
+    height: 3px;
+    background-color: #E9ECEF;
+    border-radius: 3px;
+    position: relative;
+    overflow: hidden;
+  }
+  .mobile-scroll-progress-thumb {
+    position: absolute;
+    top: 0;
+    height: 100%;
+    width: 20px;
+    background-color: var(--color-gold);
+    border-radius: 3px;
+    transition: left 0.1s ease-out, transform 0.1s ease-out;
+  }
+}
+
+@keyframes slideSubtle {
+  0%, 100% { transform: translateX(0); }
+  50% { transform: translateX(3px); }
+}
+
+@media (min-width: 769px) {
+  .mobile-show-tags-btn {
+    display: none !important;
+  }
+}

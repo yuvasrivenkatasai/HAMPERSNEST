@@ -7,6 +7,7 @@ import csvParser from 'csv-parser';
 import { createRequire } from 'module';
 const require = createRequire(import.meta.url);
 import path from 'path';
+import { ZipArchive } from 'archiver';
 import { Product, Order, Inquiry, Category } from '../database/models.js';
 
 export const exportProductsExcel = async (req, res) => {
@@ -40,11 +41,124 @@ export const exportProductsExcel = async (req, res) => {
 
 export const exportProductsCsv = async (req, res) => {
   try {
-    const products = await Product.findAll({ raw: true });
-    const fields = ['id', 'name', 'sku', 'category', 'price', 'originalPrice', 'stockQuantity', 'reservedQuantity', 'lowStockThreshold', 'isActive', 'isFeatured', 'description'];
+    const products = await Product.findAll();
+    const categories = await Category.findAll({ raw: true });
+
+    const catMap = {};
+    categories.forEach(c => {
+      catMap[c.id] = c.name;
+    });
+
+    const toBool = (val) => (val === true || val === 'true' || val === 1) ? 'TRUE' : 'FALSE';
+
+    const formattedData = products.map(p => {
+      const prod = p.toJSON();
+
+      const catName = catMap[prod.category] || prod.category || '';
+      const subcatName = catMap[prod.subCategory] || prod.subCategory || '';
+
+      let variantsStr = '';
+      if (prod.variantsEnabled && Array.isArray(prod.variants)) {
+        variantsStr = prod.variants.map(v => {
+          return `${v.name}|${v.price}|${v.sku || ''}|${v.stock || 0}${v.isDefault ? '|Default' : ''}`;
+        }).join(';');
+      }
+
+      let addonsStr = '';
+      if (prod.addonsEnabled && Array.isArray(prod.customAddons)) {
+        addonsStr = prod.customAddons.map(a => {
+          return `${a.name}|${a.price}`;
+        }).join(';');
+      }
+
+      let coverImage = '';
+      if (prod.image) {
+        const ext = prod.image.includes('.') ? prod.image.split('.').pop() : 'webp';
+        coverImage = `main.${ext}`;
+      }
+
+      let additionalImages = '';
+      if (Array.isArray(prod.images) && prod.images.length > 0) {
+        additionalImages = prod.images.map((img, idx) => {
+          const ext = img.includes('.') ? img.split('.').pop() : 'webp';
+          return `additional_${idx + 1}.${ext}`;
+        }).join(';');
+      }
+
+      let videoFile = '';
+      if (Array.isArray(prod.videoUrls) && prod.videoUrls.length > 0) {
+         const firstVid = prod.videoUrls[0];
+         if (firstVid) {
+           const ext = firstVid.includes('.') ? firstVid.split('.').pop() : 'mp4';
+           videoFile = `video.${ext}`;
+         }
+      }
+
+      let status = 'Inactive';
+      if (prod.isActive) status = 'Active';
+
+      const stockQty = prod.stockQuantity || 0;
+      const reservedQty = prod.reservedQuantity || 0;
+      const availableQty = stockQty - reservedQty;
+
+      return {
+        'Product Name': prod.name || '',
+        'Offer Price': prod.price || 0,
+        'Original Price': prod.originalPrice || 0,
+        'Product Rating': prod.rating || 4.5,
+        'Category': catName,
+        'Subcategory': subcatName,
+        'Status': status,
+        'Featured': toBool(prod.isFeatured),
+        'Show In Storefront': toBool(prod.isActive),
+        'SKU': prod.sku || '',
+        'Stock Quantity': stockQty,
+        'Reserved Quantity': reservedQty,
+        'Available Quantity': availableQty,
+        'Low Stock Threshold': prod.lowStockThreshold || 5,
+        'Minimum Order Quantity (MOQ)': prod.moq || 1,
+        'Inventory Status': availableQty > 0 ? 'In Stock' : 'Out of Stock',
+        'Primary Image': coverImage,
+        'Additional Images': additionalImages,
+        'Video File': videoFile,
+        'Image Folder': prod.name || '',
+        'Image Count': (coverImage ? 1 : 0) + (Array.isArray(prod.images) ? prod.images.length : 0),
+        'Short Description': prod.shortDescription || '',
+        'Full Description': prod.description || '',
+        'Gift Tag Enabled': toBool(prod.customGiftTagEnabled),
+        'Gift Tag Placeholder': '',
+        'Customization Section Text': prod.customizationText || '',
+        'Add-ons Enabled': toBool(prod.addonsEnabled),
+        'Add-ons': addonsStr,
+        'Delivery Information Text': prod.deliveryInfoText || '',
+        'Variants Enabled': toBool(prod.variantsEnabled),
+        'Variants': variantsStr,
+        'Homepage Featured': toBool(prod.isFeatured),
+        'Visibility Status': status,
+        'Product ID': prod.id,
+        'Created Date': prod.createdAt ? new Date(prod.createdAt).toISOString() : '',
+        'Updated Date': prod.updatedAt ? new Date(prod.updatedAt).toISOString() : '',
+        'Created By': 'System',
+        'Last Modified By': 'System'
+      };
+    });
+
+    const fields = [
+      'Product Name', 'Offer Price', 'Original Price', 'Product Rating', 'Category', 'Subcategory', 'Status', 'Featured', 'Show In Storefront', 'SKU',
+      'Stock Quantity', 'Reserved Quantity', 'Available Quantity', 'Low Stock Threshold', 'Minimum Order Quantity (MOQ)', 'Inventory Status',
+      'Primary Image', 'Additional Images', 'Video File', 'Image Folder', 'Image Count',
+      'Short Description', 'Full Description',
+      'Gift Tag Enabled', 'Gift Tag Placeholder', 'Customization Section Text',
+      'Add-ons Enabled', 'Add-ons',
+      'Delivery Information Text',
+      'Variants Enabled', 'Variants',
+      'Homepage Featured', 'Visibility Status',
+      'Product ID', 'Created Date', 'Updated Date', 'Created By', 'Last Modified By'
+    ];
+
     const json2csvParser = new Parser({ fields });
-    const csv = json2csvParser.parse(products);
-    res.header('Content-Type', 'text/csv');
+    const csv = json2csvParser.parse(formattedData);
+    res.header('Content-Type', 'text/csv; charset=utf-8');
     res.attachment('products.csv');
     return res.send(csv);
   } catch (error) {
@@ -222,13 +336,19 @@ export const exportInquiriesExcel = async (req, res) => {
 
 export const exportProductImagesZip = async (req, res) => {
   try {
-    const products = await Product.findAll({ raw: true });
+    const products = await Product.findAll();
+    const categories = await Category.findAll({ raw: true });
+
+    const catMap = {};
+    categories.forEach(c => {
+      catMap[c.id] = c.name;
+    });
     
     res.setHeader('Content-Type', 'application/zip');
     res.setHeader('Content-Disposition', 'attachment; filename=product_images.zip');
     
     const archive = new ZipArchive({
-      zlib: { level: 9 } // Sets the compression level.
+      zlib: { level: 9 }
     });
     
     archive.on('warning', function(err) {
@@ -245,44 +365,60 @@ export const exportProductImagesZip = async (req, res) => {
 
     archive.pipe(res);
 
-    for (const product of products) {
-      const categoryName = product.category ? product.category.replace(/[/\\?%*:|"<>]/g, '-') : 'Uncategorized';
-      const productName = product.name ? product.name.replace(/[/\\?%*:|"<>]/g, '-') : 'Unnamed_Product';
+    const safeName = (name) => name ? name.replace(/[/\\?%*:|"<>]/g, '-') : '';
+
+    for (const p of products) {
+      const product = p.toJSON();
+      const catName = catMap[product.category] || product.category || 'Uncategorized';
+      const subcatName = catMap[product.subCategory] || product.subCategory || '';
+
+      const catFolder = safeName(catName);
+      const subcatFolder = safeName(subcatName);
+      const prodFolder = safeName(product.name) || 'Unnamed_Product';
       
-      const allImages = [];
-      if (product.image) allImages.push(product.image);
-      let additionalImages = [];
-      try {
-        additionalImages = typeof product.images === 'string' ? JSON.parse(product.images) : product.images;
-      } catch (e) {}
+      const basePath = subcatFolder ? `${catFolder}/${subcatFolder}/${prodFolder}` : `${catFolder}/${prodFolder}`;
       
-      if (Array.isArray(additionalImages)) {
-        additionalImages.forEach(img => {
-          if (img && !allImages.includes(img)) allImages.push(img);
+      // Process Cover Image
+      if (product.image) {
+        let relativePath = product.image;
+        if (relativePath.includes('/uploads/')) {
+          relativePath = relativePath.substring(relativePath.indexOf('/uploads/')).split('?')[0];
+          const absolutePath = path.join(process.cwd(), 'public', relativePath);
+          if (fs.existsSync(absolutePath)) {
+            const ext = path.extname(absolutePath) || '.webp';
+            archive.file(absolutePath, { name: `${basePath}/main${ext}` });
+          }
+        }
+      }
+
+      // Process Additional Images
+      if (Array.isArray(product.images)) {
+        product.images.forEach((imgUrl, idx) => {
+          let relativePath = imgUrl;
+          if (relativePath && relativePath.includes('/uploads/')) {
+            relativePath = relativePath.substring(relativePath.indexOf('/uploads/')).split('?')[0];
+            const absolutePath = path.join(process.cwd(), 'public', relativePath);
+            if (fs.existsSync(absolutePath)) {
+              const ext = path.extname(absolutePath) || '.webp';
+              archive.file(absolutePath, { name: `${basePath}/additional_${idx + 1}${ext}` });
+            }
+          }
         });
       }
 
-      for (let i = 0; i < allImages.length; i++) {
-        const imgUrl = allImages[i];
-        let relativePath = imgUrl;
-        
-        if (imgUrl && imgUrl.includes('/uploads/')) {
-          relativePath = imgUrl.substring(imgUrl.indexOf('/uploads/'));
-        }
-        
-        if (relativePath && relativePath.startsWith('/uploads/')) {
-          // Parse out any query parameters just in case
-          relativePath = relativePath.split('?')[0];
-          const absolutePath = path.join(process.cwd(), 'public', relativePath);
-          if (fs.existsSync(absolutePath)) {
-            const ext = path.extname(absolutePath);
-            const fileName = i === 0 ? `main${ext}` : `additional_${i}${ext}`;
-            const zipPath = `${categoryName}/${productName}/${fileName}`;
-            archive.file(absolutePath, { name: zipPath });
-          } else {
-            console.warn(`[ZIP Export] File not found: ${absolutePath}`);
+      // Process Videos
+      if (Array.isArray(product.videoUrls)) {
+        product.videoUrls.forEach((vidUrl, idx) => {
+          let relativePath = vidUrl;
+          if (relativePath && relativePath.includes('/uploads/')) {
+            relativePath = relativePath.substring(relativePath.indexOf('/uploads/')).split('?')[0];
+            const absolutePath = path.join(process.cwd(), 'public', relativePath);
+            if (fs.existsSync(absolutePath)) {
+              const ext = path.extname(absolutePath) || '.mp4';
+              archive.file(absolutePath, { name: `${basePath}/video${ext}` });
+            }
           }
-        }
+        });
       }
     }
 

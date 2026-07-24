@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { apiRequest } from '../utils/api';
 import BulkDiscountManager from './BulkDiscountManager';
-import PriceRangeManager from './PriceRangeManager';
-
 export default function Settings() {
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
@@ -534,8 +532,6 @@ export default function Settings() {
               </div>
 
               <BulkDiscountManager settingsData={settingsData} setSettingsData={setSettingsData} />
-              
-              <PriceRangeManager settingsData={settingsData} setSettingsData={setSettingsData} />
 
 
               <button type="submit" className="btn-admin mt-2">
