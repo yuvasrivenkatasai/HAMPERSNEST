@@ -4,10 +4,11 @@ import sharp from 'sharp';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
+import { PutObjectCommand } from '@aws-sdk/client-s3';
 import dotenv from 'dotenv';
 import { protect } from '../middleware/auth.js';
 import { generateWatermarkedImage } from '../utils/imageProcessor.js';
+import { isR2Configured, getR2Client } from '../utils/r2Client.js';
 
 dotenv.config();
 
@@ -17,34 +18,7 @@ const upload = multer({ storage: multer.memoryStorage() });
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Initialize S3/R2 client if config is available
-const isR2Configured = () => {
-  return (
-    process.env.R2_ACCESS_KEY_ID &&
-    process.env.R2_SECRET_ACCESS_KEY &&
-    process.env.R2_ENDPOINT &&
-    process.env.R2_BUCKET_NAME &&
-    process.env.R2_PUBLIC_URL
-  );
-};
-
-let r2Client = null;
-if (isR2Configured()) {
-  let endpoint = process.env.R2_ENDPOINT;
-  const bucketName = process.env.R2_BUCKET_NAME;
-  if (bucketName && endpoint.endsWith(`/${bucketName}`)) {
-    endpoint = endpoint.slice(0, -(bucketName.length + 1));
-  }
-
-  r2Client = new S3Client({
-    endpoint: endpoint,
-    credentials: {
-      accessKeyId: process.env.R2_ACCESS_KEY_ID,
-      secretAccessKey: process.env.R2_SECRET_ACCESS_KEY,
-    },
-    region: 'auto',
-  });
-}
+const r2Client = getR2Client();
 
 // @desc    Upload image, convert to webp and save to R2/Local
 // @route   POST /api/upload

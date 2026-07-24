@@ -46,6 +46,25 @@ export default function Collections() {
       setScrollProgress(progress);
     }
   };
+
+  const handlePageChange = (newPage) => {
+    if (newPage === currentPage) return;
+    setCurrentPage(newPage);
+    
+    setTimeout(() => {
+      if (productsGridRef.current) {
+        // Offset accounts for fixed navbar + sticky categories on mobile
+        const headerOffset = window.innerWidth <= 768 ? 140 : 100; 
+        const elementPosition = productsGridRef.current.getBoundingClientRect().top;
+        const offsetPosition = elementPosition + window.scrollY - headerOffset;
+        
+        window.scrollTo({
+          top: offsetPosition,
+          behavior: 'smooth'
+        });
+      }
+    }, 50); // slight delay to allow product grid to render
+  };
   const productsGridRef = React.useRef(null);
   const subcategoriesRef = React.useRef(null);
   const isInitialMount = React.useRef(true);
@@ -524,7 +543,7 @@ export default function Collections() {
               <div className="reveal pagination-container" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', marginTop: '3rem', marginBottom: '1rem' }}>
                 {/* Prev Button */}
                 <button
-                  onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                  onClick={() => handlePageChange(currentPage - 1)}
                   disabled={currentPage === 1}
                   className="pagination-btn-prev"
                   style={{
@@ -553,7 +572,7 @@ export default function Collections() {
                     return (
                       <button
                         key={pageNum}
-                        onClick={() => setCurrentPage(pageNum)}
+                        onClick={() => handlePageChange(pageNum)}
                         style={{
                           width: '38px',
                           height: '38px',
@@ -580,7 +599,7 @@ export default function Collections() {
 
                 {/* Next Button */}
                 <button
-                  onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                  onClick={() => handlePageChange(currentPage + 1)}
                   disabled={currentPage === totalPages}
                   className="pagination-btn-next"
                   style={{

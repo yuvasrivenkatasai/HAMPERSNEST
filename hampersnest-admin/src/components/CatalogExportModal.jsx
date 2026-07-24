@@ -59,10 +59,9 @@ export default function CatalogExportModal({ isOpen, onClose, products, categori
       const catObj = categories.find(c => c.id === p.category);
       let catName = catObj?.name || p.category;
       let subcatName = p.subCategory;
-      if (catObj && catObj.subcategories) {
-        const subcatObj = catObj.subcategories.find(sc => sc.id === p.subCategory);
-        if (subcatObj) subcatName = subcatObj.name;
-      }
+      const subcatObj = categories.find(c => c.id === p.subCategory || c.id === p.subcategoryId);
+      if (subcatObj) subcatName = subcatObj.name;
+      
       return {
         ...p,
         categoryName: catName,
@@ -94,7 +93,7 @@ export default function CatalogExportModal({ isOpen, onClose, products, categori
 
   // Subcategories belonging to the selected category
   const availableSubcategories = selectedCategory 
-    ? categories.find(c => c.id === selectedCategory)?.subcategories || []
+    ? categories.filter(c => c.parentId === selectedCategory)
     : [];
 
   return (
@@ -159,7 +158,7 @@ export default function CatalogExportModal({ isOpen, onClose, products, categori
                   disabled={generating}
                 >
                   <option value="">All Categories</option>
-                  {categories.map(c => (
+                  {categories.filter(c => !c.parentId).map(c => (
                     <option key={c.id} value={c.id}>{c.name}</option>
                   ))}
                 </select>
@@ -173,10 +172,16 @@ export default function CatalogExportModal({ isOpen, onClose, products, categori
                   onChange={(e) => setSelectedSubcategory(e.target.value)}
                   disabled={generating || !selectedCategory}
                 >
-                  <option value="">All Subcategories</option>
-                  {availableSubcategories.map(sc => (
-                    <option key={sc.id} value={sc.id}>{sc.name}</option>
-                  ))}
+                  {availableSubcategories.length > 0 ? (
+                    <>
+                      <option value="">All Subcategories</option>
+                      {availableSubcategories.map(sc => (
+                        <option key={sc.id} value={sc.id}>{sc.name}</option>
+                      ))}
+                    </>
+                  ) : (
+                    <option value="" disabled>No subcategories available</option>
+                  )}
                 </select>
               </div>
             </div>

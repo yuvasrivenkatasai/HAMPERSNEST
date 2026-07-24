@@ -5,6 +5,8 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { Product, Category } from '../database/models.js';
 import { generateWatermarkedImage } from '../utils/imageProcessor.js';
+import { isR2Configured, getR2Client } from '../utils/r2Client.js';
+import { PutObjectCommand } from '@aws-sdk/client-s3';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -165,48 +167,90 @@ export const createProduct = async (req, res) => {
 };
 
 const applyWatermarkToProduct = async (product, req) => {
-  if (!product.image || !product.image.includes('/uploads/')) return false;
+  if (!product.image) return false;
 
   const wmOptions = product.watermarkSettings || { enabled: false };
+  const r2Configured = isR2Configured();
+
+  // If local, enforce /uploads/ check
+  if (!r2Configured && !product.image.includes('/uploads/')) return false;
+
+  // Derive original clean URL/path
   const urlObj = new URL(product.image);
+  let originalUrl = product.image.replace('_watermarked', '').replace('_original', '');
   
-  // Extract base filename (without _watermarked or _original)
-  let baseRelativePath = urlObj.pathname.replace('_watermarked', '').replace('_original', '');
-  
-  const absoluteBasePath = path.join(__dirname, '../public', baseRelativePath);
-  const absoluteOriginalPath = absoluteBasePath.replace('.webp', '_original.webp');
-  
-  // If original backup doesn't exist, but base does, rename base to original to back it up safely
-  if (!fs.existsSync(absoluteOriginalPath) && fs.existsSync(absoluteBasePath)) {
-    await fs.promises.rename(absoluteBasePath, absoluteOriginalPath);
-  }
-
-  // Determine which file to read from: always prefer _original.webp if it exists
-  const sourcePath = fs.existsSync(absoluteOriginalPath) ? absoluteOriginalPath : absoluteBasePath;
-  
-  if (!fs.existsSync(sourcePath)) return false;
-
-  const buffer = await fs.promises.readFile(sourcePath);
-  const protocol = req.protocol;
-  const host = req.get('host');
-  
-  if (wmOptions.enabled) {
-    const watermarkedBuffer = await generateWatermarkedImage(buffer, {
-      enableWatermark: true,
-      position: wmOptions.position || 'Top Left'
-    });
-    
-    // Save to base path to have cleaner URLs and fulfill V2 requirements
-    await fs.promises.writeFile(absoluteBasePath, watermarkedBuffer);
-    product.image = `${protocol}://${host}${baseRelativePath}`;
-  } else {
-    // If disabled, we might want to restore original to base
-    if (fs.existsSync(absoluteOriginalPath)) {
-      await fs.promises.copyFile(absoluteOriginalPath, absoluteBasePath);
+  if (r2Configured) {
+    try {
+      // R2 Logic
+      const response = await fetch(originalUrl);
+      if (!response.ok) throw new Error('Failed to fetch from R2');
+      const arrayBuffer = await response.arrayBuffer();
+      const buffer = Buffer.from(arrayBuffer);
+      
+      let finalBuffer = buffer;
+      let finalUrl = originalUrl;
+      
+      if (wmOptions.enabled) {
+        finalBuffer = await generateWatermarkedImage(buffer, {
+          enableWatermark: true,
+          position: wmOptions.position || 'Top Left'
+        });
+        
+        let key = urlObj.pathname.startsWith('/') ? urlObj.pathname.slice(1) : urlObj.pathname;
+        key = key.replace('.webp', '_watermarked.webp');
+        
+        const r2Client = getR2Client();
+        const command = new PutObjectCommand({
+          Bucket: process.env.R2_BUCKET_NAME,
+          Key: key,
+          Body: finalBuffer,
+          ContentType: 'image/webp',
+        });
+        await r2Client.send(command);
+        
+        const publicUrlBase = process.env.R2_PUBLIC_URL.endsWith('/') 
+          ? process.env.R2_PUBLIC_URL.slice(0, -1) 
+          : process.env.R2_PUBLIC_URL;
+        finalUrl = `${publicUrlBase}/${key}`;
+      }
+      product.image = finalUrl;
+      return true;
+    } catch (error) {
+      console.error('R2 watermark application failed', error);
+      return false;
     }
-    product.image = `${protocol}://${host}${baseRelativePath}`;
+  } else {
+    // Local Filesystem Logic
+    let baseRelativePath = urlObj.pathname.replace('_watermarked', '').replace('_original', '');
+    const absoluteBasePath = path.join(__dirname, '../public', baseRelativePath);
+    const absoluteOriginalPath = absoluteBasePath.replace('.webp', '_original.webp');
+    
+    if (!fs.existsSync(absoluteOriginalPath) && fs.existsSync(absoluteBasePath)) {
+      await fs.promises.rename(absoluteBasePath, absoluteOriginalPath);
+    }
+
+    const sourcePath = fs.existsSync(absoluteOriginalPath) ? absoluteOriginalPath : absoluteBasePath;
+    if (!fs.existsSync(sourcePath)) return false;
+
+    const buffer = await fs.promises.readFile(sourcePath);
+    const protocol = req.protocol;
+    const host = req.get('host');
+    
+    if (wmOptions.enabled) {
+      const watermarkedBuffer = await generateWatermarkedImage(buffer, {
+        enableWatermark: true,
+        position: wmOptions.position || 'Top Left'
+      });
+      await fs.promises.writeFile(absoluteBasePath, watermarkedBuffer);
+      product.image = `${protocol}://${host}${baseRelativePath}`;
+    } else {
+      if (fs.existsSync(absoluteOriginalPath)) {
+        await fs.promises.copyFile(absoluteOriginalPath, absoluteBasePath);
+      }
+      product.image = `${protocol}://${host}${baseRelativePath}`;
+    }
+    return true;
   }
-  return true;
 };
 
 // @desc    Update a product
@@ -377,47 +421,86 @@ export const regenerateWatermark = async (req, res) => {
     const product = await Product.findOne({ where: { id: req.params.id } });
     if (!product) return res.status(404).json({ message: 'Product not found' });
     
-    if (!product.image || !product.image.includes('/uploads/')) {
+    if (!product.image) {
+      return res.status(400).json({ message: 'Product image not found' });
+    }
+
+    const r2Configured = isR2Configured();
+
+    if (!r2Configured && !product.image.includes('/uploads/')) {
        return res.status(400).json({ message: 'Product image not found or not local' });
     }
 
     const wmOptions = product.watermarkSettings || { enabled: false };
-    
-    // Extract base filename (without _watermarked or _original)
     const urlObj = new URL(product.image);
-    let baseRelativePath = urlObj.pathname.replace('_watermarked', '').replace('_original', '');
-    const absoluteBasePath = path.join(__dirname, '../public', baseRelativePath);
-    const absoluteOriginalPath = absoluteBasePath.replace('.webp', '_original.webp');
-    
-    // If original backup doesn't exist, but base does, rename base to original to back it up safely
-    if (!fs.existsSync(absoluteOriginalPath) && fs.existsSync(absoluteBasePath)) {
-      await fs.promises.rename(absoluteBasePath, absoluteOriginalPath);
-    }
+    let originalUrl = product.image.replace('_watermarked', '').replace('_original', '');
 
-    const sourcePath = fs.existsSync(absoluteOriginalPath) ? absoluteOriginalPath : absoluteBasePath;
-
-    if (!fs.existsSync(sourcePath)) {
-      return res.status(404).json({ message: 'Original image file not found on server' });
-    }
-
-    const buffer = await fs.promises.readFile(sourcePath);
-    const protocol = req.protocol;
-    const host = req.get('host');
-    
-    if (wmOptions.enabled) {
-      // Apply watermark
-      const watermarkedBuffer = await generateWatermarkedImage(buffer, {
-        enableWatermark: true,
-        position: wmOptions.position || 'Top Left'
-      });
+    if (r2Configured) {
+      const response = await fetch(originalUrl);
+      if (!response.ok) return res.status(404).json({ message: 'Original image not found on R2' });
+      const arrayBuffer = await response.arrayBuffer();
+      const buffer = Buffer.from(arrayBuffer);
       
-      await fs.promises.writeFile(absoluteBasePath, watermarkedBuffer);
-      product.image = `${protocol}://${host}${baseRelativePath}`;
-    } else {
-      if (fs.existsSync(absoluteOriginalPath)) {
-        await fs.promises.copyFile(absoluteOriginalPath, absoluteBasePath);
+      let finalBuffer = buffer;
+      let finalUrl = originalUrl;
+      
+      if (wmOptions.enabled) {
+        finalBuffer = await generateWatermarkedImage(buffer, {
+          enableWatermark: true,
+          position: wmOptions.position || 'Top Left'
+        });
+        
+        let key = urlObj.pathname.startsWith('/') ? urlObj.pathname.slice(1) : urlObj.pathname;
+        key = key.replace('.webp', '_watermarked.webp');
+        
+        const r2Client = getR2Client();
+        const command = new PutObjectCommand({
+          Bucket: process.env.R2_BUCKET_NAME,
+          Key: key,
+          Body: finalBuffer,
+          ContentType: 'image/webp',
+        });
+        await r2Client.send(command);
+        
+        const publicUrlBase = process.env.R2_PUBLIC_URL.endsWith('/') 
+          ? process.env.R2_PUBLIC_URL.slice(0, -1) 
+          : process.env.R2_PUBLIC_URL;
+        finalUrl = `${publicUrlBase}/${key}`;
       }
-      product.image = `${protocol}://${host}${baseRelativePath}`;
+      product.image = finalUrl;
+    } else {
+      let baseRelativePath = urlObj.pathname.replace('_watermarked', '').replace('_original', '');
+      const absoluteBasePath = path.join(__dirname, '../public', baseRelativePath);
+      const absoluteOriginalPath = absoluteBasePath.replace('.webp', '_original.webp');
+      
+      if (!fs.existsSync(absoluteOriginalPath) && fs.existsSync(absoluteBasePath)) {
+        await fs.promises.rename(absoluteBasePath, absoluteOriginalPath);
+      }
+  
+      const sourcePath = fs.existsSync(absoluteOriginalPath) ? absoluteOriginalPath : absoluteBasePath;
+  
+      if (!fs.existsSync(sourcePath)) {
+        return res.status(404).json({ message: 'Original image file not found on server' });
+      }
+  
+      const buffer = await fs.promises.readFile(sourcePath);
+      const protocol = req.protocol;
+      const host = req.get('host');
+      
+      if (wmOptions.enabled) {
+        const watermarkedBuffer = await generateWatermarkedImage(buffer, {
+          enableWatermark: true,
+          position: wmOptions.position || 'Top Left'
+        });
+        
+        await fs.promises.writeFile(absoluteBasePath, watermarkedBuffer);
+        product.image = `${protocol}://${host}${baseRelativePath}`;
+      } else {
+        if (fs.existsSync(absoluteOriginalPath)) {
+          await fs.promises.copyFile(absoluteOriginalPath, absoluteBasePath);
+        }
+        product.image = `${protocol}://${host}${baseRelativePath}`;
+      }
     }
 
     await product.save();
