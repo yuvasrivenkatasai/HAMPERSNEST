@@ -416,32 +416,7 @@ export default function ProductDetailTemplate({ product, displayRelated = [] }) 
                 </div>
               )}
 
-              {/* Important Delivery Notice */}
-              <div style={{
-                background: 'var(--color-ivory)',
-                border: '1px solid var(--color-gold)',
-                borderRadius: '12px',
-                padding: '16px',
-                marginBottom: '1rem',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.02)'
-              }}>
-                <h4 style={{ 
-                  margin: '0 0 10px 0', 
-                  color: 'var(--color-charcoal)', 
-                  fontSize: '0.95rem',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px'
-                }}>
-                  <i className="fa-solid fa-circle-info" style={{ color: 'var(--color-gold)' }}></i> 
-                  Important Delivery Information
-                </h4>
-                <ul style={{ margin: 0, paddingLeft: '20px', fontSize: '0.85rem', color: '#555', lineHeight: '1.5' }}>
-                  <li style={{ marginBottom: '6px' }}>Shipping charges are NOT included in the displayed product price.</li>
-                  <li style={{ marginBottom: '6px' }}>Delivery charges are calculated after checkout based on the destination and the higher of the actual or volumetric weight.</li>
-                  <li>Our team will contact the customer with the final shipping cost and estimated delivery date before dispatching the order.</li>
-                </ul>
-              </div>
+
 
               {/* 3. Quantity Selector and Purchase Actions */}
               <div className="action-row-buying" style={{ display: 'flex', gap: '10px', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap' }}>

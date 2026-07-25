@@ -3,6 +3,96 @@ import { useCart } from '../context/CartContext';
 import { API_BASE } from '../config.js';
 import { useCurrency } from '../context/CurrencyContext';
 
+const DeliveryAccordion = ({ cart, products }) => {
+  const [isOpen, setIsOpen] = useState(false);
+
+  // Look for custom delivery info in cart items
+  let customInfoItems = null;
+  for (const item of cart) {
+    const product = products.find(p => p.id === item.id);
+    if (product && product.deliveryInfoText && product.deliveryInfoText.trim() !== '' && product.deliveryInfoText.trim() !== 'Standard Delivery: 3-5 business days. Express Delivery available at checkout.') {
+       customInfoItems = product.shipping && product.shipping.length > 0 
+         ? product.shipping 
+         : product.deliveryInfoText.split('\n').map(i => i.trim()).filter(Boolean);
+       break;
+    }
+  }
+
+  return (
+    <div style={{
+      background: 'var(--color-ivory, #FCFBF8)',
+      border: '1px solid var(--color-gold-light, #EADDCA)',
+      borderRadius: '8px',
+      marginBottom: '1rem',
+      marginTop: '1rem',
+      overflow: 'hidden',
+      transition: 'all 0.3s ease'
+    }}>
+      <button 
+        type="button"
+        onClick={() => setIsOpen(!isOpen)}
+        style={{
+          width: '100%',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          padding: '12px 16px',
+          background: 'none',
+          border: 'none',
+          cursor: 'pointer',
+          color: 'var(--color-charcoal, #333)',
+          fontSize: '0.9rem',
+          fontWeight: 600,
+          textAlign: 'left'
+        }}
+      >
+        <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <i className="fa-solid fa-circle-info" style={{ color: 'var(--color-gold, #C8A96B)' }}></i>
+          Important Delivery Information
+        </span>
+        <i 
+          className="fa-solid fa-chevron-down" 
+          style={{ 
+            color: 'var(--color-gold, #C8A96B)', 
+            transition: 'transform 0.3s ease',
+            transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)'
+          }}
+        ></i>
+      </button>
+      
+      <div style={{
+        maxHeight: isOpen ? '500px' : '0',
+        opacity: isOpen ? 1 : 0,
+        overflow: 'hidden',
+        transition: 'all 0.3s ease-in-out'
+      }}>
+        <div style={{ padding: '0 16px 16px 16px' }}>
+          <ul style={{ 
+            margin: 0, 
+            paddingLeft: '20px', 
+            fontSize: '0.8rem', 
+            color: '#555', 
+            lineHeight: '1.6' 
+          }}>
+            {customInfoItems ? customInfoItems.map((item, idx) => (
+              <li key={idx} style={{ marginBottom: '6px' }}>{item}</li>
+            )) : (
+              <>
+                <li style={{ marginBottom: '6px' }}>Shipping charges are NOT included in the displayed product price.</li>
+                <li style={{ marginBottom: '6px' }}>Delivery charges are calculated after checkout based on the destination and the higher of the actual or volumetric weight.</li>
+                <li style={{ marginBottom: '6px' }}>Our team will contact the customer with the final shipping cost and estimated delivery date before dispatch.</li>
+                <li style={{ marginBottom: '6px' }}>Orders are generally dispatched within 2–7 business days.</li>
+                <li style={{ marginBottom: '6px' }}>Delivery is available across India.</li>
+                <li>Bulk order discounts are automatically applied where applicable.</li>
+              </>
+            )}
+          </ul>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 export default function CartDrawer() {
   const {
     cart,
@@ -13,7 +103,8 @@ export default function CartDrawer() {
     cartTotals,
     updateQuantity,
     removeFromCart,
-    getWhatsappCheckoutUrl
+    getWhatsappCheckoutUrl,
+    products
   } = useCart();
   const { currency, formatPrice } = useCurrency();
 
@@ -351,13 +442,16 @@ export default function CartDrawer() {
             </div>
 
             {checkoutStep === 1 ? (
-              <button
-                onClick={() => setCheckoutStep(2)}
-                className="btn btn-primary"
-                style={{ width: '100%', marginTop: '0.5rem' }}
-              >
-                Proceed to Checkout <i className="fa-solid fa-arrow-right"></i>
-              </button>
+              <>
+                <DeliveryAccordion cart={cart} products={products} />
+                <button
+                  onClick={() => setCheckoutStep(2)}
+                  className="btn btn-primary"
+                  style={{ width: '100%', marginTop: '0.5rem' }}
+                >
+                  Proceed to Checkout <i className="fa-solid fa-arrow-right"></i>
+                </button>
+              </>
             ) : (
               <div style={{ display: 'flex', gap: '10px', marginTop: '0.5rem' }}>
                 <button

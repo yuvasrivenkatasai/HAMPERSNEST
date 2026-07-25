@@ -9,6 +9,7 @@ const require = createRequire(import.meta.url);
 import path from 'path';
 import { ZipArchive } from 'archiver';
 import { Product, Order, Inquiry, Category } from '../database/models.js';
+import { generateProductMediaPath } from '../utils/pathHelper.js';
 
 export const exportProductsExcel = async (req, res) => {
   try {
@@ -73,15 +74,13 @@ export const exportProductsCsv = async (req, res) => {
 
       let coverImage = '';
       if (prod.image) {
-        const ext = prod.image.includes('.') ? prod.image.split('.').pop() : 'webp';
-        coverImage = `main.${ext}`;
+        coverImage = prod.image.split('/').pop().split('?')[0];
       }
 
       let additionalImages = '';
       if (Array.isArray(prod.images) && prod.images.length > 0) {
-        additionalImages = prod.images.map((img, idx) => {
-          const ext = img.includes('.') ? img.split('.').pop() : 'webp';
-          return `additional_${idx + 1}.${ext}`;
+        additionalImages = prod.images.map(img => {
+          return img.split('/').pop().split('?')[0];
         }).join(';');
       }
 
@@ -89,8 +88,7 @@ export const exportProductsCsv = async (req, res) => {
       if (Array.isArray(prod.videoUrls) && prod.videoUrls.length > 0) {
          const firstVid = prod.videoUrls[0];
          if (firstVid) {
-           const ext = firstVid.includes('.') ? firstVid.split('.').pop() : 'mp4';
-           videoFile = `video.${ext}`;
+           videoFile = firstVid.split('/').pop().split('?')[0];
          }
       }
 
@@ -102,6 +100,7 @@ export const exportProductsCsv = async (req, res) => {
       const availableQty = stockQty - reservedQty;
 
       return {
+        'Format Version': '2.0',
         'Product Name': prod.name || '',
         'Offer Price': prod.price || 0,
         'Original Price': prod.originalPrice || 0,
@@ -144,6 +143,7 @@ export const exportProductsCsv = async (req, res) => {
     });
 
     const fields = [
+      'Format Version',
       'Product Name', 'Offer Price', 'Original Price', 'Product Rating', 'Category', 'Subcategory', 'Status', 'Featured', 'Show In Storefront', 'SKU',
       'Stock Quantity', 'Reserved Quantity', 'Available Quantity', 'Low Stock Threshold', 'Minimum Order Quantity (MOQ)', 'Inventory Status',
       'Primary Image', 'Additional Images', 'Video File', 'Image Folder', 'Image Count',
@@ -335,6 +335,8 @@ export const exportInquiriesExcel = async (req, res) => {
 };
 
 export const exportProductImagesZip = async (req, res) => {
+  let tempZipPath = null;
+  
   try {
     const products = await Product.findAll();
     const categories = await Category.findAll({ raw: true });
@@ -343,88 +345,140 @@ export const exportProductImagesZip = async (req, res) => {
     categories.forEach(c => {
       catMap[c.id] = c.name;
     });
-    
-    res.setHeader('Content-Type', 'application/zip');
-    res.setHeader('Content-Disposition', 'attachment; filename=product_images.zip');
-    
-    const archive = new ZipArchive({
-      zlib: { level: 9 }
-    });
-    
-    archive.on('warning', function(err) {
-      if (err.code === 'ENOENT') {
-        console.warn(err);
-      } else {
-        throw err;
-      }
-    });
 
-    archive.on('error', function(err) {
-      throw err;
-    });
+    const manifest = {
+      generatedAt: new Date().toISOString(),
+      productCount: products.length,
+      version: '2.0',
+      products: []
+    };
 
-    archive.pipe(res);
-
-    const safeName = (name) => name ? name.replace(/[/\\?%*:|"<>]/g, '-') : '';
+    const filesToAdd = [];
+    const missingFiles = [];
+    let imagesCount = 0;
+    let videosCount = 0;
+    let uniqueFolders = new Set();
 
     for (const p of products) {
       const product = p.toJSON();
       const catName = catMap[product.category] || product.category || 'Uncategorized';
       const subcatName = catMap[product.subCategory] || product.subCategory || '';
 
-      const catFolder = safeName(catName);
-      const subcatFolder = safeName(subcatName);
-      const prodFolder = safeName(product.name) || 'Unnamed_Product';
+      const basePath = generateProductMediaPath(catName, subcatName, product.name);
+      uniqueFolders.add(basePath);
       
-      const basePath = subcatFolder ? `${catFolder}/${subcatFolder}/${prodFolder}` : `${catFolder}/${prodFolder}`;
-      
-      // Process Cover Image
-      if (product.image) {
-        let relativePath = product.image;
+      const manifestProduct = {
+        id: product.id,
+        name: product.name,
+        folder: basePath,
+        files: []
+      };
+
+      const processMedia = (url, type) => {
+        if (!url) return;
+        let relativePath = url;
         if (relativePath.includes('/uploads/')) {
           relativePath = relativePath.substring(relativePath.indexOf('/uploads/')).split('?')[0];
           const absolutePath = path.join(process.cwd(), 'public', relativePath);
+          const fileName = relativePath.split('/').pop();
+          
           if (fs.existsSync(absolutePath)) {
-            const ext = path.extname(absolutePath) || '.webp';
-            archive.file(absolutePath, { name: `${basePath}/main${ext}` });
+            filesToAdd.push({
+              absolutePath,
+              archivePath: `${basePath}/${fileName}`
+            });
+            manifestProduct.files.push(fileName);
+            if (type === 'video') videosCount++;
+            else imagesCount++;
+          } else {
+            missingFiles.push(`Product: ${product.name}, Missing: ${absolutePath}`);
           }
         }
-      }
+      };
 
-      // Process Additional Images
-      if (Array.isArray(product.images)) {
-        product.images.forEach((imgUrl, idx) => {
-          let relativePath = imgUrl;
-          if (relativePath && relativePath.includes('/uploads/')) {
-            relativePath = relativePath.substring(relativePath.indexOf('/uploads/')).split('?')[0];
-            const absolutePath = path.join(process.cwd(), 'public', relativePath);
-            if (fs.existsSync(absolutePath)) {
-              const ext = path.extname(absolutePath) || '.webp';
-              archive.file(absolutePath, { name: `${basePath}/additional_${idx + 1}${ext}` });
-            }
-          }
-        });
-      }
+      if (product.image) processMedia(product.image, 'image');
+      if (Array.isArray(product.images)) product.images.forEach(img => processMedia(img, 'image'));
+      if (Array.isArray(product.videoUrls)) product.videoUrls.forEach(vid => processMedia(vid, 'video'));
 
-      // Process Videos
-      if (Array.isArray(product.videoUrls)) {
-        product.videoUrls.forEach((vidUrl, idx) => {
-          let relativePath = vidUrl;
-          if (relativePath && relativePath.includes('/uploads/')) {
-            relativePath = relativePath.substring(relativePath.indexOf('/uploads/')).split('?')[0];
-            const absolutePath = path.join(process.cwd(), 'public', relativePath);
-            if (fs.existsSync(absolutePath)) {
-              const ext = path.extname(absolutePath) || '.mp4';
-              archive.file(absolutePath, { name: `${basePath}/video${ext}` });
-            }
-          }
-        });
-      }
+      manifest.products.push(manifestProduct);
     }
 
-    archive.finalize();
+    if (missingFiles.length > 0) {
+      return res.status(400).json({ 
+        message: 'Validation Error: Missing media files on disk', 
+        details: missingFiles 
+      });
+    }
+
+    if (filesToAdd.length === 0) {
+      return res.status(400).json({
+        message: 'Validation Error: No media found to export. Archive would be empty.'
+      });
+    }
+
+    const uploadsDir = path.join(process.cwd(), 'uploads');
+    if (!fs.existsSync(uploadsDir)) {
+      fs.mkdirSync(uploadsDir, { recursive: true });
+    }
+    
+    tempZipPath = path.join(uploadsDir, `temp_export_${Date.now()}_${Math.floor(Math.random() * 1000)}.zip`);
+    const output = fs.createWriteStream(tempZipPath);
+    
+    const archive = new ZipArchive({
+      zlib: { level: 9 }
+    });
+    
+    await new Promise((resolve, reject) => {
+      output.on('close', resolve);
+      archive.on('error', reject);
+      archive.on('warning', (err) => {
+        if (err.code === 'ENOENT') console.warn(err);
+        else reject(err);
+      });
+
+      archive.pipe(output);
+      archive.append(JSON.stringify(manifest, null, 2), { name: 'manifest.json' });
+      filesToAdd.forEach(file => {
+        archive.file(file.absolutePath, { name: file.archivePath });
+      });
+      archive.finalize();
+    });
+
+    const stats = fs.statSync(tempZipPath);
+    if (stats.size <= 22) {
+      throw new Error("Generated ZIP is empty or corrupted (size <= 22 bytes)");
+    }
+
+    const AdmZip = (await import('adm-zip')).default;
+    const verifyZip = new AdmZip(tempZipPath);
+    const entries = verifyZip.getEntries();
+    if (entries.length === 0) {
+      throw new Error("Generated ZIP contains no readable files or directories");
+    }
+
+    console.log('--- Product Images ZIP Export ---');
+    console.log(`Products Processed: ${products.length}`);
+    console.log(`Folders Created: ${uniqueFolders.size}`);
+    console.log(`Images Added: ${imagesCount}`);
+    console.log(`Videos Added: ${videosCount}`);
+    console.log(`Missing Files: ${missingFiles.length}`);
+    console.log(`Final ZIP Size: ${stats.size} bytes`);
+    console.log('Archive Finalized Successfully and Integrity Verified');
+
+    res.download(tempZipPath, 'product_images.zip', (err) => {
+      if (err) {
+        console.error('Error sending ZIP to client:', err);
+      }
+      if (fs.existsSync(tempZipPath)) {
+        fs.unlinkSync(tempZipPath);
+      }
+    });
+
   } catch (error) {
     console.error('ZIP Export Error:', error);
+    if (tempZipPath && fs.existsSync(tempZipPath)) {
+      fs.unlinkSync(tempZipPath);
+    }
     if (!res.headersSent) {
       res.status(500).json({ message: error.message });
     }

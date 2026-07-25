@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { apiRequest, API_BASE } from '../utils/api';
 import Papa from 'papaparse';
 import JSZip from 'jszip';
+import { generateProductMediaPath, normalizeFolderName } from '../utils/pathHelper';
 
 export default function BulkImportWizard({ isOpen, onClose, categories, setCategories, products, setProducts }) {
   const [step, setStep] = useState(1);
@@ -82,28 +83,53 @@ export default function BulkImportWizard({ isOpen, onClose, categories, setCateg
       // 2. Read ZIP
       const zip = new JSZip();
       let zipContents = null;
+      let manifest = null;
+      
       if (zipFile) {
         zipContents = await zip.loadAsync(zipFile);
+        
+        // Try reading manifest
+        const manifestFile = zipContents.file('manifest.json');
+        if (manifestFile) {
+          try {
+             manifest = JSON.parse(await manifestFile.async('string'));
+          } catch(e) {
+             console.warn('Failed to parse manifest.json');
+          }
+        }
+      }
+
+      if (manifest && manifest.version !== '2.0') {
+         throw new Error(`Unsupported Format Version in ZIP Manifest: ${manifest.version}. Expected: 2.0`);
+      }
+      
+      const csvVersion = (rows[0] && rows[0]['Format Version']) || '1.0';
+      if (csvVersion !== '2.0') {
+         throw new Error(`Unsupported Format Version in CSV: ${csvVersion}. Expected: 2.0`);
       }
 
       setProgressMsg('Building Media Manifest...');
       setProgressPercent(50);
 
-      // 3. Build Media Manifest
-      // Map: FullPath -> { filename: File }
-      const zipFilesMap = {};
+      // 3. Build Media Maps for Exact and Lowercase Match
+      const zipFilesExactMap = {};
+      const zipFilesLowerMap = {};
       
       if (zipContents) {
         for (const [path, fileInfo] of Object.entries(zipContents.files)) {
           if (fileInfo.dir) continue;
           
           const parts = path.split('/');
-          const fileName = parts.pop().trim().toLowerCase();
-          const dirPath = parts.join('/').toLowerCase();
+          const fileName = parts.pop().trim();
+          const dirPathExact = parts.join('/');
+          const dirPathLower = dirPathExact.toLowerCase();
           
-          if (!zipFilesMap[dirPath]) zipFilesMap[dirPath] = {};
+          if (!zipFilesExactMap[dirPathExact]) zipFilesExactMap[dirPathExact] = {};
+          if (!zipFilesLowerMap[dirPathLower]) zipFilesLowerMap[dirPathLower] = {};
           
-          zipFilesMap[dirPath][fileName] = { fileInfo, fileName, type: getMimeType(fileName) };
+          const type = getMimeType(fileName);
+          zipFilesExactMap[dirPathExact][fileName] = { fileInfo, fileName, type };
+          zipFilesLowerMap[dirPathLower][fileName.toLowerCase()] = { fileInfo, fileName, type };
         }
       }
       
@@ -124,8 +150,6 @@ export default function BulkImportWizard({ isOpen, onClose, categories, setCateg
         const str = String(val).trim().toLowerCase();
         return str === 'true' || str === 'yes' || str === '1';
       };
-
-      const safeName = (name) => name ? name.replace(/[/\\?%*:|"<>]/g, '-') : '';
 
       for (let i = 0; i < rows.length; i++) {
         const row = rows[i];
@@ -155,21 +179,33 @@ export default function BulkImportWizard({ isOpen, onClose, categories, setCateg
           }
         }
 
-        // Media matching using Strict Hierarchy
-        const catFolder = safeName(catName).toLowerCase();
-        const subcatFolder = safeName(subcatName).toLowerCase();
-        const prodFolder = safeName(row['Image Folder'] || name).toLowerCase();
+        const exactDirPath = generateProductMediaPath(catName, subcatName, row['Image Folder'] || name);
+        const lowerDirPath = exactDirPath.toLowerCase();
         
-        const expectedDirPath = subcatFolder ? `${catFolder}/${subcatFolder}/${prodFolder}` : `${catFolder}/${prodFolder}`;
-        const folderFiles = zipFilesMap[expectedDirPath] || {};
         const media = { cover: null, gallery: [], videos: [] };
 
-        const primaryImageName = (row['Primary Image'] || '').trim().toLowerCase();
+        const resolveMedia = (fileName) => {
+           if (!fileName) return null;
+           const tFileName = fileName.trim();
+           // Try exact match
+           if (zipFilesExactMap[exactDirPath] && zipFilesExactMap[exactDirPath][tFileName]) {
+               return zipFilesExactMap[exactDirPath][tFileName];
+           }
+           // Try fallback lower match
+           const tLower = tFileName.toLowerCase();
+           if (zipFilesLowerMap[lowerDirPath] && zipFilesLowerMap[lowerDirPath][tLower]) {
+               return zipFilesLowerMap[lowerDirPath][tLower];
+           }
+           return null;
+        };
+
+        const primaryImageName = (row['Primary Image'] || '').trim();
         if (primaryImageName) {
-           if (folderFiles[primaryImageName]) {
-             media.cover = folderFiles[primaryImageName];
+           const resolved = resolveMedia(primaryImageName);
+           if (resolved) {
+             media.cover = resolved;
            } else {
-             rowErrors.push(`Primary Image '${primaryImageName}' not found in ZIP folder '${expectedDirPath}'`);
+             rowErrors.push(`Primary Image '${primaryImageName}' not found in ZIP folder '${exactDirPath}'`);
              status = 'FAILED';
            }
         } else {
@@ -178,23 +214,25 @@ export default function BulkImportWizard({ isOpen, onClose, categories, setCateg
 
         const addImagesStr = (row['Additional Images'] || '').trim();
         if (addImagesStr) {
-           const names = addImagesStr.split(';').map(n => n.trim().toLowerCase()).filter(n => n);
+           const names = addImagesStr.split(';').map(n => n.trim()).filter(n => n);
            names.forEach(imgName => {
-             if (folderFiles[imgName]) {
-                media.gallery.push(folderFiles[imgName]);
+             const resolved = resolveMedia(imgName);
+             if (resolved) {
+                media.gallery.push(resolved);
              } else {
-                rowErrors.push(`Additional Image '${imgName}' not found in ZIP folder '${expectedDirPath}'`);
+                rowErrors.push(`Additional Image '${imgName}' not found in ZIP folder '${exactDirPath}'`);
                 status = 'FAILED';
              }
            });
         }
 
-        const videoFileName = (row['Video File'] || '').trim().toLowerCase();
+        const videoFileName = (row['Video File'] || '').trim();
         if (videoFileName) {
-           if (folderFiles[videoFileName]) {
-             media.videos.push(folderFiles[videoFileName]);
+           const resolved = resolveMedia(videoFileName);
+           if (resolved) {
+             media.videos.push(resolved);
            } else {
-             rowErrors.push(`Video File '${videoFileName}' not found in ZIP folder '${expectedDirPath}'`);
+             rowErrors.push(`Video File '${videoFileName}' not found in ZIP folder '${exactDirPath}'`);
              status = 'FAILED';
            }
         }
