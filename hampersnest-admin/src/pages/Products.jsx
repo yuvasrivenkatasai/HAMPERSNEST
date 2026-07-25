@@ -187,7 +187,20 @@ export default function Products() {
         { name: 'Calligraphy Message Card', price: 49 }
       ],
       customizationText: 'Make your gift extra special by adding a custom gift tag and selecting add-ons.',
-      deliveryInfoText: 'Standard Delivery: 3-5 business days. Express Delivery available at checkout.',
+      deliveryInfoText: `🚚 Dispatch:
+Orders are dispatched within 2–7 business days.
+
+📦 Delivery:
+We deliver across India and internationally through trusted courier partners.
+
+⚖️ Shipping Charges:
+Delivery charges are calculated based on the higher of the actual weight or volumetric weight, according to courier company guidelines.
+
+🎁 Bulk Orders:
+Automatic discounts are applied at checkout:
+• 50+ items → 5% OFF
+• 100+ items → 10% OFF
+• 200+ items → 15% OFF`,
       watermarkSettings: {
         enabled: true,
         type: 'Brand Name',
@@ -259,7 +272,20 @@ export default function Products() {
           { name: 'Calligraphy Message Card', price: 49 }
         ] : []),
       customizationText: product.customizationText || 'Make your gift extra special by adding a custom gift tag and selecting add-ons.',
-      deliveryInfoText: product.deliveryInfoText || 'Standard Delivery: 3-5 business days. Express Delivery available at checkout.',
+      deliveryInfoText: (!product.deliveryInfoText || product.deliveryInfoText === 'Standard Delivery: 3-5 business days. Express Delivery available at checkout.') ? `🚚 Dispatch:
+Orders are dispatched within 2–7 business days.
+
+📦 Delivery:
+We deliver across India and internationally through trusted courier partners.
+
+⚖️ Shipping Charges:
+Delivery charges are calculated based on the higher of the actual weight or volumetric weight, according to courier company guidelines.
+
+🎁 Bulk Orders:
+Automatic discounts are applied at checkout:
+• 50+ items → 5% OFF
+• 100+ items → 10% OFF
+• 200+ items → 15% OFF` : product.deliveryInfoText,
       watermarkSettings: product.watermarkSettings || {
         enabled: true,
         type: 'Brand Name',

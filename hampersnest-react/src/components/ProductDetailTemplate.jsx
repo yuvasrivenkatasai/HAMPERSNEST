@@ -7,6 +7,23 @@ import PremiumProductGallery from './PremiumProductGallery';
 import WishlistButton from './WishlistButton';
 import { API_BASE } from '../config.js';
 
+const DEFAULT_DELIVERY_INFO_TEXT = `🚚 Dispatch:
+Orders are dispatched within 2–7 business days.
+
+📦 Delivery:
+We deliver across India and internationally through trusted courier partners.
+
+⚖️ Shipping Charges:
+Delivery charges are calculated based on the higher of the actual weight or volumetric weight, according to courier company guidelines.
+
+🎁 Bulk Orders:
+Automatic discounts are applied at checkout:
+• 50+ items → 5% OFF
+• 100+ items → 10% OFF
+• 200+ items → 15% OFF`;
+
+const OLD_DEFAULT_DELIVERY = 'Standard Delivery: 3-5 business days. Express Delivery available at checkout.';
+
 export default function ProductDetailTemplate({ product, displayRelated = [] }) {
   const navigate = useNavigate();
   const { addToCart, toggleWishlist, isInWishlist, setQuoteModalOpen, settings } = useCart();
@@ -399,6 +416,33 @@ export default function ProductDetailTemplate({ product, displayRelated = [] }) 
                 </div>
               )}
 
+              {/* Important Delivery Notice */}
+              <div style={{
+                background: 'var(--color-ivory)',
+                border: '1px solid var(--color-gold)',
+                borderRadius: '12px',
+                padding: '16px',
+                marginBottom: '1rem',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.02)'
+              }}>
+                <h4 style={{ 
+                  margin: '0 0 10px 0', 
+                  color: 'var(--color-charcoal)', 
+                  fontSize: '0.95rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px'
+                }}>
+                  <i className="fa-solid fa-circle-info" style={{ color: 'var(--color-gold)' }}></i> 
+                  Important Delivery Information
+                </h4>
+                <ul style={{ margin: 0, paddingLeft: '20px', fontSize: '0.85rem', color: '#555', lineHeight: '1.5' }}>
+                  <li style={{ marginBottom: '6px' }}>Shipping charges are NOT included in the displayed product price.</li>
+                  <li style={{ marginBottom: '6px' }}>Delivery charges are calculated after checkout based on the destination and the higher of the actual or volumetric weight.</li>
+                  <li>Our team will contact the customer with the final shipping cost and estimated delivery date before dispatching the order.</li>
+                </ul>
+              </div>
+
               {/* 3. Quantity Selector and Purchase Actions */}
               <div className="action-row-buying" style={{ display: 'flex', gap: '10px', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap' }}>
                 <div className="qty-picker-detail" style={{ height: '48px', flexShrink: 0 }}>
@@ -480,9 +524,14 @@ export default function ProductDetailTemplate({ product, displayRelated = [] }) 
 
           {/* 5. Delivery Information */}
           {(() => {
+            let infoText = product.deliveryInfoText;
+            if (!infoText || infoText.trim() === '' || infoText.trim() === OLD_DEFAULT_DELIVERY) {
+              infoText = DEFAULT_DELIVERY_INFO_TEXT;
+            }
+
             const delItems = (product.shipping && product.shipping.length > 0)
               ? product.shipping
-              : (product.deliveryInfoText ? product.deliveryInfoText.split('\n').map(i => i.trim()).filter(Boolean) : []);
+              : infoText.split('\n').map(i => i.trim()).filter(Boolean);
 
             if (delItems.length === 0) return null;
 
@@ -491,11 +540,20 @@ export default function ProductDetailTemplate({ product, displayRelated = [] }) 
                 <h5 style={{ margin: '0 0 1rem 0', fontSize: '0.9rem', color: 'var(--color-charcoal)' }}>
                   <i className="fa-solid fa-truck" style={{ marginRight: '6px', color: 'var(--color-gold)' }}></i> Delivery Information
                 </h5>
-                {delItems.map((item, idx) => (
-                  <div key={idx} style={{ fontSize: '0.85rem', color: '#666', lineHeight: '1.5', display: 'flex', alignItems: 'flex-start', gap: '8px', marginBottom: '4px' }}>
-                    <i className="fa-solid fa-truck-fast" style={{ fontSize: '0.75rem', marginTop: '4px', color: '#999' }}></i> {item}
-                  </div>
-                ))}
+                {delItems.map((item, idx) => {
+                  if (item.startsWith('🚚') || item.startsWith('📦') || item.startsWith('⚖️') || item.startsWith('🎁')) {
+                    return (
+                      <div key={idx} style={{ fontSize: '0.9rem', fontWeight: 600, color: '#333', marginTop: idx > 0 ? '12px' : '0', marginBottom: '4px' }}>
+                        {item}
+                      </div>
+                    );
+                  }
+                  return (
+                    <div key={idx} style={{ fontSize: '0.85rem', color: '#666', lineHeight: '1.5', display: 'flex', alignItems: 'flex-start', gap: '8px', marginBottom: '4px' }}>
+                      <span style={{ fontSize: '0.75rem', marginTop: '4px', color: 'var(--color-gold)' }}>•</span> {item}
+                    </div>
+                  );
+                })}
               </div>
             );
           })()}
