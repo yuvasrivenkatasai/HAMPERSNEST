@@ -38,7 +38,7 @@ export default function Collections() {
 
   const handleCategoryScroll = (e) => {
     if (!hasScrolledCategories) {
-      setHasScrolledCategories(true);
+      setHasScrolledCategories(true); 
     }
     const { scrollLeft, scrollWidth, clientWidth } = e.target;
     if (scrollWidth > clientWidth) {
