@@ -48,24 +48,29 @@ export async function generateWatermarkedImage(buffer, options = {}) {
         // if we didn't want to calculate height. For precise padding, we'll calculate it.
     }
 
-    let gravity = 'northwest';
-    switch (position) {
-      case 'Top Left': gravity = 'northwest'; break;
-      case 'Top Right': gravity = 'northeast'; break;
-      case 'Bottom Left': gravity = 'southwest'; break;
-      case 'Bottom Right': gravity = 'southeast'; break;
-      case 'Center': gravity = 'center'; break;
-      default: gravity = 'northwest'; break;
-    }
+    // 2. Determine gravity position
+    // As per global update requirements, watermark is globally centered
+    const gravity = 'center';
 
     // 3. Process the logo watermark (Resize)
     const logoBuffer = await fs.promises.readFile(LOGO_PATH);
     
-    // We simply resize the PNG while keeping its native transparency intact
-    const processedLogo = await sharp(logoBuffer)
+    const resizedLogo = await sharp(logoBuffer)
       .resize({ width: watermarkWidth })
       .png()
       .toBuffer();
+
+    const logoMeta = await sharp(resizedLogo).metadata();
+    const logoB64 = resizedLogo.toString('base64');
+    
+    // Wrap in SVG for extreme transparency (60% opacity)
+    const svgOpacityWrapper = Buffer.from(`
+      <svg width="${logoMeta.width}" height="${logoMeta.height}">
+        <image href="data:image/png;base64,${logoB64}" width="100%" height="100%" opacity="0.60"/>
+      </svg>
+    `);
+
+    const processedLogo = await sharp(svgOpacityWrapper).png().toBuffer();
 
     // 4. Apply watermark to image
     // If it's a corner gravity, we can just pad the logo itself to push it away from the edges

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { generateCatalogPdf } from '../utils/pdfGenerator';
+import { apiRequest } from '../utils/api';
 
 export default function CatalogExportModal({ isOpen, onClose, products, categories, selectedProductIds }) {
   // Export Selection (Independent)
@@ -69,7 +70,27 @@ export default function CatalogExportModal({ isOpen, onClose, products, categori
       };
     });
 
+    // Final filter: Never allow "Single Products" in the PDF catalogue
+    enrichedProducts = enrichedProducts.filter(p => 
+      p.category !== 'Single Products' && p.categoryName !== 'Single Products'
+    );
+
+    if (enrichedProducts.length === 0) {
+      alert('No products available for the selected filters (Single Products are excluded from the catalogue).');
+      setGenerating(false);
+      return;
+    }
+
     try {
+      // Fetch the latest settings for Delivery Info
+      let pdfDeliveryInfo = '';
+      try {
+        const settingsData = await apiRequest('/api/settings');
+        pdfDeliveryInfo = settingsData.pdfDeliveryInfo || '';
+      } catch (e) {
+        console.warn('Failed to fetch pdf delivery info', e);
+      }
+
       await generateCatalogPdf(enrichedProducts, mode, (prog) => setProgress(prog), {
         showPrice,
         showDescription,
@@ -78,7 +99,8 @@ export default function CatalogExportModal({ isOpen, onClose, products, categori
         exportMode,
         selectedCategory,
         selectedSubcategory,
-        categories
+        categories,
+        pdfDeliveryInfo
       });
     } catch (err) {
       console.error(err);

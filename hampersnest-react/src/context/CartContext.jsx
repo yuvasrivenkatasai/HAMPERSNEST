@@ -268,29 +268,200 @@ export const CartProvider = ({ children }) => {
   // Generate Whatsapp Checkout Message
   const getWhatsappCheckoutUrl = (userDetails = {}, orderId = null) => {
     const whatsappNumber = settings?.whatsappNumber;
+    
+    // Format currency without trailing zero decimals for whole numbers
+    const formatCurrency = (val) => {
+      const num = Number(val);
+      const isWhole = num % 1 === 0;
+      return '₹' + num.toLocaleString('en-IN', {
+        minimumFractionDigits: isWhole ? 0 : 2,
+        maximumFractionDigits: isWhole ? 0 : 2
+      });
+    };
+    
+    const formatDate = (dateStr) => {
+      if (!dateStr) return '';
+      try {
+        const d = new Date(dateStr);
+        if (isNaN(d.getTime())) return dateStr;
+        // Check for crazy years
+        if (d.getFullYear() > 2100 || d.getFullYear() < 2000) return dateStr;
+        return new Intl.DateTimeFormat('en-GB', { day: '2-digit', month: 'long', year: 'numeric' }).format(d);
+      } catch (e) {
+        return dateStr;
+      }
+    };
+    
+    const DIVIDER = '══════════════════════';
 
+    // 1. Header
+    const today = new Intl.DateTimeFormat('en-GB', { day: '2-digit', month: 'long', year: 'numeric' }).format(new Date());
+    let headerParts = [];
+    headerParts.push('*HAMPERS NEST*');
+    headerParts.push('Premium Gifts & Return Gifts');
+    headerParts.push('');
+    headerParts.push(DIVIDER);
+    headerParts.push('');
+    headerParts.push('*ORDER REQUEST*');
+    if (orderId) {
+      headerParts.push(`Order Reference:\n${orderId}`);
+    }
+    headerParts.push(`Date:\n${today}`);
+
+    // 2. Products
     let orderDetailsText = cart.map((item, idx) => {
-      let customStr = '';
-      if (item.customizations.variant) {
-        customStr += `\n   - Size: ${item.customizations.variant.name}`;
+      let lines = [];
+      lines.push(DIVIDER);
+      lines.push('');
+      
+      lines.push(`*${item.name}*`);
+      
+      let cats = [];
+      if (item.category) cats.push(item.category);
+      if (item.subCategory) cats.push(item.subCategory);
+      if (cats.length > 0) lines.push(cats.join(' - '));
+      
+      if (item.customizations?.variant) {
+        lines.push(`Variant: ${item.customizations.variant.name}`);
       }
-      if (item.customizations.giftTag) {
-        customStr += `\n   - Tag Msg: "${item.customizations.giftTag}"`;
+      
+      lines.push('');
+      
+      const basePrice = item.customizations?.variant?.price 
+                        ? item.customizations.variant.price 
+                        : (item.basePrice || (item.price - (item.customizations?.addedPrice || 0)));
+                        
+      lines.push(`• Qty : ${item.quantity} Pieces`);
+      lines.push(`• Price : ${formatCurrency(basePrice)} each`);
+      lines.push(`• Total : ${formatCurrency(basePrice * item.quantity)}`);
+
+      // Customizations
+      if (item.customizations?.giftTag) {
+        lines.push('');
+        lines.push('Gift Tag');
+        lines.push(item.customizations.giftTag);
       }
-      if (item.customizations.addOns && item.customizations.addOns.length > 0) {
-        customStr += `\n   - Add-ons: ${item.customizations.addOns.join(', ')}`;
+      
+      let addonTotal = 0;
+      if (item.customizations?.addOns && item.customizations.addOns.length > 0) {
+        lines.push('');
+        lines.push('Selected Add-ons');
+        
+        item.customizations.addOns.forEach(addonName => {
+          let price = 0;
+          if (item.customAddons && Array.isArray(item.customAddons)) {
+             const found = item.customAddons.find(a => a.name === addonName);
+             if (found) price = Number(found.price);
+          } else {
+             const defaultAddons = [
+                { name: 'Scented Wax Candle', price: 99 },
+                { name: 'Extra Chocolates (Pack of 4)', price: 149 },
+                { name: 'Premium Hydration Flask', price: 299 },
+                { name: 'Calligraphy Message Card', price: 49 }
+             ];
+             const found = defaultAddons.find(a => a.name === addonName);
+             if (found) price = Number(found.price);
+          }
+          addonTotal += price;
+          lines.push(`• ${addonName} (+${formatCurrency(price)})`);
+        });
       }
-      return `${idx + 1}. *${item.name}* x ${item.quantity} (₹${item.price} each) ${customStr}`;
+
+      if (addonTotal > 0) {
+         lines.push('');
+         lines.push('Customization Total');
+         lines.push(formatCurrency(addonTotal * item.quantity));
+      }
+
+      return lines.join('\n');
     }).join('\n\n');
 
-    const orderRefStr = orderId ? `*Order Reference:* ${orderId}\n` : '';
-    const nameStr = userDetails.name ? `*Name:* ${userDetails.name}\n` : '';
-    const phoneStr = userDetails.phone ? `*Phone:* ${userDetails.phone}\n` : '';
-    const eventStr = userDetails.eventType ? `*Event:* ${userDetails.eventType}\n` : '';
-    const dateStr = userDetails.deliveryDate ? `*Required Date:* ${userDetails.deliveryDate}\n` : '';
-    const notesStr = userDetails.notes ? `*Notes:* ${userDetails.notes}\n` : '';
+    // 3. Order Summary
+    let totalsLines = [];
+    totalsLines.push(`*ORDER SUMMARY*`);
+    totalsLines.push('');
+    // Proportional fonts in WhatsApp make perfect alignment hard, but this is a close approximation.
+    totalsLines.push(`Products            ${cart.length}`);
+    totalsLines.push(`Total Pieces        ${cartCount}`);
+    totalsLines.push(`Subtotal            ${formatCurrency(cartTotals.subtotal)}`);
+    
+    if (cartTotals.discountTotal > 0) {
+       totalsLines.push(`Discount            -${formatCurrency(cartTotals.discountTotal)}`);
+    }
+    
+    totalsLines.push(`Shipping            Calculated Separately`);
+    totalsLines.push(`Estimated Total     ${formatCurrency(cartTotal)}`);
 
-    const message = `Hi ${settings?.storeName || 'Hampers Nest'}!\n\nI would like to place an order / get a quote for the following hampers:\n\n${orderDetailsText}\n\n*Total Items:* ${cartCount}\n*Estimated Subtotal:* ₹${cartTotals.subtotal.toFixed(2)}${cartTotals.discountTotal > 0 ? `\n*Bulk Discount Saved:* -₹${cartTotals.discountTotal.toFixed(2)}` : ''}\n*Estimated Total:* ₹${cartTotal.toFixed(2)}\n\n${nameStr}${phoneStr}${eventStr}${dateStr}${notesStr}Please confirm availability and share the catalog. Thank you!`;
+    // 4. Customer Details
+    let customerLines = [];
+    if (userDetails.name || userDetails.phone || userDetails.email || userDetails.eventType || userDetails.deliveryDate || userDetails.location) {
+       customerLines.push(DIVIDER);
+       customerLines.push('');
+       customerLines.push(`*CUSTOMER*`);
+       customerLines.push('');
+       
+       if (userDetails.name) {
+         customerLines.push(userDetails.name);
+       }
+       if (userDetails.phone) {
+         customerLines.push(userDetails.phone);
+       }
+       if (userDetails.email) {
+         customerLines.push(userDetails.email);
+       }
+       if (userDetails.eventType) {
+         customerLines.push(userDetails.eventType);
+       }
+       if (userDetails.deliveryDate) {
+         customerLines.push(formatDate(userDetails.deliveryDate));
+       }
+       if (userDetails.location) {
+         customerLines.push(userDetails.location);
+       }
+    }
+
+    // 5. Notes
+    let notesLines = [];
+    if (userDetails.notes) {
+       let safeNotes = userDetails.notes.trim();
+       if (safeNotes.length > 180) {
+         safeNotes = safeNotes.substring(0, 180) + '...Read More';
+       }
+       notesLines.push(DIVIDER);
+       notesLines.push('');
+       notesLines.push(`*CUSTOMER NOTES*`);
+       notesLines.push('');
+       notesLines.push(safeNotes);
+    }
+
+    // 6. Footer
+    let footerLines = [
+      DIVIDER,
+      ``,
+      `Shipping charges are calculated separately based on destination and volumetric weight.`,
+      ``,
+      `Kindly confirm:`,
+      ``,
+      `• Product Availability`,
+      `• Final Shipping Charges`,
+      `• Estimated Dispatch Date`,
+      ``,
+      `Thank you.`,
+      ``,
+      `Hampers Nest Team`
+    ];
+
+    const messageParts = [];
+    messageParts.push(headerParts.join('\n'));
+    messageParts.push(orderDetailsText);
+    messageParts.push(DIVIDER);
+    messageParts.push(totalsLines.join('\n'));
+    if (customerLines.length > 0) messageParts.push(customerLines.join('\n'));
+    if (notesLines.length > 0) messageParts.push(notesLines.join('\n'));
+    messageParts.push(footerLines.join('\n'));
+
+    // Remove any accidental triple blank lines caused by joins
+    const message = messageParts.join('\n\n').replace(/\n{3,}/g, '\n\n');
 
     return `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
   };

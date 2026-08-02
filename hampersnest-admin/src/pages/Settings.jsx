@@ -18,6 +18,7 @@ export default function Settings() {
     shippingRate: '0',
     announcementText: '',
     announcementActive: false,
+    pdfDeliveryInfo: '',
     businessAddress: 'Uppal, Hyderabad, Telangana, India',
     googleMapsUrl: 'https://www.google.com/maps/dir/?api=1&destination=Uppal%2C%20Hyderabad%2C%20Telangana%2C%20India',
     whatsappNumber: '917989202194',
@@ -380,6 +381,25 @@ export default function Settings() {
                   style={{ width: '18px', height: '18px' }}
                 />
                 <label htmlFor="announcementActive" style={{ margin: 0, fontWeight: 500 }}>Show Announcement Banner</label>
+              </div>
+
+              <h4 style={{ color: 'var(--color-purple)', borderBottom: '1px solid var(--color-beige)', paddingBottom: '8px', marginBottom: '15px', marginTop: '20px' }}>
+                <i className="fa-solid fa-file-pdf"></i> PDF Catalogue Settings
+              </h4>
+
+              <div className="form-group">
+                <label className="form-label">Cover Page Delivery Information</label>
+                <textarea
+                  name="pdfDeliveryInfo"
+                  className="form-input"
+                  rows="6"
+                  value={settingsData.pdfDeliveryInfo || ''}
+                  onChange={handleSettingsChange}
+                  placeholder="• Dispatch within 2–7 business days&#10;• Delivery across India & International..."
+                ></textarea>
+                <small style={{ color: 'var(--color-gray-text)', fontSize: '0.75rem', marginTop: '4px', display: 'block' }}>
+                  This information will be displayed on the cover page of generated PDF catalogues.
+                </small>
               </div>
 
               <h4 style={{ color: 'var(--color-purple)', borderBottom: '1px solid var(--color-beige)', paddingBottom: '8px', marginBottom: '15px', marginTop: '20px' }}>

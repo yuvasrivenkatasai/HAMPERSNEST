@@ -90,6 +90,17 @@ export const getSettings = async (req, res) => {
       await Setting.upsert({ key: 'priceRangeCards', value: defaultPriceRangeCards });
     }
 
+    // Auto-initialize pdfDeliveryInfo
+    if (!settingsObj.pdfDeliveryInfo) {
+      const defaultPdfDeliveryInfo = `• Dispatch within 2–7 business days
+• Delivery across India & International
+• Shipping calculated based on actual or volumetric weight
+• Bulk corporate orders available
+• Premium packaging included`;
+      settingsObj.pdfDeliveryInfo = defaultPdfDeliveryInfo;
+      await Setting.upsert({ key: 'pdfDeliveryInfo', value: defaultPdfDeliveryInfo });
+    }
+
     // Fetch categories from the Categories table
     const categoriesDb = await Category.findAll({ order: [['createdAt', 'ASC']] });
     const categoriesFormatted = categoriesDb.map(c => ({

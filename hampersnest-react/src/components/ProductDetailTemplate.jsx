@@ -52,6 +52,13 @@ export default function ProductDetailTemplate({ product, displayRelated = [] }) 
 
   const [selectedAddOnIndices, setSelectedAddOnIndices] = useState([]);
 
+  // Accordion State
+  const [activeAccordion, setActiveAccordion] = useState(null);
+
+  const toggleAccordion = (section) => {
+    setActiveAccordion(prev => (prev === section ? null : section));
+  };
+
   // Gallery States
   // Managed by PremiumProductGallery component now
   
@@ -365,8 +372,7 @@ export default function ProductDetailTemplate({ product, displayRelated = [] }) 
                 </div>
               )}
 
-              {/* 3. Product Description */}
-              <p className="product-detail-short-desc">{product.description}</p>
+              {/* Product Description removed from top to avoid duplication */}
             </div>
 
             {/* Customization Form */}
@@ -471,8 +477,173 @@ export default function ProductDetailTemplate({ product, displayRelated = [] }) 
           </div>
         </div>
 
-        {/* --- DESKTOP GRID --- */}
-        <div className="product-secondary-info-grid">
+        {/* --- PREMIUM ACCORDION LAYOUT --- */}
+        <div className="product-accordion-container" style={{ marginTop: '1rem' }}>
+          
+          {/* 1. Description */}
+          <div className="product-accordion-item">
+            <button 
+              className="product-accordion-header" 
+              onClick={() => toggleAccordion('description')}
+              aria-expanded={activeAccordion === 'description'}
+            >
+              Description
+              <i className={`fa-solid fa-chevron-down product-accordion-icon ${activeAccordion === 'description' ? 'open' : ''}`}></i>
+            </button>
+            <div className={`product-accordion-content ${activeAccordion === 'description' ? 'open' : ''}`}>
+              <div className="product-accordion-content-inner">
+                {activeAccordion === 'description' && (
+                  <div style={{ fontSize: '0.9rem', color: '#4b5563', lineHeight: '1.6', whiteSpace: 'pre-wrap' }}>
+                    {product.description}
+                    
+                    {product.highlights && (
+                      <div style={{ marginTop: '16px' }}>
+                        <h4 style={{ fontWeight: 600, color: 'var(--color-charcoal)', marginBottom: '8px', fontSize: '0.95rem' }}>Highlights</h4>
+                        <div>{product.highlights}</div>
+                      </div>
+                    )}
+                    {product.features && (
+                      <div style={{ marginTop: '16px' }}>
+                        <h4 style={{ fontWeight: 600, color: 'var(--color-charcoal)', marginBottom: '8px', fontSize: '0.95rem' }}>Features</h4>
+                        <div>{product.features}</div>
+                      </div>
+                    )}
+                    {product.materials && (
+                      <div style={{ marginTop: '16px' }}>
+                        <h4 style={{ fontWeight: 600, color: 'var(--color-charcoal)', marginBottom: '8px', fontSize: '0.95rem' }}>Material</h4>
+                        <div>{product.materials}</div>
+                      </div>
+                    )}
+                    {product.careInstructions && (
+                      <div style={{ marginTop: '16px' }}>
+                        <h4 style={{ fontWeight: 600, color: 'var(--color-charcoal)', marginBottom: '8px', fontSize: '0.95rem' }}>Care Instructions</h4>
+                        <div>{product.careInstructions}</div>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* 2. Delivery Information */}
+          {(() => {
+            let infoText = product.deliveryInfoText;
+            if (!infoText || infoText.trim() === '' || infoText.trim() === OLD_DEFAULT_DELIVERY) {
+              infoText = DEFAULT_DELIVERY_INFO_TEXT;
+            }
+            const delItems = (product.shipping && product.shipping.length > 0)
+              ? product.shipping
+              : infoText.split('\n').map(i => i.trim()).filter(Boolean);
+
+            if (delItems.length === 0) return null;
+
+            return (
+              <div className="product-accordion-item">
+                <button 
+                  className="product-accordion-header" 
+                  onClick={() => toggleAccordion('delivery')}
+                  aria-expanded={activeAccordion === 'delivery'}
+                >
+                  Delivery Information
+                  <i className={`fa-solid fa-chevron-down product-accordion-icon ${activeAccordion === 'delivery' ? 'open' : ''}`}></i>
+                </button>
+                <div className={`product-accordion-content ${activeAccordion === 'delivery' ? 'open' : ''}`}>
+                  <div className="product-accordion-content-inner">
+                    {activeAccordion === 'delivery' && delItems.map((item, idx) => {
+                      if (item.startsWith('🚚') || item.startsWith('📦') || item.startsWith('⚖️') || item.startsWith('🎁')) {
+                        return (
+                          <div key={idx} style={{ fontSize: '0.95rem', fontWeight: 600, color: '#1f2937', marginTop: idx > 0 ? '16px' : '0', marginBottom: '8px' }}>
+                            {item}
+                          </div>
+                        );
+                      }
+                      return (
+                        <div key={idx} style={{ fontSize: '0.9rem', color: '#4b5563', lineHeight: '1.6', display: 'flex', alignItems: 'flex-start', gap: '10px', marginBottom: '6px' }}>
+                          <span style={{ fontSize: '0.75rem', marginTop: '6px', color: 'var(--color-gold)' }}>•</span> {item}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+            );
+          })()}
+
+          {/* 3. Personalize Your Hamper */}
+          {(product.customGiftTagEnabled !== false || product.addonsEnabled !== false || true) && (
+            <div className="product-accordion-item">
+              <button 
+                className="product-accordion-header" 
+                onClick={() => toggleAccordion('personalize')}
+                aria-expanded={activeAccordion === 'personalize'}
+              >
+                Personalize Your Hamper
+                <i className={`fa-solid fa-chevron-down product-accordion-icon ${activeAccordion === 'personalize' ? 'open' : ''}`}></i>
+              </button>
+              <div className={`product-accordion-content ${activeAccordion === 'personalize' ? 'open' : ''}`}>
+                <div className="product-accordion-content-inner">
+                  {activeAccordion === 'personalize' && (
+                    <>
+                      {product.customGiftTagEnabled !== false && (
+                        <div className="customizer-row" style={{ marginBottom: '16px' }}>
+                          <label className="customizer-label" htmlFor="gift-tag-msg" style={{ fontSize: '0.95rem', color: '#1f2937', fontWeight: 500, marginBottom: '8px', display: 'block' }}>
+                            Custom Gift Tag Message (Optional)
+                          </label>
+                          <input
+                            type="text"
+                            id="gift-tag-msg"
+                            className="customizer-input-text"
+                            placeholder="e.g. Happy Wedding Sneha & Ajay! / Welcome Home"
+                            value={giftTag}
+                            onChange={(e) => setGiftTag(e.target.value)}
+                            style={{ width: '100%', padding: '12px', border: '1px solid #e5e7eb', borderRadius: '8px', fontSize: '0.9rem' }}
+                          />
+                        </div>
+                      )}
+
+                      {product.addonsEnabled !== false && (
+                        <div className="customizer-row" style={{ marginBottom: '20px' }}>
+                          <label className="customizer-label" style={{ fontSize: '0.95rem', color: '#1f2937', fontWeight: 500, marginBottom: '12px', display: 'block' }}>
+                            Optional Add-ons
+                          </label>
+                          <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '12px' }}>
+                            {productAddons.map((addon, idx) => (
+                              <label key={idx} style={{ display: 'flex', alignItems: 'center', cursor: 'pointer', fontSize: '0.9rem', color: '#4b5563' }}>
+                                <input
+                                  type="checkbox"
+                                  checked={selectedAddOnIndices.includes(idx)}
+                                  onChange={(e) => {
+                                    if (e.target.checked) {
+                                      setSelectedAddOnIndices([...selectedAddOnIndices, idx]);
+                                    } else {
+                                      setSelectedAddOnIndices(selectedAddOnIndices.filter(i => i !== idx));
+                                    }
+                                  }}
+                                  style={{ marginRight: '10px', width: '18px', height: '18px', accentColor: 'var(--color-gold)' }}
+                                />
+                                {addon.name} <span style={{ color: 'var(--color-gold-dark)', marginLeft: '4px', fontWeight: 500 }}>(+{formatPrice(addon.price)})</span>
+                              </label>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      <button
+                        type="button"
+                        onClick={handleRequestCustomization}
+                        className="modal-customize-btn"
+                        style={{ width: '100%', paddingTop: '14px', paddingBottom: '14px', fontSize: '0.95rem', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', border: 'none', background: 'var(--gold-gradient)', color: '#fff', fontWeight: 600, cursor: 'pointer' }}
+                      >
+                        <i className="fa-solid fa-wand-magic-sparkles"></i> Request Customization
+                      </button>
+                    </>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* 4. Customization Available */}
           {(() => {
             const custItems = (product.customization && product.customization.length > 0)
@@ -482,115 +653,31 @@ export default function ProductDetailTemplate({ product, displayRelated = [] }) 
             if (custItems.length === 0) return null;
 
             return (
-              <div className="secondary-info-card">
-                <h5 style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--color-purple)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '1rem', marginTop: 0 }}>
-                  Customization Available:
-                </h5>
-                <div className="modal-features-grid customization-features-grid" style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '8px' }}>
-                  {custItems.map((feat, idx) => (
-                    <span key={idx} style={{ fontSize: '0.85rem', color: '#555', display: 'flex', alignItems: 'flex-start', gap: '8px', lineHeight: '1.4' }}>
-                      <i className="fa-solid fa-check" style={{ color: 'var(--color-gold)', flexShrink: 0, marginTop: '3px' }}></i> {feat}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            );
-          })()}
-
-          {/* 5. Delivery Information */}
-          {(() => {
-            let infoText = product.deliveryInfoText;
-            if (!infoText || infoText.trim() === '' || infoText.trim() === OLD_DEFAULT_DELIVERY) {
-              infoText = DEFAULT_DELIVERY_INFO_TEXT;
-            }
-
-            const delItems = (product.shipping && product.shipping.length > 0)
-              ? product.shipping
-              : infoText.split('\n').map(i => i.trim()).filter(Boolean);
-
-            if (delItems.length === 0) return null;
-
-            return (
-              <div className="secondary-info-card">
-                <h5 style={{ margin: '0 0 1rem 0', fontSize: '0.9rem', color: 'var(--color-charcoal)' }}>
-                  <i className="fa-solid fa-truck" style={{ marginRight: '6px', color: 'var(--color-gold)' }}></i> Delivery Information
-                </h5>
-                {delItems.map((item, idx) => {
-                  if (item.startsWith('🚚') || item.startsWith('📦') || item.startsWith('⚖️') || item.startsWith('🎁')) {
-                    return (
-                      <div key={idx} style={{ fontSize: '0.9rem', fontWeight: 600, color: '#333', marginTop: idx > 0 ? '12px' : '0', marginBottom: '4px' }}>
-                        {item}
+              <div className="product-accordion-item">
+                <button 
+                  className="product-accordion-header" 
+                  onClick={() => toggleAccordion('customization')}
+                  aria-expanded={activeAccordion === 'customization'}
+                >
+                  Customization Available
+                  <i className={`fa-solid fa-chevron-down product-accordion-icon ${activeAccordion === 'customization' ? 'open' : ''}`}></i>
+                </button>
+                <div className={`product-accordion-content ${activeAccordion === 'customization' ? 'open' : ''}`}>
+                  <div className="product-accordion-content-inner">
+                    {activeAccordion === 'customization' && (
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '10px' }}>
+                        {custItems.map((feat, idx) => (
+                          <span key={idx} style={{ fontSize: '0.9rem', color: '#4b5563', display: 'flex', alignItems: 'flex-start', gap: '10px', lineHeight: '1.5' }}>
+                            <i className="fa-solid fa-check" style={{ color: 'var(--color-gold)', flexShrink: 0, marginTop: '4px' }}></i> {feat}
+                          </span>
+                        ))}
                       </div>
-                    );
-                  }
-                  return (
-                    <div key={idx} style={{ fontSize: '0.85rem', color: '#666', lineHeight: '1.5', display: 'flex', alignItems: 'flex-start', gap: '8px', marginBottom: '4px' }}>
-                      <span style={{ fontSize: '0.75rem', marginTop: '4px', color: 'var(--color-gold)' }}>•</span> {item}
-                    </div>
-                  );
-                })}
-              </div>
-            );
-          })()}
-
-          {/* 6. Personalize Your Hamper */}
-          {(product.customGiftTagEnabled !== false || product.addonsEnabled !== false || true) && (
-            <div className="secondary-info-card">
-              <h3 className="customizer-section-title" style={{ fontSize: '1rem' }}>Personalize Your Hamper</h3>
-              
-              {product.customGiftTagEnabled !== false && (
-                <div className="customizer-row">
-                  <label className="customizer-label" htmlFor="gift-tag-msg">
-                    Custom Gift Tag Message (Optional)
-                  </label>
-                  <input
-                    type="text"
-                    id="gift-tag-msg"
-                    className="customizer-input-text"
-                    placeholder="e.g. Happy Wedding Sneha & Ajay! / Welcome Home"
-                    value={giftTag}
-                    onChange={(e) => setGiftTag(e.target.value)}
-                  />
-                </div>
-              )}
-
-              {product.addonsEnabled !== false && (
-                <div className="customizer-row" style={{ marginTop: '1rem' }}>
-                  <label className="customizer-label" style={{ marginBottom: '8px', display: 'block' }}>
-                    Optional Add-ons
-                  </label>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '8px' }}>
-                    {productAddons.map((addon, idx) => (
-                      <label key={idx} style={{ display: 'flex', alignItems: 'center', cursor: 'pointer', fontSize: '0.9rem', color: '#444' }}>
-                        <input
-                          type="checkbox"
-                          checked={selectedAddOnIndices.includes(idx)}
-                          onChange={(e) => {
-                            if (e.target.checked) {
-                              setSelectedAddOnIndices([...selectedAddOnIndices, idx]);
-                            } else {
-                              setSelectedAddOnIndices(selectedAddOnIndices.filter(i => i !== idx));
-                            }
-                          }}
-                          style={{ marginRight: '8px', width: '16px', height: '16px', accentColor: 'var(--color-gold)' }}
-                        />
-                        {addon.name} (+{formatPrice(addon.price)})
-                      </label>
-                    ))}
+                    )}
                   </div>
                 </div>
-              )}
-
-              <button
-                type="button"
-                onClick={handleRequestCustomization}
-                className="modal-customize-btn"
-                style={{ marginTop: 'auto', width: '100%', paddingTop: '12px', paddingBottom: '12px', alignSelf: 'flex-start' }}
-              >
-                <i className="fa-solid fa-wand-magic-sparkles"></i> Request Customization
-              </button>
-            </div>
-          )}
+              </div>
+            );
+          })()}
         </div>
 
         {/* 11. Related Products */}
