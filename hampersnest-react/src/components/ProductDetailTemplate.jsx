@@ -629,14 +629,6 @@ export default function ProductDetailTemplate({ product, displayRelated = [] }) 
                         </div>
                       )}
 
-                      <button
-                        type="button"
-                        onClick={handleRequestCustomization}
-                        className="modal-customize-btn"
-                        style={{ width: '100%', paddingTop: '14px', paddingBottom: '14px', fontSize: '0.95rem', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', border: 'none', background: 'var(--gold-gradient)', color: '#fff', fontWeight: 600, cursor: 'pointer' }}
-                      >
-                        <i className="fa-solid fa-wand-magic-sparkles"></i> Request Customization
-                      </button>
                     </>
                   )}
                 </div>
@@ -648,9 +640,15 @@ export default function ProductDetailTemplate({ product, displayRelated = [] }) 
           {(() => {
             const custItems = (product.customization && product.customization.length > 0)
               ? product.customization
-              : (product.customizationText ? product.customizationText.split('\n').map(i => i.trim()).filter(Boolean) : []);
-
-            if (custItems.length === 0) return null;
+              : (product.customizationText ? product.customizationText.split('\n').map(i => i.trim()).filter(Boolean) : [
+                  "Custom Gift Wrapping",
+                  "Custom Branding",
+                  "Corporate Branding",
+                  "Bulk Order Customization",
+                  "Personalized Messages",
+                  "Custom Color Themes",
+                  "Special Packaging"
+                ]);
 
             return (
               <div className="product-accordion-item">
@@ -665,13 +663,23 @@ export default function ProductDetailTemplate({ product, displayRelated = [] }) 
                 <div className={`product-accordion-content ${activeAccordion === 'customization' ? 'open' : ''}`}>
                   <div className="product-accordion-content-inner">
                     {activeAccordion === 'customization' && (
-                      <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '10px' }}>
-                        {custItems.map((feat, idx) => (
-                          <span key={idx} style={{ fontSize: '0.9rem', color: '#4b5563', display: 'flex', alignItems: 'flex-start', gap: '10px', lineHeight: '1.5' }}>
-                            <i className="fa-solid fa-check" style={{ color: 'var(--color-gold)', flexShrink: 0, marginTop: '4px' }}></i> {feat}
-                          </span>
-                        ))}
-                      </div>
+                      <>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '10px', marginBottom: '20px' }}>
+                          {custItems.map((feat, idx) => (
+                            <span key={idx} style={{ fontSize: '0.9rem', color: '#4b5563', display: 'flex', alignItems: 'flex-start', gap: '10px', lineHeight: '1.5' }}>
+                              <i className="fa-solid fa-check" style={{ color: 'var(--color-gold)', flexShrink: 0, marginTop: '4px' }}></i> {feat}
+                            </span>
+                          ))}
+                        </div>
+                        <button
+                          type="button"
+                          onClick={handleRequestCustomization}
+                          className="modal-customize-btn"
+                          style={{ width: '100%', paddingTop: '14px', paddingBottom: '14px', fontSize: '0.95rem', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', border: 'none', background: 'var(--gold-gradient)', color: '#fff', fontWeight: 600, cursor: 'pointer' }}
+                        >
+                          <i className="fa-solid fa-wand-magic-sparkles"></i> Request Customization
+                        </button>
+                      </>
                     )}
                   </div>
                 </div>
