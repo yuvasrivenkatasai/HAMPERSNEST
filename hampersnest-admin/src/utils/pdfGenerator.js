@@ -455,8 +455,11 @@ export const generateCatalogPdf = async (products, mode = 'download', onProgress
           doc.rect(x + 2, y + 2, destW, destH, 'F');
         }
         
-        let textY = y + imgH + 8; // generous gap between image and title
         const textX = x + (cardWidth / 2);
+        
+        // Fixed layout vertical anchors to prevent overlap
+        const titleY = y + imgH + 7.5;
+        const descY = titleY + 8.5;
         
         // Name (max 2 lines)
         doc.setTextColor(purple);
@@ -466,10 +469,9 @@ export const generateCatalogPdf = async (products, mode = 'download', onProgress
         if (titleLines.length > 2) {
           titleLines = [titleLines[0], titleLines[1].substring(0, titleLines[1].length - 3) + '...'];
         }
-        doc.text(titleLines, textX, textY, { align: 'center' });
-        textY += (titleLines.length * 5) + 3; // gap between title and description
+        doc.text(titleLines, textX, titleY, { align: 'center' });
         
-        // Short Description
+        // Short Description (max 2 lines)
         if (showDescription) {
           doc.setTextColor(gray);
           doc.setFont('helvetica', 'normal');
@@ -484,20 +486,17 @@ export const generateCatalogPdf = async (products, mode = 'download', onProgress
              descLines = [descLines[0], descLines[1].substring(0, descLines[1].length - 3) + '...'];
           }
           if (descLines.length > 0 && descLines[0].trim() !== '') {
-            doc.text(descLines, textX, textY, { align: 'center' });
-            textY += (descLines.length * 4.5) + 3;
-          } else {
-            textY += 3;
+            doc.text(descLines, textX, descY, { align: 'center' });
           }
         }
         
-        // Price
+        // Price (fixed at bottom)
         if (showPrice) {
           doc.setTextColor(purple);
           doc.setFont('helvetica', 'bold');
           doc.setFontSize(13);
           const priceTxt = `Rs. ${p.price.toLocaleString()}`;
-          const priceY = y + cardHeight - 8;
+          const priceY = y + cardHeight - 5.5;
           
           if (p.pricePerPiece) {
             doc.text(priceTxt, textX, priceY - 3, { align: 'center' });
