@@ -6,6 +6,9 @@ import ProductCard from './ProductCard';
 import PremiumProductGallery from './PremiumProductGallery';
 import WishlistButton from './WishlistButton';
 import { API_BASE } from '../config.js';
+import DOMPurify from 'dompurify';
+import { MINIMUM_ORDER_QTY, QUICK_QTYS } from '../utils/constants';
+import { validateQuantityInput, sanitizeQuantityOnBlur } from '../utils/ValidationUtils';
 
 const DEFAULT_DELIVERY_INFO_TEXT = `🚚 Dispatch:
 Orders are dispatched within 2–7 business days.
@@ -14,13 +17,7 @@ Orders are dispatched within 2–7 business days.
 We deliver across India and internationally through trusted courier partners.
 
 ⚖️ Shipping Charges:
-Delivery charges are calculated based on the higher of the actual weight or volumetric weight, according to courier company guidelines.
-
-🎁 Bulk Orders:
-Automatic discounts are applied at checkout:
-• 50+ items → 5% OFF
-• 100+ items → 10% OFF
-• 200+ items → 15% OFF`;
+Delivery charges are calculated based on the higher of the actual weight or volumetric weight, according to courier company guidelines.`;
 
 const OLD_DEFAULT_DELIVERY = 'Standard Delivery: 3-5 business days. Express Delivery available at checkout.';
 
@@ -33,7 +30,8 @@ export default function ProductDetailTemplate({ product, displayRelated = [] }) 
 
   // Form States
   const [giftTag, setGiftTag] = useState('');
-  const [quantity, setQuantity] = useState(5);
+  const [quantity, setQuantity] = useState(MINIMUM_ORDER_QTY);
+  const [qtyInputText, setQtyInputText] = useState(MINIMUM_ORDER_QTY.toString());
   
   // Variant State
   const defaultVariant = product.variantsEnabled && Array.isArray(product.variants) && product.variants.length > 0 
@@ -41,16 +39,20 @@ export default function ProductDetailTemplate({ product, displayRelated = [] }) 
     : null;
   const [selectedVariant, setSelectedVariant] = useState(defaultVariant);
   
-  const productAddons = Array.isArray(product.customAddons) && product.customAddons.length > 0 
+  const rawProductAddons = Array.isArray(product.customAddons) && product.customAddons.length > 0 
     ? product.customAddons 
     : [
-        { name: 'Scented Wax Candle', price: 99 },
-        { name: 'Extra Chocolates (Pack of 4)', price: 149 },
-        { name: 'Premium Hydration Flask', price: 299 },
-        { name: 'Calligraphy Message Card', price: 49 }
+        { id: '1', name: 'Scented Wax Candle', price: 99, enabled: true },
+        { id: '2', name: 'Extra Chocolates (Pack of 4)', price: 149, enabled: true },
+        { id: '3', name: 'Premium Hydration Flask', price: 299, enabled: true },
+        { id: '4', name: 'Calligraphy Message Card', price: 49, enabled: true }
       ];
+      
+  const productAddons = rawProductAddons.filter(a => a.enabled !== false);
 
-  const [selectedAddOnIndices, setSelectedAddOnIndices] = useState([]);
+  const [pendingAddOns, setPendingAddOns] = useState([]);
+  const [selectedAddOns, setSelectedAddOns] = useState([]);
+  const [addonsApplied, setAddonsApplied] = useState(false);
 
   // Accordion State
   const [activeAccordion, setActiveAccordion] = useState(null);
@@ -65,8 +67,11 @@ export default function ProductDetailTemplate({ product, displayRelated = [] }) 
   // Reset states on product change
   useEffect(() => {
     setGiftTag('');
-    setQuantity(5);
-    setSelectedAddOnIndices([]);
+    setQuantity(MINIMUM_ORDER_QTY);
+    setQtyInputText(MINIMUM_ORDER_QTY.toString());
+    setSelectedAddOns([]);
+    setPendingAddOns([]);
+    setAddonsApplied(false);
     
     if (product?.variantsEnabled && Array.isArray(product?.variants) && product.variants.length > 0) {
       setSelectedVariant(product.variants.find(v => v.isDefault) || product.variants[0]);
@@ -90,8 +95,8 @@ export default function ProductDetailTemplate({ product, displayRelated = [] }) 
   }, [product?.id]);
 
   // Calculate Added Price
-  const addedPrice = selectedAddOnIndices.reduce((total, idx) => {
-    return total + (productAddons[idx] ? Number(productAddons[idx].price) : 0);
+  const addedPrice = selectedAddOns.reduce((total, addon) => {
+    return total + (Number(addon.price) || 0);
   }, 0);
 
   const basePrice = selectedVariant ? Number(selectedVariant.price) : product.price;
@@ -102,13 +107,9 @@ export default function ProductDetailTemplate({ product, displayRelated = [] }) 
   const handleAddToBasket = (e) => {
     e.preventDefault();
 
-    // Gather active add-on names
-    const activeAddOns = selectedAddOnIndices.map((idx) => productAddons[idx].name);
-
     addToCart(product, quantity, {
       giftTag,
-      addOns: activeAddOns,
-      addedPrice,
+      addOns: selectedAddOns,
       variant: selectedVariant ? { name: selectedVariant.name, price: Number(selectedVariant.price), sku: selectedVariant.sku } : null
     });
   };
@@ -298,6 +299,42 @@ export default function ProductDetailTemplate({ product, displayRelated = [] }) 
                 )}
               </div>
 
+              {/* Compact Selected Add-ons Summary */}
+              {selectedAddOns.length > 0 && (
+                <div style={{ marginTop: '12px', marginBottom: '16px', borderTop: '1px solid #f0f0f0', paddingTop: '12px' }}>
+                  <h4 style={{ fontSize: '0.85rem', color: 'var(--color-purple)', marginBottom: '8px', fontWeight: '600' }}>Added Add-ons</h4>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                    {selectedAddOns.map(addon => {
+                      const identifier = addon.id || addon.name;
+                      return (
+                      <div key={identifier} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.85rem', color: 'var(--color-charcoal)' }}>
+                        <span>
+                          <i className="fa-solid fa-check" style={{ color: 'var(--color-gold)', marginRight: '6px', fontSize: '0.75rem' }}></i>
+                          {addon.name} <span style={{ color: '#888' }}>(+{formatPrice(addon.price)})</span>
+                        </span>
+                        <button 
+                          type="button"
+                          onClick={() => {
+                            setSelectedAddOns(prev => prev.filter(a => (a.id || a.name) !== identifier));
+                            setPendingAddOns(prev => prev.filter(a => (a.id || a.name) !== identifier));
+                            if (selectedAddOns.length === 1) setAddonsApplied(false);
+                          }}
+                          style={{ background: 'none', border: 'none', color: '#999', cursor: 'pointer', padding: '2px 6px', fontSize: '1.2rem', lineHeight: '1' }}
+                          title="Remove Add-on"
+                        >
+                          &times;
+                        </button>
+                      </div>
+                    )})}
+                  </div>
+                  <div style={{ marginTop: '10px', fontSize: '0.95rem', fontWeight: '700', color: 'var(--color-purple-dark)', display: 'flex', justifyContent: 'space-between' }}>
+                    <span>Final Price:</span>
+                    <span>{formatPrice(unitPrice)}</span>
+                  </div>
+                </div>
+              )}
+
+
               {/* Product Size Variants UI */}
               {product.variantsEnabled && Array.isArray(product.variants) && product.variants.length > 0 && (
                 <div className="product-variants-container" style={{ marginBottom: '1rem', marginTop: '0.75rem' }}>
@@ -380,7 +417,7 @@ export default function ProductDetailTemplate({ product, displayRelated = [] }) 
               
               {/* 1. Minimum Order Quantity */}
               <div style={{ marginTop: '0.5rem', fontSize: '0.8rem', color: 'var(--color-charcoal)', fontWeight: '500', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <i className="fa-solid fa-circle-info" style={{ color: 'var(--color-gold)' }}></i> Minimum Order Quantity: 5 Pieces
+                <i className="fa-solid fa-circle-info" style={{ color: 'var(--color-gold)' }}></i> Minimum Order Quantity: {MINIMUM_ORDER_QTY} Pieces
               </div>
 
               {/* 2. Bulk Discount Card */}
@@ -426,24 +463,83 @@ export default function ProductDetailTemplate({ product, displayRelated = [] }) 
 
               {/* 3. Quantity Selector and Purchase Actions */}
               <div className="action-row-buying" style={{ display: 'flex', gap: '10px', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap' }}>
-                <div className="qty-picker-detail" style={{ height: '48px', flexShrink: 0 }}>
-                  <button
-                    type="button"
-                    onClick={() => setQuantity(Math.max(5, quantity - 1))}
-                    disabled={effectiveStock === 0 || quantity <= 5}
-                    aria-label="Decrease quantity"
-                  >
-                    <i className="fa-solid fa-minus"></i>
-                  </button>
-                  <span className="qty-value">{effectiveStock === 0 ? 0 : quantity}</span>
-                  <button
-                    type="button"
-                    onClick={() => setQuantity(quantity + 1)}
-                    disabled={effectiveStock === 0 || quantity >= effectiveStock}
-                    aria-label="Increase quantity"
-                  >
-                    <i className="fa-solid fa-plus"></i>
-                  </button>
+                
+                {/* Editable Quantity Container */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  <div className="qty-picker-detail" style={{ height: '48px', flexShrink: 0, display: 'flex' }}>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const newQ = Math.max(MINIMUM_ORDER_QTY, quantity - 1);
+                        setQuantity(newQ);
+                        setQtyInputText(newQ.toString());
+                      }}
+                      disabled={effectiveStock === 0 || quantity <= MINIMUM_ORDER_QTY}
+                      aria-label="Decrease quantity"
+                    >
+                      <i className="fa-solid fa-minus"></i>
+                    </button>
+                    <input
+                      type="text"
+                      className="qty-value-input"
+                      value={effectiveStock === 0 ? 0 : qtyInputText}
+                      onChange={(e) => {
+                        const res = validateQuantityInput(e.target.value);
+                        if (res.isValid) {
+                          setQtyInputText(res.value.toString());
+                          if (res.value !== '') setQuantity(res.value);
+                        }
+                      }}
+                      onBlur={() => {
+                        const sanitized = sanitizeQuantityOnBlur(qtyInputText);
+                        setQuantity(sanitized);
+                        setQtyInputText(sanitized.toString());
+                      }}
+                      disabled={effectiveStock === 0}
+                      style={{ 
+                        width: '50px', textAlign: 'center', border: 'none', background: 'transparent',
+                        fontWeight: '600', fontSize: '1rem', color: 'var(--color-charcoal)', padding: '0 8px'
+                      }}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const newQ = quantity + 1;
+                        if (newQ <= effectiveStock) {
+                          setQuantity(newQ);
+                          setQtyInputText(newQ.toString());
+                        }
+                      }}
+                      disabled={effectiveStock === 0 || quantity >= effectiveStock}
+                      aria-label="Increase quantity"
+                    >
+                      <i className="fa-solid fa-plus"></i>
+                    </button>
+                  </div>
+                  
+                  {/* Quick QTY Buttons */}
+                  <div style={{ display: 'flex', gap: '4px' }}>
+                    {QUICK_QTYS.map((q) => (
+                       <button
+                         key={q}
+                         type="button"
+                         onClick={() => {
+                           if (q <= effectiveStock) {
+                             setQuantity(q);
+                             setQtyInputText(q.toString());
+                           }
+                         }}
+                         disabled={effectiveStock === 0 || q > effectiveStock}
+                         style={{
+                           padding: '2px 8px', fontSize: '0.75rem', borderRadius: '4px',
+                           border: '1px solid #e2e8f0', background: '#f8fafc', color: '#64748b',
+                           cursor: (effectiveStock === 0 || q > effectiveStock) ? 'not-allowed' : 'pointer'
+                         }}
+                       >
+                         +{q}
+                       </button>
+                    ))}
+                  </div>
                 </div>
 
                 <button
@@ -494,7 +590,7 @@ export default function ProductDetailTemplate({ product, displayRelated = [] }) 
               <div className="product-accordion-content-inner">
                 {activeAccordion === 'description' && (
                   <div style={{ fontSize: '0.9rem', color: '#4b5563', lineHeight: '1.6', whiteSpace: 'pre-wrap' }}>
-                    {product.description}
+                    <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(product.description || '') }} />
                     
                     {product.highlights && (
                       <div style={{ marginTop: '16px' }}>
@@ -526,7 +622,114 @@ export default function ProductDetailTemplate({ product, displayRelated = [] }) 
             </div>
           </div>
 
-          {/* 2. Delivery Information */}
+          {/* 2. Make It Extra Special */}
+          {(product.customGiftTagEnabled !== false || product.addonsEnabled !== false || true) && (
+            <div className="product-accordion-item">
+              <button 
+                className="product-accordion-header" 
+                onClick={() => toggleAccordion('personalize')}
+                aria-expanded={activeAccordion === 'personalize'}
+              >
+                Make It Extra Special ✨
+                <i className={`fa-solid fa-chevron-down product-accordion-icon ${activeAccordion === 'personalize' ? 'open' : ''}`}></i>
+              </button>
+              <div className={`product-accordion-content ${activeAccordion === 'personalize' ? 'open' : ''}`}>
+                <div className="product-accordion-content-inner">
+                  {activeAccordion === 'personalize' && (
+                    <>
+                      {product.customGiftTagEnabled !== false && (
+                        <div className="customizer-row" style={{ marginBottom: '16px' }}>
+                          <label className="customizer-label" htmlFor="gift-tag-msg" style={{ fontSize: '0.95rem', color: '#1f2937', fontWeight: 500, marginBottom: '8px', display: 'block' }}>
+                            Gift Tag
+                          </label>
+                          <input
+                            type="text"
+                            id="gift-tag-msg"
+                            className="customizer-input-text"
+                            placeholder="e.g. Happy Wedding Sneha & Ajay! / Welcome Home"
+                            value={giftTag}
+                            onChange={(e) => setGiftTag(e.target.value)}
+                            maxLength={150}
+                            style={{ width: '100%', padding: '12px', border: '1px solid #e5e7eb', borderRadius: '8px', fontSize: '0.9rem' }}
+                          />
+                        </div>
+                      )}
+
+                      {product.addonsEnabled !== false && (
+                        <div className="customizer-row" style={{ marginBottom: '20px' }}>
+                          <label className="customizer-label" style={{ fontSize: '0.95rem', color: '#1f2937', fontWeight: 500, marginBottom: '12px', display: 'block' }}>
+                            Add-ons
+                          </label>
+                          <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '12px', marginBottom: '16px' }}>
+                            {productAddons.map((addon) => (
+                              <label key={addon.id || addon.name} style={{ display: 'flex', alignItems: 'center', cursor: 'pointer', fontSize: '0.9rem', color: '#4b5563' }}>
+                                <input
+                                  type="checkbox"
+                                  checked={pendingAddOns.some(a => a.name === addon.name)}
+                                  onChange={(e) => {
+                                    setAddonsApplied(false);
+                                    if (e.target.checked) {
+                                      setPendingAddOns([...pendingAddOns, addon]);
+                                    } else {
+                                      setPendingAddOns(pendingAddOns.filter(a => a.name !== addon.name));
+                                    }
+                                  }}
+                                  style={{ marginRight: '10px', width: '18px', height: '18px', accentColor: 'var(--color-gold)' }}
+                                />
+                                {addon.name} <span style={{ color: 'var(--color-gold-dark)', marginLeft: '4px', fontWeight: 500 }}>(+{formatPrice(addon.price)})</span>
+                              </label>
+                            ))}
+                          </div>
+                          
+                          <button
+                            type="button"
+                            onClick={() => {
+                               setSelectedAddOns([...pendingAddOns]);
+                               setAddonsApplied(true);
+                            }}
+                            disabled={addonsApplied}
+                            style={{
+                              width: '100%', padding: '10px', borderRadius: '6px',
+                              background: addonsApplied ? '#e5e7eb' : 'var(--color-gold)',
+                              color: addonsApplied ? '#9ca3af' : '#fff',
+                              border: 'none', fontWeight: 600, cursor: addonsApplied ? 'not-allowed' : 'pointer',
+                              display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px'
+                            }}
+                          >
+                            {addonsApplied ? <><i className="fa-solid fa-check"></i> Added</> : 'Add Selected Add-ons'}
+                          </button>
+                          
+                          {selectedAddOns.length > 0 && (
+                            <div style={{ marginTop: '16px', background: '#f9fafb', padding: '12px', borderRadius: '8px', border: '1px solid #e5e7eb' }}>
+                              <h5 style={{ margin: '0 0 8px 0', fontSize: '0.85rem', color: '#4b5563' }}>Selected Add-ons Summary</h5>
+                              <ul style={{ margin: 0, paddingLeft: '0', listStyle: 'none', fontSize: '0.85rem' }}>
+                                {selectedAddOns.map((addon, idx) => (
+                                  <li key={idx} style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
+                                    <span>{addon.name}</span>
+                                    <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                                       <span style={{ color: 'var(--color-gold-dark)' }}>+{formatPrice(addon.price)}</span>
+                                       <button onClick={() => {
+                                          const newSel = selectedAddOns.filter(a => a.name !== addon.name);
+                                          setSelectedAddOns(newSel);
+                                          setPendingAddOns(newSel);
+                                          if (newSel.length === 0) setAddonsApplied(false);
+                                       }} style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer' }}><i className="fa-solid fa-xmark"></i></button>
+                                    </div>
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* 3. Delivery Information */}
           {(() => {
             let infoText = product.deliveryInfoText;
             if (!infoText || infoText.trim() === '' || infoText.trim() === OLD_DEFAULT_DELIVERY) {
@@ -569,72 +772,6 @@ export default function ProductDetailTemplate({ product, displayRelated = [] }) 
               </div>
             );
           })()}
-
-          {/* 3. Personalize Your Hamper */}
-          {(product.customGiftTagEnabled !== false || product.addonsEnabled !== false || true) && (
-            <div className="product-accordion-item">
-              <button 
-                className="product-accordion-header" 
-                onClick={() => toggleAccordion('personalize')}
-                aria-expanded={activeAccordion === 'personalize'}
-              >
-                Personalize Your Hamper
-                <i className={`fa-solid fa-chevron-down product-accordion-icon ${activeAccordion === 'personalize' ? 'open' : ''}`}></i>
-              </button>
-              <div className={`product-accordion-content ${activeAccordion === 'personalize' ? 'open' : ''}`}>
-                <div className="product-accordion-content-inner">
-                  {activeAccordion === 'personalize' && (
-                    <>
-                      {product.customGiftTagEnabled !== false && (
-                        <div className="customizer-row" style={{ marginBottom: '16px' }}>
-                          <label className="customizer-label" htmlFor="gift-tag-msg" style={{ fontSize: '0.95rem', color: '#1f2937', fontWeight: 500, marginBottom: '8px', display: 'block' }}>
-                            Custom Gift Tag Message (Optional)
-                          </label>
-                          <input
-                            type="text"
-                            id="gift-tag-msg"
-                            className="customizer-input-text"
-                            placeholder="e.g. Happy Wedding Sneha & Ajay! / Welcome Home"
-                            value={giftTag}
-                            onChange={(e) => setGiftTag(e.target.value)}
-                            style={{ width: '100%', padding: '12px', border: '1px solid #e5e7eb', borderRadius: '8px', fontSize: '0.9rem' }}
-                          />
-                        </div>
-                      )}
-
-                      {product.addonsEnabled !== false && (
-                        <div className="customizer-row" style={{ marginBottom: '20px' }}>
-                          <label className="customizer-label" style={{ fontSize: '0.95rem', color: '#1f2937', fontWeight: 500, marginBottom: '12px', display: 'block' }}>
-                            Optional Add-ons
-                          </label>
-                          <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '12px' }}>
-                            {productAddons.map((addon, idx) => (
-                              <label key={idx} style={{ display: 'flex', alignItems: 'center', cursor: 'pointer', fontSize: '0.9rem', color: '#4b5563' }}>
-                                <input
-                                  type="checkbox"
-                                  checked={selectedAddOnIndices.includes(idx)}
-                                  onChange={(e) => {
-                                    if (e.target.checked) {
-                                      setSelectedAddOnIndices([...selectedAddOnIndices, idx]);
-                                    } else {
-                                      setSelectedAddOnIndices(selectedAddOnIndices.filter(i => i !== idx));
-                                    }
-                                  }}
-                                  style={{ marginRight: '10px', width: '18px', height: '18px', accentColor: 'var(--color-gold)' }}
-                                />
-                                {addon.name} <span style={{ color: 'var(--color-gold-dark)', marginLeft: '4px', fontWeight: 500 }}>(+{formatPrice(addon.price)})</span>
-                              </label>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-
-                    </>
-                  )}
-                </div>
-              </div>
-            </div>
-          )}
 
           {/* 4. Customization Available */}
           {(() => {

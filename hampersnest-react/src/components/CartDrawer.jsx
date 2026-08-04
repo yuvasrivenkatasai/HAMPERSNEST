@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useCart } from '../context/CartContext';
 import { API_BASE } from '../config.js';
 import { useCurrency } from '../context/CurrencyContext';
+import { MINIMUM_ORDER_QTY, QUICK_QTYS } from '../utils/constants';
+import { validateQuantityInput, sanitizeQuantityOnBlur, validateRequiredDate, validatePhone } from '../utils/ValidationUtils';
 
 const DeliveryAccordion = ({ cart, products }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -116,6 +118,20 @@ export default function CartDrawer() {
     deliveryDate: '',
     notes: ''
   });
+  
+  const [qtyInputTexts, setQtyInputTexts] = useState({});
+  
+  useEffect(() => {
+    const newInputs = {};
+    cart.forEach(item => {
+      if (qtyInputTexts[item.cartItemId] === undefined) {
+         newInputs[item.cartItemId] = item.quantity.toString();
+      } else {
+         newInputs[item.cartItemId] = qtyInputTexts[item.cartItemId];
+      }
+    });
+    setQtyInputTexts(prev => ({ ...prev, ...newInputs }));
+  }, [cart]);
 
   // Reset checkout step when cart closes
   useEffect(() => {
@@ -156,9 +172,19 @@ export default function CartDrawer() {
       alert('Please fill out all required fields (Name, Phone, Event Type).');
       return;
     }
+    
+    if (!validatePhone(formData.phone)) {
+      alert('Please enter a valid phone number (10-15 digits).');
+      return;
+    }
+    
+    if (formData.deliveryDate && !validateRequiredDate(formData.deliveryDate, 0, 3)) {
+      alert('Please enter a valid required date (must be a valid 4-digit year within next 3 years).');
+      return;
+    }
 
-    if (cart.some(item => item.quantity < 5)) {
-      alert('Minimum order quantity is 5 pieces per product. Please increase your quantities.');
+    if (cart.some(item => item.quantity < MINIMUM_ORDER_QTY)) {
+      alert(`Minimum order quantity is ${MINIMUM_ORDER_QTY} pieces per product. Please increase your quantities.`);
       return;
     }
 
@@ -254,16 +280,21 @@ export default function CartDrawer() {
                       <span className="cart-item-price">{formatPrice(item.price)}</span>
                       
                       {/* Customization Details */}
-                      {(item.customizations.giftTag || item.customizations.variant) && (
-                        <div className="cart-item-customizations">
+                      {(item.customizations.giftTag || item.customizations.variant || (item.customizations.addOns && item.customizations.addOns.length > 0)) && (
+                        <div className="cart-item-customizations" style={{ fontSize: '0.8rem', color: '#4b5563', marginTop: '4px' }}>
                           {item.customizations.variant && (
                             <div style={{ fontStyle: 'italic', marginBottom: '2px' }}>
                               • Size: {item.customizations.variant.name}
                             </div>
                           )}
                           {item.customizations.giftTag && (
-                            <div style={{ fontStyle: 'italic' }}>
+                            <div style={{ fontStyle: 'italic', marginBottom: '2px' }}>
                               • Tag Msg: "{item.customizations.giftTag}"
+                            </div>
+                          )}
+                          {item.customizations.addOns && item.customizations.addOns.length > 0 && (
+                            <div style={{ fontStyle: 'italic' }}>
+                              • Add-ons: {item.customizations.addOns.map(a => typeof a === 'string' ? a : a.name).join(', ')}
                             </div>
                           )}
                         </div>
@@ -285,35 +316,87 @@ export default function CartDrawer() {
                       )}
 
                       {/* Quantity & Delete Actions */}
-                      <div className="cart-item-actions-wrapper" style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                        <div className="cart-item-actions">
-                          <div className="cart-item-qty">
+                      <div className="cart-item-actions-wrapper" style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '8px' }}>
+                        
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                          <div className="qty-picker-detail" style={{ height: '36px', display: 'flex', flexShrink: 0, padding: '0 4px' }}>
                             <button
-                              onClick={() => updateQuantity(item.cartItemId, item.quantity - 1)}
-                              disabled={item.quantity <= 5}
+                              onClick={() => {
+                                const newQ = Math.max(MINIMUM_ORDER_QTY, item.quantity - 1);
+                                setQtyInputTexts(p => ({ ...p, [item.cartItemId]: newQ.toString() }));
+                                updateQuantity(item.cartItemId, newQ);
+                              }}
+                              disabled={item.quantity <= MINIMUM_ORDER_QTY}
                               aria-label="Decrease quantity"
-                              style={{ opacity: item.quantity <= 5 ? 0.5 : 1, cursor: item.quantity <= 5 ? 'not-allowed' : 'pointer' }}
+                              style={{ opacity: item.quantity <= MINIMUM_ORDER_QTY ? 0.5 : 1, cursor: item.quantity <= MINIMUM_ORDER_QTY ? 'not-allowed' : 'pointer' }}
                             >
-                              <i className="fa-solid fa-minus"></i>
+                              <i className="fa-solid fa-minus" style={{ fontSize: '0.75rem' }}></i>
                             </button>
-                            <span>{item.quantity}</span>
+                            <input
+                              type="text"
+                              value={qtyInputTexts[item.cartItemId] ?? item.quantity.toString()}
+                              onChange={(e) => {
+                                const res = validateQuantityInput(e.target.value);
+                                if (res.isValid) {
+                                  setQtyInputTexts(p => ({ ...p, [item.cartItemId]: res.value.toString() }));
+                                }
+                              }}
+                              onBlur={() => {
+                                const val = qtyInputTexts[item.cartItemId];
+                                const sanitized = sanitizeQuantityOnBlur(val);
+                                setQtyInputTexts(p => ({ ...p, [item.cartItemId]: sanitized.toString() }));
+                                updateQuantity(item.cartItemId, sanitized);
+                              }}
+                              style={{ 
+                                width: '40px', textAlign: 'center', border: 'none', background: 'transparent',
+                                fontWeight: '600', fontSize: '0.9rem', color: 'var(--color-charcoal)', padding: '0'
+                              }}
+                            />
                             <button
-                              onClick={() => updateQuantity(item.cartItemId, item.quantity + 1)}
+                              onClick={() => {
+                                const newQ = item.quantity + 1;
+                                setQtyInputTexts(p => ({ ...p, [item.cartItemId]: newQ.toString() }));
+                                updateQuantity(item.cartItemId, newQ);
+                              }}
                               aria-label="Increase quantity"
                             >
-                              <i className="fa-solid fa-plus"></i>
+                              <i className="fa-solid fa-plus" style={{ fontSize: '0.75rem' }}></i>
                             </button>
                           </div>
+                          
+                          {/* Quick Buttons for Cart Items */}
+                          <div style={{ display: 'flex', gap: '4px' }}>
+                            {QUICK_QTYS.map((q) => (
+                               <button
+                                 key={q}
+                                 type="button"
+                                 onClick={() => {
+                                   setQtyInputTexts(p => ({ ...p, [item.cartItemId]: q.toString() }));
+                                   updateQuantity(item.cartItemId, q);
+                                 }}
+                                 style={{
+                                   padding: '2px 6px', fontSize: '0.7rem', borderRadius: '4px',
+                                   border: '1px solid #e2e8f0', background: '#f8fafc', color: '#64748b', cursor: 'pointer'
+                                 }}
+                               >
+                                 +{q}
+                               </button>
+                            ))}
+                          </div>
+                        </div>
+
+                        <div className="cart-item-actions" style={{ justifyContent: 'space-between' }}>
                           <button
                             onClick={() => removeFromCart(item.cartItemId)}
                             className="cart-item-remove"
                             title="Remove item"
+                            style={{ padding: 0 }}
                           >
                             <i className="fa-solid fa-trash-can"></i> Remove
                           </button>
-                        </div>
-                        <div style={{ fontSize: '0.75rem', color: '#6B7280', display: 'flex', alignItems: 'center', gap: '6px', marginTop: '2px' }}>
-                          <i className="fa-solid fa-circle-info" style={{ color: '#9CA3AF' }}></i> Minimum Order: 5 Pieces
+                          <div style={{ fontSize: '0.7rem', color: '#9CA3AF', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                            <i className="fa-solid fa-circle-info"></i> Min: {MINIMUM_ORDER_QTY}
+                          </div>
                         </div>
                       </div>
                     </div>

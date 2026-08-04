@@ -82,13 +82,12 @@ export default function CatalogExportModal({ isOpen, onClose, products, categori
     }
 
     try {
-      // Fetch the latest settings for Delivery Info
-      let pdfDeliveryInfo = '';
+      // Fetch the latest settings for Delivery Info and Footer
+      let globalSettings = {};
       try {
-        const settingsData = await apiRequest('/api/settings');
-        pdfDeliveryInfo = settingsData.pdfDeliveryInfo || '';
+        globalSettings = await apiRequest('/api/settings');
       } catch (e) {
-        console.warn('Failed to fetch pdf delivery info', e);
+        console.warn('Failed to fetch settings', e);
       }
 
       await generateCatalogPdf(enrichedProducts, mode, (prog) => setProgress(prog), {
@@ -100,7 +99,8 @@ export default function CatalogExportModal({ isOpen, onClose, products, categori
         selectedCategory,
         selectedSubcategory,
         categories,
-        pdfDeliveryInfo
+        pdfDeliveryInfo: globalSettings.pdfDeliveryInfo || '',
+        settings: globalSettings
       });
     } catch (err) {
       console.error(err);

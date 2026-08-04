@@ -100,7 +100,7 @@ export const exportProductsCsv = async (req, res) => {
       const availableQty = stockQty - reservedQty;
 
       return {
-        'Format Version': '2.0',
+        'Schema Version': '1.0',
         'Product Name': prod.name || '',
         'Offer Price': prod.price || 0,
         'Original Price': prod.originalPrice || 0,
@@ -143,7 +143,7 @@ export const exportProductsCsv = async (req, res) => {
     });
 
     const fields = [
-      'Format Version',
+      'Schema Version',
       'Product Name', 'Offer Price', 'Original Price', 'Product Rating', 'Category', 'Subcategory', 'Status', 'Featured', 'Show In Storefront', 'SKU',
       'Stock Quantity', 'Reserved Quantity', 'Available Quantity', 'Low Stock Threshold', 'Minimum Order Quantity (MOQ)', 'Inventory Status',
       'Primary Image', 'Additional Images', 'Video File', 'Image Folder', 'Image Count',

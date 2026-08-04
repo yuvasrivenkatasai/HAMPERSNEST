@@ -4,6 +4,8 @@ import BulkImportWizard from '../components/BulkImportWizard';
 import CatalogExportModal from '../components/CatalogExportModal';
 import BulkVariantModal from '../components/BulkVariantModal';
 import BulkImageImportModal from '../components/BulkImageImportModal';
+import ReactQuill from 'react-quill-new';
+import 'react-quill-new/dist/quill.snow.css';
 
 export default function Products() {
   const [products, setProducts] = useState([]);
@@ -1358,15 +1360,12 @@ Automatic discounts are applied at checkout:
 
                 <div className="form-group">
                   <label className="form-label" htmlFor="prod-desc">Full Description</label>
-                  <textarea
-                    id="prod-desc"
-                    name="description"
-                    className="form-textarea"
-                    rows="4"
-                    placeholder="Full product description for detail pages..."
+                  <ReactQuill 
+                    theme="snow"
                     value={formData.description}
-                    onChange={handleInputChange}
-                  ></textarea>
+                    onChange={(val) => setFormData(prev => ({ ...prev, description: val }))}
+                    style={{ background: 'white', marginBottom: '40px', height: '200px' }}
+                  />
                 </div>
 
                 <div style={{ padding: '15px', background: '#F8F9FA', borderRadius: '8px', marginTop: '15px', border: '1px solid #E9ECEF' }}>

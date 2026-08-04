@@ -257,7 +257,7 @@ export const generateCatalogPdf = async (products, mode = 'download', onProgress
 
   // --- GRID ENGINE MATH ---
   const headerHeight = 25;
-  const footerHeight = 0; // Removed footer
+  const footerHeight = 15; // Adjusted for footer
   const marginTop = 15;
   const marginBottom = 15;
   
@@ -326,7 +326,29 @@ export const generateCatalogPdf = async (products, mode = 'download', onProgress
   };
 
   const drawPageFooter = (pageNum) => {
-    // Footer completely removed as per client request
+    const compSettings = options.settings || {};
+    const { companyName, website, phone, email, address } = compSettings;
+    
+    // Draw Footer Background
+    doc.setFillColor(purple);
+    doc.rect(0, pageHeight - 15, pageWidth, 15, 'F');
+    
+    doc.setTextColor('#FFFFFF');
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(9);
+    
+    let cleanWebsite = website ? website.replace(/^https?:\/\//, '').replace(/\/$/, '') : 'www.hampersnest.in';
+    let cleanPhone = phone || '+91 79892 02194';
+    let cleanLocation = address || 'Hyderabad, India';
+    
+    let leftText = `${cleanWebsite} | ${cleanPhone} | ${cleanLocation}`;
+    
+    if (leftText) {
+      doc.text(leftText, 15, pageHeight - 6);
+    }
+    
+    doc.setFont('helvetica', 'bold');
+    doc.text(`Page ${pageNum}`, pageWidth - 15, pageHeight - 6, { align: 'right' });
   };
 
   let globalProductIndex = 0;

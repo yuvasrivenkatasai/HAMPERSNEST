@@ -103,9 +103,9 @@ export default function BulkImportWizard({ isOpen, onClose, categories, setCateg
          throw new Error(`Unsupported Format Version in ZIP Manifest: ${manifest.version}. Expected: 2.0`);
       }
       
-      const csvVersion = (rows[0] && rows[0]['Format Version']) || '1.0';
-      if (csvVersion !== '2.0') {
-         throw new Error(`Unsupported Format Version in CSV: ${csvVersion}. Expected: 2.0`);
+      const csvVersion = (rows[0] && (rows[0]['Schema Version'] || rows[0]['Format Version'])) || '1.0';
+      if (csvVersion !== '1.0' && csvVersion !== '2.0') {
+         throw new Error(`Unsupported Format Version in CSV: ${csvVersion}. Expected: 1.0 or 2.0`);
       }
 
       setProgressMsg('Building Media Manifest...');

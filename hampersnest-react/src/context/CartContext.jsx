@@ -1,5 +1,8 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { API_BASE } from '../config.js';
+import { MINIMUM_ORDER_QTY } from '../utils/constants';
+import { calculateProductPrice, calculateCartTotals, formatCurrency } from '../utils/PriceUtils';
+import { sanitizeGiftTag } from '../utils/ValidationUtils';
 
 const CartContext = createContext();
 
@@ -18,7 +21,7 @@ export const CartProvider = ({ children }) => {
     if (!savedCart) return [];
     try {
       const parsedCart = JSON.parse(savedCart);
-      return parsedCart.map(item => ({ ...item, quantity: Math.max(5, item.quantity || 5) }));
+      return parsedCart.map(item => ({ ...item, quantity: Math.max(MINIMUM_ORDER_QTY, item.quantity || MINIMUM_ORDER_QTY) }));
     } catch {
       return [];
     }
@@ -103,7 +106,7 @@ export const CartProvider = ({ children }) => {
       } else if (e.key === 'hampers_nest_cart') {
         try {
           const newCart = JSON.parse(e.newValue);
-          setCart(Array.isArray(newCart) ? newCart.map(item => ({ ...item, quantity: Math.max(5, item.quantity || 5) })) : []);
+          setCart(Array.isArray(newCart) ? newCart.map(item => ({ ...item, quantity: Math.max(MINIMUM_ORDER_QTY, item.quantity || MINIMUM_ORDER_QTY) })) : []);
         } catch {
           setCart([]);
         }
@@ -115,14 +118,16 @@ export const CartProvider = ({ children }) => {
   }, []);
 
   // Cart operations
-  const addToCart = (product, quantity = 5, customizations = {}) => {
+  const addToCart = (product, quantity = MINIMUM_ORDER_QTY, customizations = {}) => {
     const { 
       giftTag = '', 
-      addOns = [],
-      addedPrice = 0,
+      addOns = [], // Array of extended addon objects {id, name, price, ...}
       variant = null
     } = customizations;
     
+    // Ensure addOns is an array of objects
+    const safeAddOns = (Array.isArray(addOns) ? addOns : []).map(a => typeof a === 'string' ? { name: a, price: 0 } : a);
+    const addedPrice = safeAddOns.reduce((sum, a) => sum + (Number(a.price) || 0), 0);
     const finalPrice = product.price + addedPrice + (variant && typeof variant.price === 'number' ? variant.price - product.price : 0);
     
     // Create a unique cart item ID based on product ID, customizations, and add-ons
@@ -136,7 +141,7 @@ export const CartProvider = ({ children }) => {
       if (existingItemIndex > -1) {
         // Increment quantity of existing item
         const updatedCart = [...prevCart];
-        updatedCart[existingItemIndex].quantity += Number(Math.max(5, quantity));
+        updatedCart[existingItemIndex].quantity += Number(Math.max(MINIMUM_ORDER_QTY, quantity));
         return updatedCart;
       } else {
         // Add new item
@@ -147,12 +152,13 @@ export const CartProvider = ({ children }) => {
             id: product.id,
             name: product.name,
             price: finalPrice,
+            basePrice: product.price,
             image: product.image,
             category: product.category,
-            quantity: Number(Math.max(5, quantity)),
+            quantity: Number(Math.max(MINIMUM_ORDER_QTY, quantity)),
             customizations: {
-              giftTag: giftTag.trim(),
-              addOns,
+              giftTag: sanitizeGiftTag(giftTag),
+              addOns: safeAddOns,
               variant
             }
           }
@@ -187,7 +193,7 @@ export const CartProvider = ({ children }) => {
     }
     setCart((prevCart) =>
       prevCart.map((item) =>
-        item.cartItemId === cartItemId ? { ...item, quantity: Number(Math.max(5, newQuantity)) } : item
+        item.cartItemId === cartItemId ? { ...item, quantity: Number(Math.max(MINIMUM_ORDER_QTY, newQuantity)) } : item
       )
     );
   };
@@ -213,42 +219,33 @@ export const CartProvider = ({ children }) => {
 
   // Calculate totals
   const getCartTotals = () => {
-    let count = 0;
-    let subtotal = 0;
-    let discountTotal = 0;
-    
-    const productQtyMap = {};
-    cart.forEach(item => {
-      productQtyMap[item.id] = (productQtyMap[item.id] || 0) + item.quantity;
-      count += item.quantity;
-    });
+    // Transform cart to use new calculateCartTotals helper
+    const itemsForHelper = cart.map(item => ({
+      ...item,
+      basePrice: item.customizations?.variant?.price || item.basePrice || item.price,
+      addOns: item.customizations?.addOns || []
+    }));
 
     const bulkSettings = settings?.bulkDiscountSettings;
     const isDiscountEnabled = bulkSettings?.enabled && bulkSettings?.rules && bulkSettings.rules.length > 0;
-    const sortedRulesDesc = isDiscountEnabled ? [...bulkSettings.rules].sort((a, b) => b.minQty - a.minQty) : [];
-    const sortedRulesAsc = isDiscountEnabled ? [...bulkSettings.rules].sort((a, b) => a.minQty - b.minQty) : [];
-
-    cart.forEach(item => {
-      const lineSubtotal = item.price * item.quantity;
-      subtotal += lineSubtotal;
-
-      if (isDiscountEnabled) {
-        const totalQtyForProduct = productQtyMap[item.id];
-        const rule = sortedRulesDesc.find(r => totalQtyForProduct >= r.minQty);
-        if (rule) {
-          discountTotal += lineSubtotal * (rule.discountPercent / 100);
-        }
-      }
-    });
-
-    const finalTotal = subtotal - discountTotal;
-
+    const discountRules = isDiscountEnabled ? bulkSettings.rules : [];
+    
+    const { subtotal, discountPercent, discountAmount, finalTotal, totalQuantity } = calculateCartTotals(itemsForHelper, discountRules);
+    
+    // Legacy support for upsales UI
     const upsales = {};
+    const productQtyMap = {};
+    const sortedRulesDesc = isDiscountEnabled ? [...discountRules].sort((a, b) => b.minQty - a.minQty) : [];
+    const sortedRulesAsc = isDiscountEnabled ? [...discountRules].sort((a, b) => a.minQty - b.minQty) : [];
+
     if (isDiscountEnabled) {
+      cart.forEach(item => {
+        productQtyMap[item.id] = (productQtyMap[item.id] || 0) + item.quantity;
+      });
       cart.forEach(item => {
          const totalQtyForProduct = productQtyMap[item.id];
          const nextRule = sortedRulesAsc.find(r => totalQtyForProduct < r.minQty);
-         if (nextRule && !upsales[item.id]) { // only compute once per product
+         if (nextRule && !upsales[item.id]) {
             upsales[item.id] = {
                productName: item.name,
                qtyNeeded: nextRule.minQty - totalQtyForProduct,
@@ -258,7 +255,15 @@ export const CartProvider = ({ children }) => {
       });
     }
 
-    return { count, subtotal, discountTotal, finalTotal, upsales, productQtyMap, sortedRulesDesc };
+    return { 
+      count: totalQuantity, 
+      subtotal, 
+      discountTotal: discountAmount, 
+      finalTotal, 
+      upsales, 
+      productQtyMap, 
+      sortedRulesDesc 
+    };
   };
 
   const cartTotals = getCartTotals();
@@ -269,22 +274,11 @@ export const CartProvider = ({ children }) => {
   const getWhatsappCheckoutUrl = (userDetails = {}, orderId = null) => {
     const whatsappNumber = settings?.whatsappNumber;
     
-    // Format currency without trailing zero decimals for whole numbers
-    const formatCurrency = (val) => {
-      const num = Number(val);
-      const isWhole = num % 1 === 0;
-      return '₹' + num.toLocaleString('en-IN', {
-        minimumFractionDigits: isWhole ? 0 : 2,
-        maximumFractionDigits: isWhole ? 0 : 2
-      });
-    };
-    
     const formatDate = (dateStr) => {
       if (!dateStr) return '';
       try {
         const d = new Date(dateStr);
         if (isNaN(d.getTime())) return dateStr;
-        // Check for crazy years
         if (d.getFullYear() > 2100 || d.getFullYear() < 2000) return dateStr;
         return new Intl.DateTimeFormat('en-GB', { day: '2-digit', month: 'long', year: 'numeric' }).format(d);
       } catch (e) {
@@ -292,176 +286,124 @@ export const CartProvider = ({ children }) => {
       }
     };
     
-    const DIVIDER = '══════════════════════';
+    const DIVIDER = '----------------------------------';
 
     // 1. Header
     const today = new Intl.DateTimeFormat('en-GB', { day: '2-digit', month: 'long', year: 'numeric' }).format(new Date());
-    let headerParts = [];
-    headerParts.push('*HAMPERS NEST*');
-    headerParts.push('Premium Gifts & Return Gifts');
-    headerParts.push('');
-    headerParts.push(DIVIDER);
-    headerParts.push('');
-    headerParts.push('*ORDER REQUEST*');
+    let messageParts = [];
+    
+    messageParts.push('*HAMPERS NEST*');
+    messageParts.push('Premium Gifts & Return Gifts');
+    messageParts.push('');
+    messageParts.push(DIVIDER);
+    messageParts.push('');
+    messageParts.push('*ORDER SUMMARY*');
+    messageParts.push('');
     if (orderId) {
-      headerParts.push(`Order Reference:\n${orderId}`);
+      messageParts.push(`Order ID:\n${orderId}`);
     }
-    headerParts.push(`Date:\n${today}`);
+    messageParts.push(`Date:\n${today}`);
+    messageParts.push('');
+    messageParts.push(DIVIDER);
+    messageParts.push('');
+    messageParts.push('*PRODUCTS*');
+    messageParts.push('');
 
     // 2. Products
-    let orderDetailsText = cart.map((item, idx) => {
-      let lines = [];
-      lines.push(DIVIDER);
-      lines.push('');
-      
-      lines.push(`*${item.name}*`);
+    cart.forEach((item, idx) => {
+      messageParts.push(`${idx + 1}.`);
+      messageParts.push('');
+      messageParts.push(`*${item.name}*`);
       
       let cats = [];
       if (item.category) cats.push(item.category);
       if (item.subCategory) cats.push(item.subCategory);
-      if (cats.length > 0) lines.push(cats.join(' - '));
+      if (cats.length > 0) messageParts.push(cats.join(' - '));
       
       if (item.customizations?.variant) {
-        lines.push(`Variant: ${item.customizations.variant.name}`);
+        messageParts.push(`Variant: ${item.customizations.variant.name}`);
       }
       
-      lines.push('');
+      messageParts.push('');
+      messageParts.push(`Quantity: ${item.quantity}`);
       
-      const basePrice = item.customizations?.variant?.price 
-                        ? item.customizations.variant.price 
-                        : (item.basePrice || (item.price - (item.customizations?.addedPrice || 0)));
-                        
-      lines.push(`• Qty : ${item.quantity} Pieces`);
-      lines.push(`• Price : ${formatCurrency(basePrice)} each`);
-      lines.push(`• Total : ${formatCurrency(basePrice * item.quantity)}`);
-
-      // Customizations
       if (item.customizations?.giftTag) {
-        lines.push('');
-        lines.push('Gift Tag');
-        lines.push(item.customizations.giftTag);
+        messageParts.push('');
+        messageParts.push('Gift Tag:');
+        messageParts.push(item.customizations.giftTag);
       }
       
       let addonTotal = 0;
       if (item.customizations?.addOns && item.customizations.addOns.length > 0) {
-        lines.push('');
-        lines.push('Selected Add-ons');
-        
-        item.customizations.addOns.forEach(addonName => {
-          let price = 0;
-          if (item.customAddons && Array.isArray(item.customAddons)) {
-             const found = item.customAddons.find(a => a.name === addonName);
-             if (found) price = Number(found.price);
-          } else {
-             const defaultAddons = [
-                { name: 'Scented Wax Candle', price: 99 },
-                { name: 'Extra Chocolates (Pack of 4)', price: 149 },
-                { name: 'Premium Hydration Flask', price: 299 },
-                { name: 'Calligraphy Message Card', price: 49 }
-             ];
-             const found = defaultAddons.find(a => a.name === addonName);
-             if (found) price = Number(found.price);
-          }
+        messageParts.push('');
+        messageParts.push('Selected Add-ons:');
+        item.customizations.addOns.forEach(addon => {
+          // Backward compatibility for old string-based addons
+          const name = typeof addon === 'string' ? addon : addon.name;
+          const price = typeof addon === 'string' ? 0 : (Number(addon.price) || 0);
           addonTotal += price;
-          lines.push(`• ${addonName} (+${formatCurrency(price)})`);
+          messageParts.push(`• ${name} (+${formatCurrency(price)})`);
         });
       }
-
-      if (addonTotal > 0) {
-         lines.push('');
-         lines.push('Customization Total');
-         lines.push(formatCurrency(addonTotal * item.quantity));
-      }
-
-      return lines.join('\n');
-    }).join('\n\n');
+      
+      const basePrice = item.customizations?.variant?.price || item.basePrice || item.price;
+      const unitPrice = calculateProductPrice(basePrice, item.customizations?.addOns || []);
+      
+      messageParts.push('');
+      messageParts.push(`Price: ${formatCurrency(unitPrice * item.quantity)}`);
+      messageParts.push('');
+    });
 
     // 3. Order Summary
-    let totalsLines = [];
-    totalsLines.push(`*ORDER SUMMARY*`);
-    totalsLines.push('');
-    // Proportional fonts in WhatsApp make perfect alignment hard, but this is a close approximation.
-    totalsLines.push(`Products            ${cart.length}`);
-    totalsLines.push(`Total Pieces        ${cartCount}`);
-    totalsLines.push(`Subtotal            ${formatCurrency(cartTotals.subtotal)}`);
+    messageParts.push(DIVIDER);
+    messageParts.push('');
+    messageParts.push(`*TOTALS*`);
+    messageParts.push('');
+    messageParts.push(`Subtotal: ${formatCurrency(cartTotals.subtotal)}`);
     
     if (cartTotals.discountTotal > 0) {
-       totalsLines.push(`Discount            -${formatCurrency(cartTotals.discountTotal)}`);
+       messageParts.push(`Discount: -${formatCurrency(cartTotals.discountTotal)}`);
     }
     
-    totalsLines.push(`Shipping            Calculated Separately`);
-    totalsLines.push(`Estimated Total     ${formatCurrency(cartTotal)}`);
+    messageParts.push(`Shipping: Calculated Separately`);
+    messageParts.push(`Grand Total: ${formatCurrency(cartTotal)}`);
+    messageParts.push('');
+    messageParts.push(DIVIDER);
 
     // 4. Customer Details
-    let customerLines = [];
-    if (userDetails.name || userDetails.phone || userDetails.email || userDetails.eventType || userDetails.deliveryDate || userDetails.location) {
-       customerLines.push(DIVIDER);
-       customerLines.push('');
-       customerLines.push(`*CUSTOMER*`);
-       customerLines.push('');
-       
-       if (userDetails.name) {
-         customerLines.push(userDetails.name);
-       }
-       if (userDetails.phone) {
-         customerLines.push(userDetails.phone);
-       }
-       if (userDetails.email) {
-         customerLines.push(userDetails.email);
-       }
-       if (userDetails.eventType) {
-         customerLines.push(userDetails.eventType);
-       }
-       if (userDetails.deliveryDate) {
-         customerLines.push(formatDate(userDetails.deliveryDate));
-       }
-       if (userDetails.location) {
-         customerLines.push(userDetails.location);
-       }
-    }
-
-    // 5. Notes
-    let notesLines = [];
+    messageParts.push('');
+    messageParts.push(`*CUSTOMER*`);
+    messageParts.push('');
+    
+    if (userDetails.name) messageParts.push(`Name: ${userDetails.name}`);
+    if (userDetails.phone) messageParts.push(`Phone: ${userDetails.phone}`);
+    if (userDetails.eventType) messageParts.push(`Event: ${userDetails.eventType}`);
+    if (userDetails.deliveryDate) messageParts.push(`Required Date: ${formatDate(userDetails.deliveryDate)}`);
+    
     if (userDetails.notes) {
        let safeNotes = userDetails.notes.trim();
-       if (safeNotes.length > 180) {
-         safeNotes = safeNotes.substring(0, 180) + '...Read More';
-       }
-       notesLines.push(DIVIDER);
-       notesLines.push('');
-       notesLines.push(`*CUSTOMER NOTES*`);
-       notesLines.push('');
-       notesLines.push(safeNotes);
+       if (safeNotes.length > 180) safeNotes = safeNotes.substring(0, 180) + '...';
+       messageParts.push('');
+       messageParts.push(`Notes:`);
+       messageParts.push(safeNotes);
     }
 
     // 6. Footer
-    let footerLines = [
-      DIVIDER,
-      ``,
-      `Shipping charges are calculated separately based on destination and volumetric weight.`,
-      ``,
-      `Kindly confirm:`,
-      ``,
-      `• Product Availability`,
-      `• Final Shipping Charges`,
-      `• Estimated Dispatch Date`,
-      ``,
-      `Thank you.`,
-      ``,
-      `Hampers Nest Team`
-    ];
-
-    const messageParts = [];
-    messageParts.push(headerParts.join('\n'));
-    messageParts.push(orderDetailsText);
+    messageParts.push('');
     messageParts.push(DIVIDER);
-    messageParts.push(totalsLines.join('\n'));
-    if (customerLines.length > 0) messageParts.push(customerLines.join('\n'));
-    if (notesLines.length > 0) messageParts.push(notesLines.join('\n'));
-    messageParts.push(footerLines.join('\n'));
+    messageParts.push('');
+    messageParts.push(`Kindly confirm:`);
+    messageParts.push('');
+    messageParts.push(`• Product Availability`);
+    messageParts.push(`• Shipping Charges`);
+    messageParts.push(`• Dispatch Date`);
+    messageParts.push('');
+    messageParts.push(`Thank you.`);
+    messageParts.push('');
+    messageParts.push(`Hampers Nest`);
 
     // Remove any accidental triple blank lines caused by joins
-    const message = messageParts.join('\n\n').replace(/\n{3,}/g, '\n\n');
+    const message = messageParts.join('\n').replace(/\n{3,}/g, '\n\n');
 
     return `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
   };
