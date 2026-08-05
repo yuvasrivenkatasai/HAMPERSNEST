@@ -81,6 +81,28 @@ export default function CatalogExportModal({ isOpen, onClose, products, categori
       return;
     }
 
+    // 3. Centralized Sorting Engine
+    enrichedProducts.sort((a, b) => {
+      const nameA = (a.name || '').replace(/^(a|an|the)\s+/i, '').trim();
+      const nameB = (b.name || '').replace(/^(a|an|the)\s+/i, '').trim();
+
+      switch (sortBy) {
+        case 'NAME_ASC':
+        case 'CATEGORY': // For CATEGORY, we sort by Name A-Z here, and pdfGenerator groups them
+          return nameA.localeCompare(nameB);
+        case 'NAME_DESC':
+          return nameB.localeCompare(nameA);
+        case 'PRICE_ASC':
+          return (parseFloat(a.price) || 0) - (parseFloat(b.price) || 0);
+        case 'PRICE_DESC':
+          return (parseFloat(b.price) || 0) - (parseFloat(a.price) || 0);
+        case 'RECENT':
+          return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
+        default:
+          return 0;
+      }
+    });
+
     try {
       // Fetch the latest settings for Delivery Info and Footer
       let globalSettings = {};
@@ -113,10 +135,28 @@ export default function CatalogExportModal({ isOpen, onClose, products, categori
     }
   };
 
-  // Subcategories belonging to the selected category
-  const availableSubcategories = selectedCategory 
-    ? categories.filter(c => c.parentId === selectedCategory)
-    : [];
+  // Subcategories belonging to the selected category (or all if none selected)
+  let availableSubcategories = [];
+  if (selectedCategory) {
+    availableSubcategories = categories
+      .filter(c => c.parentId === selectedCategory)
+      .sort((a, b) => a.name.localeCompare(b.name));
+  } else {
+    availableSubcategories = categories
+      .filter(c => c.parentId)
+      .sort((a, b) => a.name.localeCompare(b.name));
+  }
+
+  // Group subcategories if "All Categories" is selected
+  const groupedSubcategories = {};
+  if (!selectedCategory) {
+    availableSubcategories.forEach(sc => {
+      if (!groupedSubcategories[sc.parentId]) {
+        groupedSubcategories[sc.parentId] = [];
+      }
+      groupedSubcategories[sc.parentId].push(sc);
+    });
+  }
 
   return (
     <div className="modal-backdrop" onClick={(e) => e.target.classList.contains('modal-backdrop') && !generating && onClose()}>
@@ -160,9 +200,11 @@ export default function CatalogExportModal({ isOpen, onClose, products, categori
               disabled={generating}
             >
               <option value="NAME_ASC">Name (A-Z)</option>
+              <option value="NAME_DESC">Name (Z-A)</option>
               <option value="PRICE_ASC">Price (Low to High)</option>
               <option value="PRICE_DESC">Price (High to Low)</option>
               <option value="CATEGORY">Category</option>
+              <option value="RECENT">Recently Added</option>
             </select>
           </div>
 
@@ -192,17 +234,31 @@ export default function CatalogExportModal({ isOpen, onClose, products, categori
                   className="form-select"
                   value={selectedSubcategory}
                   onChange={(e) => setSelectedSubcategory(e.target.value)}
-                  disabled={generating || !selectedCategory}
+                  disabled={generating}
                 >
                   {availableSubcategories.length > 0 ? (
                     <>
                       <option value="">All Subcategories</option>
-                      {availableSubcategories.map(sc => (
-                        <option key={sc.id} value={sc.id}>{sc.name}</option>
-                      ))}
+                      {selectedCategory ? (
+                        availableSubcategories.map(sc => (
+                          <option key={sc.id} value={sc.id}>{sc.name}</option>
+                        ))
+                      ) : (
+                        Object.keys(groupedSubcategories).map(parentId => {
+                          const parent = categories.find(c => c.id === parentId);
+                          if (!parent) return null;
+                          return (
+                            <optgroup key={parentId} label={parent.name}>
+                              {groupedSubcategories[parentId].map(sc => (
+                                <option key={sc.id} value={sc.id}>{sc.name}</option>
+                              ))}
+                            </optgroup>
+                          );
+                        })
+                      )}
                     </>
                   ) : (
-                    <option value="" disabled>No subcategories available</option>
+                    <option value="">No subcategories available</option>
                   )}
                 </select>
               </div>

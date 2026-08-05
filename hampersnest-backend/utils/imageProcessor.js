@@ -6,8 +6,8 @@ import path from 'path';
 // We assume this file exists at `hampersnest-backend/assets/official-watermark.png`
 const LOGO_PATH = path.join(process.cwd(), 'assets', 'official-watermark.png');
 
-const DEFAULT_WATERMARK_POSITION = 'northwest';
-const DEFAULT_WATERMARK_OPACITY = 1.0;
+const DEFAULT_WATERMARK_POSITION = 'center';
+const DEFAULT_WATERMARK_OPACITY = 0.60;
 /**
  * Process a single image buffer, applying a premium logo watermark if requested
  * Returns a high-quality processed buffer.
@@ -15,8 +15,8 @@ const DEFAULT_WATERMARK_OPACITY = 1.0;
 export async function generateWatermarkedImage(buffer, options = {}) {
   const {
     enableWatermark = true,
-    position = 'Top Left', // Configurable position, defaults to top left
-    scalePercent = 0.4    // 40% of image width
+    position = 'center', // Configurable position, defaults to center
+    scalePercent = 0.35    // 35% of image width
   } = options;
 
   if (!enableWatermark) {
@@ -51,7 +51,7 @@ export async function generateWatermarkedImage(buffer, options = {}) {
     }
 
     // 2. Determine gravity position
-    // As per global update requirements, watermark is placed at Top Left
+    // As per global update requirements, watermark is placed at center
     const gravity = DEFAULT_WATERMARK_POSITION;
 
     // 3. Process the logo watermark (Resize)

@@ -124,17 +124,7 @@ export const generateCatalogPdf = async (products, mode = 'download', onProgress
 
   // Consistent sorting logic inside categories/tiers
   const sortProductsInGroup = (prods) => {
-    return prods.sort((a, b) => {
-      const aFeat = (a.isFeatured || a.featured) ? 1 : 0;
-      const bFeat = (b.isFeatured || b.featured) ? 1 : 0;
-      if (aFeat !== bFeat) return bFeat - aFeat;
-      
-      const aStock = a.stock > 0 ? 1 : 0;
-      const bStock = b.stock > 0 ? 1 : 0;
-      if (aStock !== bStock) return bStock - aStock;
-      
-      return stripArticle(a.name || '').localeCompare(stripArticle(b.name || ''));
-    });
+    return prods; // Products are already strictly sorted by the modal before generation
   };
 
   // Section Builders
@@ -197,15 +187,8 @@ export const generateCatalogPdf = async (products, mode = 'download', onProgress
   } else if (sortBy.startsWith('PRICE')) {
     const priceAsc = sortBy === 'PRICE_ASC';
     
-    // Strict numeric sort
-    const sorted = [...products].sort((a, b) => {
-      const priceA = parseFloat(a.price) || 0;
-      const priceB = parseFloat(b.price) || 0;
-      return priceAsc ? (priceA - priceB) : (priceB - priceA);
-    });
-    
     const tiers = {};
-    sorted.forEach(p => {
+    products.forEach(p => {
       const tier = getPriceTier(p.price);
       if (!tiers[tier.label]) tiers[tier.label] = { label: tier.label, min: tier.min, products: [] };
       tiers[tier.label].products.push(p);
@@ -229,18 +212,20 @@ export const generateCatalogPdf = async (products, mode = 'download', onProgress
     });
 
   } else {
-    // NAME_ASC (ignore articles)
-    const sorted = [...products].sort((a, b) => stripArticle(a.name || '').localeCompare(stripArticle(b.name || '')));
-    
+    // NAME_ASC, NAME_DESC, RECENT
+    let title = 'Products (A–Z)';
+    if (sortBy === 'NAME_DESC') title = 'Products (Z–A)';
+    else if (sortBy === 'RECENT') title = 'Recently Added';
+
     sections.push({
       type: 'SECTION_HEADER',
-      title: 'Products (A–Z)',
-      subtitle: `${sorted.length} Products`
+      title: title,
+      subtitle: `${products.length} Products`
     });
 
     sections.push({
       type: 'PRODUCTS',
-      products: sorted
+      products: products
     });
   }
 
