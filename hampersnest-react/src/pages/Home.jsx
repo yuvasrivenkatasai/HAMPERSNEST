@@ -36,10 +36,10 @@ export default function Home() {
   const [activeSlide, setActiveSlide] = useState(0);
   const [testimonials, setTestimonials] = useState(DEFAULT_TESTIMONIALS);
   const [heroBanner, setHeroBanner] = useState({
-    mainImage: null,
-    floatingImageTop: null,
-    floatingImageBottom: null,
-    isActive: false
+    mainImage: '/assets/hero_banner.webp',
+    floatingImageTop: '/assets/wedding_gift.webp',
+    floatingImageBottom: '/assets/brass_cup.webp',
+    isActive: true
   });
 
   // Fetch Hero Banner Configuration
@@ -214,13 +214,13 @@ export default function Home() {
             <div className="hero-visual hero-fade" style={{ '--delay': '0.5s' }}>
               <div className="hero-image-glow" aria-hidden="true"></div>
               <div className="hero-image-frame">
-                <img src={heroBanner.mainImage || "/assets/hero_banner.webp"} alt="Premium luxury curated gift hamper by Hampers Nest" />
+                <img src={heroBanner.mainImage} alt="Premium luxury curated gift hamper by Hampers Nest" />
               </div>
               <div className="hero-product-card hero-product-wedding">
-                <img src={heroBanner.floatingImageTop || "/assets/wedding_gift.webp"} alt="Elegant wedding hamper gift" />
+                <img src={heroBanner.floatingImageTop} alt="Elegant wedding hamper gift" />
               </div>
               <div className="hero-product-card hero-product-brass">
-                <img src={heroBanner.floatingImageBottom || "/assets/brass_cup.webp"} alt="Handcrafted brass return gift" />
+                <img src={heroBanner.floatingImageBottom} alt="Handcrafted brass return gift" />
               </div>
             </div>
           </div>

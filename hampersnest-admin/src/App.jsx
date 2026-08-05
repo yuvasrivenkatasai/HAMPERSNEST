@@ -15,6 +15,7 @@ import Users from './pages/Users';
 import Testimonials from './pages/Testimonials';
 import Policies from './pages/Policies';
 import CategoryShowcaseManager from './pages/CategoryShowcaseManager';
+import HeroBannerManager from './pages/HeroBannerManager';
 
 // All modules with their sidebar config
 const ALL_SIDEBAR_ITEMS = [
@@ -32,6 +33,7 @@ const ADMIN_SIDEBAR_ITEMS = [
   { path: '/users', permission: 'users', icon: 'fa-solid fa-users-gear', label: 'Users & Roles' },
   { path: '/settings', permission: 'settings', icon: 'fa-solid fa-sliders', label: 'Settings' },
   { path: '/category-showcase', permission: 'category_showcase', icon: 'fa-solid fa-icons', label: 'Category Showcase' },
+  { path: '/hero-banner', permission: 'settings', icon: 'fa-solid fa-image', label: 'Homepage Hero Images' },
 ];
 
 // Helper: check if a user has a given permission
@@ -172,6 +174,7 @@ function AdminLayout({ children, userPermissions }) {
       case '/policies': return 'Policy Management';
       case '/settings': return 'System Settings';
       case '/users': return 'User Access Control';
+      case '/hero-banner': return 'Homepage Hero Images';
       default: return 'Hampers Nest Admin';
     }
   };
@@ -283,6 +286,7 @@ export default function App() {
                   <Route path="/settings" element={<ProtectedRoute permissionKey="settings" userPermissions={userPermissions}><Settings /></ProtectedRoute>} />
                   <Route path="/users" element={<ProtectedRoute permissionKey="users" userPermissions={userPermissions}><Users /></ProtectedRoute>} />
                   <Route path="/category-showcase" element={<ProtectedRoute permissionKey="category_showcase" userPermissions={userPermissions}><CategoryShowcaseManager /></ProtectedRoute>} />
+                  <Route path="/hero-banner" element={<ProtectedRoute permissionKey="settings" userPermissions={userPermissions}><HeroBannerManager /></ProtectedRoute>} />
                   <Route path="*" element={<Navigate to="/" replace />} />
                 </Routes>
               </AdminLayout>

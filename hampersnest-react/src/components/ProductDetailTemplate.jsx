@@ -7,7 +7,7 @@ import PremiumProductGallery from './PremiumProductGallery';
 import WishlistButton from './WishlistButton';
 import { API_BASE } from '../config.js';
 import DOMPurify from 'dompurify';
-import { MINIMUM_ORDER_QTY, QUICK_QTYS } from '../utils/constants';
+import { MIN_ORDER_QUANTITY, QUICK_QTYS } from '../utils/constants';
 import { validateQuantityInput, sanitizeQuantityOnBlur } from '../utils/ValidationUtils';
 
 const DEFAULT_DELIVERY_INFO_TEXT = `🚚 Dispatch:
@@ -30,8 +30,8 @@ export default function ProductDetailTemplate({ product, displayRelated = [] }) 
 
   // Form States
   const [giftTag, setGiftTag] = useState('');
-  const [quantity, setQuantity] = useState(MINIMUM_ORDER_QTY);
-  const [qtyInputText, setQtyInputText] = useState(MINIMUM_ORDER_QTY.toString());
+  const [quantity, setQuantity] = useState(MIN_ORDER_QUANTITY);
+  const [qtyInputText, setQtyInputText] = useState(MIN_ORDER_QUANTITY.toString());
   
   // Variant State
   const defaultVariant = product.variantsEnabled && Array.isArray(product.variants) && product.variants.length > 0 
@@ -67,8 +67,8 @@ export default function ProductDetailTemplate({ product, displayRelated = [] }) 
   // Reset states on product change
   useEffect(() => {
     setGiftTag('');
-    setQuantity(MINIMUM_ORDER_QTY);
-    setQtyInputText(MINIMUM_ORDER_QTY.toString());
+    setQuantity(MIN_ORDER_QUANTITY);
+    setQtyInputText(MIN_ORDER_QUANTITY.toString());
     setSelectedAddOns([]);
     setPendingAddOns([]);
     setAddonsApplied(false);
@@ -417,7 +417,7 @@ export default function ProductDetailTemplate({ product, displayRelated = [] }) 
               
               {/* 1. Minimum Order Quantity */}
               <div style={{ marginTop: '0.5rem', fontSize: '0.8rem', color: 'var(--color-charcoal)', fontWeight: '500', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <i className="fa-solid fa-circle-info" style={{ color: 'var(--color-gold)' }}></i> Minimum Order Quantity: {MINIMUM_ORDER_QTY} Pieces
+                <i className="fa-solid fa-circle-info" style={{ color: 'var(--color-gold)' }}></i> Minimum Order Quantity: {MIN_ORDER_QUANTITY} Pieces
               </div>
 
               {/* 2. Bulk Discount Card */}
@@ -470,11 +470,11 @@ export default function ProductDetailTemplate({ product, displayRelated = [] }) 
                     <button
                       type="button"
                       onClick={() => {
-                        const newQ = Math.max(MINIMUM_ORDER_QTY, quantity - 1);
+                        const newQ = Math.max(MIN_ORDER_QUANTITY, quantity - 1);
                         setQuantity(newQ);
                         setQtyInputText(newQ.toString());
                       }}
-                      disabled={effectiveStock === 0 || quantity <= MINIMUM_ORDER_QTY}
+                      disabled={effectiveStock === 0 || quantity <= MIN_ORDER_QUANTITY}
                       aria-label="Decrease quantity"
                     >
                       <i className="fa-solid fa-minus"></i>
@@ -589,7 +589,7 @@ export default function ProductDetailTemplate({ product, displayRelated = [] }) 
             <div className={`product-accordion-content ${activeAccordion === 'description' ? 'open' : ''}`}>
               <div className="product-accordion-content-inner">
                 {activeAccordion === 'description' && (
-                  <div style={{ fontSize: '0.9rem', color: '#4b5563', lineHeight: '1.6', whiteSpace: 'pre-wrap' }}>
+                  <div className="product-description-text" style={{ fontSize: '0.9rem', color: '#4b5563', lineHeight: '1.6' }}>
                     <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(product.description || '') }} />
                     
                     {product.highlights && (

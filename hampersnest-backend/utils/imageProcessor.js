@@ -6,6 +6,8 @@ import path from 'path';
 // We assume this file exists at `hampersnest-backend/assets/official-watermark.png`
 const LOGO_PATH = path.join(process.cwd(), 'assets', 'official-watermark.png');
 
+const DEFAULT_WATERMARK_POSITION = 'northwest';
+const DEFAULT_WATERMARK_OPACITY = 1.0;
 /**
  * Process a single image buffer, applying a premium logo watermark if requested
  * Returns a high-quality processed buffer.
@@ -49,8 +51,8 @@ export async function generateWatermarkedImage(buffer, options = {}) {
     }
 
     // 2. Determine gravity position
-    // As per global update requirements, watermark is globally centered
-    const gravity = 'center';
+    // As per global update requirements, watermark is placed at Top Left
+    const gravity = DEFAULT_WATERMARK_POSITION;
 
     // 3. Process the logo watermark (Resize)
     const logoBuffer = await fs.promises.readFile(LOGO_PATH);
@@ -63,10 +65,10 @@ export async function generateWatermarkedImage(buffer, options = {}) {
     const logoMeta = await sharp(resizedLogo).metadata();
     const logoB64 = resizedLogo.toString('base64');
     
-    // Wrap in SVG for extreme transparency (60% opacity)
+    // Wrap in SVG for extreme transparency (using DEFAULT_WATERMARK_OPACITY)
     const svgOpacityWrapper = Buffer.from(`
       <svg width="${logoMeta.width}" height="${logoMeta.height}">
-        <image href="data:image/png;base64,${logoB64}" width="100%" height="100%" opacity="0.60"/>
+        <image href="data:image/png;base64,${logoB64}" width="100%" height="100%" opacity="${DEFAULT_WATERMARK_OPACITY}"/>
       </svg>
     `);
 

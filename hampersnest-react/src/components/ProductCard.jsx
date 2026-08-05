@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useCurrency } from '../context/CurrencyContext';
 import WishlistButton from './WishlistButton';
+import { getPlainTextPreview } from '../utils/FormatUtils';
 
 const ProductCard = memo(({ product, animationDelay = 0 }) => {
   const navigate = useNavigate();
@@ -228,7 +229,7 @@ const ProductCard = memo(({ product, animationDelay = 0 }) => {
           overflow: 'hidden',
           textOverflow: 'ellipsis'
         }}>
-          {product.shortDescription || product.description || <span style={{ visibility: 'hidden' }}>&nbsp;</span>}
+          {getPlainTextPreview(product.shortDescription || product.description) || <span style={{ visibility: 'hidden' }}>&nbsp;</span>}
         </p>
         <div style={{ display: 'flex', gap: '8px', marginTop: '4px' }}>
           <button

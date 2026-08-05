@@ -9,10 +9,10 @@ export const getHeroBanner = async (req, res) => {
     if (!banner) {
       banner = {
         title: 'Default Homepage Hero',
-        mainImage: null,
-        floatingImageTop: null,
-        floatingImageBottom: null,
-        isActive: false
+        mainImage: '/assets/hero_banner.webp',
+        floatingImageTop: '/assets/wedding_gift.webp',
+        floatingImageBottom: '/assets/brass_cup.webp',
+        isActive: true
       };
     }
     res.json(banner);
@@ -64,10 +64,10 @@ export const deleteHeroBanner = async (req, res) => {
   try {
     const banner = await HeroBanner.findOne({ where: { id: 1 } });
     if (banner) {
-      banner.mainImage = null;
-      banner.floatingImageTop = null;
-      banner.floatingImageBottom = null;
-      banner.isActive = false;
+      banner.mainImage = '/assets/hero_banner.webp';
+      banner.floatingImageTop = '/assets/wedding_gift.webp';
+      banner.floatingImageBottom = '/assets/brass_cup.webp';
+      banner.isActive = true;
       await banner.save();
     }
     res.json({ message: 'Hero banner reset to defaults successfully' });

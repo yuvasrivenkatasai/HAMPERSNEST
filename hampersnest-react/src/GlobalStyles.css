@@ -8827,3 +8827,14 @@ footer h4,
   text-overflow: ellipsis;
   margin-bottom: 1rem;
 }
+
+.product-description-text {
+  white-space: normal !important;
+  overflow-wrap: break-word;
+  word-break: normal;
+  max-width: 100%;
+  width: 100%;
+  box-sizing: border-box;
+  min-width: 0;
+  overflow: visible;
+}

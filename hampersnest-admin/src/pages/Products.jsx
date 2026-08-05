@@ -56,7 +56,6 @@ export default function Products() {
       type: 'Brand Name',
       text: 'Hampers Nest',
       position: 'Top Left',
-      opacity: 18,
       size: 'Medium'
     },
     variantsEnabled: false,
@@ -1222,17 +1221,6 @@ Automatic discounts are applied at checkout:
                           <option value="Bottom Right">Bottom Right</option>
                           <option value="Center">Center</option>
                         </select>
-                      </div>
-                      <div className="form-group">
-                        <label className="form-label">Opacity (%)</label>
-                        <input
-                          type="number"
-                          min="1"
-                          max="100"
-                          className="form-input"
-                          value={formData.watermarkSettings?.opacity || 18}
-                          onChange={(e) => setFormData(prev => ({...prev, watermarkSettings: {...prev.watermarkSettings, opacity: parseInt(e.target.value) || 18}}))}
-                        />
                       </div>
                       <div className="form-group">
                         <label className="form-label">Size</label>

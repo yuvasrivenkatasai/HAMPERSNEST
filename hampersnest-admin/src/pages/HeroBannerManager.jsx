@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { apiRequest } from '../utils/api';
+import { apiRequest, API_BASE } from '../utils/api';
 
 export default function HeroBannerManager() {
   const [loading, setLoading] = useState(true);
@@ -51,7 +51,21 @@ export default function HeroBannerManager() {
       formData.append('image', file);
 
       // Upload the file
-      const uploadRes = await apiRequest('/api/upload?folder=hero', 'POST', formData, true);
+      const token = localStorage.getItem('adminToken');
+      const response = await fetch(`${API_BASE}/api/upload?folder=hero`, {
+        method: 'POST',
+        headers: {
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+        },
+        body: formData
+      });
+
+      if (!response.ok) {
+        const errData = await response.json().catch(() => ({}));
+        throw new Error(errData.message || 'Image upload failed');
+      }
+
+      const uploadRes = await response.json();
       
       if (uploadRes && uploadRes.url) {
         setBanner((prev) => ({ ...prev, [field]: uploadRes.url }));
@@ -74,7 +88,10 @@ export default function HeroBannerManager() {
     try {
       setSaving(true);
       setError('');
-      const data = await apiRequest('/api/hero-banner', 'PUT', banner);
+      const data = await apiRequest('/api/hero-banner', {
+        method: 'PUT',
+        body: banner
+      });
       setBanner(data);
       setSuccess('Hero banner settings saved successfully!');
       setTimeout(() => setSuccess(''), 3000);
@@ -91,7 +108,7 @@ export default function HeroBannerManager() {
     try {
       setSaving(true);
       setError('');
-      await apiRequest('/api/hero-banner', 'DELETE');
+      await apiRequest('/api/hero-banner', { method: 'DELETE' });
       await fetchBanner();
       setSuccess('Hero banner reset to defaults.');
       setTimeout(() => setSuccess(''), 3000);

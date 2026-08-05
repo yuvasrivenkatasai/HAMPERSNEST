@@ -1,4 +1,4 @@
-import { MINIMUM_ORDER_QTY } from './constants';
+import { MIN_ORDER_QUANTITY } from './constants';
 
 export const validateQuantityInput = (value) => {
   // Allow empty string temporarily for editing
@@ -14,9 +14,9 @@ export const validateQuantityInput = (value) => {
 };
 
 export const sanitizeQuantityOnBlur = (value) => {
-  if (value === '' || isNaN(value)) return MINIMUM_ORDER_QTY;
+  if (value === '' || isNaN(value)) return MIN_ORDER_QUANTITY;
   const num = parseInt(value, 10);
-  if (num < MINIMUM_ORDER_QTY) return MINIMUM_ORDER_QTY;
+  if (num < MIN_ORDER_QUANTITY) return MIN_ORDER_QUANTITY;
   return num;
 };
 

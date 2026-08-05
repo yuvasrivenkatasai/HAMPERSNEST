@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useCart } from '../context/CartContext';
 import { API_BASE } from '../config.js';
 import { useCurrency } from '../context/CurrencyContext';
-import { MINIMUM_ORDER_QTY, QUICK_QTYS } from '../utils/constants';
+import { MIN_ORDER_QUANTITY, QUICK_QTYS } from '../utils/constants';
 import { validateQuantityInput, sanitizeQuantityOnBlur, validateRequiredDate, validatePhone } from '../utils/ValidationUtils';
 
 const DeliveryAccordion = ({ cart, products }) => {
@@ -183,8 +183,8 @@ export default function CartDrawer() {
       return;
     }
 
-    if (cart.some(item => item.quantity < MINIMUM_ORDER_QTY)) {
-      alert(`Minimum order quantity is ${MINIMUM_ORDER_QTY} pieces per product. Please increase your quantities.`);
+    if (cart.some(item => item.quantity < MIN_ORDER_QUANTITY)) {
+      alert(`Minimum order quantity is ${MIN_ORDER_QUANTITY} pieces per product. Please increase your quantities.`);
       return;
     }
 
@@ -322,13 +322,13 @@ export default function CartDrawer() {
                           <div className="qty-picker-detail" style={{ height: '36px', display: 'flex', flexShrink: 0, padding: '0 4px' }}>
                             <button
                               onClick={() => {
-                                const newQ = Math.max(MINIMUM_ORDER_QTY, item.quantity - 1);
+                                const newQ = Math.max(MIN_ORDER_QUANTITY, item.quantity - 1);
                                 setQtyInputTexts(p => ({ ...p, [item.cartItemId]: newQ.toString() }));
                                 updateQuantity(item.cartItemId, newQ);
                               }}
-                              disabled={item.quantity <= MINIMUM_ORDER_QTY}
+                              disabled={item.quantity <= MIN_ORDER_QUANTITY}
                               aria-label="Decrease quantity"
-                              style={{ opacity: item.quantity <= MINIMUM_ORDER_QTY ? 0.5 : 1, cursor: item.quantity <= MINIMUM_ORDER_QTY ? 'not-allowed' : 'pointer' }}
+                              style={{ opacity: item.quantity <= MIN_ORDER_QUANTITY ? 0.5 : 1, cursor: item.quantity <= MIN_ORDER_QUANTITY ? 'not-allowed' : 'pointer' }}
                             >
                               <i className="fa-solid fa-minus" style={{ fontSize: '0.75rem' }}></i>
                             </button>
@@ -395,7 +395,7 @@ export default function CartDrawer() {
                             <i className="fa-solid fa-trash-can"></i> Remove
                           </button>
                           <div style={{ fontSize: '0.7rem', color: '#9CA3AF', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                            <i className="fa-solid fa-circle-info"></i> Min: {MINIMUM_ORDER_QTY}
+                            <i className="fa-solid fa-circle-info"></i> Min: {MIN_ORDER_QUANTITY}
                           </div>
                         </div>
                       </div>

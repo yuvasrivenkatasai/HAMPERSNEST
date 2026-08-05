@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useCart } from '../context/CartContext';
+import { MIN_ORDER_QUANTITY } from '../utils/constants';
 
 const OCCASIONS = [
   'Wedding Return Gifts',
@@ -35,7 +36,7 @@ const CUSTOMIZATION_OPTIONS = [
 const EMPTY_FORM = {
   occasion: '',
   eventDate: '',
-  quantity: '5',
+  quantity: MIN_ORDER_QUANTITY.toString(),
   budget: '',
   location: '',
   customizations: [],

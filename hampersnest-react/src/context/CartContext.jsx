@@ -1,8 +1,12 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { API_BASE } from '../config.js';
-import { MINIMUM_ORDER_QTY } from '../utils/constants';
+import { MIN_ORDER_QUANTITY } from '../utils/constants';
 import { calculateProductPrice, calculateCartTotals, formatCurrency } from '../utils/PriceUtils';
 import { sanitizeGiftTag } from '../utils/ValidationUtils';
+
+export const updateCartQuantity = (existingQty, incomingQty) => {
+  return existingQty + incomingQty;
+};
 
 const CartContext = createContext();
 
@@ -21,7 +25,7 @@ export const CartProvider = ({ children }) => {
     if (!savedCart) return [];
     try {
       const parsedCart = JSON.parse(savedCart);
-      return parsedCart.map(item => ({ ...item, quantity: Math.max(MINIMUM_ORDER_QTY, item.quantity || MINIMUM_ORDER_QTY) }));
+      return parsedCart.map(item => ({ ...item, quantity: Math.max(MIN_ORDER_QUANTITY, item.quantity || MIN_ORDER_QUANTITY) }));
     } catch {
       return [];
     }
@@ -106,7 +110,7 @@ export const CartProvider = ({ children }) => {
       } else if (e.key === 'hampers_nest_cart') {
         try {
           const newCart = JSON.parse(e.newValue);
-          setCart(Array.isArray(newCart) ? newCart.map(item => ({ ...item, quantity: Math.max(MINIMUM_ORDER_QTY, item.quantity || MINIMUM_ORDER_QTY) })) : []);
+          setCart(Array.isArray(newCart) ? newCart.map(item => ({ ...item, quantity: Math.max(MIN_ORDER_QUANTITY, item.quantity || MIN_ORDER_QUANTITY) })) : []);
         } catch {
           setCart([]);
         }
@@ -118,7 +122,7 @@ export const CartProvider = ({ children }) => {
   }, []);
 
   // Cart operations
-  const addToCart = (product, quantity = MINIMUM_ORDER_QTY, customizations = {}) => {
+  const addToCart = (product, quantity = MIN_ORDER_QUANTITY, customizations = {}) => {
     const { 
       giftTag = '', 
       addOns = [], // Array of extended addon objects {id, name, price, ...}
@@ -141,7 +145,7 @@ export const CartProvider = ({ children }) => {
       if (existingItemIndex > -1) {
         // Increment quantity of existing item
         const updatedCart = [...prevCart];
-        updatedCart[existingItemIndex].quantity += Number(Math.max(MINIMUM_ORDER_QTY, quantity));
+        updatedCart[existingItemIndex].quantity = updateCartQuantity(updatedCart[existingItemIndex].quantity, Number(quantity));
         return updatedCart;
       } else {
         // Add new item
@@ -155,7 +159,7 @@ export const CartProvider = ({ children }) => {
             basePrice: product.price,
             image: product.image,
             category: product.category,
-            quantity: Number(Math.max(MINIMUM_ORDER_QTY, quantity)),
+            quantity: Number(Math.max(MIN_ORDER_QUANTITY, quantity)),
             customizations: {
               giftTag: sanitizeGiftTag(giftTag),
               addOns: safeAddOns,
@@ -193,7 +197,7 @@ export const CartProvider = ({ children }) => {
     }
     setCart((prevCart) =>
       prevCart.map((item) =>
-        item.cartItemId === cartItemId ? { ...item, quantity: Number(Math.max(MINIMUM_ORDER_QTY, newQuantity)) } : item
+        item.cartItemId === cartItemId ? { ...item, quantity: Number(Math.max(MIN_ORDER_QUANTITY, newQuantity)) } : item
       )
     );
   };
