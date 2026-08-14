@@ -98,6 +98,17 @@ export const connectDB = async () => {
         await sequelize.query('ALTER TABLE "products" ADD "customAddons" CLOB');
       } catch (e) { /* Column already exists */ }
     }
+    
+    // Safely add destinations column to HeroBanner table
+    if (dbDialect === 'sqlite') {
+      try {
+        await sequelize.query('ALTER TABLE hero_banners ADD COLUMN destinations TEXT;');
+      } catch (e) { /* Column already exists */ }
+    } else if (dbDialect === 'oracle') {
+      try {
+        await sequelize.query('ALTER TABLE "hero_banners" ADD "destinations" CLOB');
+      } catch (e) { /* Column already exists */ }
+    }
 
     console.log('Database connection verified and schema synced (manual alter).');
 

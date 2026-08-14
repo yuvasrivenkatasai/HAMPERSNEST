@@ -597,6 +597,22 @@ export const HeroBanner = sequelize.define('HeroBanner', {
   isActive: {
     type: DataTypes.BOOLEAN,
     defaultValue: true
+  },
+  destinations: {
+    type: DataTypes.TEXT,
+    defaultValue: JSON.stringify({
+      mainImage: { type: 'none' },
+      floatingImageTop: { type: 'none' },
+      floatingImageBottom: { type: 'none' }
+    }),
+    get() {
+      const val = this.getDataValue('destinations');
+      if (!val) return {};
+      try { return typeof val === 'string' ? JSON.parse(val) : val; } catch(e) { return {}; }
+    },
+    set(val) {
+      this.setDataValue('destinations', typeof val === 'string' ? val : JSON.stringify(val || {}));
+    }
   }
 }, {
   tableName: 'hero_banners',

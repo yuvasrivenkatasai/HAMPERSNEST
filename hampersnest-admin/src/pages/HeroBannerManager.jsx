@@ -6,19 +6,46 @@ export default function HeroBannerManager() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [categories, setCategories] = useState([]);
+  const [products, setProducts] = useState([]);
   
   const [banner, setBanner] = useState({
     title: 'Main Homepage Hero',
     mainImage: null,
     floatingImageTop: null,
     floatingImageBottom: null,
-    isActive: true
+    isActive: true,
+    destinations: {
+      mainImage: { type: 'none' },
+      floatingImageTop: { type: 'none' },
+      floatingImageBottom: { type: 'none' }
+    }
   });
 
   // Fetch current banner settings
   useEffect(() => {
     fetchBanner();
+    fetchCategories();
+    fetchProducts();
   }, []);
+
+  const fetchCategories = async () => {
+    try {
+      const data = await apiRequest('/api/categories');
+      setCategories(Array.isArray(data) ? data : []);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const fetchProducts = async () => {
+    try {
+      const data = await apiRequest('/api/products?all=true');
+      setProducts(Array.isArray(data) ? data : (data?.products || []));
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   const fetchBanner = async () => {
     try {
@@ -84,7 +111,30 @@ export default function HeroBannerManager() {
     setBanner((prev) => ({ ...prev, [field]: null }));
   };
 
+  const validateDestinations = () => {
+    const dests = banner.destinations;
+    if (!dests) return true;
+    for (const key of ['mainImage', 'floatingImageTop', 'floatingImageBottom']) {
+      const d = dests[key] || { type: 'none' };
+      const label = key === 'mainImage' ? 'Main Banner' : (key === 'floatingImageTop' ? 'Top Floating' : 'Bottom Floating');
+      if (d.type === 'category' && !d.categoryId) {
+        setError(`Please select a category for ${label}.`);
+        return false;
+      }
+      if (d.type === 'subcategory' && (!d.categoryId || !d.subcategoryId)) {
+        setError(`Please select a category and subcategory for ${label}.`);
+        return false;
+      }
+      if (d.type === 'product' && !d.productId) {
+        setError(`Please select a product for ${label}.`);
+        return false;
+      }
+    }
+    return true;
+  };
+
   const handleSave = async () => {
+    if (!validateDestinations()) return;
     try {
       setSaving(true);
       setError('');
@@ -201,6 +251,10 @@ export default function HeroBannerManager() {
                   onUpload={(file) => handleUploadImage('mainImage', file)}
                   onRemove={() => handleRemoveImage('mainImage')}
                   saving={saving}
+                  dest={banner.destinations?.mainImage || { type: 'none' }}
+                  onChangeDest={(newDest) => setBanner(p => ({ ...p, destinations: { ...(p.destinations || {}), mainImage: newDest } }))}
+                  categories={categories}
+                  products={products}
                 />
               </div>
 
@@ -215,6 +269,10 @@ export default function HeroBannerManager() {
                   onRemove={() => handleRemoveImage('floatingImageTop')}
                   saving={saving}
                   small
+                  dest={banner.destinations?.floatingImageTop || { type: 'none' }}
+                  onChangeDest={(newDest) => setBanner(p => ({ ...p, destinations: { ...(p.destinations || {}), floatingImageTop: newDest } }))}
+                  categories={categories}
+                  products={products}
                 />
               </div>
 
@@ -229,6 +287,10 @@ export default function HeroBannerManager() {
                   onRemove={() => handleRemoveImage('floatingImageBottom')}
                   saving={saving}
                   small
+                  dest={banner.destinations?.floatingImageBottom || { type: 'none' }}
+                  onChangeDest={(newDest) => setBanner(p => ({ ...p, destinations: { ...(p.destinations || {}), floatingImageBottom: newDest } }))}
+                  categories={categories}
+                  products={products}
                 />
               </div>
 
@@ -242,7 +304,24 @@ export default function HeroBannerManager() {
 }
 
 // Sub-component for individual image slots
-function ImageUploader({ label, recommended, imageUrl, isFallback, onUpload, onRemove, saving, small }) {
+function ImageUploader({ label, recommended, imageUrl, isFallback, onUpload, onRemove, saving, small, dest, onChangeDest, categories, products }) {
+  const getDestIndicator = () => {
+    if (!dest || dest.type === 'none') return 'None';
+    if (dest.type === 'category') {
+      const c = categories?.find(x => x.id === dest.categoryId);
+      return c ? `Category → ${c.name}` : 'Destination unavailable';
+    }
+    if (dest.type === 'subcategory') {
+      const c = categories?.find(x => x.id === dest.subcategoryId);
+      return c ? `Subcategory → ${c.name}` : 'Destination unavailable';
+    }
+    if (dest.type === 'product') {
+      const p = products?.find(x => x.id === dest.productId);
+      return p ? `Product → ${p.name}` : 'Destination unavailable';
+    }
+    return 'None';
+  };
+
   return (
     <div className={`image-slot-card ${small ? 'slot-small' : ''}`}>
       <div className="slot-preview">
@@ -254,6 +333,9 @@ function ImageUploader({ label, recommended, imageUrl, isFallback, onUpload, onR
         <div className="slot-info">
           <strong>{label}</strong>
           <span>Rec: {recommended}</span>
+          <span style={{ display: 'block', marginTop: '4px', color: 'var(--color-purple)', fontSize: '0.75rem', fontWeight: 600 }}>
+            Destination: {getDestIndicator()}
+          </span>
         </div>
         
         <div className="slot-actions">
@@ -279,6 +361,83 @@ function ImageUploader({ label, recommended, imageUrl, isFallback, onUpload, onR
           )}
         </div>
       </div>
+      <DestinationConfigurator dest={dest} onChange={onChangeDest} categories={categories} products={products} />
+    </div>
+  );
+}
+
+function DestinationConfigurator({ dest, onChange, categories, products }) {
+  if (!dest || !categories) return null;
+  const destType = dest.type || 'none';
+  
+  const availableSubcats = categories.filter(c => c.parentId && c.parentId === dest.categoryId);
+  const availableProducts = products ? products.filter(p => {
+    if (destType !== 'product') return false;
+    if (dest.categoryId && p.category !== dest.categoryId) return false;
+    if (dest.subcategoryId && p.subCategory !== dest.subcategoryId) return false;
+    return true;
+  }) : [];
+
+  return (
+    <div style={{ marginTop: '12px', paddingTop: '12px', borderTop: '1px solid #eee', width: '100%' }}>
+      <div style={{ fontSize: '0.8rem', fontWeight: 600, marginBottom: '6px', color: '#555' }}>Click Destination</div>
+      
+      <select 
+        className="form-select" 
+        value={destType} 
+        onChange={(e) => onChange({ type: e.target.value })} 
+        style={{ padding: '4px 8px', fontSize: '0.8rem', width: '100%', marginBottom: '8px' }}
+        disabled={!onChange}
+      >
+        <option value="none">None</option>
+        <option value="category">Category</option>
+        <option value="subcategory">Subcategory</option>
+        <option value="product">Product</option>
+      </select>
+
+      {destType !== 'none' && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+          <select 
+            className="form-select" 
+            value={dest.categoryId || ''} 
+            onChange={(e) => onChange({ ...dest, categoryId: e.target.value, subcategoryId: '', productId: '' })} 
+            style={{ padding: '4px 8px', fontSize: '0.8rem', width: '100%' }}
+          >
+            <option value="">[Select Category]</option>
+            {categories.filter(c => !c.parentId).map(c => (
+              <option key={c.id} value={c.id}>{c.name}</option>
+            ))}
+          </select>
+
+          {(destType === 'subcategory' || destType === 'product') && (
+            <select 
+              className="form-select" 
+              value={dest.subcategoryId || ''} 
+              onChange={(e) => onChange({ ...dest, subcategoryId: e.target.value, productId: '' })} 
+              style={{ padding: '4px 8px', fontSize: '0.8rem', width: '100%' }}
+            >
+              <option value="">[Select Subcategory]</option>
+              {availableSubcats.map(c => (
+                <option key={c.id} value={c.id}>{c.name}</option>
+              ))}
+            </select>
+          )}
+
+          {destType === 'product' && (
+            <select 
+              className="form-select" 
+              value={dest.productId || ''} 
+              onChange={(e) => onChange({ ...dest, productId: e.target.value })} 
+              style={{ padding: '4px 8px', fontSize: '0.8rem', width: '100%' }}
+            >
+              <option value="">[Select Product]</option>
+              {availableProducts.map(p => (
+                <option key={p.id} value={p.id}>{p.name}</option>
+              ))}
+            </select>
+          )}
+        </div>
+      )}
     </div>
   );
 }

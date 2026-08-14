@@ -304,8 +304,8 @@ export default function ProductDetailTemplate({ product, displayRelated = [] }) 
                 <div style={{ marginTop: '12px', marginBottom: '16px', borderTop: '1px solid #f0f0f0', paddingTop: '12px' }}>
                   <h4 style={{ fontSize: '0.85rem', color: 'var(--color-purple)', marginBottom: '8px', fontWeight: '600' }}>Added Add-ons</h4>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                    {selectedAddOns.map(addon => {
-                      const identifier = addon.id || addon.name;
+                    {selectedAddOns.map((addon, idx) => {
+                      const identifier = addon.id || addon.name || idx;
                       return (
                       <div key={identifier} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.85rem', color: 'var(--color-charcoal)' }}>
                         <span>
@@ -348,12 +348,12 @@ export default function ProductDetailTemplate({ product, displayRelated = [] }) 
                     WebkitOverflowScrolling: 'touch',
                     scrollbarWidth: 'none'
                   }}>
-                    {product.variants.map((variant) => {
+                    {product.variants.map((variant, idx) => {
                       const isSelected = selectedVariant && selectedVariant.id === variant.id;
                       const isOutOfStock = variant.stock === 0;
                       return (
                         <button
-                          key={variant.id}
+                          key={variant.id || idx}
                           onClick={() => !isOutOfStock && setSelectedVariant(variant)}
                           disabled={isOutOfStock}
                           style={{
@@ -661,8 +661,8 @@ export default function ProductDetailTemplate({ product, displayRelated = [] }) 
                             Add-ons
                           </label>
                           <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '12px', marginBottom: '16px' }}>
-                            {productAddons.map((addon) => (
-                              <label key={addon.id || addon.name} style={{ display: 'flex', alignItems: 'center', cursor: 'pointer', fontSize: '0.9rem', color: '#4b5563' }}>
+                            {productAddons.map((addon, idx) => (
+                              <label key={addon.id || addon.name || idx} style={{ display: 'flex', alignItems: 'center', cursor: 'pointer', fontSize: '0.9rem', color: '#4b5563' }}>
                                 <input
                                   type="checkbox"
                                   checked={pendingAddOns.some(a => a.name === addon.name)}
@@ -832,8 +832,8 @@ export default function ProductDetailTemplate({ product, displayRelated = [] }) 
             <h2 className="section-title" style={{ marginBottom: '1.5rem' }}>Related Hampers</h2>
             
             <div className="collections-grid">
-              {displayRelated.map((item) => (
-                <ProductCard key={item.id} product={item} />
+              {displayRelated.map((item, idx) => (
+                <ProductCard key={item.id || idx} product={item} />
               ))}
             </div>
           </div>

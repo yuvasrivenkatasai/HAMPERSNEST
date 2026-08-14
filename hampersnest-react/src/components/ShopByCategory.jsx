@@ -35,6 +35,7 @@ export default function ShopByCategory() {
   const [isVisible, setIsVisible] = useState(false);
   const sectionRef = useRef(null);
   const scrollRef = useRef(null);
+  const { settings } = useCart();
 
   useEffect(() => {
     const fetchShowcases = async () => {
@@ -78,7 +79,6 @@ export default function ShopByCategory() {
     return (a.sortOrder || 0) - (b.sortOrder || 0);
   })];
 
-  const { settings } = useCart();
   const priceRangeCards = (settings?.priceRangeCards || []).filter(c => c.isActive).sort((a,b) => a.sortOrder - b.sortOrder);
 
   // Combine price range cards and regular categories into one list

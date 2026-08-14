@@ -37,6 +37,8 @@ export default function CatalogExportModal({ isOpen, onClose, products, categori
       filteredProducts = products.filter(p => p.stock > 0 || (p.variants && p.variants.some(v => v.stock > 0)));
     } else if (exportMode === 'OUT_OF_STOCK') {
       filteredProducts = products.filter(p => p.stock <= 0 && (!p.variants || !p.variants.some(v => v.stock > 0)));
+    } else if (exportMode === 'ALL') {
+      filteredProducts = products.filter(p => p.isActive !== false);
     }
 
     // 2. Filter by Category / Subcategory if Sort By = Category
@@ -70,16 +72,7 @@ export default function CatalogExportModal({ isOpen, onClose, products, categori
       };
     });
 
-    // Final filter: Never allow "Single Products" in the PDF catalogue
-    enrichedProducts = enrichedProducts.filter(p => 
-      p.category !== 'Single Products' && p.categoryName !== 'Single Products'
-    );
-
-    if (enrichedProducts.length === 0) {
-      alert('No products available for the selected filters (Single Products are excluded from the catalogue).');
-      setGenerating(false);
-      return;
-    }
+    console.log(`[PDF Generator] Products selected for PDF: ${enrichedProducts.length}`);
 
     // 3. Centralized Sorting Engine
     enrichedProducts.sort((a, b) => {

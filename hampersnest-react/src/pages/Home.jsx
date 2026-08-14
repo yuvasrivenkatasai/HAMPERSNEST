@@ -115,6 +115,25 @@ export default function Home() {
     return () => observer.disconnect();
   }, []);
 
+  const getHeroDestinationUrl = (dest) => {
+    if (!dest || dest.type === 'none') return null;
+    if (dest.type === 'category' && dest.categoryId) {
+      return `/collections?category=${encodeURIComponent(dest.categoryId)}`;
+    }
+    if (dest.type === 'subcategory' && dest.categoryId && dest.subcategoryId) {
+      return `/collections?category=${encodeURIComponent(dest.categoryId)}&subcategory=${encodeURIComponent(dest.subcategoryId)}`;
+    }
+    if (dest.type === 'product' && dest.productId) {
+      return `/product/${dest.productId}`;
+    }
+    return null;
+  };
+
+  const handleHeroClick = (dest) => {
+    const url = getHeroDestinationUrl(dest);
+    if (url) navigate(url);
+  };
+
   const openQuoteModal = (e) => {
     e.preventDefault();
     setQuoteModalOpen(true);
@@ -213,13 +232,25 @@ export default function Home() {
           <div className="hero-right">
             <div className="hero-visual hero-fade" style={{ '--delay': '0.5s' }}>
               <div className="hero-image-glow" aria-hidden="true"></div>
-              <div className="hero-image-frame">
+              <div 
+                className="hero-image-frame"
+                onClick={() => handleHeroClick(heroBanner.destinations?.mainImage)}
+                style={{ cursor: getHeroDestinationUrl(heroBanner.destinations?.mainImage) ? 'pointer' : undefined }}
+              >
                 <img src={heroBanner.mainImage} alt="Premium luxury curated gift hamper by Hampers Nest" />
               </div>
-              <div className="hero-product-card hero-product-wedding">
+              <div 
+                className="hero-product-card hero-product-wedding"
+                onClick={() => handleHeroClick(heroBanner.destinations?.floatingImageTop)}
+                style={{ cursor: getHeroDestinationUrl(heroBanner.destinations?.floatingImageTop) ? 'pointer' : undefined }}
+              >
                 <img src={heroBanner.floatingImageTop} alt="Elegant wedding hamper gift" />
               </div>
-              <div className="hero-product-card hero-product-brass">
+              <div 
+                className="hero-product-card hero-product-brass"
+                onClick={() => handleHeroClick(heroBanner.destinations?.floatingImageBottom)}
+                style={{ cursor: getHeroDestinationUrl(heroBanner.destinations?.floatingImageBottom) ? 'pointer' : undefined }}
+              >
                 <img src={heroBanner.floatingImageBottom} alt="Handcrafted brass return gift" />
               </div>
             </div>

@@ -18,6 +18,10 @@ export default function Products() {
   const [editingProduct, setEditingProduct] = useState(null); // null means "Add Product" mode
   const [search, setSearch] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('All');
+  const [subCategoryFilter, setSubCategoryFilter] = useState('All');
+  const [statusFilter, setStatusFilter] = useState('All');
+  const [featuredFilter, setFeaturedFilter] = useState('All');
+  const [stockFilter, setStockFilter] = useState('All');
   
   // Export/Import/Catalog State
   const [catalogModalOpen, setCatalogModalOpen] = useState(false);
@@ -539,12 +543,35 @@ Automatic discounts are applied at checkout:
   // Filter products
   const safeProducts = Array.isArray(products) ? products : [];
   const filteredProducts = safeProducts.filter(product => {
-    const matchesCategory = categoryFilter === 'All' || product.category === categoryFilter;
+    // Search Pipeline
     const categoryLabel = getCategoryLabel(product.category).toLowerCase();
-    const matchesSearch = 
+    const matchesSearch = search === '' || 
       product.name.toLowerCase().includes(search.toLowerCase()) ||
       categoryLabel.includes(search.toLowerCase());
-    return matchesCategory && matchesSearch;
+    
+    // Category Pipeline
+    const matchesCategory = categoryFilter === 'All' || product.category === categoryFilter;
+    
+    // Subcategory Pipeline
+    const matchesSubCategory = subCategoryFilter === 'All' || product.subCategory === subCategoryFilter;
+    
+    // Status Pipeline
+    const matchesStatus = statusFilter === 'All' || 
+      (statusFilter === 'Active' && product.isActive !== false) || 
+      (statusFilter === 'Inactive' && product.isActive === false);
+      
+    // Featured Pipeline
+    const matchesFeatured = featuredFilter === 'All' || 
+      (featuredFilter === 'Featured' && product.isFeatured) || 
+      (featuredFilter === 'Standard' && !product.isFeatured);
+      
+    // Stock Pipeline
+    const isOutOfStock = product.stock <= 0 && (!product.variants || !product.variants.some(v => v.stock > 0));
+    const matchesStock = stockFilter === 'All' || 
+      (stockFilter === 'In Stock' && !isOutOfStock) || 
+      (stockFilter === 'Out of Stock' && isOutOfStock);
+
+    return matchesSearch && matchesCategory && matchesSubCategory && matchesStatus && matchesFeatured && matchesStock;
   });
 
   // Bulk actions handlers
@@ -629,21 +656,100 @@ Automatic discounts are applied at checkout:
     <div>
       {/* Search and Action Bar */}
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '15px', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-        <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap', flex: 1 }}>
+          
           {/* Category Selector */}
           <select
             className="form-select"
             value={categoryFilter}
-            onChange={(e) => setCategoryFilter(e.target.value)}
-            style={{ width: '180px', padding: '0.5rem 1rem' }}
+            onChange={(e) => {
+              const newCat = e.target.value;
+              setCategoryFilter(newCat);
+              if (subCategoryFilter !== 'All' && newCat !== 'All') {
+                const isValid = (Array.isArray(categories) ? categories : []).some(c => c.id === subCategoryFilter && c.parentId === newCat);
+                if (!isValid) setSubCategoryFilter('All');
+              }
+            }}
+            style={{ width: '160px', padding: '0.5rem 1rem' }}
           >
             {categoriesList.map(cat => (
-              <option key={cat} value={cat}>{cat === 'All' ? 'All' : getCategoryLabel(cat)} Category</option>
+              <option key={cat} value={cat}>{cat === 'All' ? 'All Categories' : getCategoryLabel(cat)}</option>
             ))}
           </select>
 
+          {/* Subcategory Selector */}
+          <select
+            className="form-select"
+            value={subCategoryFilter}
+            onChange={(e) => setSubCategoryFilter(e.target.value)}
+            style={{ width: '160px', padding: '0.5rem 1rem' }}
+          >
+            <option value="All">All Subcategories</option>
+            {(() => {
+              const subcats = (Array.isArray(categories) ? categories : []).filter(c => c.parentId);
+              if (categoryFilter !== 'All') {
+                return subcats.filter(c => c.parentId === categoryFilter).map(c => (
+                  <option key={c.id} value={c.id}>{c.name}</option>
+                ));
+              } else {
+                const grouped = {};
+                subcats.forEach(sc => {
+                  if (!grouped[sc.parentId]) grouped[sc.parentId] = [];
+                  grouped[sc.parentId].push(sc);
+                });
+                return Object.keys(grouped).map(parentId => {
+                  const parent = (Array.isArray(categories) ? categories : []).find(c => c.id === parentId);
+                  if (!parent) return null;
+                  return (
+                    <optgroup key={parentId} label={parent.name}>
+                      {grouped[parentId].map(sc => (
+                        <option key={sc.id} value={sc.id}>{sc.name}</option>
+                      ))}
+                    </optgroup>
+                  );
+                });
+              }
+            })()}
+          </select>
+
+          {/* Status Selector */}
+          <select
+            className="form-select"
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            style={{ width: '130px', padding: '0.5rem 1rem' }}
+          >
+            <option value="All">Status: All</option>
+            <option value="Active">Active</option>
+            <option value="Inactive">Inactive</option>
+          </select>
+
+          {/* Featured Selector */}
+          <select
+            className="form-select"
+            value={featuredFilter}
+            onChange={(e) => setFeaturedFilter(e.target.value)}
+            style={{ width: '140px', padding: '0.5rem 1rem' }}
+          >
+            <option value="All">Featured: All</option>
+            <option value="Featured">Featured</option>
+            <option value="Standard">Standard</option>
+          </select>
+
+          {/* Stock Selector */}
+          <select
+            className="form-select"
+            value={stockFilter}
+            onChange={(e) => setStockFilter(e.target.value)}
+            style={{ width: '140px', padding: '0.5rem 1rem' }}
+          >
+            <option value="All">Stock: All</option>
+            <option value="In Stock">In Stock</option>
+            <option value="Out of Stock">Out of Stock</option>
+          </select>
+
           {/* Search Input */}
-          <div style={{ position: 'relative', width: '260px' }}>
+          <div style={{ position: 'relative', width: '220px' }}>
             <input
               type="text"
               className="form-input"
@@ -654,6 +760,24 @@ Automatic discounts are applied at checkout:
             />
             <i className="fa-solid fa-magnifying-glass" style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--color-gray-text)', fontSize: '0.85rem' }}></i>
           </div>
+
+          {/* Clear Filters Button */}
+          {(search || categoryFilter !== 'All' || subCategoryFilter !== 'All' || statusFilter !== 'All' || featuredFilter !== 'All' || stockFilter !== 'All') && (
+            <button 
+              className="btn-admin-secondary" 
+              style={{ padding: '0.4rem 0.8rem' }}
+              onClick={() => {
+                setSearch('');
+                setCategoryFilter('All');
+                setSubCategoryFilter('All');
+                setStatusFilter('All');
+                setFeaturedFilter('All');
+                setStockFilter('All');
+              }}
+            >
+              Clear Filters
+            </button>
+          )}
         </div>
 
         {/* Export / Import / Add Product Buttons */}
@@ -680,6 +804,15 @@ Automatic discounts are applied at checkout:
               </button>
             </>
           )}
+        </div>
+      </div>
+
+      {/* Product Count Header */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '10px' }}>
+        <div style={{ fontSize: '1rem', fontWeight: 'bold', color: 'var(--color-purple)' }}>
+          {categoryFilter === 'All' ? 'All Products' : getCategoryLabel(categoryFilter)}
+          {subCategoryFilter !== 'All' && ` > ${getCategoryLabel(subCategoryFilter)}`}
+          <span style={{ color: 'var(--color-gray-text)', fontWeight: 'normal', marginLeft: '8px' }}>· {filteredProducts.length} Product{filteredProducts.length !== 1 ? 's' : ''}</span>
         </div>
       </div>
 

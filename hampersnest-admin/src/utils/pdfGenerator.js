@@ -502,7 +502,8 @@ export const generateCatalogPdf = async (products, mode = 'download', onProgress
           doc.setTextColor(purple);
           doc.setFont('helvetica', 'bold');
           doc.setFontSize(13);
-          const priceTxt = `Rs. ${p.price.toLocaleString()}`;
+          const priceVal = p.price != null ? Number(p.price) : 0;
+          const priceTxt = `Rs. ${priceVal.toLocaleString()}`;
           const priceY = y + cardHeight - 5.5;
           
           if (p.pricePerPiece) {
@@ -548,6 +549,9 @@ export const generateCatalogPdf = async (products, mode = 'download', onProgress
   }
 
   if (onProgress) onProgress(100);
+  
+  console.log(`[PDF Generator] Rendered products: ${globalProductIndex}`);
+
   const filename = `HampersNest-Catalog-${new Date().toLocaleDateString('en-GB').replace(/\//g, '-')}.pdf`;
   
   if (mode === 'preview') {

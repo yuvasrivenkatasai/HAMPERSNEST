@@ -12,7 +12,12 @@ export const getHeroBanner = async (req, res) => {
         mainImage: '/assets/hero_banner.webp',
         floatingImageTop: '/assets/wedding_gift.webp',
         floatingImageBottom: '/assets/brass_cup.webp',
-        isActive: true
+        isActive: true,
+        destinations: {
+          mainImage: { type: 'none' },
+          floatingImageTop: { type: 'none' },
+          floatingImageBottom: { type: 'none' }
+        }
       };
     }
     res.json(banner);
@@ -27,7 +32,7 @@ export const getHeroBanner = async (req, res) => {
 // @access  Private/Admin
 export const updateHeroBanner = async (req, res) => {
   try {
-    const { title, mainImage, floatingImageTop, floatingImageBottom, isActive } = req.body;
+    const { title, mainImage, floatingImageTop, floatingImageBottom, isActive, destinations } = req.body;
     
     // Using upsert logic, always targeting id: 1
     let banner = await HeroBanner.findOne({ where: { id: 1 } });
@@ -38,6 +43,9 @@ export const updateHeroBanner = async (req, res) => {
       banner.floatingImageTop = floatingImageTop !== undefined ? floatingImageTop : banner.floatingImageTop;
       banner.floatingImageBottom = floatingImageBottom !== undefined ? floatingImageBottom : banner.floatingImageBottom;
       banner.isActive = isActive !== undefined ? isActive : banner.isActive;
+      if (destinations !== undefined) {
+        banner.destinations = destinations;
+      }
       await banner.save();
     } else {
       banner = await HeroBanner.create({
@@ -46,7 +54,12 @@ export const updateHeroBanner = async (req, res) => {
         mainImage,
         floatingImageTop,
         floatingImageBottom,
-        isActive: isActive !== undefined ? isActive : true
+        isActive: isActive !== undefined ? isActive : true,
+        destinations: destinations !== undefined ? destinations : {
+          mainImage: { type: 'none' },
+          floatingImageTop: { type: 'none' },
+          floatingImageBottom: { type: 'none' }
+        }
       });
     }
 
@@ -68,6 +81,11 @@ export const deleteHeroBanner = async (req, res) => {
       banner.floatingImageTop = '/assets/wedding_gift.webp';
       banner.floatingImageBottom = '/assets/brass_cup.webp';
       banner.isActive = true;
+      banner.destinations = {
+        mainImage: { type: 'none' },
+        floatingImageTop: { type: 'none' },
+        floatingImageBottom: { type: 'none' }
+      };
       await banner.save();
     }
     res.json({ message: 'Hero banner reset to defaults successfully' });
