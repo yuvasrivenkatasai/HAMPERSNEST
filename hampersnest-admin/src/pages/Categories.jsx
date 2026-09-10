@@ -11,6 +11,7 @@ export default function Categories() {
   const [formData, setFormData] = useState({ name: '', parentId: '' });
 
   const fetchCategories = async () => {
+
     try {
       const data = await apiRequest('/api/categories');
       setCategories(Array.isArray(data) ? data : []);
@@ -138,7 +139,7 @@ export default function Categories() {
       )}
 
       <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1.8fr) minmax(0, 1.2fr)', gap: '25px', alignItems: 'start' }}>
-        
+
         {/* Categories List Table */}
         <div className="dashboard-panel" style={{ margin: 0 }}>
           <div className="panel-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--color-gray-border)', paddingBottom: '1rem', marginBottom: '1.5rem' }}>
@@ -161,14 +162,14 @@ export default function Categories() {
                 {categories.map(category => (
                   <tr key={category.id} className={editingCategory?.id === category.id ? 'active-row-highlight' : ''} style={editingCategory?.id === category.id ? { background: '#FDFBF7' } : {}}>
                     <td className="font-semibold" style={{ color: 'var(--color-purple-dark)' }}>
-                      {category.parentId && <span style={{color: '#999', marginRight: '5px'}}>↳</span>}
+                      {category.parentId && <span style={{ color: '#999', marginRight: '5px' }}>↳</span>}
                       {category.name}
                     </td>
                     <td>
                       {category.parentId ? (
-                        <span className="badge" style={{background: '#F3E8FF', color: '#701A75'}}>Subcategory</span>
+                        <span className="badge" style={{ background: '#F3E8FF', color: '#701A75' }}>Subcategory</span>
                       ) : (
-                        <span className="badge" style={{background: '#E0F2FE', color: '#0369A1'}}>Main Category</span>
+                        <span className="badge" style={{ background: '#E0F2FE', color: '#0369A1' }}>Main Category</span>
                       )}
                     </td>
                     <td>
