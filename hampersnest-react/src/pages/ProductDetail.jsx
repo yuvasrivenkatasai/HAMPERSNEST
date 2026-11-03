@@ -117,9 +117,23 @@ export default function ProductDetail() {
 
 
 
-  // Filter Related Products (Same category, excluding current)
+  // Filter Related Products (Any shared category, excluding current)
+  const currentCategories = Array.isArray(product.allCategories) && product.allCategories.length > 0
+    ? product.allCategories
+    : (Array.isArray(product.categoryAssignments) && product.categoryAssignments.length > 0
+      ? product.categoryAssignments.map(a => a.categoryId || a.category)
+      : [product.category].filter(Boolean));
+
   const relatedProducts = products ? products
-    .filter((p) => p.category === product.category && p.id !== product.id)
+    .filter((p) => {
+      if (p.id === product.id) return false;
+      const otherCategories = Array.isArray(p.allCategories) && p.allCategories.length > 0
+        ? p.allCategories
+        : (Array.isArray(p.categoryAssignments) && p.categoryAssignments.length > 0
+          ? p.categoryAssignments.map(a => a.categoryId || a.category)
+          : [p.category].filter(Boolean));
+      return currentCategories.some(cat => otherCategories.includes(cat));
+    })
     .slice(0, 3) : [];
 
   // Fallback to featured products if no same-category items

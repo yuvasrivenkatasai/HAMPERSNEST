@@ -43,7 +43,11 @@ export default function FeaturedGifts() {
 
   const filteredFeaturedItems = useMemo(() => {
     if (activeFilter === 'All') return featuredItems;
-    return featuredItems.filter(p => p.category === activeFilter);
+    return featuredItems.filter(p => 
+      p.category === activeFilter ||
+      (Array.isArray(p.allCategories) && p.allCategories.includes(activeFilter)) ||
+      (Array.isArray(p.categoryAssignments) && p.categoryAssignments.some(a => (a.categoryId || a.category) === activeFilter))
+    );
   }, [featuredItems, activeFilter]);
 
   useEffect(() => {

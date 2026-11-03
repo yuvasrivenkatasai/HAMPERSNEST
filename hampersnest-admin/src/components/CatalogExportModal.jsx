@@ -44,10 +44,20 @@ export default function CatalogExportModal({ isOpen, onClose, products, categori
     // 2. Filter by Category / Subcategory if Sort By = Category
     if (sortBy === 'CATEGORY') {
       if (selectedCategory) {
-        filteredProducts = filteredProducts.filter(p => p.category === selectedCategory || p.categoryId === selectedCategory);
+        filteredProducts = filteredProducts.filter(p => 
+          p.category === selectedCategory || 
+          p.categoryId === selectedCategory ||
+          (Array.isArray(p.allCategories) && p.allCategories.includes(selectedCategory)) ||
+          (Array.isArray(p.categoryAssignments) && p.categoryAssignments.some(a => (a.categoryId || a.category) === selectedCategory))
+        );
       }
       if (selectedSubcategory) {
-        filteredProducts = filteredProducts.filter(p => p.subCategory === selectedSubcategory || p.subcategoryId === selectedSubcategory);
+        filteredProducts = filteredProducts.filter(p => 
+          p.subCategory === selectedSubcategory || 
+          p.subcategoryId === selectedSubcategory ||
+          (Array.isArray(p.allSubCategories) && p.allSubCategories.includes(selectedSubcategory)) ||
+          (Array.isArray(p.categoryAssignments) && p.categoryAssignments.some(a => (a.subCategoryId || a.subcategoryId || a.subCategory) === selectedSubcategory))
+        );
       }
     }
 

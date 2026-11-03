@@ -229,10 +229,20 @@ export default function Collections() {
 
     // 1. Category Filter
     if (activeCategory !== 'All') {
-      result = result.filter(p => p.category === activeCategory);
+      result = result.filter(p => {
+        if (p.category === activeCategory) return true;
+        if (Array.isArray(p.allCategories) && p.allCategories.includes(activeCategory)) return true;
+        if (Array.isArray(p.categoryAssignments) && p.categoryAssignments.some(a => (a.categoryId || a.category) === activeCategory)) return true;
+        return false;
+      });
     }
     if (activeSubcategory) {
-      result = result.filter(p => p.subCategory === activeSubcategory);
+      result = result.filter(p => {
+        if (p.subCategory === activeSubcategory) return true;
+        if (Array.isArray(p.allSubCategories) && p.allSubCategories.includes(activeSubcategory)) return true;
+        if (Array.isArray(p.categoryAssignments) && p.categoryAssignments.some(a => (a.subCategoryId || a.subcategoryId || a.subCategory) === activeSubcategory)) return true;
+        return false;
+      });
     }
 
     // 1.5 Price Filter
@@ -248,11 +258,14 @@ export default function Collections() {
     // 2. Search Filter
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase().trim();
-      result = result.filter(
-        p => p.name.toLowerCase().includes(q) ||
+      result = result.filter(p => {
+        const catLabels = (p.allCategoryNames || [getCategoryLabel(p.category)]).join(' ').toLowerCase();
+        const subcatLabels = (p.allSubcategoryNames || [p.subcategoryName || '']).join(' ').toLowerCase();
+        return p.name.toLowerCase().includes(q) ||
           (p.description && p.description.toLowerCase().includes(q)) ||
-          getCategoryLabel(p.category).toLowerCase().includes(q)
-      );
+          catLabels.includes(q) ||
+          subcatLabels.includes(q);
+      });
     }
 
     // 3. Sorting

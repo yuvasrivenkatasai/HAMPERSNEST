@@ -1,4 +1,5 @@
-import { Category, Product, GalleryItem } from '../database/models.js';
+import { Category, Product, ProductCategory, GalleryItem } from '../database/models.js';
+import { Op } from 'sequelize';
 import { DEFAULT_CATEGORIES } from './settingsController.js';
 import crypto from 'crypto';
 
@@ -91,11 +92,27 @@ export const deleteCategory = async (req, res) => {
       return res.status(404).json({ message: 'Category not found' });
     }
 
-    // Check if any products are using it
-    const productsCount = await Product.count({ where: { category: req.params.id } });
-    if (productsCount > 0) {
+    // Check if any products are using it (legacy or multi-assignment)
+    const productsCount = await Product.count({
+      where: {
+        [Op.or]: [
+          { category: req.params.id },
+          { subCategory: req.params.id }
+        ]
+      }
+    });
+    const assignmentCount = await ProductCategory.count({
+      where: {
+        [Op.or]: [
+          { categoryId: req.params.id },
+          { subCategoryId: req.params.id }
+        ]
+      }
+    });
+    const totalLinked = Math.max(productsCount, assignmentCount);
+    if (totalLinked > 0) {
       return res.status(400).json({
-        message: `Cannot delete category: it is currently linked to ${productsCount} product(s). Please delete or change the products first.`
+        message: `Cannot delete category: it is currently linked to ${totalLinked} product assignment(s). Please remove it from products first.`
       });
     }
 

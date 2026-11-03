@@ -691,6 +691,40 @@ export const CategoryShowcase = sequelize.define('CategoryShowcase', {
   timestamps: true
 });
 
+// 12. ProductCategory Model (normalized many-to-many product category/subcategory assignments)
+export const ProductCategory = sequelize.define('ProductCategory', {
+  id: {
+    type: DataTypes.INTEGER,
+    autoIncrement: true,
+    primaryKey: true
+  },
+  productId: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
+  categoryId: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
+  subCategoryId: {
+    type: DataTypes.STRING,
+    allowNull: true
+  },
+  isPrimary: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false
+  }
+}, {
+  tableName: 'product_categories',
+  timestamps: true,
+  indexes: [
+    { fields: ['productId'] },
+    { fields: ['categoryId'] },
+    { fields: ['subCategoryId'] },
+    { unique: true, fields: ['productId', 'categoryId', 'subCategoryId'] }
+  ]
+});
+
 // Associations
 Category.hasMany(Product, { foreignKey: 'category', sourceKey: 'id', as: 'products' });
 Product.belongsTo(Category, { foreignKey: 'category', targetKey: 'id', as: 'categoryDetails' });
@@ -698,3 +732,12 @@ Product.belongsTo(Category, { foreignKey: 'category', targetKey: 'id', as: 'cate
 // Self-referencing association for sub-categories
 Category.hasMany(Category, { as: 'subCategories', foreignKey: 'parentId' });
 Category.belongsTo(Category, { as: 'parentCategory', foreignKey: 'parentId' });
+
+// Multi-category associations
+Product.hasMany(ProductCategory, { foreignKey: 'productId', sourceKey: 'id', as: 'categoryAssignments' });
+ProductCategory.belongsTo(Product, { foreignKey: 'productId', targetKey: 'id' });
+
+Category.hasMany(ProductCategory, { foreignKey: 'categoryId', sourceKey: 'id', as: 'productAssignments' });
+ProductCategory.belongsTo(Category, { foreignKey: 'categoryId', targetKey: 'id', as: 'category' });
+ProductCategory.belongsTo(Category, { foreignKey: 'subCategoryId', targetKey: 'id', as: 'subCategory' });
+

@@ -41,6 +41,7 @@ export default function Products() {
     price: '',
     category: '',
     subCategory: '',
+    categoryAssignments: [{ categoryId: '', subcategoryId: '' }],
     image: '',
     description: '',
     shortDescription: '',
@@ -174,6 +175,7 @@ export default function Products() {
       price: '',
       category: defaultCategory,
       subCategory: '',
+      categoryAssignments: [{ categoryId: defaultCategory, subcategoryId: '' }],
       image: '',
       description: '',
       shortDescription: '',
@@ -251,12 +253,29 @@ Automatic discounts are applied at checkout:
       preview: url
     })));
 
+    let loadedAssignments = [];
+    if (Array.isArray(product.categoryAssignments) && product.categoryAssignments.length > 0) {
+      loadedAssignments = product.categoryAssignments.map(a => ({
+        categoryId: a.categoryId || a.category,
+        subcategoryId: a.subCategoryId !== undefined ? (a.subCategoryId || '') : (a.subcategoryId !== undefined ? (a.subcategoryId || '') : (a.subCategory || ''))
+      }));
+    } else if (product.category) {
+      loadedAssignments = [{
+        categoryId: product.category,
+        subcategoryId: product.subCategory || ''
+      }];
+    } else {
+      const defaultCat = (Array.isArray(categories) ? categories : []).find(c => !c.parentId)?.id || '';
+      loadedAssignments = [{ categoryId: defaultCat, subcategoryId: '' }];
+    }
+
     setFormData({
       id: product.id || '',
       name: product.name,
       price: product.price.toString(),
-      category: product.category,
-      subCategory: product.subCategory || '',
+      category: loadedAssignments[0]?.categoryId || product.category,
+      subCategory: loadedAssignments[0]?.subcategoryId || product.subCategory || '',
+      categoryAssignments: loadedAssignments,
       image: product.image || '',
       description: product.description || '',
       shortDescription: product.shortDescription || '',
@@ -325,6 +344,62 @@ Automatic discounts are applied at checkout:
       ...prev,
       [name]: type === 'checkbox' ? checked : value
     }));
+  };
+
+  const handleAddCategoryAssignment = () => {
+    const mainCategories = (Array.isArray(categories) ? categories : []).filter(c => !c.parentId);
+    const usedCatIds = new Set((formData.categoryAssignments || []).map(a => a.categoryId));
+    const nextCat = mainCategories.find(c => !usedCatIds.has(c.id))?.id || mainCategories[0]?.id || '';
+    setFormData(prev => ({
+      ...prev,
+      categoryAssignments: [
+        ...(prev.categoryAssignments || []),
+        { categoryId: nextCat, subcategoryId: '' }
+      ]
+    }));
+  };
+
+  const handleRemoveCategoryAssignment = (indexToRemove) => {
+    setFormData(prev => {
+      const current = prev.categoryAssignments || [];
+      const updated = current.filter((_, idx) => idx !== indexToRemove);
+      const finalAssignments = updated.length > 0 ? updated : [{ categoryId: (Array.isArray(categories) ? categories : []).find(c => !c.parentId)?.id || '', subcategoryId: '' }];
+      return {
+        ...prev,
+        categoryAssignments: finalAssignments,
+        category: finalAssignments[0]?.categoryId || prev.category,
+        subCategory: finalAssignments[0]?.subcategoryId || ''
+      };
+    });
+  };
+
+  const handleCategoryAssignmentChange = (index, field, value) => {
+    setFormData(prev => {
+      const updated = [...(prev.categoryAssignments || [])];
+      if (!updated[index]) return prev;
+
+      if (field === 'categoryId') {
+        const currentSub = updated[index].subcategoryId;
+        const subBelongs = currentSub ? (Array.isArray(categories) ? categories : []).some(c => c.id === currentSub && c.parentId === value) : false;
+        updated[index] = {
+          ...updated[index],
+          categoryId: value,
+          subcategoryId: subBelongs ? currentSub : ''
+        };
+      } else if (field === 'subcategoryId') {
+        updated[index] = {
+          ...updated[index],
+          subcategoryId: value
+        };
+      }
+
+      return {
+        ...prev,
+        categoryAssignments: updated,
+        category: updated[0]?.categoryId || prev.category,
+        subCategory: updated[0]?.subcategoryId || ''
+      };
+    });
   };
 
   const handleAddVariant = () => {
@@ -398,6 +473,41 @@ Automatic discounts are applied at checkout:
     }
 
     try {
+      // Category assignments validation
+      const assignments = formData.categoryAssignments || [];
+      if (assignments.length === 0) {
+        alert('Please assign at least one category.');
+        setFormSubmitting(false);
+        return;
+      }
+
+      const seenCombos = new Set();
+      for (let i = 0; i < assignments.length; i++) {
+        const a = assignments[i];
+        if (!a.categoryId) {
+          alert(`Please select a Category for Category Assignment #${i + 1}`);
+          setFormSubmitting(false);
+          return;
+        }
+        if (a.subcategoryId) {
+          const subcatObj = (Array.isArray(categories) ? categories : []).find(c => c.id === a.subcategoryId);
+          if (subcatObj && subcatObj.parentId !== a.categoryId) {
+            alert(`The selected subcategory "${subcatObj.name}" does not belong to category "${getCategoryLabel(a.categoryId)}" in Assignment #${i + 1}.`);
+            setFormSubmitting(false);
+            return;
+          }
+        }
+        const comboKey = `${a.categoryId}::${a.subcategoryId || ''}`;
+        if (seenCombos.has(comboKey)) {
+          const catName = getCategoryLabel(a.categoryId);
+          const subcatName = a.subcategoryId ? getCategoryLabel(a.subcategoryId) : 'None';
+          alert(`Duplicate category assignment detected for Assignment #${i + 1}: "${catName} > ${subcatName}". Each category & subcategory assignment must be unique.`);
+          setFormSubmitting(false);
+          return;
+        }
+        seenCombos.add(comboKey);
+      }
+
       const token = localStorage.getItem('adminToken');
 
       // 1. Upload Images to R2/Local Storage
@@ -460,12 +570,16 @@ Automatic discounts are applied at checkout:
         }
       }
 
+      const primaryCat = assignments[0]?.categoryId || formData.category;
+      const primarySubCat = assignments[0]?.subcategoryId || formData.subCategory || '';
+
       const payload = {
         id: formData.id,
         name: formData.name,
         price: finalPrice,
-        category: formData.category,
-        subCategory: formData.subCategory || '',
+        category: primaryCat,
+        subCategory: primarySubCat,
+        categoryAssignments: assignments,
         image: uploadedImages[0] || '/assets/hero_banner.png',
         description: formData.description,
         shortDescription: formData.shortDescription,
@@ -544,16 +658,24 @@ Automatic discounts are applied at checkout:
   const safeProducts = Array.isArray(products) ? products : [];
   const filteredProducts = safeProducts.filter(product => {
     // Search Pipeline
-    const categoryLabel = getCategoryLabel(product.category).toLowerCase();
+    const categoryLabels = (product.allCategoryNames || [getCategoryLabel(product.category)]).join(' ').toLowerCase();
+    const subcategoryLabels = (product.allSubcategoryNames || [product.subcategoryName || '']).join(' ').toLowerCase();
     const matchesSearch = search === '' || 
       product.name.toLowerCase().includes(search.toLowerCase()) ||
-      categoryLabel.includes(search.toLowerCase());
+      categoryLabels.includes(search.toLowerCase()) ||
+      subcategoryLabels.includes(search.toLowerCase());
     
     // Category Pipeline
-    const matchesCategory = categoryFilter === 'All' || product.category === categoryFilter;
+    const matchesCategory = categoryFilter === 'All' || 
+      product.category === categoryFilter ||
+      (Array.isArray(product.allCategories) && product.allCategories.includes(categoryFilter)) ||
+      (Array.isArray(product.categoryAssignments) && product.categoryAssignments.some(a => (a.categoryId || a.category) === categoryFilter));
     
     // Subcategory Pipeline
-    const matchesSubCategory = subCategoryFilter === 'All' || product.subCategory === subCategoryFilter;
+    const matchesSubCategory = subCategoryFilter === 'All' || 
+      product.subCategory === subCategoryFilter ||
+      (Array.isArray(product.allSubCategories) && product.allSubCategories.includes(subCategoryFilter)) ||
+      (Array.isArray(product.categoryAssignments) && product.categoryAssignments.some(a => (a.subCategoryId || a.subcategoryId || a.subCategory) === subCategoryFilter));
     
     // Status Pipeline
     const matchesStatus = statusFilter === 'All' || 
@@ -935,7 +1057,48 @@ Automatic discounts are applied at checkout:
                         />
                       </td>
                       <td className="font-semibold" style={{ color: 'var(--color-purple-dark)' }}>{product.name}</td>
-                      <td>{getCategoryLabel(product.category)}{product.subCategory ? ` > ${getCategoryLabel(product.subCategory)}` : ''}</td>
+                      <td>
+                        {(() => {
+                          const assignments = Array.isArray(product.categoryAssignments) && product.categoryAssignments.length > 0
+                            ? product.categoryAssignments
+                            : (product.category ? [{ categoryId: product.category, subCategoryId: product.subCategory }] : []);
+
+                          if (assignments.length === 0) {
+                            return <span style={{ color: '#999' }}>Uncategorized</span>;
+                          }
+
+                          const first = assignments[0];
+                          const firstLabel = `${getCategoryLabel(first.categoryId || first.category)}${first.subCategoryId || first.subcategoryId || first.subCategory ? ` > ${getCategoryLabel(first.subCategoryId || first.subcategoryId || first.subCategory)}` : ''}`;
+
+                          if (assignments.length === 1) {
+                            return <span>{firstLabel}</span>;
+                          }
+
+                          const allSummary = assignments.map((a, i) => 
+                            `${i + 1}. ${getCategoryLabel(a.categoryId || a.category)}${a.subCategoryId || a.subcategoryId || a.subCategory ? ` > ${getCategoryLabel(a.subCategoryId || a.subcategoryId || a.subCategory)}` : ''}`
+                          ).join('\n');
+
+                          return (
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                              <span>{firstLabel}</span>
+                              <span 
+                                title={allSummary}
+                                style={{
+                                  background: 'var(--color-purple-light, #EDE9FE)',
+                                  color: 'var(--color-purple, #6B21A8)',
+                                  fontSize: '0.75rem',
+                                  fontWeight: '600',
+                                  padding: '2px 6px',
+                                  borderRadius: '10px',
+                                  cursor: 'help'
+                                }}
+                              >
+                                +{assignments.length - 1} more
+                              </span>
+                            </div>
+                          );
+                        })()}
+                      </td>
                       <td className="font-semibold">
                         ₹{product.price.toLocaleString()}
                         {product.originalPrice > 0 && product.originalPrice > product.price && (
@@ -1119,42 +1282,118 @@ Automatic discounts are applied at checkout:
                   />
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
-                  <div className="form-group">
-                    <label className="form-label" htmlFor="prod-cat">Category *</label>
-                    <select
-                      id="prod-cat"
-                      name="category"
-                      className="form-select"
-                      value={formData.category}
-                      onChange={handleInputChange}
-                      required
+                {/* Product Categories & Collections */}
+                <div style={{ padding: '16px', background: '#F8F9FA', borderRadius: '8px', border: '1px solid #E9ECEF', marginTop: '15px', marginBottom: '15px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                    <div>
+                      <h4 style={{ margin: 0, color: 'var(--color-purple-dark)', fontSize: '1rem', fontWeight: '600' }}>
+                        Product Categories &amp; Collections
+                      </h4>
+                      <p style={{ margin: '3px 0 0', fontSize: '0.8rem', color: 'var(--color-gray-text)' }}>
+                        Assign this hamper to multiple categories and optional subcategories. It will be showcased across all assigned collections.
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={handleAddCategoryAssignment}
+                      className="btn-admin-secondary"
+                      style={{ padding: '6px 12px', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '6px' }}
                     >
-                      {categories.filter(c => !c.parentId).map(category => (
-                        <option key={category.id} value={category.id}>{category.name}</option>
-                      ))}
-                    </select>
-                    {categories.filter(c => !c.parentId).length === 0 && (
-                      <small style={{ color: '#E53E3E', fontSize: '0.75rem', marginTop: '4px', display: 'block' }}>
-                        Please create at least one Main Category before adding products.
-                      </small>
-                    )}
+                      <i className="fa-solid fa-plus"></i> Add Another Category
+                    </button>
                   </div>
 
-                  <div className="form-group">
-                    <label className="form-label" htmlFor="prod-subcat">Subcategory (Optional)</label>
-                    <select
-                      id="prod-subcat"
-                      name="subCategory"
-                      className="form-select"
-                      value={formData.subCategory}
-                      onChange={handleInputChange}
+                  {(formData.categoryAssignments || []).map((assignment, index) => {
+                    const rowCategory = assignment.categoryId;
+                    const rowSubcategory = assignment.subcategoryId || '';
+                    const availableSubcategories = (Array.isArray(categories) ? categories : []).filter(c => c.parentId === rowCategory);
+
+                    return (
+                      <div
+                        key={index}
+                        style={{
+                          background: '#FFFFFF',
+                          border: '1px solid #E2E8F0',
+                          borderRadius: '6px',
+                          padding: '12px 14px',
+                          marginBottom: index === ((formData.categoryAssignments || []).length - 1) ? 0 : '10px'
+                        }}
+                      >
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                          <span style={{ fontSize: '0.85rem', fontWeight: '600', color: '#4A5568' }}>
+                            Category Assignment {index + 1} {index === 0 && <span style={{ fontSize: '0.75rem', color: '#805AD5', fontWeight: 'normal' }}>(Primary)</span>}
+                          </span>
+                          {(formData.categoryAssignments || []).length > 1 && (
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveCategoryAssignment(index)}
+                              title="Remove Assignment"
+                              style={{
+                                background: 'transparent',
+                                border: 'none',
+                                color: '#E53E3E',
+                                cursor: 'pointer',
+                                fontSize: '0.85rem',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '4px',
+                                padding: '2px 6px'
+                              }}
+                            >
+                              <i className="fa-solid fa-trash-can"></i> Remove
+                            </button>
+                          )}
+                        </div>
+
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+                          <div className="form-group" style={{ marginBottom: 0 }}>
+                            <label className="form-label" style={{ fontSize: '0.85rem' }}>Category *</label>
+                            <select
+                              className="form-select"
+                              value={rowCategory}
+                              onChange={(e) => handleCategoryAssignmentChange(index, 'categoryId', e.target.value)}
+                              required
+                            >
+                              <option value="" disabled>-- Select Category --</option>
+                              {(Array.isArray(categories) ? categories : []).filter(c => !c.parentId).map(category => (
+                                <option key={category.id} value={category.id}>{category.name}</option>
+                              ))}
+                            </select>
+                            {(Array.isArray(categories) ? categories : []).filter(c => !c.parentId).length === 0 && (
+                              <small style={{ color: '#E53E3E', fontSize: '0.75rem', marginTop: '4px', display: 'block' }}>
+                                Please create at least one Main Category before adding products.
+                              </small>
+                            )}
+                          </div>
+
+                          <div className="form-group" style={{ marginBottom: 0 }}>
+                            <label className="form-label" style={{ fontSize: '0.85rem' }}>Subcategory (Optional)</label>
+                            <select
+                              className="form-select"
+                              value={rowSubcategory}
+                              onChange={(e) => handleCategoryAssignmentChange(index, 'subcategoryId', e.target.value)}
+                              disabled={!rowCategory || availableSubcategories.length === 0}
+                            >
+                              <option value="">-- None {availableSubcategories.length === 0 ? '(No subcategories)' : ''} --</option>
+                              {availableSubcategories.map(category => (
+                                <option key={category.id} value={category.id}>{category.name}</option>
+                              ))}
+                            </select>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+
+                  <div style={{ marginTop: '12px' }}>
+                    <button
+                      type="button"
+                      onClick={handleAddCategoryAssignment}
+                      className="btn-admin-secondary"
+                      style={{ padding: '6px 12px', fontSize: '0.85rem', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
                     >
-                      <option value="">-- None --</option>
-                      {categories.filter(c => c.parentId === formData.category).map(category => (
-                        <option key={category.id} value={category.id}>{category.name}</option>
-                      ))}
-                    </select>
+                      <i className="fa-solid fa-plus"></i> + Add Another Category
+                    </button>
                   </div>
                 </div>
 

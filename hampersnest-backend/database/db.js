@@ -65,10 +65,32 @@ export const connectDB = async () => {
       console.log(`SQL Database Connected to SQLite: ./database.sqlite`);
     }
     // Import models before syncing to register them with sequelize
-    const { User, Category } = await import('./models.js');
+    const { User, Category, Product, ProductCategory } = await import('./models.js');
 
     // Automatically sync models to database (Disabled alter to prevent schema resets on restart)
     await sequelize.sync();
+
+    // Ensure ProductCategory table exists and backfill existing product categories safely
+    try {
+      await ProductCategory.sync();
+      const existingProducts = await Product.findAll({ attributes: ['id', 'category', 'subCategory'] });
+      for (const prod of existingProducts) {
+        if (prod.category) {
+          const assignmentCount = await ProductCategory.count({ where: { productId: prod.id } });
+          if (assignmentCount === 0) {
+            await ProductCategory.create({
+              productId: prod.id,
+              categoryId: prod.category,
+              subCategoryId: prod.subCategory || null,
+              isPrimary: true
+            });
+          }
+        }
+      }
+      console.log('Product category assignments verified and backfilled successfully.');
+    } catch (bfErr) {
+      console.error('Product category backfill notice:', bfErr.message);
+    }
     
     // Safely add missing columns to Products table (bypassing SQLite backup table bug / keeping Oracle aligned)
     if (dbDialect === 'sqlite') {

@@ -8,7 +8,7 @@ import { createRequire } from 'module';
 const require = createRequire(import.meta.url);
 import path from 'path';
 import { ZipArchive } from 'archiver';
-import { Product, Order, Inquiry, Category } from '../database/models.js';
+import { Product, Order, Inquiry, Category, ProductCategory } from '../database/models.js';
 import { generateProductMediaPath } from '../utils/pathHelper.js';
 
 export const exportProductsExcel = async (req, res) => {
@@ -42,7 +42,15 @@ export const exportProductsExcel = async (req, res) => {
 
 export const exportProductsCsv = async (req, res) => {
   try {
-    const products = await Product.findAll();
+    const products = await Product.findAll({
+      include: [
+        {
+          model: ProductCategory,
+          as: 'categoryAssignments',
+          required: false
+        }
+      ]
+    });
     const categories = await Category.findAll({ raw: true });
 
     const catMap = {};
@@ -57,6 +65,10 @@ export const exportProductsCsv = async (req, res) => {
 
       const catName = catMap[prod.category] || prod.category || '';
       const subcatName = catMap[prod.subCategory] || prod.subCategory || '';
+
+      const allAssignments = Array.isArray(prod.categoryAssignments) && prod.categoryAssignments.length > 0
+        ? prod.categoryAssignments.map(a => `${catMap[a.categoryId] || a.categoryId}${a.subCategoryId ? ` > ${catMap[a.subCategoryId] || a.subCategoryId}` : ''}`).join('; ')
+        : (catName ? `${catName}${subcatName ? ` > ${subcatName}` : ''}` : '');
 
       let variantsStr = '';
       if (prod.variantsEnabled && Array.isArray(prod.variants)) {
@@ -107,6 +119,7 @@ export const exportProductsCsv = async (req, res) => {
         'Product Rating': prod.rating || 4.5,
         'Category': catName,
         'Subcategory': subcatName,
+        'Categories & Collections': allAssignments,
         'Status': status,
         'Featured': toBool(prod.isFeatured),
         'Show In Storefront': toBool(prod.isActive),
@@ -144,7 +157,7 @@ export const exportProductsCsv = async (req, res) => {
 
     const fields = [
       'Schema Version',
-      'Product Name', 'Offer Price', 'Original Price', 'Product Rating', 'Category', 'Subcategory', 'Status', 'Featured', 'Show In Storefront', 'SKU',
+      'Product Name', 'Offer Price', 'Original Price', 'Product Rating', 'Category', 'Subcategory', 'Categories & Collections', 'Status', 'Featured', 'Show In Storefront', 'SKU',
       'Stock Quantity', 'Reserved Quantity', 'Available Quantity', 'Low Stock Threshold', 'Minimum Order Quantity (MOQ)', 'Inventory Status',
       'Primary Image', 'Additional Images', 'Video File', 'Image Folder', 'Image Count',
       'Short Description', 'Full Description',
@@ -226,6 +239,20 @@ export const importProductsCsv = async (req, res) => {
                 description: row.description || existingProduct.description,
                 category: row.category || existingProduct.category
               });
+
+              if (row.category) {
+                const assignExists = await ProductCategory.findOne({
+                  where: { productId: existingProduct.id, categoryId: row.category }
+                });
+                if (!assignExists) {
+                  await ProductCategory.create({
+                    productId: existingProduct.id,
+                    categoryId: row.category,
+                    subCategoryId: null,
+                    isPrimary: true
+                  });
+                }
+              }
               updatedCount++;
             }
           } else {
@@ -245,8 +272,9 @@ export const importProductsCsv = async (req, res) => {
                 catId = 'Customized';
               }
 
+              const newId = crypto.randomUUID();
               await Product.create({
-                id: crypto.randomUUID(),
+                id: newId,
                 name: row.name,
                 sku: row.sku,
                 category: catId,
@@ -257,6 +285,14 @@ export const importProductsCsv = async (req, res) => {
                 description: row.description || '',
                 image: '/assets/hero_banner.png' // default image
               });
+
+              await ProductCategory.create({
+                productId: newId,
+                categoryId: catId,
+                subCategoryId: null,
+                isPrimary: true
+              });
+
               createdCount++;
             }
           }
