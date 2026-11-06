@@ -7,8 +7,13 @@ import csvParser from 'csv-parser';
 import { createRequire } from 'module';
 const require = createRequire(import.meta.url);
 import path from 'path';
+<<<<<<< Updated upstream
 import { ZipArchive } from 'archiver';
 import { Product, Order, Inquiry, Category, ProductCategory } from '../database/models.js';
+=======
+import archiver from 'archiver';
+import { Product, Order, Inquiry, Category } from '../database/models.js';
+>>>>>>> Stashed changes
 import { generateProductMediaPath } from '../utils/pathHelper.js';
 
 export const exportProductsExcel = async (req, res) => {

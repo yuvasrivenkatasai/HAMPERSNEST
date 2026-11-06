@@ -1,0 +1,100 @@
+pipeline {
+    agent any
+
+    environment {
+        NODE_ENV = 'staging'
+        DB_PROJECT_DIR = 'hampersnest-database'
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                echo 'Checking out source repository...'
+                checkout scm
+            }
+        }
+
+        stage('Install Dependencies') {
+            steps {
+                dir("${env.DB_PROJECT_DIR}") {
+                    echo 'Installing database dependencies...'
+                    sh 'npm ci || npm install'
+                }
+            }
+        }
+
+        stage('Lint & Validate Config') {
+            steps {
+                dir("${env.DB_PROJECT_DIR}") {
+                    echo 'Validating Knexfile and environment configuration...'
+                    sh 'node -e "require(\'./knexfile.js\'); console.log(\'knexfile syntax OK\')"'
+                }
+            }
+        }
+
+        stage('Test Migrations & Rollback') {
+            environment {
+                NODE_ENV = 'test'
+            }
+            steps {
+                dir("${env.DB_PROJECT_DIR}") {
+                    echo 'Running automated migration & integration tests...'
+                    sh 'npm test'
+                }
+            }
+        }
+
+        stage('Deploy Staging Migrations') {
+            when {
+                branch 'develop'
+            }
+            environment {
+                NODE_ENV = 'staging'
+            }
+            steps {
+                dir("${env.DB_PROJECT_DIR}") {
+                    echo 'Applying Knex migrations to Staging Database...'
+                    sh 'npm run migrate:staging'
+                    echo 'Applying Staging seeds...'
+                    sh 'npm run seed:staging'
+                }
+            }
+        }
+
+        stage('Approve Production Deployment') {
+            when {
+                branch 'main'
+            }
+            steps {
+                timeout(time: 30, unit: 'MINUTES') {
+                    input message: 'Proceed with Database Migration on PRODUCTION?', ok: 'Deploy to Production'
+                }
+            }
+        }
+
+        stage('Deploy Production Migrations') {
+            when {
+                branch 'main'
+            }
+            environment {
+                NODE_ENV = 'production'
+            }
+            steps {
+                dir("${env.DB_PROJECT_DIR}") {
+                    echo 'Executing Production Database Migration...'
+                    sh 'npm run migrate:prod'
+                }
+            }
+        }
+    }
+
+    post {
+        failure {
+            echo '[ALERT] HampersNest Database Pipeline failed! Inspect logs for details.'
+        }
+        success {
+            echo '[SUCCESS] Database pipeline completed successfully.'
+        }
+    }
+}
+

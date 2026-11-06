@@ -1,0 +1,50 @@
+name: Database CI Pipeline
+
+on:
+  push:
+    branches: [ main, master, develop ]
+    paths:
+      - 'hampersnest-database/**'
+  pull_request:
+    branches: [ main, master, develop ]
+    paths:
+      - 'hampersnest-database/**'
+
+jobs:
+  test-and-verify:
+    name: Lint, Test Migrations & Integration
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: hampersnest-database
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: hampersnest-database/package.json
+
+      - name: Install Dependencies
+        run: npm ci || npm install
+
+      - name: Verify Environment Template
+        run: test -f .env.example
+
+      - name: Run Database Health Check
+        run: npm run db:health
+        env:
+          NODE_ENV: test
+          DB_CLIENT: sqlite3
+
+      - name: Run Migration Suite
+        run: npm run test:migrations
+
+      - name: Run Integration & Transaction Suite
+        run: npm run test:integration
+

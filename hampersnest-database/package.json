@@ -1,0 +1,34 @@
+{
+  "name": "hampersnest-database",
+  "version": "1.0.0",
+  "description": "Clean, modular production database schema and migration manager for HampersNest",
+  "main": "schema/index.js",
+  "scripts": {
+    "migrate": "knex migrate:latest",
+    "migrate:rollback": "knex migrate:rollback",
+    "migrate:status": "knex migrate:status",
+    "seed": "knex seed:run",
+    "db:sync": "node scripts/sync.js",
+    "db:verify": "node scripts/verify.js",
+    "test": "node --test tests/schema.test.js && node --test tests/crud.test.js"
+  },
+  "keywords": [
+    "knex",
+    "migrations",
+    "schema",
+    "hampersnest",
+    "oracle",
+    "sqlite"
+  ],
+  "author": "HampersNest Engineering",
+  "license": "ISC",
+  "dependencies": {
+    "better-sqlite3": "^13.0.3",
+    "dotenv": "^16.6.1",
+    "knex": "^3.3.0",
+    "mysql2": "^3.24.6",
+    "oracledb": "^26.0.0",
+    "pg": "^8.23.1",
+    "sqlite3": "^5.1.7"
+  }
+}
