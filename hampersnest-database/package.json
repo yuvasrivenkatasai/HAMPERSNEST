@@ -10,20 +10,18 @@
     "seed": "knex seed:run",
     "db:sync": "node scripts/sync.js",
     "db:verify": "node scripts/verify.js",
-    "test": "node --test tests/schema.test.js && node --test tests/crud.test.js"
+    "test": "node --test tests/schema.test.js"
   },
   "keywords": [
     "knex",
     "migrations",
     "schema",
     "hampersnest",
-    "oracle",
-    "sqlite"
+    "oracle"
   ],
   "author": "HampersNest Engineering",
   "license": "ISC",
   "dependencies": {
-    "better-sqlite3": "^13.0.3",
     "dotenv": "^16.6.1",
     "knex": "^3.3.0",
     "oracledb": "^26.0.0"

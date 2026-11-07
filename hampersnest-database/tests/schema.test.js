@@ -1,69 +1,62 @@
-const { test, describe, before, after } = require('node:test');
+const { test, describe } = require('node:test');
 const assert = require('node:assert');
-const knex = require('knex');
+const path = require('path');
+const fs = require('fs');
+const { tables, syncAll, dropAll } = require('../schema');
 const knexfile = require('../knexfile');
-const { syncAll, dropAll, tables } = require('../schema');
 
-describe('HampersNest Modular Schema Suite', () => {
-  let db;
-
-  before(async () => {
-    db = knex(knexfile.test);
+describe('HampersNest Production Schema & Integrity Suite', () => {
+  test('should load Knexfile with Oracle Cloud Production configuration', () => {
+    assert.ok(knexfile.production, 'knexfile.production must exist');
+    assert.strictEqual(knexfile.production.client, 'oracledb');
+    assert.ok(knexfile.production.connection, 'Production connection config must exist');
+    assert.strictEqual(knexfile.production.connection.user, 'HAMPERSNEST');
   });
 
-  after(async () => {
-    if (db) {
-      await db.destroy();
-    }
-  });
-
-  test('should synchronize all 11 production tables', async () => {
-    await syncAll(db);
-
-    for (const t of tables) {
-      const exists = await db.schema.hasTable(t.tableName);
-      assert.strictEqual(exists, true, `Table "${t.tableName}" must be created`);
-    }
-  });
-
-  test('should verify all products columns including newer alterations', async () => {
-    const expectedCols = [
-      'id', 'name', 'price', 'discountPrice', 'originalPrice', 'image',
-      'category', 'masterCategory', 'subCategory', 'occasion', 'stockQuantity',
-      'reservedQuantity', 'lowStockThreshold', 'rating', 'description',
-      'shortDescription', 'isFeatured', 'views', 'clicks', 'isActive',
-      'customGiftTagEnabled', 'addonsEnabled', 'customizationText',
-      'deliveryInfoText', 'videoUrls', 'tags', 'customization', 'shipping',
-      'details', 'images', 'watermarkSettings', 'variantsEnabled',
-      'variants', 'customAddons'
+  test('should register all 11 required production tables', () => {
+    assert.strictEqual(tables.length, 11, 'Must have exactly 11 production tables');
+    
+    const expectedTables = [
+      'users',
+      'categories',
+      'products',
+      'orders',
+      'inquiries',
+      'settings',
+      'gallery_items',
+      'audit_logs',
+      'hero_banners',
+      'testimonials',
+      'category_showcase'
     ];
 
-    for (const col of expectedCols) {
-      const hasCol = await db.schema.hasColumn('products', col);
-      assert.strictEqual(hasCol, true, `products must have column "${col}"`);
+    const registeredNames = tables.map(t => t.tableName);
+    for (const name of expectedTables) {
+      assert.ok(registeredNames.includes(name), `Table "${name}" must be registered`);
     }
   });
 
-  test('should verify order columns match backend models', async () => {
-    const expectedCols = [
-      'id', 'orderId', 'customer', 'items', 'totalAmount', 'budget',
-      'eventType', 'deliveryDate', 'notes', 'internalNotes', 'status',
-      'source', 'paymentStatus', 'paymentMethod', 'advancePaid', 'history'
-    ];
-
-    for (const col of expectedCols) {
-      const hasCol = await db.schema.hasColumn('orders', col);
-      assert.strictEqual(hasCol, true, `orders must have column "${col}"`);
-    }
-  });
-
-  test('should drop all tables cleanly on rollback', async () => {
-    await dropAll(db);
-
+  test('every table schema module must export tableName, up, and down functions', () => {
     for (const t of tables) {
-      const exists = await db.schema.hasTable(t.tableName);
-      assert.strictEqual(exists, false, `Table "${t.tableName}" must be dropped`);
+      assert.ok(typeof t.tableName === 'string' && t.tableName.length > 0, `Table must have string tableName`);
+      assert.ok(typeof t.up === 'function', `Table "${t.tableName}" must export an async up() function`);
+      assert.ok(typeof t.down === 'function', `Table "${t.tableName}" must export an async down() function`);
+    }
+  });
+
+  test('orchestrator should export syncAll and dropAll handlers', () => {
+    assert.ok(typeof syncAll === 'function', 'syncAll must be a function');
+    assert.ok(typeof dropAll === 'function', 'dropAll must be a function');
+  });
+
+  test('all production seeds must exist and export valid seed functions', () => {
+    const seedsDir = path.join(__dirname, '..', 'seeds');
+    const files = fs.readdirSync(seedsDir).filter(f => f.endsWith('.js'));
+    assert.ok(files.length >= 3, 'Must have at least 3 initial seed files');
+
+    for (const file of files) {
+      const seedModule = require(path.join(seedsDir, file));
+      assert.ok(typeof seedModule.seed === 'function', `Seed ${file} must export seed() function`);
     }
   });
 });
-

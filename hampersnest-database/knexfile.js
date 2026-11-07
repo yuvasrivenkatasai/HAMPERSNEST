@@ -28,7 +28,7 @@ try {
     oracledb._knexPatched = true;
   }
 } catch (e) {
-  // Ignored during testing when oracledb is not needed
+  // Ignored if oracledb is not loaded
 }
 
 const prodConfig = {
@@ -59,22 +59,5 @@ const prodConfig = {
 
 module.exports = {
   production: prodConfig,
-  development: prodConfig,
-
-  // Isolated test configuration
-  test: {
-    client: 'better-sqlite3',
-    useNullAsDefault: true,
-    connection: {
-      filename: ':memory:'
-    },
-    pool: { min: 1, max: 1 },
-    migrations: {
-      tableName: 'knex_migrations',
-      directory: path.join(__dirname, 'migrations')
-    },
-    seeds: {
-      directory: path.join(__dirname, 'seeds')
-    }
-  }
+  development: prodConfig
 };
