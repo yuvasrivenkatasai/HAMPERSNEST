@@ -6,8 +6,8 @@ import ExcelJS from 'exceljs';
 import csvParser from 'csv-parser';
 import { createRequire } from 'module';
 const require = createRequire(import.meta.url);
+const archiver = require('archiver');
 import path from 'path';
-import archiver from 'archiver';
 import { Product, Order, Inquiry, Category, ProductCategory } from '../database/models.js';
 import { generateProductMediaPath } from '../utils/pathHelper.js';
 
