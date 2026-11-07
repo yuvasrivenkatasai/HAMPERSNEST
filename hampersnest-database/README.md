@@ -84,3 +84,44 @@ Executes schema validation and CRUD tests in an isolated memory database:
 ```bash
 npm test
 ```
+
+---
+
+## 🤖 GitHub Actions CI/CD & Production Publishing
+
+Automated pipelines are configured in `.github/workflows/`:
+
+1. **`db-ci.yml`**: Automatically runs linting and automated test suites on every pull request and push to `main`.
+2. **`deploy-production.yml`**: Deploys and verifies schema changes against the live Oracle Cloud Autonomous Database.
+
+### Required GitHub Repository Secrets
+Navigate to **GitHub Repository -> Settings -> Secrets and variables -> Actions** and add:
+
+| Secret Name | Value Description | Example / Source |
+| :--- | :--- | :--- |
+| `DB_USER` | Oracle Database user name | `HAMPERSNEST` |
+| `DB_PASSWORD` | Oracle Database user password | *From your production `.env`* |
+| `DB_SERVICE_NAME` | Oracle TNS service name | `m7z45z3hgdzijbqt_low` |
+| `DB_WALLET_PASSWORD` | Oracle Cloud mTLS Wallet password | *Your wallet unlock password* |
+| `ORACLE_WALLET_BASE64` | Base64-encoded zip string of the wallet directory | Generated via `scripts/copy-wallet-secret.ps1` |
+
+### Generating `ORACLE_WALLET_BASE64`
+Run the provided helper script in PowerShell:
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts\copy-wallet-secret.ps1
+```
+The script will zip your wallet files, encode them into Base64, and save them to `scripts/wallet-base64.txt` ready to paste into GitHub Secrets.
+
+### Triggering Production Deployment
+1. Go to the **Actions** tab on GitHub: `https://github.com/GruhaSankalp/HampersNest-Database/actions`.
+2. Select **Deploy Database to Production** in the left sidebar.
+3. Click **Run workflow**.
+4. In the confirmation prompt, type **`DEPLOY`** and click **Run workflow**.
+5. The pipeline executes:
+   - Automated Safety Test Suite
+   - Cloud Wallet extraction
+   - Pre-deployment DB verification & table counts
+   - Safe Schema Sync (`npm run db:sync`)
+   - Post-deployment verification
+   - Secure cleanup of wallet files from the runner
+

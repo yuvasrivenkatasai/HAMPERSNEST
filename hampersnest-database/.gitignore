@@ -9,6 +9,8 @@ package-lock.json.bak
 *.pem
 *.key
 wallet/
+*wallet-base64.txt
+*.zip
 
 # SQLite databases & temp storage
 *.sqlite
