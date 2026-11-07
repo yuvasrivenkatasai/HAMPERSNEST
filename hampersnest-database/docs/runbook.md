@@ -1,41 +1,25 @@
 # HampersNest Database Operations Runbook
 
-## 1. Health Checks
-Check connectivity and query execution:
+## 1. Health & Connection Checks
+Verify connectivity and examine row counts across all 11 production tables (Read-Only):
 ```bash
-npm run db:health
+npm run db:verify
 ```
 
-## 2. Seeding Data
-Seed the database with appropriate environment datasets:
+## 2. Synchronize / Create / Alter Tables
+Apply schema changes, create missing tables, or add new columns to an existing database safely:
 ```bash
-# Seed development dummy data
-npm run seed:dev
-
-# Seed staging test data
-npm run seed:staging
-
-# Seed production critical configurations
-npm run seed:prod
+npm run db:sync
 ```
 
-## 3. Database Reset (Development & Staging ONLY)
-To completely wipe tables, re-run all migrations from scratch, and re-seed:
+## 3. Populate Initial Baseline Data
+Seed initial categories, superadmin user, and store settings/policies:
 ```bash
-npm run db:reset
+npm run seed
 ```
-> [!CAUTION]
-> `db:reset` is hardcoded to refuse running in `production` environment to prevent data loss.
 
-## 4. Emergency Rollback Procedure
-If a migration fails or causes regression during release:
-1. Run rollback on the current environment:
-   ```bash
-   npx knex migrate:rollback --env <environment>
-   ```
-2. Verify system functionality:
-   ```bash
-   npm run db:health
-   ```
-3. Check `knex_migrations` table to confirm status.
-
+## 4. Run Automated Test Suite
+Execute isolated in-memory test suite before committing changes:
+```bash
+npm test
+```

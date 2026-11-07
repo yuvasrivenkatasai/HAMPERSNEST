@@ -32,7 +32,7 @@ hampersnest-database/
 ├── seeds/
 │   ├── 01_initial_categories.js    # Full category hierarchy (Weddings, Baby, Festive...)
 │   ├── 02_initial_admin.js         # Default superadmin account
-│   └── 03_initial_policies.js      # Default privacy, refund, and shipping policies
+│   └── 03_initial_settings.js      # Default store settings, policies, and discounts
 │
 ├── config/
 │   └── index.js                    # Knex instance & health check provider

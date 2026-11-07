@@ -2,17 +2,17 @@ name: Database CI Pipeline
 
 on:
   push:
-    branches: [ main, master, develop ]
+    branches: [ main, master ]
     paths:
       - 'hampersnest-database/**'
   pull_request:
-    branches: [ main, master, develop ]
+    branches: [ main, master ]
     paths:
       - 'hampersnest-database/**'
 
 jobs:
   test-and-verify:
-    name: Lint, Test Migrations & Integration
+    name: Lint & Test Schema
     runs-on: ubuntu-latest
 
     defaults:
@@ -36,15 +36,5 @@ jobs:
       - name: Verify Environment Template
         run: test -f .env.example
 
-      - name: Run Database Health Check
-        run: npm run db:health
-        env:
-          NODE_ENV: test
-          DB_CLIENT: sqlite3
-
-      - name: Run Migration Suite
-        run: npm run test:migrations
-
-      - name: Run Integration & Transaction Suite
-        run: npm run test:integration
-
+      - name: Run Schema & CRUD Test Suite
+        run: npm test

@@ -1,79 +1,46 @@
-// HampersNest Database - Knex Configuration (Production Dedicated)
-// Documentation: https://knexjs.org/guide/
-
+// HampersNest Database - Dedicated Production Knex Configuration
 const path = require('path');
 const dotenv = require('dotenv');
 
 // Load environment variables from .env
 dotenv.config({ path: path.resolve(__dirname, '.env') });
 
-const dialect = (process.env.DB_DIALECT || '').toLowerCase();
-const rawClient = process.env.DB_CLIENT || (dialect === 'oracle' ? 'oracledb' : 'better-sqlite3');
-const dbClient = rawClient === 'oracle' ? 'oracledb' : rawClient;
-const isSqlite = dbClient === 'better-sqlite3' || dbClient === 'sqlite3';
-const isOracle = dbClient === 'oracledb';
+const rawWalletPath = process.env.DB_WALLET_PATH || '../hampersnest-backend/wallet';
+const walletPath = path.isAbsolute(rawWalletPath) ? rawWalletPath : path.resolve(__dirname, rawWalletPath);
 
-// Oracle Cloud Wallet integration patch
-if (isOracle) {
-  try {
-    const rawWalletPath = process.env.DB_WALLET_PATH || '../hampersnest-backend/wallet';
-    const walletPath = path.isAbsolute(rawWalletPath) ? rawWalletPath : path.resolve(__dirname, rawWalletPath);
-    process.env.TNS_ADMIN = walletPath;
+// Configure Oracle Cloud Wallet environment
+process.env.TNS_ADMIN = walletPath;
 
-    const oracledb = require('oracledb');
-    if (!oracledb._knexPatched) {
-      const originalGetConnection = oracledb.getConnection;
-      oracledb.getConnection = function(opts, cb) {
-        if (opts && typeof opts === 'object') {
-          opts.configDir = opts.configDir || walletPath;
-          opts.walletLocation = opts.walletLocation || walletPath;
-          if (process.env.DB_WALLET_PASSWORD) {
-            opts.walletPassword = opts.walletPassword || process.env.DB_WALLET_PASSWORD;
-          }
+try {
+  const oracledb = require('oracledb');
+  if (!oracledb._knexPatched) {
+    const originalGetConnection = oracledb.getConnection;
+    oracledb.getConnection = function(opts, cb) {
+      if (opts && typeof opts === 'object') {
+        opts.configDir = opts.configDir || walletPath;
+        opts.walletLocation = opts.walletLocation || walletPath;
+        if (process.env.DB_WALLET_PASSWORD) {
+          opts.walletPassword = opts.walletPassword || process.env.DB_WALLET_PASSWORD;
         }
-        return originalGetConnection.call(this, opts, cb);
-      };
-      oracledb._knexPatched = true;
-    }
-  } catch (e) {
-    // ignore if oracledb is not loaded in current environment
-  }
-}
-
-function getConnectionConfig() {
-  if (isSqlite) {
-    const filename = process.env.DB_FILE || path.resolve(__dirname, 'database.sqlite');
-    return { filename };
-  }
-
-  if (isOracle) {
-    const rawWalletPath = process.env.DB_WALLET_PATH || '../hampersnest-backend/wallet';
-    const walletPath = path.isAbsolute(rawWalletPath) ? rawWalletPath : path.resolve(__dirname, rawWalletPath);
-
-    return {
-      user: process.env.DB_USER || 'HAMPERSNEST',
-      password: process.env.DB_PASSWORD || '',
-      connectString: process.env.DB_SERVICE_NAME || 'm7z45z3hgdzijbqt_low',
-      configDir: walletPath,
-      walletLocation: walletPath,
-      walletPassword: process.env.DB_WALLET_PASSWORD
+      }
+      return originalGetConnection.call(this, opts, cb);
     };
+    oracledb._knexPatched = true;
   }
-
-  return {
-    host: process.env.DB_HOST || '127.0.0.1',
-    port: parseInt(process.env.DB_PORT || (dbClient === 'pg' ? '5432' : '3306'), 10),
-    user: process.env.DB_USER || 'root',
-    password: process.env.DB_PASSWORD || '',
-    database: process.env.DB_NAME || 'hampersnest',
-    ssl: process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : false
-  };
+} catch (e) {
+  // Ignored during testing when oracledb is not needed
 }
 
 const prodConfig = {
-  client: dbClient,
-  useNullAsDefault: isSqlite,
-  connection: getConnectionConfig(),
+  client: 'oracledb',
+  connection: {
+    user: process.env.DB_USER || 'HAMPERSNEST',
+    password: process.env.DB_PASSWORD || '',
+    connectString: process.env.DB_SERVICE_NAME || 'm7z45z3hgdzijbqt_low',
+    configDir: walletPath,
+    walletLocation: walletPath,
+    walletPassword: process.env.DB_WALLET_PASSWORD
+  },
   pool: {
     min: 1,
     max: 5,
@@ -90,13 +57,11 @@ const prodConfig = {
   }
 };
 
-/**
- * @type { Object.<string, import("knex").Knex.Config> }
- */
 module.exports = {
   production: prodConfig,
   development: prodConfig,
 
+  // Isolated test configuration
   test: {
     client: 'better-sqlite3',
     useNullAsDefault: true,

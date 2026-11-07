@@ -1,74 +1,33 @@
-# HampersNest Knex Migration Guide
+# HampersNest Database Operations & Schema Guide
 
-This guide details how to create, test, and deploy database schema changes using [Knex.js](https://knexjs.org/).
-
----
-
-## 1. Creating a New Migration
-
-Generate a new timestamped migration file:
-
-```bash
-# General Knex CLI
-npx knex migrate:make add_loyalty_points_to_users
-
-# Or using the package npm shortcut
-npm run migrate:make -- add_loyalty_points_to_users
-```
-
-By default, place production-ready migrations in `migrations/production/`. If the migration is experimental or specific to staging/development, place it in `migrations/staging/` or `migrations/development/`.
+This guide details how to sync, verify, seed, and manage database schema changes using [Knex.js](https://knexjs.org/) and the modular table schemas in `schema/tables/`.
 
 ---
 
-## 2. Anatomy of a Migration File
+## 1. Table Schema Architecture
 
-Every migration file must export an `up` and a `down` function:
+Each table is cleanly defined in its own file under `schema/tables/`:
+- `users.js`
+- `categories.js`
+- `products.js`
+- `orders.js`
+- `inquiries.js`
+- `settings.js`
+- `gallery_items.js`
+- `audit_logs.js`
+- `hero_banners.js`
+- `testimonials.js`
+- `category_showcase.js`
 
-```javascript
-/**
- * @param { import("knex").Knex } knex
- * @returns { Promise<void> }
- */
-exports.up = async function(knex) {
-  await knex.schema.alterTable('users', (table) => {
-    table.integer('loyalty_points').defaultTo(0);
-  });
-};
-
-/**
- * @param { import("knex").Knex } knex
- * @returns { Promise<void> }
- */
-exports.down = async function(knex) {
-  await knex.schema.alterTable('users', (table) => {
-    table.dropColumn('loyalty_points');
-  });
-};
-```
+To add a new column or feature to a table, simply edit that table's schema file in `schema/tables/`.
 
 ---
 
-## 3. Running Migrations
+## 2. Available Commands
 
-| Environment | Command | Description |
+| Command | Action | Description |
 | :--- | :--- | :--- |
-| **Development** | `npm run migrate:dev` | Runs migrations across `production/` & `development/` |
-| **Staging** | `npm run migrate:staging` | Runs migrations across `production/` & `staging/` |
-| **Production** | `npm run migrate:prod` | Runs production migrations only |
-| **Rollback** | `npm run migrate:rollback` | Rolls back the most recent migration batch |
-| **Check Status** | `npm run migrate:status` | Shows completed and pending migrations |
-
----
-
-## 4. Testing Migrations Locally
-
-Always execute tests before committing:
-
-```bash
-# Run all test suites
-npm test
-
-# Run migration tests specifically
-npm run test:migrations
-```
-
+| `npm run db:sync` | Safe Schema Sync | Creates missing tables and safely alters existing tables with new columns |
+| `npm run db:verify` | Read-Only Health Check | Tests Oracle connection and lists row counts for all 11 tables |
+| `npm run seed` | Seed Baseline Data | Populates default categories, superadmin, and store policies/settings |
+| `npm test` | Run Automated Tests | Executes 8 unit tests in an isolated memory database |

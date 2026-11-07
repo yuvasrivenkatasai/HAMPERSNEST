@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        NODE_ENV = 'staging'
+        NODE_ENV = 'production'
         DB_PROJECT_DIR = 'hampersnest-database'
     }
 
@@ -26,63 +26,45 @@ pipeline {
         stage('Lint & Validate Config') {
             steps {
                 dir("${env.DB_PROJECT_DIR}") {
-                    echo 'Validating Knexfile and environment configuration...'
+                    echo 'Validating Knexfile syntax...'
                     sh 'node -e "require(\'./knexfile.js\'); console.log(\'knexfile syntax OK\')"'
                 }
             }
         }
 
-        stage('Test Migrations & Rollback') {
+        stage('Automated Schema Tests') {
             environment {
                 NODE_ENV = 'test'
             }
             steps {
                 dir("${env.DB_PROJECT_DIR}") {
-                    echo 'Running automated migration & integration tests...'
+                    echo 'Running automated schema & CRUD tests...'
                     sh 'npm test'
                 }
             }
         }
 
-        stage('Deploy Staging Migrations') {
-            when {
-                branch 'develop'
-            }
-            environment {
-                NODE_ENV = 'staging'
-            }
-            steps {
-                dir("${env.DB_PROJECT_DIR}") {
-                    echo 'Applying Knex migrations to Staging Database...'
-                    sh 'npm run migrate:staging'
-                    echo 'Applying Staging seeds...'
-                    sh 'npm run seed:staging'
-                }
-            }
-        }
-
-        stage('Approve Production Deployment') {
+        stage('Approve Production Sync') {
             when {
                 branch 'main'
             }
             steps {
                 timeout(time: 30, unit: 'MINUTES') {
-                    input message: 'Proceed with Database Migration on PRODUCTION?', ok: 'Deploy to Production'
+                    input message: 'Proceed with Database Sync on PRODUCTION?', ok: 'Deploy Schema'
                 }
             }
         }
 
-        stage('Deploy Production Migrations') {
+        stage('Apply Production Sync') {
             when {
                 branch 'main'
             }
-            environment {
-                NODE_ENV = 'production'
-            }
             steps {
                 dir("${env.DB_PROJECT_DIR}") {
-                    echo 'Executing Production Database Migration...'
-                    sh 'npm run migrate:prod'
+                    echo 'Synchronizing schema with Production Oracle Database...'
+                    sh 'npm run db:sync'
+                    echo 'Verifying production table health...'
+                    sh 'npm run db:verify'
                 }
             }
         }
@@ -93,8 +75,7 @@ pipeline {
             echo '[ALERT] HampersNest Database Pipeline failed! Inspect logs for details.'
         }
         success {
-            echo '[SUCCESS] Database pipeline completed successfully.'
+            echo '[SUCCESS] Production Database pipeline completed successfully.'
         }
     }
 }
-
