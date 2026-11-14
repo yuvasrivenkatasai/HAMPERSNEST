@@ -32,22 +32,22 @@ export default function ProductDetailTemplate({ product, displayRelated = [] }) 
   const [giftTag, setGiftTag] = useState('');
   const [quantity, setQuantity] = useState(MIN_ORDER_QUANTITY);
   const [qtyInputText, setQtyInputText] = useState(MIN_ORDER_QUANTITY.toString());
-  
+
   // Variant State
-  const defaultVariant = product.variantsEnabled && Array.isArray(product.variants) && product.variants.length > 0 
-    ? (product.variants.find(v => v.isDefault) || product.variants[0]) 
+  const defaultVariant = product.variantsEnabled && Array.isArray(product.variants) && product.variants.length > 0
+    ? (product.variants.find(v => v.isDefault) || product.variants[0])
     : null;
   const [selectedVariant, setSelectedVariant] = useState(defaultVariant);
-  
-  const rawProductAddons = Array.isArray(product.customAddons) && product.customAddons.length > 0 
-    ? product.customAddons 
+
+  const rawProductAddons = Array.isArray(product.customAddons) && product.customAddons.length > 0
+    ? product.customAddons
     : [
-        { id: '1', name: 'Scented Wax Candle', price: 99, enabled: true },
-        { id: '2', name: 'Extra Chocolates (Pack of 4)', price: 149, enabled: true },
-        { id: '3', name: 'Premium Hydration Flask', price: 299, enabled: true },
-        { id: '4', name: 'Calligraphy Message Card', price: 49, enabled: true }
-      ];
-      
+      { id: '1', name: 'Scented Wax Candle', price: 99, enabled: true },
+      { id: '2', name: 'Extra Chocolates (Pack of 4)', price: 149, enabled: true },
+      { id: '3', name: 'Premium Hydration Flask', price: 299, enabled: true },
+      { id: '4', name: 'Calligraphy Message Card', price: 49, enabled: true }
+    ];
+
   const productAddons = rawProductAddons.filter(a => a.enabled !== false);
 
   const [pendingAddOns, setPendingAddOns] = useState([]);
@@ -63,7 +63,7 @@ export default function ProductDetailTemplate({ product, displayRelated = [] }) 
 
   // Gallery States
   // Managed by PremiumProductGallery component now
-  
+
   // Reset states on product change
   useEffect(() => {
     setGiftTag('');
@@ -73,7 +73,7 @@ export default function ProductDetailTemplate({ product, displayRelated = [] }) 
     setPendingAddOns([]);
     setAddonsApplied(false);
     setActiveAccordion('description');
-    
+
     if (product?.variantsEnabled && Array.isArray(product?.variants) && product.variants.length > 0) {
       setSelectedVariant(product.variants.find(v => v.isDefault) || product.variants[0]);
     } else {
@@ -124,8 +124,8 @@ export default function ProductDetailTemplate({ product, displayRelated = [] }) 
     const cleanNumber = rawNumber.replace(/\D/g, '');
 
     const tagText = giftTag ? `\n• Gift Tag Note: "${giftTag}"` : '';
-    const addonText = selectedAddOns && selectedAddOns.length > 0 
-      ? `\n• Selected Add-ons: ${selectedAddOns.map(a => a.name).join(', ')}` 
+    const addonText = selectedAddOns && selectedAddOns.length > 0
+      ? `\n• Selected Add-ons: ${selectedAddOns.map(a => a.name).join(', ')}`
       : '';
     const variantText = selectedVariant ? `\n• Variant: ${selectedVariant.name}` : '';
 
@@ -140,18 +140,18 @@ export default function ProductDetailTemplate({ product, displayRelated = [] }) 
       <div className="breadcrumb-bar">
         <div className="container" style={{ padding: '8px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.8rem', color: '#777' }}>
           <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-            <Link to="/" style={{ color: 'var(--color-gold-dark)' }}>Home</Link> / 
-            <Link to="/collections" style={{ color: 'var(--color-gold-dark)' }}>Collections</Link> / 
+            <Link to="/" style={{ color: 'var(--color-gold-dark)' }}>Home</Link> /
+            <Link to="/collections" style={{ color: 'var(--color-gold-dark)' }}>Collections</Link> /
             <span style={{ color: 'var(--color-purple)' }}>{product.name}</span>
           </div>
-          <button 
+          <button
             onClick={() => {
               if (window.history.length > 2 || (window.history.state && window.history.state.idx > 0)) {
-                 navigate(-1);
+                navigate(-1);
               } else {
-                 const lastVisited = sessionStorage.getItem('last_visited_collection');
-                 if (lastVisited) navigate(lastVisited);
-                 else navigate('/collections');
+                const lastVisited = sessionStorage.getItem('last_visited_collection');
+                if (lastVisited) navigate(lastVisited);
+                else navigate('/collections');
               }
             }}
             style={{
@@ -175,12 +175,12 @@ export default function ProductDetailTemplate({ product, displayRelated = [] }) 
 
       <div className="container product-detail-section" style={{ paddingTop: '0.5rem' }}>
         <div className="product-detail-layout-grid">
-          
+
           {/* MOBILE ONLY HEADER */}
           <div className="product-header-block mobile-only" style={{ marginBottom: '-1rem' }}>
             <span className="product-category-tag">{getDisplayCategory(product)} Collection</span>
             <h1 className="product-detail-title">{product.name}</h1>
-            
+
             <div className="product-rating-row">
               <div className="stars-gold">
                 {Array.from({ length: 5 }).map((_, i) => (
@@ -206,35 +206,35 @@ export default function ProductDetailTemplate({ product, displayRelated = [] }) 
               {/* Desktop Only Title & Rating (Hidden on mobile) */}
               <div className="desktop-only">
                 <span className="product-category-tag">{getDisplayCategory(product)} Collection</span>
-              <h1 className="product-detail-title">{product.name}</h1>
-              
-              <div className="product-rating-row">
-                <div className="stars-gold">
-                  {Array.from({ length: 5 }).map((_, i) => (
-                    <i
-                      key={i}
-                      className={i < Math.floor(product.rating || 4.5) ? "fa-solid fa-star" : "fa-regular fa-star"}
-                    ></i>
-                  ))}
+                <h1 className="product-detail-title">{product.name}</h1>
+
+                <div className="product-rating-row">
+                  <div className="stars-gold">
+                    {Array.from({ length: 5 }).map((_, i) => (
+                      <i
+                        key={i}
+                        className={i < Math.floor(product.rating || 4.5) ? "fa-solid fa-star" : "fa-regular fa-star"}
+                      ></i>
+                    ))}
+                  </div>
+                  <span className="rating-count">({product.rating || 4.5} Rating / Verified Client Reviews)</span>
                 </div>
-                <span className="rating-count">({product.rating || 4.5} Rating / Verified Client Reviews)</span>
-              </div>
               </div>
 
-            <div className="product-trust-badges" style={{ marginTop: '5px', marginBottom: '15px' }}>
-              <div className="trust-badge-item">
-                <i className="fa-solid fa-truck-fast"></i>
-                <span>Fast Shipping</span>
+              <div className="product-trust-badges" style={{ marginTop: '5px', marginBottom: '15px' }}>
+                <div className="trust-badge-item">
+                  <i className="fa-solid fa-truck-fast"></i>
+                  <span>Fast Shipping</span>
+                </div>
+                <div className="trust-badge-item">
+                  <i className="fa-solid fa-gift"></i>
+                  <span>Premium Quality</span>
+                </div>
+                <div className="trust-badge-item">
+                  <i className="fa-solid fa-lock"></i>
+                  <span>Secure Packing</span>
+                </div>
               </div>
-              <div className="trust-badge-item">
-                <i className="fa-solid fa-gift"></i>
-                <span>Premium Quality</span>
-              </div>
-              <div className="trust-badge-item">
-                <i className="fa-solid fa-lock"></i>
-                <span>Secure Packing</span>
-              </div>
-            </div>
 
               <div className="product-price-block" style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', marginBottom: '1rem' }}>
                 <span className="current-price">{formatPrice(unitPrice)}</span>
@@ -246,7 +246,7 @@ export default function ProductDetailTemplate({ product, displayRelated = [] }) 
                     </span>
                   </>
                 )}
-                
+
                 {/* Compact Inline Stock Status Badge */}
                 {effectiveStock === 0 ? (
                   <span className="stock-badge out-of-stock" style={{
@@ -323,25 +323,26 @@ export default function ProductDetailTemplate({ product, displayRelated = [] }) 
                     {selectedAddOns.map((addon, idx) => {
                       const identifier = addon.id || addon.name || idx;
                       return (
-                      <div key={identifier} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.85rem', color: 'var(--color-charcoal)' }}>
-                        <span>
-                          <i className="fa-solid fa-check" style={{ color: 'var(--color-gold)', marginRight: '6px', fontSize: '0.75rem' }}></i>
-                          {addon.name} <span style={{ color: '#888' }}>(+{formatPrice(addon.price)})</span>
-                        </span>
-                        <button 
-                          type="button"
-                          onClick={() => {
-                            setSelectedAddOns(prev => prev.filter(a => (a.id || a.name) !== identifier));
-                            setPendingAddOns(prev => prev.filter(a => (a.id || a.name) !== identifier));
-                            if (selectedAddOns.length === 1) setAddonsApplied(false);
-                          }}
-                          style={{ background: 'none', border: 'none', color: '#999', cursor: 'pointer', padding: '2px 6px', fontSize: '1.2rem', lineHeight: '1' }}
-                          title="Remove Add-on"
-                        >
-                          &times;
-                        </button>
-                      </div>
-                    )})}
+                        <div key={identifier} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.85rem', color: 'var(--color-charcoal)' }}>
+                          <span>
+                            <i className="fa-solid fa-check" style={{ color: 'var(--color-gold)', marginRight: '6px', fontSize: '0.75rem' }}></i>
+                            {addon.name} <span style={{ color: '#888' }}>(+{formatPrice(addon.price)})</span>
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setSelectedAddOns(prev => prev.filter(a => (a.id || a.name) !== identifier));
+                              setPendingAddOns(prev => prev.filter(a => (a.id || a.name) !== identifier));
+                              if (selectedAddOns.length === 1) setAddonsApplied(false);
+                            }}
+                            style={{ background: 'none', border: 'none', color: '#999', cursor: 'pointer', padding: '2px 6px', fontSize: '1.2rem', lineHeight: '1' }}
+                            title="Remove Add-on"
+                          >
+                            &times;
+                          </button>
+                        </div>
+                      )
+                    })}
                   </div>
                   <div style={{ marginTop: '10px', fontSize: '0.95rem', fontWeight: '700', color: 'var(--color-purple-dark)', display: 'flex', justifyContent: 'space-between' }}>
                     <span>Final Price:</span>
@@ -355,9 +356,9 @@ export default function ProductDetailTemplate({ product, displayRelated = [] }) 
               {product.variantsEnabled && Array.isArray(product.variants) && product.variants.length > 0 && (
                 <div className="product-variants-container" style={{ marginBottom: '1rem', marginTop: '0.75rem' }}>
                   <h4 style={{ fontSize: '0.9rem', marginBottom: '12px', color: 'var(--color-charcoal)' }}>Select Size:</h4>
-                  <div style={{ 
-                    display: 'flex', 
-                    gap: '12px', 
+                  <div style={{
+                    display: 'flex',
+                    gap: '12px',
                     flexWrap: 'nowrap',
                     overflowX: 'auto',
                     paddingBottom: '8px',
@@ -392,18 +393,18 @@ export default function ProductDetailTemplate({ product, displayRelated = [] }) 
                             transform: isSelected ? 'translateY(-2px)' : 'none',
                           }}
                           onMouseEnter={(e) => {
-                             if (!isOutOfStock && !isSelected) {
-                                e.currentTarget.style.transform = 'translateY(-2px)';
-                                e.currentTarget.style.boxShadow = '0 4px 10px rgba(0,0,0,0.08)';
-                                e.currentTarget.style.borderColor = 'var(--color-gold)';
-                             }
+                            if (!isOutOfStock && !isSelected) {
+                              e.currentTarget.style.transform = 'translateY(-2px)';
+                              e.currentTarget.style.boxShadow = '0 4px 10px rgba(0,0,0,0.08)';
+                              e.currentTarget.style.borderColor = 'var(--color-gold)';
+                            }
                           }}
                           onMouseLeave={(e) => {
-                             if (!isOutOfStock && !isSelected) {
-                                e.currentTarget.style.transform = 'none';
-                                e.currentTarget.style.boxShadow = '0 2px 5px rgba(0,0,0,0.03)';
-                                e.currentTarget.style.borderColor = '#e0e0e0';
-                             }
+                            if (!isOutOfStock && !isSelected) {
+                              e.currentTarget.style.transform = 'none';
+                              e.currentTarget.style.boxShadow = '0 2px 5px rgba(0,0,0,0.03)';
+                              e.currentTarget.style.borderColor = '#e0e0e0';
+                            }
                           }}
                         >
                           {isSelected && (
@@ -430,7 +431,7 @@ export default function ProductDetailTemplate({ product, displayRelated = [] }) 
 
             {/* Customization Form */}
             <div className="product-customizer-box">
-              
+
               {/* 1. Minimum Order Quantity */}
               <div style={{ marginTop: '0.5rem', fontSize: '0.8rem', color: 'var(--color-charcoal)', fontWeight: '500', display: 'flex', alignItems: 'center', gap: '6px' }}>
                 <i className="fa-solid fa-circle-info" style={{ color: 'var(--color-gold)' }}></i> Minimum Order Quantity: {MIN_ORDER_QUANTITY} Pieces
@@ -446,25 +447,25 @@ export default function ProductDetailTemplate({ product, displayRelated = [] }) 
                   marginBottom: '1rem',
                   boxShadow: '0 2px 8px rgba(0,0,0,0.02)'
                 }}>
-                  <h4 style={{ 
-                    margin: '0 0 8px 0', 
-                    color: 'var(--color-purple)', 
+                  <h4 style={{
+                    margin: '0 0 8px 0',
+                    color: 'var(--color-purple)',
                     fontSize: '0.95rem',
                     textAlign: 'center'
                   }}>
                     {settings.bulkDiscountSettings.heading || '🎉 Bulk Order Discounts'}
                   </h4>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', borderTop: '1px dashed var(--color-beige)', borderBottom: '1px dashed var(--color-beige)', padding: '12px 0', margin: '0 0 12px 0' }}>
-                    {[...settings.bulkDiscountSettings.rules].sort((a,b) => a.minQty - b.minQty).map((rule, idx) => (
+                    {[...settings.bulkDiscountSettings.rules].sort((a, b) => a.minQty - b.minQty).map((rule, idx) => (
                       <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <span style={{ fontSize: '0.9rem', fontWeight: 600, color: '#4B5563' }}>{rule.minQty}+ Pieces</span>
-                        <span style={{ 
-                          background: 'var(--color-gold-light)', 
-                          color: 'var(--color-gold-dark)', 
-                          padding: '2px 10px', 
-                          borderRadius: '12px', 
-                          fontSize: '0.75rem', 
-                          fontWeight: 700 
+                        <span style={{
+                          background: 'var(--color-gold-light)',
+                          color: 'var(--color-gold-dark)',
+                          padding: '2px 10px',
+                          borderRadius: '12px',
+                          fontSize: '0.75rem',
+                          fontWeight: 700
                         }}>SAVE {rule.discountPercent}%</span>
                       </div>
                     ))}
@@ -514,7 +515,7 @@ export default function ProductDetailTemplate({ product, displayRelated = [] }) 
                           setQtyInputText(sanitized.toString());
                         }}
                         disabled={effectiveStock === 0}
-                        style={{ 
+                        style={{
                           width: '50px', textAlign: 'center', border: 'none', background: 'transparent',
                           fontWeight: '600', fontSize: '1rem', color: 'var(--color-charcoal)', padding: '0 8px'
                         }}
@@ -535,31 +536,31 @@ export default function ProductDetailTemplate({ product, displayRelated = [] }) 
                       </button>
                     </div>
                   </div>
-                  
+
                   {/* Quick QTY Buttons */}
                   <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
                     {QUICK_QTYS.map((q) => (
-                       <button
-                         key={q}
-                         type="button"
-                         onClick={() => {
-                           if (q <= effectiveStock) {
-                             setQuantity(q);
-                             setQtyInputText(q.toString());
-                           }
-                         }}
-                         disabled={effectiveStock === 0 || q > effectiveStock}
-                         style={{
-                           padding: '2px 8px', fontSize: '0.72rem', borderRadius: '4px',
-                           border: quantity === q ? '1px solid var(--color-purple)' : '1px solid #e2e8f0', 
-                           background: quantity === q ? 'var(--color-lavender)' : '#f8fafc', 
-                           color: quantity === q ? 'var(--color-purple-dark)' : '#64748b',
-                           fontWeight: quantity === q ? '600' : '400',
-                           cursor: (effectiveStock === 0 || q > effectiveStock) ? 'not-allowed' : 'pointer'
-                         }}
-                       >
-                         +{q}
-                       </button>
+                      <button
+                        key={q}
+                        type="button"
+                        onClick={() => {
+                          if (q <= effectiveStock) {
+                            setQuantity(q);
+                            setQtyInputText(q.toString());
+                          }
+                        }}
+                        disabled={effectiveStock === 0 || q > effectiveStock}
+                        style={{
+                          padding: '2px 8px', fontSize: '0.72rem', borderRadius: '4px',
+                          border: quantity === q ? '1px solid var(--color-purple)' : '1px solid #e2e8f0',
+                          background: quantity === q ? 'var(--color-lavender)' : '#f8fafc',
+                          color: quantity === q ? 'var(--color-purple-dark)' : '#64748b',
+                          fontWeight: quantity === q ? '600' : '400',
+                          cursor: (effectiveStock === 0 || q > effectiveStock) ? 'not-allowed' : 'pointer'
+                        }}
+                      >
+                        +{q}
+                      </button>
                     ))}
                   </div>
                 </div>
@@ -574,8 +575,8 @@ export default function ProductDetailTemplate({ product, displayRelated = [] }) 
                   onClick={handleAddToBasket}
                   disabled={effectiveStock === 0}
                   className="btn btn-primary buy-btn-cart"
-                  style={{ 
-                    height: '48px', 
+                  style={{
+                    height: '48px',
                     padding: '0 1rem',
                     background: effectiveStock === 0 ? '#CBD5E1' : 'var(--color-purple-dark)',
                     borderColor: effectiveStock === 0 ? '#CBD5E1' : 'var(--color-purple-dark)',
@@ -626,17 +627,17 @@ export default function ProductDetailTemplate({ product, displayRelated = [] }) 
                 </button>
               </div>
 
-              </div>
+            </div>
           </div>
         </div>
 
         {/* --- PREMIUM ACCORDION LAYOUT --- */}
         <div className="product-accordion-container" style={{ marginTop: '1rem' }}>
-          
+
           {/* 1. Description */}
           <div className="product-accordion-item">
-            <button 
-              className="product-accordion-header" 
+            <button
+              className="product-accordion-header"
               onClick={() => toggleAccordion('description')}
               aria-expanded={activeAccordion === 'description'}
             >
@@ -654,7 +655,7 @@ export default function ProductDetailTemplate({ product, displayRelated = [] }) 
                         Curated handcrafted gift hamper from our <strong>{getDisplayCategory(product)}</strong> collection. Thoughtfully designed with luxury packaging and personalized accents, ideal for wedding return gifts, Gruhapravesam favors, and festive celebrations.
                       </p>
                     )}
-                    
+
                     {product.highlights && (
                       <div style={{ marginTop: '16px' }}>
                         <h4 style={{ fontWeight: 600, color: 'var(--color-charcoal)', marginBottom: '8px', fontSize: '0.95rem' }}>Highlights</h4>
@@ -688,8 +689,8 @@ export default function ProductDetailTemplate({ product, displayRelated = [] }) 
           {/* 2. Make It Extra Special */}
           {(product.customGiftTagEnabled !== false || product.addonsEnabled !== false || true) && (
             <div className="product-accordion-item">
-              <button 
-                className="product-accordion-header" 
+              <button
+                className="product-accordion-header"
                 onClick={() => toggleAccordion('personalize')}
                 aria-expanded={activeAccordion === 'personalize'}
               >
@@ -743,12 +744,12 @@ export default function ProductDetailTemplate({ product, displayRelated = [] }) 
                               </label>
                             ))}
                           </div>
-                          
+
                           <button
                             type="button"
                             onClick={() => {
-                               setSelectedAddOns([...pendingAddOns]);
-                               setAddonsApplied(true);
+                              setSelectedAddOns([...pendingAddOns]);
+                              setAddonsApplied(true);
                             }}
                             disabled={addonsApplied}
                             style={{
@@ -761,7 +762,7 @@ export default function ProductDetailTemplate({ product, displayRelated = [] }) 
                           >
                             {addonsApplied ? <><i className="fa-solid fa-check"></i> Added</> : 'Add Selected Add-ons'}
                           </button>
-                          
+
                           {selectedAddOns.length > 0 && (
                             <div style={{ marginTop: '16px', background: '#f9fafb', padding: '12px', borderRadius: '8px', border: '1px solid #e5e7eb' }}>
                               <h5 style={{ margin: '0 0 8px 0', fontSize: '0.85rem', color: '#4b5563' }}>Selected Add-ons Summary</h5>
@@ -770,13 +771,13 @@ export default function ProductDetailTemplate({ product, displayRelated = [] }) 
                                   <li key={idx} style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
                                     <span>{addon.name}</span>
                                     <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                                       <span style={{ color: 'var(--color-gold-dark)' }}>+{formatPrice(addon.price)}</span>
-                                       <button onClick={() => {
-                                          const newSel = selectedAddOns.filter(a => a.name !== addon.name);
-                                          setSelectedAddOns(newSel);
-                                          setPendingAddOns(newSel);
-                                          if (newSel.length === 0) setAddonsApplied(false);
-                                       }} style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer' }}><i className="fa-solid fa-xmark"></i></button>
+                                      <span style={{ color: 'var(--color-gold-dark)' }}>+{formatPrice(addon.price)}</span>
+                                      <button onClick={() => {
+                                        const newSel = selectedAddOns.filter(a => a.name !== addon.name);
+                                        setSelectedAddOns(newSel);
+                                        setPendingAddOns(newSel);
+                                        if (newSel.length === 0) setAddonsApplied(false);
+                                      }} style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer' }}><i className="fa-solid fa-xmark"></i></button>
                                     </div>
                                   </li>
                                 ))}
@@ -806,8 +807,8 @@ export default function ProductDetailTemplate({ product, displayRelated = [] }) 
 
             return (
               <div className="product-accordion-item">
-                <button 
-                  className="product-accordion-header" 
+                <button
+                  className="product-accordion-header"
                   onClick={() => toggleAccordion('delivery')}
                   aria-expanded={activeAccordion === 'delivery'}
                 >
@@ -841,19 +842,19 @@ export default function ProductDetailTemplate({ product, displayRelated = [] }) 
             const custItems = (product.customization && product.customization.length > 0)
               ? product.customization
               : (product.customizationText ? product.customizationText.split('\n').map(i => i.trim()).filter(Boolean) : [
-                  "Custom Gift Wrapping",
-                  "Custom Branding",
-                  "Corporate Branding",
-                  "Bulk Order Customization",
-                  "Personalized Messages",
-                  "Custom Color Themes",
-                  "Special Packaging"
-                ]);
+                "Custom Gift Wrapping",
+                "Custom Branding",
+                "Corporate Branding",
+                "Bulk Order Customization",
+                "Personalized Messages",
+                "Custom Color Themes",
+                "Special Packaging"
+              ]);
 
             return (
               <div className="product-accordion-item">
-                <button 
-                  className="product-accordion-header" 
+                <button
+                  className="product-accordion-header"
                   onClick={() => toggleAccordion('customization')}
                   aria-expanded={activeAccordion === 'customization'}
                 >
@@ -893,7 +894,7 @@ export default function ProductDetailTemplate({ product, displayRelated = [] }) 
           <div className="related-products-section" style={{ marginTop: '3rem', borderTop: '1px solid var(--color-beige)', paddingTop: '2.5rem' }}>
             <span className="section-subtitle">Customers also viewed</span>
             <h2 className="section-title" style={{ marginBottom: '1.5rem' }}>Related Hampers</h2>
-            
+
             <div className="collections-grid">
               {displayRelated.map((item, idx) => (
                 <ProductCard key={item.id || idx} product={item} />

@@ -3477,6 +3477,7 @@ footer {
 
 /* Mobile Card Layout Fixes (Only for Featured Collections and Product Showcase) */
 @media (max-width: 767px) {
+
   #collections .container,
   #gallery.container {
     padding: 16px 12px;
@@ -9023,6 +9024,7 @@ footer h4,
   min-width: 0;
   overflow: visible;
 }
+
 /* ==========================================
    NAVBAR FIT — keep nav labels on one line
    ========================================== */
