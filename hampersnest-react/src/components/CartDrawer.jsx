@@ -521,7 +521,7 @@ export default function CartDrawer() {
             )}
             
             <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '4px' }}>
-              <span className="cart-currency-badge">{currency === 'INR' ? '₹ INR' : '$ USD'}</span>
+              <span className="cart-currency-badge">{currency === 'INR' ? 'Rs. INR' : '$ USD'}</span>
             </div>
 
             {checkoutStep === 1 ? (

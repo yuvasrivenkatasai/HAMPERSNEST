@@ -74,7 +74,7 @@ export default function Header() {
           {/* Logo container - image + brand name */}
           <Link to="/" className="logo-container" onClick={closeMobileMenu}>
             <div className="logo-wrapper">
-              <img src="/assets/hampersnest-logo.png" alt={`${settings?.storeName || 'Hampers Nest'} Logo`} />
+              <img src="/assets/Logo.svg" alt={`${settings?.storeName || 'Hampers Nest'} Logo`} />
             </div>
           </Link>
 
@@ -111,7 +111,7 @@ export default function Header() {
                   onClick={() => toggleCurrency('INR')}
                   aria-label="Switch to INR"
                 >
-                  ₹ INR
+                  Rs. INR
                 </button>
                 <span className="currency-divider">|</span>
                 <button
@@ -134,7 +134,7 @@ export default function Header() {
                 onClick={() => toggleCurrency('INR')}
                 aria-label="Switch to INR"
               >
-                ₹ INR
+                Rs. INR
               </button>
               <span className="currency-divider">|</span>
               <button

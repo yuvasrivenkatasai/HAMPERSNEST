@@ -52,11 +52,9 @@ export const formatCurrency = (amount, currency = 'INR', exchangeRate = 1) => {
     }).format(value);
   }
   
-  // Default to INR
-  return new Intl.NumberFormat('en-IN', {
-    style: 'currency',
-    currency: 'INR',
-    minimumFractionDigits: 0,
+  // Default to INR (Traditional Rs. format)
+  const formatted = new Intl.NumberFormat('en-IN', {
     maximumFractionDigits: 0
   }).format(value);
+  return `Rs. ${formatted}`;
 };

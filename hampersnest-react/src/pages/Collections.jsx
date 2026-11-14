@@ -9,11 +9,12 @@ import ProductCard from '../components/ProductCard';
 
 export default function Collections() {
   const [searchParams, setSearchParams] = useSearchParams();
+  const isViewAll = searchParams.get('view') === 'all';
   const queryCategory = searchParams.get('category');
   const minPriceFilter = searchParams.get('min');
   const maxPriceFilter = searchParams.get('max');
   
-  const { products, addToCart, settings } = useCart();
+  const { products, addToCart, settings, productsLoading } = useCart();
   const navigate = useNavigate();
 
   const location = useLocation();
@@ -27,44 +28,18 @@ export default function Collections() {
     }
   }, [location.key]);
 
-  const [activeCategory, setActiveCategory] = useState(savedState?.activeCategory || 'All');
+  const [activeCategory, setActiveCategory] = useState(queryCategory ? 'All' : (savedState?.activeCategory || 'All'));
   const [activeSubcategory, setActiveSubcategory] = useState(savedState?.activeSubcategory || null);
   const [searchQuery, setSearchQuery] = useState(savedState?.searchQuery || '');
   const [sortBy, setSortBy] = useState(savedState?.sortBy || 'featured');
-  const [currentPage, setCurrentPage] = useState(savedState?.currentPage || 1);
   const [showPopularSearches, setShowPopularSearches] = useState(false);
-  const [hasScrolledCategories, setHasScrolledCategories] = useState(false);
-  const [scrollProgress, setScrollProgress] = useState(0);
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
-  const handleCategoryScroll = (e) => {
-    if (!hasScrolledCategories) {
-      setHasScrolledCategories(true); 
-    }
-    const { scrollLeft, scrollWidth, clientWidth } = e.target;
-    if (scrollWidth > clientWidth) {
-      const progress = (scrollLeft / (scrollWidth - clientWidth)) * 100;
-      setScrollProgress(progress);
-    }
-  };
-
-  const handlePageChange = (newPage) => {
-    if (newPage === currentPage) return;
-    setCurrentPage(newPage);
-    
-    setTimeout(() => {
-      if (productsGridRef.current) {
-        // Offset accounts for fixed navbar + sticky categories on mobile
-        const headerOffset = window.innerWidth <= 768 ? 140 : 100; 
-        const elementPosition = productsGridRef.current.getBoundingClientRect().top;
-        const offsetPosition = elementPosition + window.scrollY - headerOffset;
-        
-        window.scrollTo({
-          top: offsetPosition,
-          behavior: 'smooth'
-        });
-      }
-    }, 50); // slight delay to allow product grid to render
-  };
+  // Infinite Scroll / Page Scroller Constants & State
+  const BATCH_SIZE = 18;
+  const [visibleCount, setVisibleCount] = useState(BATCH_SIZE);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const loaderSentinelRef = React.useRef(null);
   const productsGridRef = React.useRef(null);
   const subcategoriesRef = React.useRef(null);
   const isInitialMount = React.useRef(true);
@@ -75,9 +50,9 @@ export default function Collections() {
       activeSubcategory,
       searchQuery,
       sortBy,
-      currentPage
+      visibleCount
     }));
-  }, [activeCategory, activeSubcategory, searchQuery, sortBy, currentPage, location.key]);
+  }, [activeCategory, activeSubcategory, searchQuery, sortBy, visibleCount, location.key]);
 
   const storefrontCategories = useMemo(() => {
     const configuredCategories = Array.isArray(settings?.categories) ? settings.categories : [];
@@ -90,9 +65,66 @@ export default function Collections() {
       .filter((category) => category.id);
   }, [settings]);
 
+  const getCategoryGroupKey = (label) => {
+    const l = String(label || '').trim().toLowerCase();
+    if (l.includes('wedding')) return 'wedding';
+    if (l.includes('baby')) return 'baby';
+    if (l.includes('corporate')) return 'corporate';
+    if (l === 'bags' || l.includes('jute')) return 'jute_bags';
+    return l.replace(/s$/, '');
+  };
+
   const mainCategories = useMemo(() => {
-    return [{ id: 'All', label: 'All' }, ...storefrontCategories.filter(c => !c.parentId)];
+    const raw = [{ id: 'All', label: 'All' }, ...storefrontCategories.filter(c => !c.parentId)];
+    const groups = new Map();
+
+    for (const cat of raw) {
+      if (cat.id === 'All') {
+        groups.set('all', { ...cat, allIds: ['All'] });
+        continue;
+      }
+      const key = getCategoryGroupKey(cat.label);
+      if (!groups.has(key)) {
+        groups.set(key, { ...cat, allIds: [cat.id] });
+      } else {
+        const existing = groups.get(key);
+        existing.allIds.push(cat.id);
+        // Prefer more descriptive label (e.g. 'Weddings' over 'Wedding', 'Corporate Gifting' over 'Corporate')
+        if (cat.label.length > existing.label.length) {
+          existing.label = cat.label;
+          existing.id = cat.id;
+        }
+      }
+    }
+
+    return Array.from(groups.values());
   }, [storefrontCategories]);
+
+  // Compute live product counts per main category
+  const categoryCounts = useMemo(() => {
+    if (!products) return {};
+    const counts = { All: products.length };
+
+    mainCategories.forEach(cat => {
+      if (cat.id === 'All') return;
+      const allIds = new Set(cat.allIds || [cat.id]);
+
+      const count = products.filter(p => {
+        if (allIds.has(p.category)) return true;
+        if (Array.isArray(p.allCategories) && p.allCategories.some(c => allIds.has(c))) return true;
+        if (Array.isArray(p.categoryAssignments) && p.categoryAssignments.some(a => allIds.has(a.categoryId || a.category))) return true;
+        return false;
+      }).length;
+      counts[cat.id] = count;
+    });
+
+    return counts;
+  }, [products, mainCategories]);
+
+  // Filter out empty duplicate categories (only show categories that have curated products)
+  const visibleCategories = useMemo(() => {
+    return mainCategories.filter(cat => cat.id === 'All' || (categoryCounts[cat.id] || 0) > 0);
+  }, [mainCategories, categoryCounts]);
 
   const activeSubcategoriesList = useMemo(() => {
     if (activeCategory === 'All') return [];
@@ -104,7 +136,10 @@ export default function Collections() {
     return settings.popularSearches.split(',').map(s => s.trim().replace(/^#/, '')).filter(Boolean);
   }, [settings?.popularSearches]);
   const getCategoryLabel = (categoryId) => {
-    return storefrontCategories.find(category => category.id === categoryId)?.label || categoryId || '';
+    const match = storefrontCategories.find(category => category.id === categoryId);
+    if (match?.label) return match.label;
+    const isId = categoryId && (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(categoryId) || /^[0-9a-f]{24}$/i.test(categoryId));
+    return isId ? 'Curated Gifts' : (categoryId || '');
   };
 
   const getCategoryIdByLabel = (label) => {
@@ -171,14 +206,14 @@ export default function Collections() {
     if (activeCategory !== expectedCategory || activeSubcategory !== expectedSubcategory) {
       setActiveCategory(expectedCategory);
       setActiveSubcategory(expectedSubcategory);
-      setCurrentPage(1);
+      setVisibleCount(BATCH_SIZE);
     }
   }, [queryCategory, storefrontCategories]);
 
   // Save current collection URL for smart back navigation
   useEffect(() => {
     sessionStorage.setItem('last_visited_collection', window.location.pathname + window.location.search);
-  }, [searchParams, currentPage, activeCategory, activeSubcategory, searchQuery]);
+  }, [searchParams, visibleCount, activeCategory, activeSubcategory, searchQuery]);
 
   // Reset page when search or sort changes
   useEffect(() => {
@@ -186,14 +221,14 @@ export default function Collections() {
       isInitialMount.current = false;
       return;
     }
-    setCurrentPage(1);
+    setVisibleCount(BATCH_SIZE);
   }, [searchQuery, sortBy]);
 
   // Handle category tab click & update URL params
   const handleCategoryChange = (catId) => {
     setActiveCategory(catId);
     setActiveSubcategory(null);
-    setCurrentPage(1);
+    setVisibleCount(BATCH_SIZE);
     setSearchQuery('');
     
     if (catId !== 'All') {
@@ -218,7 +253,7 @@ export default function Collections() {
 
   const handleSubcategoryChange = (subcatId) => {
     setActiveSubcategory(subcatId);
-    setCurrentPage(1);
+    setVisibleCount(BATCH_SIZE);
     scrollToGrid();
   };
 
@@ -227,12 +262,16 @@ export default function Collections() {
     if (!products) return [];
     let result = [...products];
 
-    // 1. Category Filter
+    // 1. Category Filter (Matches ID and aliases across duplicates)
     if (activeCategory !== 'All') {
+      const activeObj = mainCategories.find(c => c.id === activeCategory) || storefrontCategories.find(c => c.id === activeCategory);
+      const allIds = activeObj?.allIds || [activeCategory];
+      const matchingCatIds = new Set(allIds);
+
       result = result.filter(p => {
-        if (p.category === activeCategory) return true;
-        if (Array.isArray(p.allCategories) && p.allCategories.includes(activeCategory)) return true;
-        if (Array.isArray(p.categoryAssignments) && p.categoryAssignments.some(a => (a.categoryId || a.category) === activeCategory)) return true;
+        if (matchingCatIds.has(p.category)) return true;
+        if (Array.isArray(p.allCategories) && p.allCategories.some(c => matchingCatIds.has(c))) return true;
+        if (Array.isArray(p.categoryAssignments) && p.categoryAssignments.some(a => matchingCatIds.has(a.categoryId || a.category))) return true;
         return false;
       });
     }
@@ -282,15 +321,71 @@ export default function Collections() {
     return result;
   }, [activeCategory, activeSubcategory, searchQuery, sortBy, products, searchParams, minPriceFilter, maxPriceFilter]);
 
-  // Pagination Logic
-  const isViewAll = searchParams.get('view') === 'all';
-  const itemsPerPage = isViewAll ? Math.max(filteredProducts.length, 1) : 24;
-  const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
+  // Infinite Scroll / Page Scroller Logic
+  useEffect(() => {
+    setVisibleCount(BATCH_SIZE);
+    setIsLoadingMore(false);
+  }, [activeCategory, activeSubcategory, searchQuery, sortBy, minPriceFilter, maxPriceFilter]);
 
-  const paginatedProducts = useMemo(() => {
-    const startIndex = (currentPage - 1) * itemsPerPage;
-    return filteredProducts.slice(startIndex, startIndex + itemsPerPage);
-  }, [filteredProducts, currentPage]);
+  const displayedProducts = useMemo(() => {
+    return filteredProducts.slice(0, visibleCount);
+  }, [filteredProducts, visibleCount]);
+
+  const hasMore = visibleCount < filteredProducts.length;
+
+  const loadMore = useCallback(() => {
+    if (isLoadingMore || !hasMore) return;
+    setIsLoadingMore(true);
+    // Instant append so user never hits the footer
+    setVisibleCount(prev => Math.min(prev + BATCH_SIZE, filteredProducts.length));
+    setTimeout(() => {
+      setIsLoadingMore(false);
+    }, 120);
+  }, [isLoadingMore, hasMore, filteredProducts.length]);
+
+  // Primary: IntersectionObserver with generous 1000px pre-trigger margin
+  useEffect(() => {
+    const sentinel = loaderSentinelRef.current;
+    if (!sentinel || !hasMore) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          loadMore();
+        }
+      },
+      {
+        rootMargin: '1000px 0px',
+        threshold: 0.01
+      }
+    );
+
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [loadMore, hasMore]);
+
+  // Secondary Safety: Pre-emptively load when user is within 1000px of page bottom
+  useEffect(() => {
+    if (!hasMore || isLoadingMore) return;
+
+    let ticking = false;
+    const handleScroll = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          const scrollBottom = window.innerHeight + window.scrollY;
+          const triggerThreshold = document.documentElement.scrollHeight - 1000;
+          if (scrollBottom >= triggerThreshold) {
+            loadMore();
+          }
+          ticking = false;
+        });
+        ticking = true;
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [hasMore, isLoadingMore, loadMore]);
 
   // Scroll animations observer
   useEffect(() => {
@@ -308,7 +403,7 @@ export default function Collections() {
     );
     revealElements.forEach((el) => observer.observe(el));
     return () => observer.disconnect();
-  }, [paginatedProducts]);
+  }, [displayedProducts]);
 
   const handleAddToCart = (e, product) => {
     e.stopPropagation();
@@ -351,8 +446,8 @@ export default function Collections() {
   let collectionHeaderTitle = 'Our Collections';
 
   if (minPriceFilter !== null || maxPriceFilter !== null) {
-    const minText = minPriceFilter ? `₹${minPriceFilter}` : '';
-    const maxText = maxPriceFilter ? `₹${maxPriceFilter}` : '';
+    const minText = minPriceFilter ? `Rs. ${minPriceFilter}` : '';
+    const maxText = maxPriceFilter ? `Rs. ${maxPriceFilter}` : '';
     let priceRangeLabel = '';
     
     if (minPriceFilter && maxPriceFilter) {
@@ -414,118 +509,157 @@ export default function Collections() {
         </div>
       </div>
 
-      <div className="container" style={{ paddingTop: '8px' }}>
+      <div className="container collections-container-wide" style={{ paddingTop: '8px' }}>
         <Breadcrumbs customCrumbs={[
           { name: 'Collections', path: '/collections' },
           ...(activeCategory !== 'All' ? [{ name: getCategoryLabel(activeCategory), path: `/collections?category=${activeCategory}` }] : [])
         ]} />
 
-        <div className="mobile-sticky-category-wrapper mobile-sticky-category">
-          {/* Top Right Arrow Indicator */}
-          <div className={`mobile-scroll-arrow d-md-none ${hasScrolledCategories ? 'fade-out' : ''}`}>
-            <i className="fa-solid fa-angles-right"></i>
-          </div>
-
-          <div ref={subcategoriesRef} onScroll={handleCategoryScroll} className="category-tabs reveal mobile-horizontal-scroll" style={{ display: 'flex', justifyContent: 'flex-start', marginBottom: '4px', flexWrap: 'wrap', position: 'relative' }}>
-            {mainCategories.map((cat) => (
-              <button
-                key={cat.id}
-                onClick={() => handleCategoryChange(cat.id)}
-                className={`category-tab ${activeCategory === cat.id ? 'active' : ''}`}
-              >
-                {cat.label}
-              </button>
-            ))}
-          </div>
+        {/* === 2-COLUMN COLLECTIONS LAYOUT (Left Sidebar Categories + Right Main Products) === */}
+        <div className="collections-layout-container">
           
-          {/* Custom Scroll Progress Line */}
-          <div className="mobile-scroll-progress-container d-md-none">
-            <div className="mobile-scroll-progress-track">
-              <div className="mobile-scroll-progress-thumb" style={{ left: `${scrollProgress}%`, transform: `translateX(-${scrollProgress}%)` }}></div>
-            </div>
-          </div>
-        </div>
-
-        {/* === SUBCATEGORY CHIPS === */}
-        {activeSubcategoriesList.length > 0 && activeCategory !== 'All' && (
-          <div className="subcategory-chips reveal mobile-horizontal-scroll" style={{ display: 'flex', justifyContent: 'center', gap: '10px', flexWrap: 'wrap', marginBottom: '16px' }}>
-            {activeSubcategoriesList.map(subcat => (
-              <button
-                key={subcat.id}
-                onClick={() => handleSubcategoryChange(subcat.id)}
-                className={`subcategory-chip ${activeSubcategory === subcat.id ? 'active' : ''}`}
-                style={{
-                  padding: '6px 14px',
-                  borderRadius: '20px',
-                  border: activeSubcategory === subcat.id ? 'none' : '1px solid var(--color-beige)',
-                  background: activeSubcategory === subcat.id ? 'var(--color-purple)' : '#fff',
-                  color: activeSubcategory === subcat.id ? '#fff' : 'var(--color-gray-text)',
-                  fontSize: '0.85rem',
-                  fontWeight: 500,
-                  cursor: 'pointer',
-                  transition: 'all 0.2s ease',
-                  boxShadow: activeSubcategory === subcat.id ? '0 2px 8px rgba(112, 26, 117, 0.3)' : 'none'
-                }}
-              >
-                #{subcat.label.replace(/\s+/g, '')}
-              </button>
-            ))}
-            {activeSubcategory && (
-              <button
-                onClick={() => handleSubcategoryChange(null)}
-                style={{ background: 'none', border: 'none', color: 'var(--color-gold-dark)', fontSize: '0.85rem', cursor: 'pointer', textDecoration: 'underline' }}
-              >
-                Clear
-              </button>
-            )}
-          </div>
-        )}
-
-        {/* === SEARCH + SORT BAR === */}
-        <div className="filter-bar reveal mobile-merged-filter" ref={productsGridRef} style={{ marginBottom: '12px' }}>
-          <div className="search-input-wrapper">
-            <i className="fa-solid fa-magnifying-glass"></i>
-            <input
-              type="text"
-              placeholder="Search hampers, occasions, gifts..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
-
-          <select
-            className="sort-select"
-            value={sortBy}
-            onChange={(e) => setSortBy(e.target.value)}
-            aria-label="Sort products by"
-          >
-            <option value="featured">Featured Items</option>
-            <option value="price-low">Price: Low to High</option>
-            <option value="price-high">Price: High to Low</option>
-            <option value="rating">Top Rated</option>
-            <option value="name">Alphabetical (A-Z)</option>
-          </select>
-        </div>
-
-        {/* Results Counter */}
-        <div
-          style={{ marginBottom: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', color: '#666', fontSize: '0.85rem' }}
-          className="reveal-heading results-counter-bar"
-        >
-          <span>Showing {paginatedProducts.length} of {filteredProducts.length} products</span>
-          {searchQuery && (
-            <button
-              onClick={() => { setSearchQuery(''); setActiveSubcategory(null); }}
-              style={{ background: 'none', border: 'none', color: 'var(--color-gold-dark)', cursor: 'pointer', fontWeight: 500, fontSize: '0.85rem' }}
+          {/* Mobile Filter Toggle */}
+          <div className="mobile-sidebar-toggle-bar">
+            <button 
+              className="mobile-sidebar-toggle-btn"
+              onClick={() => setMobileSidebarOpen(!mobileSidebarOpen)}
             >
-              Clear Filters ✕
+              <div className="mobile-toggle-btn-left">
+                <i className="fa-solid fa-sliders"></i>
+                <span>Occasion: <strong>{activeCategory === 'All' ? 'All Collections' : getCategoryLabel(activeCategory)}</strong></span>
+              </div>
+              <i className={`fa-solid fa-chevron-${mobileSidebarOpen ? 'up' : 'down'}`}></i>
             </button>
-          )}
-        </div>
+          </div>
+
+          {/* LEFT SIDEBAR: CATEGORIES */}
+          <aside className={`collections-sidebar-panel ${mobileSidebarOpen ? 'open' : ''}`}>
+            <div className="sidebar-sticky-box">
+              <div className="sidebar-header-row">
+                <div className="sidebar-title">
+                  <i className="fa-solid fa-shapes"></i>
+                  <span>Gifting Occasions</span>
+                </div>
+                {activeCategory !== 'All' && (
+                  <button 
+                    className="sidebar-reset-btn"
+                    onClick={() => { handleCategoryChange('All'); setMobileSidebarOpen(false); }}
+                  >
+                    Reset
+                  </button>
+                )}
+              </div>
+
+              <nav className="sidebar-category-nav" ref={subcategoriesRef}>
+                {visibleCategories.map((cat) => {
+                  const isActive = activeCategory === cat.id;
+                  return (
+                    <div key={cat.id} className="sidebar-cat-group">
+                      <button
+                        onClick={() => {
+                          handleCategoryChange(cat.id);
+                          setMobileSidebarOpen(false);
+                        }}
+                        className={`sidebar-cat-btn ${isActive ? 'active' : ''}`}
+                      >
+                        <div className="sidebar-cat-left">
+                          {cat.id === 'All' ? (
+                            <i className="fa-solid fa-gem sidebar-gem-icon"></i>
+                          ) : (
+                            <span className="sidebar-cat-dot"></span>
+                          )}
+                          <span className="sidebar-cat-name">{cat.label}</span>
+                        </div>
+                        {categoryCounts[cat.id] !== undefined && (
+                          <span className="sidebar-cat-badge">{categoryCounts[cat.id]}</span>
+                        )}
+                      </button>
+
+                      {/* Nested Subcategories under active parent */}
+                      {isActive && activeSubcategoriesList.length > 0 && (
+                        <div className="sidebar-subcat-dropdown">
+                          {activeSubcategoriesList.map(subcat => {
+                            const isSubActive = activeSubcategory === subcat.id;
+                            return (
+                              <button
+                                key={subcat.id}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleSubcategoryChange(isSubActive ? null : subcat.id);
+                                  setMobileSidebarOpen(false);
+                                }}
+                                className={`sidebar-subcat-btn ${isSubActive ? 'active' : ''}`}
+                              >
+                                <i className={`fa-${isSubActive ? 'solid fa-circle-check' : 'regular fa-circle'}`}></i>
+                                <span>{subcat.label}</span>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </nav>
+            </div>
+          </aside>
+
+          {/* RIGHT MAIN PANEL */}
+          <div className="collections-main-panel">
+            {/* === UNIFIED SEARCH + COUNTER + SORT BAR === */}
+            <div className="filter-bar-unified reveal" ref={productsGridRef}>
+              <div className="search-input-wrapper-unified">
+                <i className="fa-solid fa-magnifying-glass search-icon"></i>
+                <input
+                  type="text"
+                  placeholder="Search hampers, occasions, gifts..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+                {searchQuery && (
+                  <button
+                    className="clear-search-btn-unified"
+                    onClick={() => { setSearchQuery(''); setActiveSubcategory(null); }}
+                    title="Clear search"
+                  >
+                    ✕
+                  </button>
+                )}
+              </div>
+
+              <div className="filter-counter-unified">
+                Showing <strong>{displayedProducts.length}</strong> of <strong>{filteredProducts.length}</strong> Products
+              </div>
+
+              <div className="sort-wrapper-unified">
+                <span className="sort-label-text">Sort:</span>
+                <div className="sort-select-container">
+                  <select
+                    className="sort-select-unified"
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value)}
+                    aria-label="Sort products by"
+                  >
+                    <option value="featured">Featured Items</option>
+                    <option value="price-low">Price: Low to High</option>
+                    <option value="price-high">Price: High to Low</option>
+                    <option value="rating">Top Rated</option>
+                    <option value="name">Alphabetical (A-Z)</option>
+                  </select>
+                  <i className="fa-solid fa-chevron-down sort-chevron-icon"></i>
+                </div>
+              </div>
+            </div>
 
         {/* === PRODUCTS GRID === */}
-        {filteredProducts.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '5rem 0', color: '#888' }} className="reveal">
+        {productsLoading && filteredProducts.length === 0 ? (
+          <div style={{ textAlign: 'center', padding: '6rem 2rem', color: 'var(--color-purple)' }}>
+            <i className="fa-solid fa-spinner fa-spin" style={{ fontSize: '3rem', color: 'var(--color-gold)', marginBottom: '1.25rem' }}></i>
+            <h3 style={{ fontFamily: 'var(--font-heading)', color: 'var(--color-purple)' }}>Curating Luxury Hampers...</h3>
+            <p style={{ marginTop: '0.5rem', color: 'var(--color-gray-text)' }}>Fetching handcrafted collections for you.</p>
+          </div>
+        ) : filteredProducts.length === 0 ? (
+          <div style={{ textAlign: 'center', padding: '5rem 0', color: '#888' }} className="reveal active">
             <i className="fa-solid fa-magnifying-glass" style={{ fontSize: '3rem', color: 'var(--color-lavender-dark)', marginBottom: '1.5rem' }}></i>
             <h3>No products found</h3>
             <p style={{ marginTop: '0.5rem' }}>
@@ -541,135 +675,85 @@ export default function Collections() {
           </div>
         ) : (
           <>
-            <div className="collections-grid-4col reveal">
-              {paginatedProducts.map((product, idx) => (
+            <div className="collections-grid-4col reveal active">
+              {displayedProducts.map((product, idx) => (
                 <ProductCard
                   key={product.id}
                   product={product}
-                  animationDelay={(idx % 8) * 60}
+                  animationDelay={(idx % 6) * 50}
                 />
               ))}
             </div>
 
-            {/* Pagination Controls */}
-            {totalPages > 1 && (
-              <div className="reveal pagination-container" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', marginTop: '3rem', marginBottom: '1rem' }}>
-                {/* Prev Button */}
-                <button
-                  onClick={() => handlePageChange(currentPage - 1)}
-                  disabled={currentPage === 1}
-                  className="pagination-btn-prev"
-                  style={{
-                    padding: '8px 16px',
-                    border: '1px solid var(--color-beige)',
-                    background: currentPage === 1 ? '#F8F9FA' : 'var(--color-white)',
-                    color: currentPage === 1 ? '#ADB5BD' : 'var(--color-purple-dark)',
-                    borderRadius: '8px',
-                    cursor: currentPage === 1 ? 'not-allowed' : 'pointer',
-                    fontWeight: 600,
-                    fontSize: '0.85rem',
-                    transition: 'all 0.2s ease',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '6px'
-                  }}
-                >
-                  <i className="fa-solid fa-chevron-left"></i> Previous
-                </button>
-
-                {/* Page Numbers */}
-                <div className="pagination-numbers-desktop" style={{ display: 'flex', gap: '8px' }}>
-                  {Array.from({ length: totalPages }).map((_, idx) => {
-                    const pageNum = idx + 1;
-                    const isActive = currentPage === pageNum;
-                    return (
-                      <button
-                        key={pageNum}
-                        onClick={() => handlePageChange(pageNum)}
-                        style={{
-                          width: '38px',
-                          height: '38px',
-                          border: isActive ? 'none' : '1px solid var(--color-beige)',
-                          background: isActive ? 'var(--gold-gradient)' : 'var(--color-white)',
-                          color: isActive ? 'var(--color-white)' : 'var(--color-purple-dark)',
-                          borderRadius: '8px',
-                          cursor: 'pointer',
-                          fontWeight: 600,
-                          fontSize: '0.85rem',
-                          transition: 'all 0.2s ease',
-                          boxShadow: isActive ? 'var(--shadow-gold)' : 'none'
-                        }}
-                      >
-                        {pageNum}
-                      </button>
-                    );
-                  })}
+            {/* === INFINITE SCROLL / PAGE SCROLLER LOADER === */}
+            {hasMore && (
+              <div ref={loaderSentinelRef} className="scrolling-loader-sentinel">
+                <div className="scrolling-loader-card">
+                  <div className="scrolling-loader-spinner"></div>
+                  <p className="scrolling-loader-text">Loading more handcrafted hampers...</p>
+                  <span className="scrolling-loader-counter">
+                    {displayedProducts.length} of {filteredProducts.length} loaded
+                  </span>
                 </div>
+              </div>
+            )}
 
-                <div className="pagination-mobile-text" style={{ display: 'none', fontWeight: 600, color: 'var(--color-purple-dark)', fontSize: '0.9rem', padding: '0 10px' }}>
-                  Page {currentPage} of {totalPages}
+            {/* === ALL PRODUCTS VIEWED COMPLETION INDICATOR === */}
+            {!hasMore && filteredProducts.length > 0 && (
+              <div className="scrolling-completed-indicator">
+                <div className="scrolling-gem-badge">
+                  <i className="fa-solid fa-gem"></i>
                 </div>
-
-                {/* Next Button */}
-                <button
-                  onClick={() => handlePageChange(currentPage + 1)}
-                  disabled={currentPage === totalPages}
-                  className="pagination-btn-next"
-                  style={{
-                    padding: '8px 16px',
-                    border: '1px solid var(--color-beige)',
-                    background: currentPage === totalPages ? '#F8F9FA' : 'var(--color-white)',
-                    color: currentPage === totalPages ? '#ADB5BD' : 'var(--color-purple-dark)',
-                    borderRadius: '8px',
-                    cursor: currentPage === totalPages ? 'not-allowed' : 'pointer',
-                    fontWeight: 600,
-                    fontSize: '0.85rem',
-                    transition: 'all 0.2s ease',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '6px'
-                  }}
+                <h4>You've explored all {filteredProducts.length} curated hampers</h4>
+                <p>Looking for a custom bespoke creation? Reach out directly to our gifting atelier.</p>
+                <button 
+                  onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} 
+                  className="scrolling-back-to-top-btn"
                 >
-                  Next <i className="fa-solid fa-chevron-right"></i>
+                  <i className="fa-solid fa-arrow-up"></i> Back to Top
                 </button>
               </div>
             )}
           </>
         )}
+          </div> {/* closes collections-main-panel */}
+        </div>   {/* closes collections-layout-container */}
 
-        {/* SEO Related Keywords Grid Section */}
-        <div className="collections-seo-keywords-section" style={{ marginTop: '2.5rem', borderTop: '1px solid var(--color-beige)', paddingTop: '2.5rem' }}>
-          <h4 className="seo-keywords-title">Related Gifting Searches</h4>
-          <div className="seo-keywords-grid">
-            <div className="seo-keywords-col">
-              <h5>Occasions</h5>
-              <ul>
-                <li><button onClick={() => handleCategoryLabelChange('Wedding')} className="seo-keyword-link">Wedding Return Gifts Hyderabad</button></li>
-                <li><button onClick={() => handleCategoryLabelChange('Baby Shower')} className="seo-keyword-link">Premium Baby Shower Gift Curations</button></li>
-                <li><button onClick={() => handleCategoryLabelChange('Housewarming')} className="seo-keyword-link">Housewarming Ceremony Hampers</button></li>
-                <li><button onClick={() => handleCategoryLabelChange('Customized Hampers')} className="seo-keyword-link">Festival & Seasonal Gift Boxes</button></li>
-              </ul>
-            </div>
-            <div className="seo-keywords-col">
-              <h5>Gift Styles</h5>
-              <ul>
-                <li><button onClick={() => handleCategoryLabelChange('Brass Gifting')} className="seo-keyword-link">Traditional Brass Item Return Gifts</button></li>
-                <li><button onClick={() => handleCategoryLabelChange('Customized Hampers')} className="seo-keyword-link">Curated Luxury Dry Fruit Hampers</button></li>
-                <li><button onClick={() => handleCategoryLabelChange('Corporate Gifting')} className="seo-keyword-link">Premium Corporate Gift Sets</button></li>
-                <li><button onClick={() => handleCategoryLabelChange('Customized Hampers')} className="seo-keyword-link">Handmade Gourmet Gift Trays</button></li>
-              </ul>
-            </div>
-            <div className="seo-keywords-col">
-              <h5>Customization</h5>
-              <ul>
-                <li><button onClick={() => handleCategoryChange('All')} className="seo-keyword-link">Premium Ivory Lace Wrapping</button></li>
-                <li><button onClick={() => handleCategoryChange('All')} className="seo-keyword-link">Royal Purple Silk Box Covers</button></li>
-                <li><button onClick={() => handleCategoryChange('All')} className="seo-keyword-link">Personalized Gift Tags & Message Cards</button></li>
-                <li><button onClick={() => handleCategoryChange('Corporate')} className="seo-keyword-link">Bulk Order Corporate Hampers</button></li>
-              </ul>
+        {/* SEO Related Keywords Grid Section (Only shown after all products are explored) */}
+        {!hasMore && (
+          <div className="collections-seo-keywords-section" style={{ marginTop: '2.5rem', borderTop: '1px solid var(--color-beige)', paddingTop: '2.5rem' }}>
+            <h4 className="seo-keywords-title">Related Gifting Searches</h4>
+            <div className="seo-keywords-grid">
+              <div className="seo-keywords-col">
+                <h5>Occasions</h5>
+                <ul>
+                  <li><button onClick={() => handleCategoryLabelChange('Wedding')} className="seo-keyword-link">Wedding Return Gifts Hyderabad</button></li>
+                  <li><button onClick={() => handleCategoryLabelChange('Baby Shower')} className="seo-keyword-link">Premium Baby Shower Gift Curations</button></li>
+                  <li><button onClick={() => handleCategoryLabelChange('Housewarming')} className="seo-keyword-link">Housewarming Ceremony Hampers</button></li>
+                  <li><button onClick={() => handleCategoryLabelChange('Customized Hampers')} className="seo-keyword-link">Festival & Seasonal Gift Boxes</button></li>
+                </ul>
+              </div>
+              <div className="seo-keywords-col">
+                <h5>Gift Styles</h5>
+                <ul>
+                  <li><button onClick={() => handleCategoryLabelChange('Brass Gifting')} className="seo-keyword-link">Traditional Brass Item Return Gifts</button></li>
+                  <li><button onClick={() => handleCategoryLabelChange('Customized Hampers')} className="seo-keyword-link">Curated Luxury Dry Fruit Hampers</button></li>
+                  <li><button onClick={() => handleCategoryLabelChange('Corporate Gifting')} className="seo-keyword-link">Premium Corporate Gift Sets</button></li>
+                  <li><button onClick={() => handleCategoryLabelChange('Customized Hampers')} className="seo-keyword-link">Handmade Gourmet Gift Trays</button></li>
+                </ul>
+              </div>
+              <div className="seo-keywords-col">
+                <h5>Customization</h5>
+                <ul>
+                  <li><button onClick={() => handleCategoryChange('All')} className="seo-keyword-link">Premium Ivory Lace Wrapping</button></li>
+                  <li><button onClick={() => handleCategoryChange('All')} className="seo-keyword-link">Royal Purple Silk Box Covers</button></li>
+                  <li><button onClick={() => handleCategoryChange('All')} className="seo-keyword-link">Personalized Gift Tags & Message Cards</button></li>
+                  <li><button onClick={() => handleCategoryChange('Corporate')} className="seo-keyword-link">Bulk Order Corporate Hampers</button></li>
+                </ul>
+              </div>
             </div>
           </div>
-        </div>
+        )}
 
       </div>
     </div>

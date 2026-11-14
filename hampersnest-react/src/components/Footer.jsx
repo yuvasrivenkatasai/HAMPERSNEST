@@ -12,22 +12,17 @@ export default function Footer() {
   };
 
   return (
-    <footer>
+    <footer id="footer">
       <div className="container footer-grid">
         {/* About column */}
         <div className="footer-col">
-          <div style={{ marginBottom: '1.5rem' }}>
-            <Link to="/" style={{ textDecoration: 'none' }}>
-              <h2 style={{ 
-                color: 'var(--color-gold)', 
-                fontSize: '2rem', 
-                fontWeight: '700', 
-                letterSpacing: '2px', 
-                margin: '0',
-                textTransform: 'uppercase'
-              }}>
-                {settings?.storeName?.toUpperCase() || 'HAMPERS NEST'}
-              </h2>
+          <div style={{ marginBottom: '1.25rem' }}>
+            <Link to="/" className="footer-logo" onClick={() => window.scrollTo(0, 0)} aria-label="Hampers Nest Home">
+              <img 
+                src="/assets/Logo-light.svg" 
+                alt={`${settings?.storeName || 'Hampers Nest'} Logo`} 
+                className="footer-logo-img"
+              />
             </Link>
           </div>
           <p className="footer-about-text">

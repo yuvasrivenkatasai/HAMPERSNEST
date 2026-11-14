@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useCurrency } from '../context/CurrencyContext';
-import ProductCard from './ProductCard';
+import ProductCard, { getDisplayCategory } from './ProductCard';
 import PremiumProductGallery from './PremiumProductGallery';
 import WishlistButton from './WishlistButton';
 import { API_BASE } from '../config.js';
@@ -54,8 +54,8 @@ export default function ProductDetailTemplate({ product, displayRelated = [] }) 
   const [selectedAddOns, setSelectedAddOns] = useState([]);
   const [addonsApplied, setAddonsApplied] = useState(false);
 
-  // Accordion State
-  const [activeAccordion, setActiveAccordion] = useState(null);
+  // Accordion State - Default to 'description' open as requested
+  const [activeAccordion, setActiveAccordion] = useState('description');
 
   const toggleAccordion = (section) => {
     setActiveAccordion(prev => (prev === section ? null : section));
@@ -72,6 +72,7 @@ export default function ProductDetailTemplate({ product, displayRelated = [] }) 
     setSelectedAddOns([]);
     setPendingAddOns([]);
     setAddonsApplied(false);
+    setActiveAccordion('description');
     
     if (product?.variantsEnabled && Array.isArray(product?.variants) && product.variants.length > 0) {
       setSelectedVariant(product.variants.find(v => v.isDefault) || product.variants[0]);
@@ -118,6 +119,21 @@ export default function ProductDetailTemplate({ product, displayRelated = [] }) 
     setQuoteModalOpen(true);
   };
 
+  const handleWhatsAppEventQuote = () => {
+    const rawNumber = settings?.whatsappNumber || settings?.ownerContactNumber || '917989202194';
+    const cleanNumber = rawNumber.replace(/\D/g, '');
+
+    const tagText = giftTag ? `\n• Gift Tag Note: "${giftTag}"` : '';
+    const addonText = selectedAddOns && selectedAddOns.length > 0 
+      ? `\n• Selected Add-ons: ${selectedAddOns.map(a => a.name).join(', ')}` 
+      : '';
+    const variantText = selectedVariant ? `\n• Variant: ${selectedVariant.name}` : '';
+
+    const message = `Hi ${settings?.storeName || 'Hampers Nest'}!\n\nI am planning a Return Gift / Event order:\n\n*Product:* ${product.name}\n*Quantity:* ${quantity} pieces (Return Gift Order)\n*Unit Price:* ${formatPrice(unitPrice)}${variantText}${tagText}${addonText}\n*Estimated Total:* ${formatPrice(unitPrice * quantity)}\n\nPlease share delivery confirmation, bulk pricing, and custom gift card design proof.\n\nThank you!`;
+
+    window.open(`https://wa.me/${cleanNumber}?text=${encodeURIComponent(message)}`, '_blank');
+  };
+
   return (
     <>
       {/* Breadcrumbs & Smart Back Navigation */}
@@ -162,7 +178,7 @@ export default function ProductDetailTemplate({ product, displayRelated = [] }) 
           
           {/* MOBILE ONLY HEADER */}
           <div className="product-header-block mobile-only" style={{ marginBottom: '-1rem' }}>
-            <span className="product-category-tag">{(product.subcategoryName || product.categoryName || settings?.categories?.find(c => c.id === product.subCategory)?.label || settings?.categories?.find(c => c.id === product.category)?.label || product.category)} Collection</span>
+            <span className="product-category-tag">{getDisplayCategory(product)} Collection</span>
             <h1 className="product-detail-title">{product.name}</h1>
             
             <div className="product-rating-row">
@@ -189,7 +205,7 @@ export default function ProductDetailTemplate({ product, displayRelated = [] }) 
             <div className="product-header-block">
               {/* Desktop Only Title & Rating (Hidden on mobile) */}
               <div className="desktop-only">
-                <span className="product-category-tag">{(product.subcategoryName || product.categoryName || settings?.categories?.find(c => c.id === product.subCategory)?.label || settings?.categories?.find(c => c.id === product.category)?.label || product.category)} Collection</span>
+                <span className="product-category-tag">{getDisplayCategory(product)} Collection</span>
               <h1 className="product-detail-title">{product.name}</h1>
               
               <div className="product-rating-row">
@@ -401,7 +417,7 @@ export default function ProductDetailTemplate({ product, displayRelated = [] }) 
                           )}
                           <i className="fa-solid fa-gift" style={{ color: 'var(--color-gold)', marginBottom: '4px', fontSize: '1.1rem' }}></i>
                           <span style={{ fontSize: '0.85rem', fontWeight: isSelected ? '600' : '500', marginBottom: '2px' }}>{variant.name}</span>
-                          <span style={{ fontSize: '0.8rem', color: isSelected ? 'var(--color-gold-dark)' : '#666', fontWeight: '500' }}>₹{variant.price}</span>
+                          <span style={{ fontSize: '0.8rem', color: isSelected ? 'var(--color-gold-dark)' : '#666', fontWeight: '500' }}>{formatPrice(variant.price)}</span>
                         </button>
                       );
                     })}
@@ -461,64 +477,67 @@ export default function ProductDetailTemplate({ product, displayRelated = [] }) 
 
 
 
-              {/* 3. Quantity Selector and Purchase Actions */}
-              <div className="action-row-buying" style={{ display: 'flex', gap: '10px', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap' }}>
-                
-                {/* Editable Quantity Container */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  <div className="qty-picker-detail" style={{ height: '48px', flexShrink: 0, display: 'flex' }}>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        const newQ = Math.max(MIN_ORDER_QUANTITY, quantity - 1);
-                        setQuantity(newQ);
-                        setQtyInputText(newQ.toString());
-                      }}
-                      disabled={effectiveStock === 0 || quantity <= MIN_ORDER_QUANTITY}
-                      aria-label="Decrease quantity"
-                    >
-                      <i className="fa-solid fa-minus"></i>
-                    </button>
-                    <input
-                      type="text"
-                      className="qty-value-input"
-                      value={effectiveStock === 0 ? 0 : qtyInputText}
-                      onChange={(e) => {
-                        const res = validateQuantityInput(e.target.value);
-                        if (res.isValid) {
-                          setQtyInputText(res.value.toString());
-                          if (res.value !== '') setQuantity(res.value);
-                        }
-                      }}
-                      onBlur={() => {
-                        const sanitized = sanitizeQuantityOnBlur(qtyInputText);
-                        setQuantity(sanitized);
-                        setQtyInputText(sanitized.toString());
-                      }}
-                      disabled={effectiveStock === 0}
-                      style={{ 
-                        width: '50px', textAlign: 'center', border: 'none', background: 'transparent',
-                        fontWeight: '600', fontSize: '1rem', color: 'var(--color-charcoal)', padding: '0 8px'
-                      }}
-                    />
-                    <button
-                      type="button"
-                      onClick={() => {
-                        const newQ = quantity + 1;
-                        if (newQ <= effectiveStock) {
+              {/* 3. Quantity Selector and Stepper */}
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap', marginTop: '0.5rem', marginBottom: '0.75rem' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--color-purple-dark)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                      Quantity:
+                    </span>
+                    <div className="qty-picker-detail" style={{ height: '42px', flexShrink: 0, display: 'flex' }}>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const newQ = Math.max(MIN_ORDER_QUANTITY, quantity - 1);
                           setQuantity(newQ);
                           setQtyInputText(newQ.toString());
-                        }
-                      }}
-                      disabled={effectiveStock === 0 || quantity >= effectiveStock}
-                      aria-label="Increase quantity"
-                    >
-                      <i className="fa-solid fa-plus"></i>
-                    </button>
+                        }}
+                        disabled={effectiveStock === 0 || quantity <= MIN_ORDER_QUANTITY}
+                        aria-label="Decrease quantity"
+                      >
+                        <i className="fa-solid fa-minus"></i>
+                      </button>
+                      <input
+                        type="text"
+                        className="qty-value-input"
+                        value={effectiveStock === 0 ? 0 : qtyInputText}
+                        onChange={(e) => {
+                          const res = validateQuantityInput(e.target.value);
+                          if (res.isValid) {
+                            setQtyInputText(res.value.toString());
+                            if (res.value !== '') setQuantity(res.value);
+                          }
+                        }}
+                        onBlur={() => {
+                          const sanitized = sanitizeQuantityOnBlur(qtyInputText);
+                          setQuantity(sanitized);
+                          setQtyInputText(sanitized.toString());
+                        }}
+                        disabled={effectiveStock === 0}
+                        style={{ 
+                          width: '50px', textAlign: 'center', border: 'none', background: 'transparent',
+                          fontWeight: '600', fontSize: '1rem', color: 'var(--color-charcoal)', padding: '0 8px'
+                        }}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const newQ = quantity + 1;
+                          if (newQ <= effectiveStock) {
+                            setQuantity(newQ);
+                            setQtyInputText(newQ.toString());
+                          }
+                        }}
+                        disabled={effectiveStock === 0 || quantity >= effectiveStock}
+                        aria-label="Increase quantity"
+                      >
+                        <i className="fa-solid fa-plus"></i>
+                      </button>
+                    </div>
                   </div>
                   
                   {/* Quick QTY Buttons */}
-                  <div style={{ display: 'flex', gap: '4px' }}>
+                  <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
                     {QUICK_QTYS.map((q) => (
                        <button
                          key={q}
@@ -531,8 +550,11 @@ export default function ProductDetailTemplate({ product, displayRelated = [] }) 
                          }}
                          disabled={effectiveStock === 0 || q > effectiveStock}
                          style={{
-                           padding: '2px 8px', fontSize: '0.75rem', borderRadius: '4px',
-                           border: '1px solid #e2e8f0', background: '#f8fafc', color: '#64748b',
+                           padding: '2px 8px', fontSize: '0.72rem', borderRadius: '4px',
+                           border: quantity === q ? '1px solid var(--color-purple)' : '1px solid #e2e8f0', 
+                           background: quantity === q ? 'var(--color-lavender)' : '#f8fafc', 
+                           color: quantity === q ? 'var(--color-purple-dark)' : '#64748b',
+                           fontWeight: quantity === q ? '600' : '400',
                            cursor: (effectiveStock === 0 || q > effectiveStock) ? 'not-allowed' : 'pointer'
                          }}
                        >
@@ -542,31 +564,66 @@ export default function ProductDetailTemplate({ product, displayRelated = [] }) 
                   </div>
                 </div>
 
+                <WishlistButton productId={product.id} style={{ width: '42px', height: '42px', flexShrink: 0 }} />
+              </div>
+
+              {/* Purchase Actions (Add to Cart + 1-Click WhatsApp Event Quote) */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))', gap: '10px', marginTop: '0.5rem', marginBottom: '0.75rem' }}>
                 <button
                   type="button"
                   onClick={handleAddToBasket}
                   disabled={effectiveStock === 0}
                   className="btn btn-primary buy-btn-cart"
                   style={{ 
-                    flex: 1, 
                     height: '48px', 
-                    padding: 0, 
-                    minWidth: '150px',
-                    background: effectiveStock === 0 ? '#CBD5E1' : 'var(--gold-gradient)',
-                    borderColor: effectiveStock === 0 ? '#CBD5E1' : 'var(--color-gold)',
+                    padding: '0 1rem',
+                    background: effectiveStock === 0 ? '#CBD5E1' : 'var(--color-purple-dark)',
+                    borderColor: effectiveStock === 0 ? '#CBD5E1' : 'var(--color-purple-dark)',
                     color: effectiveStock === 0 ? '#64748B' : 'var(--color-white)',
                     cursor: effectiveStock === 0 ? 'not-allowed' : 'pointer',
-                    boxShadow: effectiveStock === 0 ? 'none' : 'var(--shadow-gold)'
+                    boxShadow: effectiveStock === 0 ? 'none' : '0 4px 14px rgba(74, 29, 95, 0.2)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '8px',
+                    fontWeight: 600,
+                    borderRadius: '8px'
                   }}
                 >
                   {effectiveStock === 0 ? (
                     'Out of Stock'
                   ) : (
-                    <>Add To Cart <i className="fa-solid fa-cart-shopping" style={{ marginLeft: '6px' }}></i></>
+                    <>Add To Cart <i className="fa-solid fa-cart-shopping"></i></>
                   )}
                 </button>
 
-                <WishlistButton productId={product.id} style={{ width: '48px', height: '48px', flexShrink: 0 }} />
+                <button
+                  type="button"
+                  onClick={handleWhatsAppEventQuote}
+                  className="btn-whatsapp-event-quote"
+                  style={{
+                    height: '48px',
+                    padding: '0 1rem',
+                    background: '#25D366',
+                    border: '1px solid #1EBE5D',
+                    borderRadius: '8px',
+                    color: '#ffffff',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '10px',
+                    boxShadow: '0 4px 14px rgba(37, 211, 102, 0.25)',
+                    transition: 'all 0.2s ease'
+                  }}
+                  title="Order return gifts for 50-200 pcs directly on WhatsApp"
+                >
+                  <i className="fa-brands fa-whatsapp" style={{ fontSize: '1.35rem' }}></i>
+                  <span style={{ textAlign: 'left', lineHeight: '1.15' }}>
+                    <span style={{ display: 'block', fontSize: '0.65rem', textTransform: 'uppercase', letterSpacing: '0.5px', opacity: 0.9, fontWeight: 600 }}>Return Gifts (50-200 pcs)</span>
+                    <span style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700 }}>WhatsApp Event Quote</span>
+                  </span>
+                </button>
               </div>
 
               </div>
@@ -590,7 +647,13 @@ export default function ProductDetailTemplate({ product, displayRelated = [] }) 
               <div className="product-accordion-content-inner">
                 {activeAccordion === 'description' && (
                   <div className="product-description-text" style={{ fontSize: '0.9rem', color: '#4b5563', lineHeight: '1.6' }}>
-                    <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(product.description || '') }} />
+                    {product.description ? (
+                      <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(product.description) }} />
+                    ) : (
+                      <p style={{ margin: 0, color: '#555', lineHeight: '1.6' }}>
+                        Curated handcrafted gift hamper from our <strong>{getDisplayCategory(product)}</strong> collection. Thoughtfully designed with luxury packaging and personalized accents, ideal for wedding return gifts, Gruhapravesam favors, and festive celebrations.
+                      </p>
+                    )}
                     
                     {product.highlights && (
                       <div style={{ marginTop: '16px' }}>
@@ -812,7 +875,7 @@ export default function ProductDetailTemplate({ product, displayRelated = [] }) 
                           type="button"
                           onClick={handleRequestCustomization}
                           className="modal-customize-btn"
-                          style={{ width: '100%', paddingTop: '14px', paddingBottom: '14px', fontSize: '0.95rem', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', border: 'none', background: 'var(--gold-gradient)', color: '#fff', fontWeight: 600, cursor: 'pointer' }}
+                          style={{ width: '100%', paddingTop: '14px', paddingBottom: '14px', fontSize: '0.95rem', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', border: '1px solid rgba(200, 169, 107, 0.35)', background: 'var(--color-purple-dark)', color: '#fff', fontWeight: 600, cursor: 'pointer', boxShadow: '0 4px 14px rgba(74, 29, 95, 0.2)' }}
                         >
                           <i className="fa-solid fa-wand-magic-sparkles"></i> Request Customization
                         </button>

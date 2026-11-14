@@ -37,6 +37,7 @@ export const CartProvider = ({ children }) => {
   });
 
   const [products, setProducts] = useState([]);
+  const [productsLoading, setProductsLoading] = useState(true);
   const [cartOpen, setCartOpen] = useState(false);
   const [inquiryOpen, setInquiryOpen] = useState(false);
   const [quoteModalOpen, setQuoteModalOpen] = useState(false);
@@ -67,6 +68,8 @@ export const CartProvider = ({ children }) => {
         }
       } catch (err) {
         console.warn('Backend products API offline:', err);
+      } finally {
+        setProductsLoading(false);
       }
     };
 
@@ -416,6 +419,7 @@ export const CartProvider = ({ children }) => {
     <CartContext.Provider
       value={{
         products,
+        productsLoading,
         cart,
         wishlist,
         cartOpen,

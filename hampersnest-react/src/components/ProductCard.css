@@ -1,0 +1,413 @@
+/* ========================================================
+   HampersNest — Option B (Modern Gifter) Product Card Styles
+   ======================================================== */
+
+/* Guarantee 3 cards per row across all collection grids on Desktop */
+.collections-grid-4col,
+.shop-collections-grid,
+.collections-grid {
+  display: grid !important;
+  grid-template-columns: repeat(3, 1fr) !important;
+  gap: 1.5rem !important;
+  align-items: stretch !important;
+}
+
+@media (min-width: 768px) and (max-width: 1024px) {
+  .collections-grid-4col,
+  .shop-collections-grid,
+  .collections-grid {
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 1.2rem !important;
+    align-items: stretch !important;
+  }
+}
+
+@media (max-width: 767px) {
+  .collections-grid-4col,
+  .shop-collections-grid,
+  .collections-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 0.8rem !important;
+    align-items: stretch !important;
+  }
+}
+
+.collection-card.product-card-modern {
+  background: var(--color-white, #ffffff);
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid rgba(74, 29, 95, 0.08);
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.04);
+  transition: all 0.35s cubic-bezier(0.165, 0.84, 0.44, 1);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.collection-card.product-card-modern:hover {
+  transform: translateY(-4px);
+  border-color: rgba(200, 169, 107, 0.45);
+  box-shadow: 0 14px 32px rgba(74, 29, 95, 0.12);
+}
+
+/* Image Container */
+.product-card-modern .card-img-wrapper {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  overflow: hidden;
+  background-color: #f7f6f4;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.product-card-modern .card-media-carousel {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.product-card-modern .card-carousel-slide {
+  min-width: 100%;
+  height: 100%;
+}
+
+.product-card-modern .card-carousel-slide img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+  transition: transform 0.5s ease;
+}
+
+.product-card-modern:hover .card-carousel-slide img {
+  transform: scale(1.03);
+}
+
+/* Badges Dock - Top Left */
+.product-card-modern .card-badges-dock {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 5px;
+  z-index: 10;
+  pointer-events: none;
+}
+
+.product-card-modern .card-badge {
+  font-family: var(--font-sans);
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  line-height: 1;
+}
+
+.product-card-modern .card-badge.bestseller {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 0.64rem;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  padding: 4px 8px;
+  box-shadow: 0 2px 6px rgba(217, 119, 6, 0.35);
+}
+
+.product-card-modern .card-badge.customizable {
+  background: rgba(255, 255, 255, 0.94);
+  color: var(--color-purple, #4A1D5F);
+  border: 1px solid rgba(194, 176, 211, 0.7);
+  backdrop-filter: blur(4px);
+  font-weight: 600;
+  font-size: 0.64rem;
+  padding: 3px 8px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+/* Carousel Interactive Dots */
+.product-card-modern .card-carousel-dots {
+  position: absolute;
+  bottom: 10px;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  z-index: 10;
+  pointer-events: auto;
+}
+
+.product-card-modern .card-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.65);
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+}
+
+.product-card-modern .card-dot.active {
+  background: #ffffff;
+  transform: scale(1.35);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+}
+
+/* Card Content Area */
+.product-card-modern .card-content {
+  padding: 14px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  flex-grow: 1 !important;
+  justify-content: space-between !important;
+  background: var(--color-white, #ffffff);
+}
+
+/* Header Row: Category, Rating Pill & Stock */
+.product-card-modern .card-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  margin-bottom: 4px;
+}
+
+.product-card-modern .card-category-tag {
+  font-family: var(--font-sans);
+  font-size: 0.68rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: #78716c;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 58%;
+}
+
+/* Header Pill Rating (Prepared for future ratings) */
+.product-card-modern .card-header-rating-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: #fffbeb;
+  color: #92400e;
+  border: 1px solid #fde68a;
+  font-size: 0.68rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.product-card-modern .card-header-rating-pill i {
+  color: #f59e0b;
+  font-size: 0.62rem;
+}
+
+.product-card-modern .card-header-rating-pill .rating-count {
+  color: #78716c;
+  font-weight: 500;
+  font-size: 0.62rem;
+}
+
+.product-card-modern .card-availability-badge {
+  font-family: var(--font-sans);
+  font-size: 0.65rem;
+  font-weight: 600;
+  padding: 1px 6px;
+  border-radius: 4px;
+  line-height: 1.2;
+}
+
+.product-card-modern .card-availability-badge.in-stock {
+  color: #059669;
+  background: #ecfdf5;
+}
+
+.product-card-modern .card-availability-badge.out-of-stock {
+  color: #dc2626;
+  background: #fef2f2;
+}
+
+/* Title */
+.product-card-modern .card-title {
+  font-family: var(--font-serif) !important;
+  font-size: 1.05rem !important;
+  font-weight: 600 !important;
+  color: var(--color-purple-dark, #3A1649) !important;
+  line-height: 1.35 !important;
+  margin: 2px 0 6px 0 !important;
+  cursor: pointer;
+  display: -webkit-box !important;
+  -webkit-line-clamp: 2 !important;
+  line-clamp: 2 !important;
+  -webkit-box-orient: vertical !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  transition: color 0.2s ease;
+}
+
+.product-card-modern .card-title:hover {
+  color: var(--color-purple, #4A1D5F) !important;
+}
+
+/* Feature Chips */
+.product-card-modern .card-feature-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-bottom: 6px;
+}
+
+.product-card-modern .card-chip {
+  font-family: var(--font-sans);
+  font-size: 0.65rem;
+  font-weight: 500;
+  background: #f5f5f4;
+  color: #57534e;
+  padding: 2px 7px;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+
+/* Price Row */
+.product-card-modern .card-price-row {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  margin-top: 4px;
+  margin-bottom: 4px;
+}
+
+.product-card-modern .card-price-current {
+  font-family: var(--font-serif);
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--color-purple-dark, #3A1649);
+}
+
+.product-card-modern .card-price-original {
+  font-family: var(--font-sans);
+  font-size: 0.78rem;
+  color: #a8a29e;
+  text-decoration: line-through;
+}
+
+.product-card-modern .card-price-discount {
+  font-family: var(--font-sans);
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: #ef4444;
+  text-transform: uppercase;
+}
+
+/* Split Action Footer */
+.product-card-modern .card-action-split {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 8px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.product-card-modern .btn-card-action {
+  height: 38px;
+  border-radius: 8px;
+  font-size: 0.76rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.22s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  text-align: center;
+  border: none;
+  outline: none;
+  text-decoration: none;
+  font-family: var(--font-sans);
+  padding: 0 8px;
+  white-space: nowrap;
+}
+
+.product-card-modern .btn-card-action.btn-personalize {
+  background: #f5f5f4;
+  color: #292524;
+  border: 1px solid #e7e5e4;
+}
+
+.product-card-modern .btn-card-action.btn-personalize:hover {
+  background: #e7e5e4;
+  color: #0c0a09;
+  border-color: #d6d3d1;
+}
+
+.product-card-modern .btn-card-action.btn-add-cart {
+  background: var(--color-purple, #4A1D5F);
+  color: #ffffff;
+  box-shadow: 0 2px 6px rgba(74, 29, 95, 0.18);
+}
+
+.product-card-modern .btn-card-action.btn-add-cart i {
+  color: var(--color-gold, #C8A96B);
+  font-size: 0.72rem;
+}
+
+.product-card-modern .btn-card-action.btn-add-cart:hover {
+  background: var(--color-purple-dark, #371347);
+  box-shadow: 0 4px 10px rgba(74, 29, 95, 0.28);
+  transform: translateY(-1px);
+}
+
+.product-card-modern .btn-card-action.disabled {
+  background: #e2e8f0;
+  color: #94a3b8;
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+  .collection-card.product-card-modern {
+    border-radius: 12px;
+  }
+
+  .product-card-modern .card-content {
+    padding: 10px 10px 12px !important;
+  }
+
+  .product-card-modern .card-title {
+    font-size: 0.95rem !important;
+    line-height: 1.3 !important;
+  }
+
+  .product-card-modern .card-price-current {
+    font-size: 1.05rem;
+  }
+
+  .product-card-modern .card-action-split {
+    gap: 6px;
+    padding-top: 8px;
+    margin-top: 6px;
+  }
+
+  .product-card-modern .btn-card-action {
+    height: 34px;
+    font-size: 0.72rem;
+    padding: 0 4px;
+  }
+}

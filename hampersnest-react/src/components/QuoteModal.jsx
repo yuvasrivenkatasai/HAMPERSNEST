@@ -17,11 +17,11 @@ const OCCASIONS = [
 ];
 
 const BUDGETS = [
-  'Under ₹250',
-  '₹250–₹500',
-  '₹500–₹1,000',
-  '₹1,000–₹2,000',
-  'Above ₹2,000',
+  'Under Rs. 250',
+  'Rs. 250–500',
+  'Rs. 500–1,000',
+  'Rs. 1,000–2,000',
+  'Above Rs. 2,000',
 ];
 
 const CUSTOMIZATION_OPTIONS = [

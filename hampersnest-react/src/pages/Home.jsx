@@ -79,8 +79,8 @@ export default function Home() {
     fetchTestimonials();
   }, []);
 
-  // Get first 8 featured products dynamically from context
-  const featuredProducts = (products || []).filter((p) => p.isFeatured).slice(0, 8);
+  // Get first 6 featured products dynamically from context (2 complete rows of 3)
+  const featuredProducts = (products || []).filter((p) => p.isFeatured).slice(0, 6);
 
   // Testimonial slider auto-slide
   useEffect(() => {
@@ -193,65 +193,189 @@ export default function Home() {
         keywords="wedding return gifts Hyderabad, customized gift hampers, baby shower gifts Hyderabad, brass items return gifts, corporate gift sets, luxury gifting Hyderabad, hampersnest, hamspersnest"
         schema={homeSchema}
       />
-      {/* LUXURY HERO */}
-      <section className="luxury-hero" id="hero">
-        <div className="hero-particles" aria-hidden="true">
-          {Array.from({ length: 8 }).map((_, idx) => (
-            <span key={idx} className="particle"></span>
-          ))}
+      {/* MASTER LUXURY ATELIER HERO */}
+      <section className="master-luxury-hero" id="hero">
+        {/* Main Hero Body Grid */}
+        <div className="atelier-hero-content">
+          <div className="atelier-hero-grid">
+            
+            {/* Left Column: The Grand Story & Concierge */}
+            <div className="atelier-hero-left">
+              <span className="atelier-pill">
+                <span className="atelier-pill-dot"></span>
+                Customized Return Gifts & Wedding Hampers
+              </span>
+
+              <h1 className="atelier-hero-title">
+                The Grand Art of <br />
+                <span className="atelier-hero-highlight">Return Gifting.</span>
+              </h1>
+
+              <p className="atelier-hero-subtitle">
+                {settings?.heroDescription || 'Sacred brass keepsakes, divine silver gifts, artisanal dry fruits, and handcrafted sweets — packed in luxury velvet trunks and personalized with your family’s initials.'}
+              </p>
+
+              {/* 3 Tactile Luxury Pillars (Real Craftsmanship Reassurance) */}
+              <div className="atelier-pillars-grid">
+                <div className="atelier-pillar-card">
+                  <div className="pillar-icon"><i className="fa-solid fa-wand-magic-sparkles"></i></div>
+                  <h4 className="pillar-title">Custom Branding</h4>
+                  <p className="pillar-desc">Laser-cut wooden tags & gold-foil monogramming</p>
+                </div>
+                
+                <div className="atelier-pillar-card">
+                  <div className="pillar-icon"><i className="fa-solid fa-om"></i></div>
+                  <h4 className="pillar-title">Pure Heirlooms</h4>
+                  <p className="pillar-desc">Traditional Tirupati brass lamps & silver deities</p>
+                </div>
+
+                <div className="atelier-pillar-card">
+                  <div className="pillar-icon"><i className="fa-solid fa-boxes-stacked"></i></div>
+                  <h4 className="pillar-title">50 to 500+ Scale</h4>
+                  <p className="pillar-desc">Fast Hyderabad mockups & all-India express delivery</p>
+                </div>
+              </div>
+
+              {/* High-Contrast Grand Action Buttons */}
+              <div className="atelier-cta-group">
+                <Link to="/collections" className="atelier-btn-primary">
+                  Explore 150+ Curations <i className="fa-solid fa-arrow-right"></i>
+                </Link>
+
+                <a href="#" onClick={openQuoteModal} className="atelier-btn-secondary">
+                  <i className="fa-brands fa-whatsapp"></i> WhatsApp Gifting Stylist
+                </a>
+              </div>
+
+              {/* Local Studio Anchor */}
+              <div className="atelier-studio-anchor">
+                <span className="live-status-dot"></span>
+                <span>Studio Open for Consultations in Hyderabad (10:00 AM – 7:00 PM)</span>
+              </div>
+            </div>
+
+            {/* Right Column: The Opulent Hamper Showcase Stage */}
+            <div className="atelier-hero-right">
+              
+              {/* Outer Gold Framing Container */}
+              <div className="hamper-showcase-card">
+                <div className="hamper-stage-frame">
+                  <img 
+                    src={heroBanner?.mainImage || "/assets/hero_banner.webp"} 
+                    alt="Grand Tirupati Brass Gift Hamper" 
+                    className="hamper-main-img"
+                    onClick={() => handleHeroClick(heroBanner?.destinations?.mainImage)}
+                    style={{ cursor: getHeroDestinationUrl(heroBanner?.destinations?.mainImage) ? 'pointer' : undefined }}
+                  />
+                  
+                  {/* Subtle Luxury Vignette */}
+                  <div className="hamper-stage-vignette"></div>
+
+                  {/* Realistic Gold Monogram Tag Overlay */}
+                  <div className="hamper-edition-tag">
+                    <span className="tag-eyebrow">Exclusive Edition</span>
+                    <span className="tag-title">The Tirupati Brass & Silver Box</span>
+                  </div>
+
+                  {/* Bottom Price & Feature Pill */}
+                  <div className="hamper-price-pill">
+                    <div>
+                      <span className="price-eyebrow">Starting From</span>
+                      <span className="price-amount">{formatPrice(500)} <span className="price-unit">/ box</span></span>
+                    </div>
+                    <div>
+                      <span className="feature-status">
+                        <i className="fa-solid fa-check"></i> Ready to Customize
+                      </span>
+                      <span className="order-min">Min. Order: 25 Units</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Secondary Thumbnails Bar underneath */}
+              <div className="hamper-thumbs-grid">
+                <div 
+                  className="hamper-thumb-item" 
+                  onClick={() => navigate('/collections?category=Wedding')}
+                  title="Explore Wedding Gifts"
+                >
+                  <img src={heroBanner?.floatingImageTop || "/assets/wedding_gift.webp"} alt="Wedding Gifts" />
+                  <div className="thumb-overlay">
+                    <span>Weddings</span>
+                  </div>
+                </div>
+                <div 
+                  className="hamper-thumb-item" 
+                  onClick={() => navigate('/collections?category=Housewarming')}
+                  title="Explore Housewarming Gifts"
+                >
+                  <img src={heroBanner?.floatingImageBottom || "/assets/brass_cup.webp"} alt="Housewarming Gifts" />
+                  <div className="thumb-overlay">
+                    <span>Housewarming</span>
+                  </div>
+                </div>
+                <div 
+                  className="hamper-thumb-item" 
+                  onClick={() => navigate('/collections?category=Baby%20Shower')}
+                  title="Explore Baby Shower Gifts"
+                >
+                  <img src="/assets/baby_shower.webp" alt="Baby Shower Favors" />
+                  <div className="thumb-overlay">
+                    <span>Baby Shower</span>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
+          </div>
         </div>
 
-        <div className="hero-inner">
-          {/* LEFT COLUMN: text content */}
-          <div className="hero-left">
-            <div className="hero-fade" style={{ '--delay': '0.2s' }}>
-              <h1 className="hero-headline">
-                {settings?.heroTitle || 'Premium Return Gifts & Customized Hampers'}
-              </h1>
-            </div>
-
-            <div className="hero-fade" style={{ '--delay': '0.4s' }}>
-              <p className="hero-desc">
-                {settings?.heroSubtitle || 'Wedding • Housewarming • Baby Shower • Corporate Gifting'}
-                <br />
-                <span style={{ fontSize: '0.9em', opacity: 0.9, display: 'inline-block', marginTop: '8px', whiteSpace: 'pre-line' }}>{settings?.heroDescription || 'Luxury gifting solutions crafted for every celebration.'}</span>
-              </p>
-            </div>
-
-            <div className="hero-cta hero-fade" style={{ '--delay': '0.6s' }}>
-              <Link to="/collections" className="btn-hero btn-hero-primary hero-shimmer-btn">
-                {settings?.heroButtonPrimary || 'Explore Collections'}
+        {/* Grand Occasion Quick-Jump Ribbon Directly Below */}
+        <div className="atelier-milestones-bar">
+          <div className="milestones-inner">
+            <div className="milestones-header">
+              <div>
+                <h3 className="milestones-title">Explore By Milestone Celebration</h3>
+                <p className="milestones-subtitle">Directly crafted for traditional South Indian & modern festive occasions</p>
+              </div>
+              <Link to="/collections" className="milestones-all-link">
+                View All Categories <i className="fa-solid fa-arrow-right"></i>
               </Link>
-              <a href="#" onClick={openQuoteModal} className="btn-hero btn-hero-secondary">
-                <i className="fa-brands fa-whatsapp"></i> {settings?.heroButtonSecondary || 'WhatsApp Consultation'}
-              </a>
             </div>
-          </div>
 
-          {/* RIGHT COLUMN: image block */}
-          <div className="hero-right">
-            <div className="hero-visual hero-fade" style={{ '--delay': '0.5s' }}>
-              <div className="hero-image-glow" aria-hidden="true"></div>
-              <div 
-                className="hero-image-frame"
-                onClick={() => handleHeroClick(heroBanner.destinations?.mainImage)}
-                style={{ cursor: getHeroDestinationUrl(heroBanner.destinations?.mainImage) ? 'pointer' : undefined }}
-              >
-                <img src={heroBanner.mainImage} alt="Premium luxury curated gift hamper by Hampers Nest" />
+            <div className="milestones-grid">
+              <div className="milestone-card" onClick={() => navigate('/collections?category=Wedding')}>
+                <div className="milestone-card-top">
+                  <span className="milestone-icon"><i className="fa-solid fa-crown"></i></span>
+                  <h4 className="milestone-name">Royal Weddings</h4>
+                </div>
+                <p className="milestone-desc">Brass deities, luxury dry fruit packaging with couple initials.</p>
               </div>
-              <div 
-                className="hero-product-card hero-product-wedding"
-                onClick={() => handleHeroClick(heroBanner.destinations?.floatingImageTop)}
-                style={{ cursor: getHeroDestinationUrl(heroBanner.destinations?.floatingImageTop) ? 'pointer' : undefined }}
-              >
-                <img src={heroBanner.floatingImageTop} alt="Elegant wedding hamper gift" />
+
+              <div className="milestone-card" onClick={() => navigate('/collections?category=Housewarming')}>
+                <div className="milestone-card-top">
+                  <span className="milestone-icon"><i className="fa-solid fa-house-chimney"></i></span>
+                  <h4 className="milestone-name">Gruhapravesam</h4>
+                </div>
+                <p className="milestone-desc">Auspicious brass lamps, kumkum holders & festive bell jars.</p>
               </div>
-              <div 
-                className="hero-product-card hero-product-brass"
-                onClick={() => handleHeroClick(heroBanner.destinations?.floatingImageBottom)}
-                style={{ cursor: getHeroDestinationUrl(heroBanner.destinations?.floatingImageBottom) ? 'pointer' : undefined }}
-              >
-                <img src={heroBanner.floatingImageBottom} alt="Handcrafted brass return gift" />
+
+              <div className="milestone-card" onClick={() => navigate('/collections?category=Baby%20Shower')}>
+                <div className="milestone-card-top">
+                  <span className="milestone-icon"><i className="fa-solid fa-baby-carriage"></i></span>
+                  <h4 className="milestone-name">Baby Shower</h4>
+                </div>
+                <p className="milestone-desc">Pastel keepsake boxes, silver coins, and joy celebration favors.</p>
+              </div>
+
+              <div className="milestone-card" onClick={() => navigate('/collections?category=Corporate%20Gifting')}>
+                <div className="milestone-card-top">
+                  <span className="milestone-icon"><i className="fa-solid fa-briefcase"></i></span>
+                  <h4 className="milestone-name">Corporate Gifting</h4>
+                </div>
+                <p className="milestone-desc">Executive gift hampers with custom corporate company logo embossing.</p>
               </div>
             </div>
           </div>
@@ -356,7 +480,7 @@ export default function Home() {
         </p>
 
         <div className="collections-grid-4col reveal active">
-          {products && products.slice(0, 4).map((product) => (
+          {products && products.slice(0, 6).map((product) => (
             <ProductCard key={product.id} product={product} />
           ))}
         </div>
@@ -490,8 +614,6 @@ export default function Home() {
           </div>
         </div>
       </section>
-
-      <SeoKeywordsSection />
     </div>
   );
 }
