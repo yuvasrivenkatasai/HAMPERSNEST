@@ -71,7 +71,7 @@ const ProductCard = memo(({ product, animationDelay = 0 }) => {
   } else {
     initialMedia = ['/assets/hero_banner.png'];
   }
-  
+
   const mediaList = initialMedia;
 
   const [activeIndex, setActiveIndex] = useState(0);
@@ -113,7 +113,7 @@ const ProductCard = memo(({ product, animationDelay = 0 }) => {
     if (mediaList.length <= 1) return;
     const touchEndX = e.changedTouches[0].clientX;
     const touchEndY = e.changedTouches[0].clientY;
-    
+
     // Prevent swipe on vertical scroll
     if (Math.abs(touchStartY.current - touchEndY) > 40) return;
 
@@ -151,22 +151,22 @@ const ProductCard = memo(({ product, animationDelay = 0 }) => {
     : [];
 
   return (
-    <div 
+    <div
       className="collection-card product-card-modern reveal-category active"
       style={{ animationDelay: `${animationDelay}ms` }}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
       {/* Media / Image Wrapper */}
-      <div 
-        className="card-img-wrapper" 
-        onClick={handleViewDetails} 
+      <div
+        className="card-img-wrapper"
+        onClick={handleViewDetails}
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
       >
         {/* Top Right: Wishlist Luxury Button */}
         <WishlistButton productId={product.id} absolute />
-        
+
         {/* Top Left: Badges Dock (Bestseller & Customizable) */}
         <div className="card-badges-dock">
           {(product.featured || product.isBestseller) && (
@@ -182,10 +182,10 @@ const ProductCard = memo(({ product, animationDelay = 0 }) => {
         </div>
 
         {/* Carousel Slides */}
-        <div 
-          className="card-media-carousel" 
-          style={{ 
-            transform: `translateX(-${activeIndex * 100}%)` 
+        <div
+          className="card-media-carousel"
+          style={{
+            transform: `translateX(-${activeIndex * 100}%)`
           }}
         >
           {mediaList.map((url, idx) => (
@@ -327,16 +327,8 @@ const ProductCard = memo(({ product, animationDelay = 0 }) => {
           </div>
         </div>
 
-        {/* Dual Bottom Actions: Personalize vs Add to Cart */}
+        {/* Dual Bottom Actions: Add to Cart (Top) & Personalize (Bottom) */}
         <div className="card-action-split">
-          <button
-            type="button"
-            onClick={handleViewDetails}
-            className="btn-card-action btn-personalize"
-          >
-            Personalize
-          </button>
-
           {product.stockQuantity === 0 ? (
             <button type="button" className="btn-card-action disabled" disabled>
               Out of Stock
@@ -350,6 +342,14 @@ const ProductCard = memo(({ product, animationDelay = 0 }) => {
               <i className="fa-solid fa-cart-shopping"></i> Add to Cart
             </button>
           )}
+
+          <button
+            type="button"
+            onClick={handleViewDetails}
+            className="btn-card-action btn-personalize"
+          >
+            Personalize
+          </button>
         </div>
       </div>
     </div>
