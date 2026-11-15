@@ -2793,7 +2793,6 @@ footer {
 }
 
 @media (max-width: 767px) {
-
   .footer-logo img,
   .footer-logo-img {
     height: clamp(30px, 7.5vw, 40px) !important;
@@ -2802,7 +2801,6 @@ footer {
 }
 
 @media (max-width: 360px) {
-
   .footer-logo img,
   .footer-logo-img {
     height: 28px !important;
@@ -3509,16 +3507,13 @@ footer {
   #header .nav-container {
     padding: 0 12px !important;
   }
-
   #header .logo-container {
     max-width: calc(100% - 124px) !important;
   }
-
   .logo-wrapper img {
     height: clamp(30px, 8vw, 38px) !important;
     max-width: 100% !important;
   }
-
   .footer-logo img,
   .footer-logo-img {
     height: clamp(30px, 7.5vw, 40px) !important;
@@ -3530,11 +3525,9 @@ footer {
   #header .nav-container {
     padding: 0 10px !important;
   }
-
   #header .logo-container {
     max-width: calc(100% - 118px) !important;
   }
-
   .logo-wrapper img {
     height: clamp(28px, 7.2vw, 34px) !important;
     max-width: 100% !important;
@@ -3545,27 +3538,22 @@ footer {
   #header .nav-container {
     padding: 0 8px !important;
   }
-
   #header .logo-container {
     max-width: calc(100% - 105px) !important;
   }
-
   .logo-wrapper img {
     height: 28px !important;
     max-width: 140px !important;
   }
-
   #header .header-actions {
     gap: 6px !important;
   }
-
   #header .nav-cart-btn,
   #header .mobile-menu-toggle {
     width: 32px !important;
     height: 32px !important;
     font-size: 0.95rem !important;
   }
-
   .footer-logo img,
   .footer-logo-img {
     height: 28px !important;
@@ -6797,41 +6785,45 @@ footer h4,
 /* ===========================================
    QUOTE MODAL — LEAD CAPTURE FORM
    =========================================== */
+/* ==========================================================================
+   QUOTE / WHATSAPP LEAD MODAL — Responsive & Luxury Bottom Sheet on Mobile
+   ========================================================================== */
 .quote-modal-backdrop {
   position: fixed;
   inset: 0;
   z-index: 9998;
-  background: rgba(20, 8, 40, 0.75);
+  background: rgba(20, 8, 40, 0.78);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
-  display: block;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   overflow-y: auto;
   padding: 40px 16px;
-  animation: quoteFadeIn 0.3s ease forwards;
+  animation: quoteFadeIn 0.25s ease forwards;
 }
 
 @keyframes quoteFadeIn {
-  from {
-    opacity: 0;
-  }
-
-  to {
-    opacity: 1;
-  }
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 .quote-modal-container {
-  background: var(--color-ivory);
+  background: var(--color-ivory, #FAF7F3);
   border-radius: 20px;
   box-shadow:
-    0 30px 80px rgba(74, 29, 95, 0.25),
-    0 0 0 1px rgba(200, 169, 107, 0.15);
-  max-width: 680px;
+    0 30px 80px rgba(74, 29, 95, 0.3),
+    0 0 0 1px rgba(200, 169, 107, 0.2);
+  max-width: 660px;
   width: 100%;
   position: relative;
-  padding: 2.5rem 2rem 2rem;
-  margin: 0 auto;
-  animation: quoteSlideUp 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+  padding: 2.2rem 2rem 2rem;
+  margin: auto;
+  animation: quoteSlideUp 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+.quote-modal-drag-handle {
+  display: none;
 }
 
 .quote-modal-container::-webkit-scrollbar {
@@ -6839,16 +6831,15 @@ footer h4,
 }
 
 .quote-modal-container::-webkit-scrollbar-thumb {
-  background: var(--color-lavender-dark);
+  background: var(--color-lavender-dark, #C4B5FD);
   border-radius: 10px;
 }
 
 @keyframes quoteSlideUp {
   from {
     opacity: 0;
-    transform: translateY(30px) scale(0.97);
+    transform: translateY(24px) scale(0.98);
   }
-
   to {
     opacity: 1;
     transform: translateY(0) scale(1);
@@ -6859,51 +6850,54 @@ footer h4,
   position: absolute;
   top: 16px;
   right: 16px;
-  width: 36px;
-  height: 36px;
+  width: 38px;
+  height: 38px;
   border-radius: 50%;
-  border: 1px solid var(--color-beige);
-  background: var(--color-white);
-  color: var(--color-purple);
+  border: 1px solid rgba(200, 169, 107, 0.3);
+  background: var(--color-white, #ffffff);
+  color: var(--color-purple, #4A1D5F);
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.9rem;
-  transition: var(--transition-fast);
+  font-size: 1rem;
+  transition: all 0.2s ease;
   z-index: 10;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
 .quote-modal-close:hover {
-  background: var(--color-purple);
-  color: var(--color-white);
-  border-color: var(--color-purple);
+  background: var(--color-purple, #4A1D5F);
+  color: var(--color-white, #ffffff);
+  border-color: var(--color-purple, #4A1D5F);
+  transform: rotate(90deg);
 }
 
 .quote-modal-header {
   text-align: center;
-  margin-bottom: 2rem;
+  margin-bottom: 1.6rem;
 }
 
 .quote-modal-icon {
-  font-size: 2.4rem;
-  margin-bottom: 0.5rem;
+  font-size: 2.2rem;
+  margin-bottom: 0.4rem;
   line-height: 1;
 }
 
 .quote-modal-title {
-  font-size: 1.5rem;
-  font-weight: 600;
-  color: var(--color-purple);
-  margin-bottom: 0.6rem;
+  font-family: var(--font-serif, Georgia, serif);
+  font-size: 1.45rem;
+  font-weight: 700;
+  color: var(--color-purple-dark, #3A1649);
+  margin-bottom: 0.4rem;
   line-height: 1.25;
 }
 
 .quote-modal-subtitle {
   font-size: 0.85rem;
   color: #666;
-  line-height: 1.6;
-  max-width: 460px;
+  line-height: 1.5;
+  max-width: 480px;
   margin: 0 auto;
 }
 
@@ -6919,25 +6913,19 @@ footer h4,
   gap: 1rem;
 }
 
-@media (max-width: 540px) {
-  .quote-form-row {
-    grid-template-columns: 1fr;
-  }
-}
-
 .quote-form-group {
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: 6px;
   position: relative;
 }
 
 .quote-label {
   font-size: 0.75rem;
-  font-weight: 600;
-  color: var(--color-purple);
+  font-weight: 700;
+  color: var(--color-purple-dark, #3A1649);
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.6px;
 }
 
 .quote-required {
@@ -6945,7 +6933,7 @@ footer h4,
 }
 
 .quote-optional {
-  color: #999;
+  color: #888;
   font-weight: 400;
   text-transform: none;
   letter-spacing: 0;
@@ -6955,22 +6943,23 @@ footer h4,
 .quote-select,
 .quote-textarea {
   width: 100%;
-  padding: 0.65rem 0.9rem;
-  border: 1.5px solid var(--color-beige);
+  padding: 0.75rem 0.95rem;
+  border: 1.5px solid #E5DFD5;
   border-radius: 10px;
   font-family: var(--font-sans);
-  font-size: 0.85rem;
-  color: var(--color-charcoal);
-  background: var(--color-white);
+  font-size: 0.9rem;
+  color: var(--color-charcoal, #292524);
+  background: var(--color-white, #ffffff);
   outline: none;
   transition: border-color 0.2s, box-shadow 0.2s;
+  box-sizing: border-box;
 }
 
 .quote-input:focus,
 .quote-select:focus,
 .quote-textarea:focus {
-  border-color: var(--color-gold);
-  box-shadow: 0 0 0 3px rgba(200, 169, 107, 0.12);
+  border-color: var(--color-gold, #C8A96B);
+  box-shadow: 0 0 0 3px rgba(200, 169, 107, 0.15);
 }
 
 .quote-input.error,
@@ -6981,122 +6970,72 @@ footer h4,
 
 .quote-textarea {
   resize: vertical;
-  min-height: 80px;
+  min-height: 75px;
 }
 
 .quote-error {
   color: #e24e4e;
-  font-size: 0.7rem;
+  font-size: 0.72rem;
   font-weight: 500;
 }
 
 .quote-char-count {
   text-align: right;
   font-size: 0.65rem;
-  color: #aaa;
+  color: #999;
   margin-top: 2px;
 }
 
+/* Customization Chips */
 .quote-checkboxes {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 8px;
   margin-top: 4px;
 }
 
 .quote-checkbox-label {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 7px;
+  padding: 7px 12px;
+  background: var(--color-white, #ffffff);
+  border: 1.5px solid #E5DFD5;
+  border-radius: 20px;
   font-size: 0.8rem;
-  color: var(--color-charcoal);
+  font-weight: 500;
+  color: var(--color-charcoal, #292524);
   cursor: pointer;
+  transition: all 0.2s ease;
   user-select: none;
 }
 
+.quote-checkbox-label:hover {
+  border-color: var(--color-gold, #C8A96B);
+}
+
+.quote-checkbox-label.selected,
+.quote-checkbox-label:has(.quote-checkbox:checked) {
+  background: #FAF5EB;
+  border-color: var(--color-gold, #C8A96B);
+  color: var(--color-purple-dark, #3A1649);
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(200, 169, 107, 0.18);
+}
+
 .quote-checkbox {
-  width: 15px;
-  height: 15px;
-  accent-color: var(--color-gold);
+  width: 14px;
+  height: 14px;
+  accent-color: var(--color-purple, #4A1D5F);
   cursor: pointer;
   flex-shrink: 0;
 }
 
-.quote-upload-area {
-  border: 2px dashed var(--color-gold-light);
-  border-radius: 12px;
-  padding: 1.5rem;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  cursor: pointer;
-  transition: border-color 0.2s, background 0.2s;
-  background: var(--color-lavender);
-  color: var(--color-purple);
-  font-size: 0.82rem;
-  text-align: center;
-  min-height: 100px;
-}
-
-.quote-upload-area:hover {
-  border-color: var(--color-gold);
-  background: rgba(200, 169, 107, 0.06);
-}
-
-.quote-upload-area i {
-  font-size: 1.8rem;
-  color: var(--color-gold);
-  margin-bottom: 4px;
-}
-
-.quote-upload-hint {
-  font-size: 0.68rem;
-  color: #999;
-}
-
-.quote-image-preview {
-  position: relative;
-  width: 100%;
-  max-width: 220px;
-}
-
-.quote-image-preview img {
-  width: 100%;
-  border-radius: 8px;
-  max-height: 140px;
-  object-fit: cover;
-  display: block;
-}
-
-.quote-image-remove {
-  position: absolute;
-  top: -8px;
-  right: -8px;
-  width: 26px;
-  height: 26px;
-  border-radius: 50%;
-  background: var(--color-purple);
-  color: #fff;
-  border: 2px solid #fff;
-  font-size: 0.7rem;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background 0.2s;
-}
-
-.quote-image-remove:hover {
-  background: #e24e4e;
-}
-
 .quote-submit-btn {
   width: 100%;
-  padding: 1rem;
-  background: var(--color-whatsapp);
-  color: var(--color-white);
+  padding: 0.95rem;
+  background: #25D366;
+  color: var(--color-white, #ffffff);
   border: none;
   border-radius: 12px;
   font-family: var(--font-sans);
@@ -7108,33 +7047,133 @@ footer h4,
   align-items: center;
   justify-content: center;
   gap: 10px;
-  transition: var(--transition-fast);
-  box-shadow: 0 8px 24px rgba(37, 211, 102, 0.3);
-  margin-top: 0.5rem;
+  transition: all 0.25s ease;
+  box-shadow: 0 8px 24px rgba(37, 211, 102, 0.35);
+  margin-top: 0.4rem;
 }
 
 .quote-submit-btn:hover {
+  background: #20BA59;
   transform: translateY(-2px);
   box-shadow: 0 12px 30px rgba(37, 211, 102, 0.45);
 }
 
 .quote-submit-btn i {
-  font-size: 1.2rem;
+  font-size: 1.3rem;
 }
 
-@media (max-width: 600px) {
+/* ==========================================================================
+   MOBILE RESPONSIVENESS (< 640px) — Smooth Bottom Sheet Experience
+   ========================================================================== */
+@media (max-width: 640px) {
   .quote-modal-backdrop {
-    padding: 16px 12px !important;
+    display: flex !important;
+    align-items: flex-end !important;
+    justify-content: center !important;
+    padding: 0 !important;
+    overflow-y: hidden !important;
   }
 
   .quote-modal-container {
-    margin: 1rem auto !important;
-    padding: 1.5rem 1rem 1rem !important;
-    border-radius: 16px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    max-height: 90vh !important;
+    border-radius: 24px 24px 0 0 !important;
+    margin: 0 !important;
+    padding: 1rem 1.25rem 2.5rem !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    animation: quoteSheetSlideUp 0.32s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+    box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.35) !important;
+    padding-bottom: max(2rem, calc(1.5rem + env(safe-area-inset-bottom))) !important;
+  }
+
+  @keyframes quoteSheetSlideUp {
+    from {
+      opacity: 0;
+      transform: translateY(100%);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .quote-modal-drag-handle {
+    display: block !important;
+    width: 42px !important;
+    height: 4px !important;
+    background: #DDD5C7 !important;
+    border-radius: 10px !important;
+    margin: 0 auto 12px !important;
+  }
+
+  .quote-modal-close {
+    top: 14px !important;
+    right: 14px !important;
+    width: 32px !important;
+    height: 32px !important;
+    font-size: 0.85rem !important;
+    background: #F2ECE3 !important;
+  }
+
+  .quote-modal-header {
+    margin-bottom: 1.2rem !important;
+    padding: 0 20px !important;
+  }
+
+  .quote-modal-icon svg {
+    width: 34px !important;
+    height: 34px !important;
   }
 
   .quote-modal-title {
-    font-size: 1.25rem;
+    font-size: 1.2rem !important;
+    margin-bottom: 4px !important;
+  }
+
+  .quote-modal-subtitle {
+    font-size: 0.78rem !important;
+    line-height: 1.4 !important;
+  }
+
+  .quote-form-row {
+    grid-template-columns: 1fr !important;
+    gap: 0.85rem !important;
+  }
+
+  .quote-modal-form {
+    gap: 0.85rem !important;
+  }
+
+  .quote-input,
+  .quote-select,
+  .quote-textarea {
+    font-size: 16px !important; /* CRITICAL: Prevents unwanted iOS Safari viewport auto-zoom */
+    padding: 0.75rem 0.85rem !important;
+    border-radius: 8px !important;
+    min-height: 44px !important;
+  }
+
+  .quote-textarea {
+    min-height: 70px !important;
+  }
+
+  .quote-checkboxes {
+    gap: 6px !important;
+  }
+
+  .quote-checkbox-label {
+    padding: 6px 10px !important;
+    font-size: 0.76rem !important;
+    border-radius: 16px !important;
+  }
+
+  .quote-submit-btn {
+    height: 48px !important;
+    font-size: 0.95rem !important;
+    border-radius: 10px !important;
+    margin-top: 0.6rem !important;
   }
 }
 

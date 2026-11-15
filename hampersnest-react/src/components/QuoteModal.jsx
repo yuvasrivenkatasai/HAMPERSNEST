@@ -142,6 +142,9 @@ export default function QuoteModal({ open, onClose }) {
   return (
     <div className="quote-modal-backdrop" onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
       <div className="quote-modal-container" role="dialog" aria-modal="true" aria-labelledby="quote-modal-title">
+        {/* Mobile Drag Handle */}
+        <div className="quote-modal-drag-handle"></div>
+
         {/* Close */}
         <button className="quote-modal-close" onClick={onClose} aria-label="Close quote form">
           <i className="fa-solid fa-xmark"></i>
@@ -249,17 +252,20 @@ export default function QuoteModal({ open, onClose }) {
           <div className="quote-form-group">
             <label className="quote-label">Customization Needed</label>
             <div className="quote-checkboxes">
-              {CUSTOMIZATION_OPTIONS.map((opt) => (
-                <label key={opt} className="quote-checkbox-label">
-                  <input
-                    type="checkbox"
-                    className="quote-checkbox"
-                    checked={form.customizations.includes(opt)}
-                    onChange={() => handleCheckbox(opt)}
-                  />
-                  <span>{opt}</span>
-                </label>
-              ))}
+              {CUSTOMIZATION_OPTIONS.map((opt) => {
+                const isSelected = form.customizations.includes(opt);
+                return (
+                  <label key={opt} className={`quote-checkbox-label ${isSelected ? 'selected' : ''}`}>
+                    <input
+                      type="checkbox"
+                      className="quote-checkbox"
+                      checked={isSelected}
+                      onChange={() => handleCheckbox(opt)}
+                    />
+                    <span>{opt}</span>
+                  </label>
+                );
+              })}
             </div>
           </div>
 
