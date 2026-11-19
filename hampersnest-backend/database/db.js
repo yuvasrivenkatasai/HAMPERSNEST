@@ -18,35 +18,49 @@ const rawWalletPath = process.env.DB_WALLET_PATH || path.resolve(__dirname, '../
 const dbWalletPath = path.isAbsolute(rawWalletPath) ? rawWalletPath : path.resolve(__dirname, '..', rawWalletPath);
 const dbWalletPassword = process.env.DB_WALLET_PASSWORD;
 
-const dialectOptions = {};
+const dbDialect = process.env.DB_DIALECT || 'oracle';
 
-if (dbWalletPath) {
-  dialectOptions.connectString = dbService;
-  dialectOptions.configDir = dbWalletPath;
-  dialectOptions.walletLocation = dbWalletPath;
-  if (dbWalletPassword) {
-    dialectOptions.walletPassword = dbWalletPassword;
-  }
+let sequelize;
+
+if (dbDialect === 'sqlite') {
+  sequelize = new Sequelize({
+    dialect: 'sqlite',
+    storage: path.resolve(__dirname, '../database.sqlite'),
+    logging: false
+  });
 } else {
-  if (dbService.trim().startsWith('(')) {
-    dialectOptions.connectString = dbService;
-  } else {
-    dialectOptions.connectString = `${dbHost}:${dbPort}/${dbService}`;
-  }
-}
+  const dialectOptions = {};
 
-const sequelize = new Sequelize({
-  dialect: 'oracle',
-  username: dbUser,
-  password: dbPassword,
-  dialectOptions,
-  logging: false
-});
+  if (dbWalletPath) {
+    dialectOptions.connectString = dbService;
+    dialectOptions.configDir = dbWalletPath;
+    dialectOptions.walletLocation = dbWalletPath;
+    if (dbWalletPassword) {
+      dialectOptions.walletPassword = dbWalletPassword;
+    }
+  } else {
+    if (dbService.trim().startsWith('(')) {
+      dialectOptions.connectString = dbService;
+    } else {
+      dialectOptions.connectString = `${dbHost}:${dbPort}/${dbService}`;
+    }
+  }
+
+  sequelize = new Sequelize({
+    dialect: 'oracle',
+    username: dbUser,
+    password: dbPassword,
+    dialectOptions,
+    logging: false
+  });
+}
 
 export const connectDB = async () => {
   try {
     await sequelize.authenticate();
-    if (dbWalletPath) {
+    if (dbDialect === 'sqlite') {
+      console.log('SQL Database Connected to SQLite (local development mode).');
+    } else if (dbWalletPath) {
       console.log(`SQL Database Connected to Oracle Cloud via Wallet: ${dbService}`);
     } else {
       console.log(`SQL Database Connected to Oracle using: ${dbHost}:${dbPort}/${dbService}`);
