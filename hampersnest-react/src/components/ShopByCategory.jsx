@@ -123,6 +123,10 @@ export default function ShopByCategory() {
                     src={imgSrc}
                     alt={showcase.name}
                     loading="lazy"
+                    onError={(e) => {
+                      e.target.onerror = null;
+                      e.target.src = getDefaultImage(showcase.name);
+                    }}
                   />
                 )}
                 {/* Gold overlay on hover */}
@@ -169,6 +173,10 @@ export default function ShopByCategory() {
                     src={imgSrc}
                     alt={showcase.name}
                     loading="lazy"
+                    onError={(e) => {
+                      e.target.onerror = null;
+                      e.target.src = getDefaultImage(showcase.name);
+                    }}
                   />
                 )}
                 <div className="category-card-overlay"></div>

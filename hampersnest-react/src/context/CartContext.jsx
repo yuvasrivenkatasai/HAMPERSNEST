@@ -158,6 +158,7 @@ export const CartProvider = ({ children }) => {
             cartItemId,
             id: product.id,
             name: product.name,
+            sku: product.sku || '',
             price: finalPrice,
             basePrice: product.price,
             image: product.image,
@@ -279,7 +280,8 @@ export const CartProvider = ({ children }) => {
 
   // Generate Whatsapp Checkout Message
   const getWhatsappCheckoutUrl = (userDetails = {}, orderId = null) => {
-    const whatsappNumber = settings?.whatsappNumber;
+    const rawNumber = settings?.whatsappNumber || settings?.ownerContactNumber || '917989202194';
+    const whatsappNumber = String(rawNumber).replace(/\D/g, '');
     
     const formatDate = (dateStr) => {
       if (!dateStr) return '';
@@ -292,122 +294,154 @@ export const CartProvider = ({ children }) => {
         return dateStr;
       }
     };
+
+    const getBaseOrigin = () => {
+      if (typeof window !== 'undefined' && window.location && window.location.origin) {
+        return window.location.origin;
+      }
+      return 'https://hampersnest.com';
+    };
+
+    const resolveProductImageUrl = (item, matchedProduct) => {
+      let rawImage = item?.image;
+      if (!rawImage && matchedProduct) {
+        rawImage = matchedProduct.image || (matchedProduct.images && matchedProduct.images[0]);
+      }
+      if (!rawImage || typeof rawImage !== 'string') return '';
+      const trimmed = rawImage.trim();
+      if (/^https?:\/\//i.test(trimmed)) {
+        return trimmed;
+      }
+      const origin = getBaseOrigin();
+      if (trimmed.startsWith('/uploads')) {
+        const apiBase = API_BASE ? API_BASE.replace(/\/+$/, '') : origin;
+        return `${apiBase}${trimmed}`;
+      }
+      if (trimmed.startsWith('/')) {
+        return `${origin}${trimmed}`;
+      }
+      return trimmed;
+    };
+
+    const resolveProductDetailUrl = (item) => {
+      const productId = item?.id;
+      if (!productId) return '';
+      const origin = getBaseOrigin();
+      return `${origin}/product/${encodeURIComponent(productId)}`;
+    };
     
     const DIVIDER = '----------------------------------';
-
-    // 1. Header
     const today = new Intl.DateTimeFormat('en-GB', { day: '2-digit', month: 'long', year: 'numeric' }).format(new Date());
+
     let messageParts = [];
     
-    messageParts.push('*HAMPERS NEST*');
-    messageParts.push('Premium Gifts & Return Gifts');
-    messageParts.push('');
-    messageParts.push(DIVIDER);
-    messageParts.push('');
-    messageParts.push('*ORDER SUMMARY*');
+    // 1. Header & Greeting
+    const storeName = settings?.storeName || 'Hampers Nest';
+    messageParts.push(`Hello ${storeName}! I would like to place an order.`);
     messageParts.push('');
     if (orderId) {
-      messageParts.push(`Order ID:\n${orderId}`);
+      messageParts.push(`Order ID: ${orderId}`);
     }
-    messageParts.push(`Date:\n${today}`);
+    messageParts.push(`Date: ${today}`);
     messageParts.push('');
     messageParts.push(DIVIDER);
     messageParts.push('');
-    messageParts.push('*PRODUCTS*');
+    messageParts.push('PRODUCT DETAILS:');
     messageParts.push('');
 
-    // 2. Products
+    // 2. Products List with Images & Clickable Links
     cart.forEach((item, idx) => {
-      messageParts.push(`${idx + 1}.`);
-      messageParts.push('');
-      messageParts.push(`*${item.name}*`);
-      
+      messageParts.push(`Product ${idx + 1}:`);
+      messageParts.push(`Name: ${item.name}`);
+
+      const matchedProduct = (products || []).find((p) => p.id === item.id) || {};
+      const sku = item.sku || matchedProduct.sku || item.id || '';
+      if (sku) {
+        const isOfficialSku = Boolean(item.sku || matchedProduct.sku);
+        messageParts.push(isOfficialSku ? `SKU: ${sku}` : `Product ID: ${sku}`);
+      }
+
       let cats = [];
       if (item.category) cats.push(item.category);
       if (item.subCategory) cats.push(item.subCategory);
-      if (cats.length > 0) messageParts.push(cats.join(' - '));
-      
+      if (cats.length > 0) messageParts.push(`Category: ${cats.join(' - ')}`);
+
       if (item.customizations?.variant) {
         messageParts.push(`Variant: ${item.customizations.variant.name}`);
       }
-      
-      messageParts.push('');
-      messageParts.push(`Quantity: ${item.quantity}`);
-      
+
       if (item.customizations?.giftTag) {
-        messageParts.push('');
-        messageParts.push('Gift Tag:');
-        messageParts.push(item.customizations.giftTag);
+        messageParts.push(`Gift Tag Note: "${item.customizations.giftTag}"`);
       }
-      
-      let addonTotal = 0;
+
       if (item.customizations?.addOns && item.customizations.addOns.length > 0) {
-        messageParts.push('');
         messageParts.push('Selected Add-ons:');
-        item.customizations.addOns.forEach(addon => {
-          // Backward compatibility for old string-based addons
+        item.customizations.addOns.forEach((addon) => {
           const name = typeof addon === 'string' ? addon : addon.name;
           const price = typeof addon === 'string' ? 0 : (Number(addon.price) || 0);
-          addonTotal += price;
-          messageParts.push(`• ${name} (+${formatCurrency(price)})`);
+          messageParts.push(`• ${name}${price > 0 ? ` (+${formatCurrency(price)})` : ''}`);
         });
       }
-      
+
       const basePrice = item.customizations?.variant?.price || item.basePrice || item.price;
       const unitPrice = calculateProductPrice(basePrice, item.customizations?.addOns || []);
-      
-      messageParts.push('');
-      messageParts.push(`Price: ${formatCurrency(unitPrice * item.quantity)}`);
+      const itemSubtotal = unitPrice * item.quantity;
+
+      messageParts.push(`Quantity: ${item.quantity}`);
+      messageParts.push(`Unit Price: ${formatCurrency(unitPrice)}`);
+      messageParts.push(`Subtotal: ${formatCurrency(itemSubtotal)}`);
+
+      // Public Product Image URL
+      const imageUrl = resolveProductImageUrl(item, matchedProduct);
+      if (imageUrl) {
+        messageParts.push(`Product Image: ${imageUrl}`);
+      }
+
+      // Clickable Product Detail Page URL
+      const productPageUrl = resolveProductDetailUrl(item);
+      if (productPageUrl) {
+        messageParts.push(`View Product: ${productPageUrl}`);
+      }
+
       messageParts.push('');
     });
 
-    // 3. Order Summary
+    // 3. Totals
     messageParts.push(DIVIDER);
-    messageParts.push('');
-    messageParts.push(`*TOTALS*`);
-    messageParts.push('');
-    messageParts.push(`Subtotal: ${formatCurrency(cartTotals.subtotal)}`);
-    
     if (cartTotals.discountTotal > 0) {
-       messageParts.push(`Discount: -${formatCurrency(cartTotals.discountTotal)}`);
+      messageParts.push(`Subtotal: ${formatCurrency(cartTotals.subtotal)}`);
+      messageParts.push(`Discount: -${formatCurrency(cartTotals.discountTotal)}`);
+      messageParts.push(`Shipping: Calculated Separately`);
+      messageParts.push(`TOTAL ORDER VALUE: ${formatCurrency(cartTotal)}`);
+    } else {
+      messageParts.push(`TOTAL ORDER VALUE: ${formatCurrency(cartTotal)}`);
+      messageParts.push(`(Shipping: Calculated Separately)`);
     }
-    
-    messageParts.push(`Shipping: Calculated Separately`);
-    messageParts.push(`Grand Total: ${formatCurrency(cartTotal)}`);
-    messageParts.push('');
     messageParts.push(DIVIDER);
 
-    // 4. Customer Details
-    messageParts.push('');
-    messageParts.push(`*CUSTOMER*`);
-    messageParts.push('');
-    
-    if (userDetails.name) messageParts.push(`Name: ${userDetails.name}`);
-    if (userDetails.phone) messageParts.push(`Phone: ${userDetails.phone}`);
-    if (userDetails.eventType) messageParts.push(`Event: ${userDetails.eventType}`);
-    if (userDetails.deliveryDate) messageParts.push(`Required Date: ${formatDate(userDetails.deliveryDate)}`);
-    
-    if (userDetails.notes) {
-       let safeNotes = userDetails.notes.trim();
-       if (safeNotes.length > 180) safeNotes = safeNotes.substring(0, 180) + '...';
-       messageParts.push('');
-       messageParts.push(`Notes:`);
-       messageParts.push(safeNotes);
+    // 4. Customer Details (if provided)
+    if (userDetails.name || userDetails.phone || userDetails.eventType || userDetails.deliveryDate || userDetails.notes) {
+      messageParts.push('');
+      messageParts.push('CUSTOMER DETAILS:');
+      if (userDetails.name) messageParts.push(`Name: ${userDetails.name}`);
+      if (userDetails.phone) messageParts.push(`Phone: ${userDetails.phone}`);
+      if (userDetails.eventType) messageParts.push(`Event: ${userDetails.eventType}`);
+      if (userDetails.deliveryDate) messageParts.push(`Required Date: ${formatDate(userDetails.deliveryDate)}`);
+      
+      if (userDetails.notes) {
+        let safeNotes = userDetails.notes.trim();
+        if (safeNotes.length > 180) safeNotes = safeNotes.substring(0, 180) + '...';
+        messageParts.push(`Notes: ${safeNotes}`);
+      }
+      messageParts.push(DIVIDER);
     }
 
-    // 6. Footer
+    // 5. Confirmation & Closing
     messageParts.push('');
-    messageParts.push(DIVIDER);
+    messageParts.push('Please contact me regarding order confirmation and customization.');
     messageParts.push('');
-    messageParts.push(`Kindly confirm:`);
-    messageParts.push('');
-    messageParts.push(`• Product Availability`);
-    messageParts.push(`• Shipping Charges`);
-    messageParts.push(`• Dispatch Date`);
-    messageParts.push('');
-    messageParts.push(`Thank you.`);
-    messageParts.push('');
-    messageParts.push(`Hampers Nest`);
+    messageParts.push('Thank you,');
+    messageParts.push(storeName);
 
     // Remove any accidental triple blank lines caused by joins
     const message = messageParts.join('\n').replace(/\n{3,}/g, '\n\n');

@@ -212,7 +212,7 @@ export default function Home() {
               </h1>
 
               <p className="atelier-hero-subtitle">
-                {settings?.heroDescription || 'Sacred brass keepsakes, divine silver gifts, artisanal dry fruits, and handcrafted sweets — packed in luxury velvet trunks and personalized with your family’s initials.'}
+                {settings?.heroDescription || 'Luxury gifting solutions crafted for every celebration.'}
               </p>
 
               {/* 3 Tactile Luxury Pillars (Real Craftsmanship Reassurance) */}
@@ -266,6 +266,10 @@ export default function Home() {
                     className="hamper-main-img"
                     onClick={() => handleHeroClick(heroBanner?.destinations?.mainImage)}
                     style={{ cursor: getHeroDestinationUrl(heroBanner?.destinations?.mainImage) ? 'pointer' : undefined }}
+                    onError={(e) => {
+                      e.target.onerror = null;
+                      e.target.src = '/assets/hero_banner.webp';
+                    }}
                   />
                   
                   {/* Subtle Luxury Vignette */}
@@ -300,7 +304,14 @@ export default function Home() {
                   onClick={() => navigate('/collections?category=Wedding')}
                   title="Explore Wedding Gifts"
                 >
-                  <img src={heroBanner?.floatingImageTop || "/assets/wedding_gift.webp"} alt="Wedding Gifts" />
+                  <img 
+                    src={heroBanner?.floatingImageTop || "/assets/wedding_gift.webp"} 
+                    alt="Wedding Gifts" 
+                    onError={(e) => {
+                      e.target.onerror = null;
+                      e.target.src = '/assets/wedding_gift.webp';
+                    }}
+                  />
                   <div className="thumb-overlay">
                     <span>Weddings</span>
                   </div>
@@ -310,7 +321,14 @@ export default function Home() {
                   onClick={() => navigate('/collections?category=Housewarming')}
                   title="Explore Housewarming Gifts"
                 >
-                  <img src={heroBanner?.floatingImageBottom || "/assets/brass_cup.webp"} alt="Housewarming Gifts" />
+                  <img 
+                    src={heroBanner?.floatingImageBottom || "/assets/brass_cup.webp"} 
+                    alt="Housewarming Gifts" 
+                    onError={(e) => {
+                      e.target.onerror = null;
+                      e.target.src = '/assets/brass_cup.webp';
+                    }}
+                  />
                   <div className="thumb-overlay">
                     <span>Housewarming</span>
                   </div>
@@ -320,7 +338,14 @@ export default function Home() {
                   onClick={() => navigate('/collections?category=Baby%20Shower')}
                   title="Explore Baby Shower Gifts"
                 >
-                  <img src="/assets/baby_shower.webp" alt="Baby Shower Favors" />
+                  <img 
+                    src="/assets/baby_shower.webp" 
+                    alt="Baby Shower Favors" 
+                    onError={(e) => {
+                      e.target.onerror = null;
+                      e.target.src = '/assets/baby_shower.webp';
+                    }}
+                  />
                   <div className="thumb-overlay">
                     <span>Baby Shower</span>
                   </div>

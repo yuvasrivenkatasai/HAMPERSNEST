@@ -69,7 +69,7 @@ const ProductCard = memo(({ product, animationDelay = 0 }) => {
   } else if (product.image) {
     initialMedia = [product.image];
   } else {
-    initialMedia = ['/assets/hero_banner.png'];
+    initialMedia = ['/assets/hero_banner.webp'];
   }
 
   const mediaList = initialMedia;
@@ -194,6 +194,10 @@ const ProductCard = memo(({ product, animationDelay = 0 }) => {
                 src={url}
                 alt={`${product.name} - ${idx + 1}`}
                 loading={idx === 0 ? "eager" : "lazy"}
+                onError={(e) => {
+                  e.target.onerror = null;
+                  e.target.src = '/assets/hero_banner.webp';
+                }}
               />
             </div>
           ))}
@@ -312,18 +316,18 @@ const ProductCard = memo(({ product, animationDelay = 0 }) => {
             <span className="card-price-current">
               {formatPrice(product.price)}
             </span>
-            {product.originalPrice && product.originalPrice > product.price && (
+            {(product.originalPrice && Number(product.originalPrice) > Number(product.price)) ? (
               <>
                 <span className="card-price-original">
                   {formatPrice(product.originalPrice)}
                 </span>
-                {discountPercent && (
+                {discountPercent && discountPercent > 0 ? (
                   <span className="card-price-discount">
                     {discountPercent}% OFF
                   </span>
-                )}
+                ) : null}
               </>
-            )}
+            ) : null}
           </div>
         </div>
 

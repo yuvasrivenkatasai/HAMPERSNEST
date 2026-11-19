@@ -87,7 +87,21 @@ app.get('/', (req, res) => {
 });
 
 // Start listening
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
   console.log(`HampersNest Backend running on port ${PORT}`);
   console.log(`- API Status: http://localhost:${PORT}`);
 });
+
+// If running locally on a custom port, also listen on port 5000 if available for asset compatibility
+if (Number(PORT) !== 5000) {
+  try {
+    const fallbackServer = app.listen(5000, () => {
+      console.log(`- Compatibility Listener: http://localhost:5000`);
+    });
+    fallbackServer.on('error', () => {
+      // Silently ignore if port 5000 is occupied
+    });
+  } catch (e) {
+    // Ignore if unavailable
+  }
+}

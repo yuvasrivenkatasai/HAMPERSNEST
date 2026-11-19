@@ -19,3 +19,10 @@ hampersnest-backend/public/uploads/
 hampersnest-backend/.env
 hampersnest-database/.env
 .env
+
+# Export data & local SQLite databases
+HAMPERSNEST_LIVE_EXPORT/
+*.sqlite
+*.sqlite3
+*.db
+

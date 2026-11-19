@@ -273,7 +273,15 @@ export default function CartDrawer() {
               <div style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
                 {cart.map((item) => (
                   <div key={item.cartItemId} className="cart-item">
-                    <img src={item.image} alt={item.name} className="cart-item-img" />
+                    <img 
+                      src={item.image} 
+                      alt={item.name} 
+                      className="cart-item-img"
+                      onError={(e) => {
+                        e.target.onerror = null;
+                        e.target.src = '/assets/hero_banner.webp';
+                      }}
+                    />
                     
                     <div className="cart-item-details">
                       <span className="cart-item-name">{item.name}</span>
@@ -536,22 +544,37 @@ export default function CartDrawer() {
                 </button>
               </>
             ) : (
-              <div style={{ display: 'flex', gap: '10px', marginTop: '0.5rem' }}>
-                <button
-                  type="button"
-                  onClick={() => setCheckoutStep(1)}
-                  className="btn btn-secondary"
-                  style={{ flex: 1, padding: '0.8rem 1rem' }}
-                >
-                  <i className="fa-solid fa-arrow-left"></i> Back
-                </button>
-                <button
-                  onClick={handleCheckoutSubmit}
-                  className="btn btn-primary"
-                  style={{ flex: 2, padding: '0.8rem 1rem', background: 'var(--color-whatsapp)', borderColor: 'var(--color-whatsapp)', boxShadow: '0 8px 20px rgba(37, 211, 102, 0.2)' }}
-                >
-                  Checkout WhatsApp <i className="fa-brands fa-whatsapp"></i>
-                </button>
+              <div style={{ marginTop: '0.5rem' }}>
+                <div style={{ display: 'flex', gap: '10px' }}>
+                  <button
+                    type="button"
+                    onClick={() => setCheckoutStep(1)}
+                    className="btn btn-secondary"
+                    style={{ flex: 1, padding: '0.8rem 1rem' }}
+                  >
+                    <i className="fa-solid fa-arrow-left"></i> Back
+                  </button>
+                  <button
+                    onClick={handleCheckoutSubmit}
+                    className="btn btn-primary"
+                    style={{ flex: 2, padding: '0.8rem 1rem', background: 'var(--color-whatsapp)', borderColor: 'var(--color-whatsapp)', boxShadow: '0 8px 20px rgba(37, 211, 102, 0.2)' }}
+                  >
+                    Checkout WhatsApp <i className="fa-brands fa-whatsapp"></i>
+                  </button>
+                </div>
+                <div style={{
+                  fontSize: '0.78rem',
+                  color: '#666',
+                  textAlign: 'center',
+                  marginTop: '10px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '6px'
+                }}>
+                  <i className="fa-brands fa-whatsapp" style={{ color: 'var(--color-whatsapp, #25D366)' }}></i>
+                  <span>Product images and links will be shared with our team on WhatsApp.</span>
+                </div>
               </div>
             )}
           </div>

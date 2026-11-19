@@ -129,7 +129,23 @@ export default function ProductDetailTemplate({ product, displayRelated = [] }) 
       : '';
     const variantText = selectedVariant ? `\n• Variant: ${selectedVariant.name}` : '';
 
-    const message = `Hi ${settings?.storeName || 'Hampers Nest'}!\n\nI am planning a Return Gift / Event order:\n\n*Product:* ${product.name}\n*Quantity:* ${quantity} pieces (Return Gift Order)\n*Unit Price:* ${formatPrice(unitPrice)}${variantText}${tagText}${addonText}\n*Estimated Total:* ${formatPrice(unitPrice * quantity)}\n\nPlease share delivery confirmation, bulk pricing, and custom gift card design proof.\n\nThank you!`;
+    const origin = typeof window !== 'undefined' && window.location ? window.location.origin : 'https://hampersnest.com';
+    const productUrl = `${origin}/product/${encodeURIComponent(product.id)}`;
+    
+    // Resolve product image
+    let productImg = product.image || (product.images && product.images[0]) || '';
+    if (productImg && productImg.startsWith('/uploads')) {
+      const apiBase = API_BASE ? API_BASE.replace(/\/+$/, '') : origin;
+      productImg = `${apiBase}${productImg}`;
+    } else if (productImg && productImg.startsWith('/')) {
+      productImg = `${origin}${productImg}`;
+    }
+
+    const skuText = product.sku ? `\n• SKU: ${product.sku}` : '';
+    const imgText = productImg ? `\n• Product Image: ${productImg}` : '';
+    const urlText = productUrl ? `\n• View Product: ${productUrl}` : '';
+
+    const message = `Hi ${settings?.storeName || 'Hampers Nest'}!\n\nI am planning a Return Gift / Event order:\n\n*Product:* ${product.name}${skuText}\n*Quantity:* ${quantity} pieces (Return Gift Order)\n*Unit Price:* ${formatPrice(unitPrice)}${variantText}${tagText}${addonText}\n*Estimated Total:* ${formatPrice(unitPrice * quantity)}${imgText}${urlText}\n\nPlease share delivery confirmation, bulk pricing, and custom gift card design proof.\n\nThank you!`;
 
     window.open(`https://wa.me/${cleanNumber}?text=${encodeURIComponent(message)}`, '_blank');
   };
@@ -238,14 +254,14 @@ export default function ProductDetailTemplate({ product, displayRelated = [] }) 
 
               <div className="product-price-block" style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', marginBottom: '1rem' }}>
                 <span className="current-price">{formatPrice(unitPrice)}</span>
-                {product.originalPrice > 0 && product.originalPrice > product.price && (
+                {(product.originalPrice && Number(product.originalPrice) > Number(product.price)) ? (
                   <>
                     <span className="original-price">{formatPrice(product.originalPrice)}</span>
                     <span className="save-badge">
                       Save {Math.round(((product.originalPrice - unitPrice) / product.originalPrice) * 100)}%
                     </span>
                   </>
-                )}
+                ) : null}
 
                 {/* Compact Inline Stock Status Badge */}
                 {effectiveStock === 0 ? (

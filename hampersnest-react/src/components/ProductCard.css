@@ -422,3 +422,44 @@
     border-radius: 6px !important;
   }
 }
+
+@media (max-width: 480px) {
+  .collections-grid-4col,
+  .shop-collections-grid,
+  .collections-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 0.6rem !important;
+  }
+
+  .product-card-modern .card-content {
+    padding: 8px 8px 10px !important;
+  }
+
+  .product-card-modern .card-title {
+    font-size: 0.88rem !important;
+    line-height: 1.25 !important;
+    margin: 2px 0 4px 0 !important;
+  }
+
+  .product-card-modern .card-price-current {
+    font-size: 0.98rem !important;
+  }
+
+  .product-card-modern .card-price-original {
+    font-size: 0.72rem !important;
+  }
+
+  .product-card-modern .card-price-discount {
+    font-size: 0.6rem !important;
+  }
+
+  .product-card-modern .btn-card-action {
+    height: 32px !important;
+    font-size: 0.7rem !important;
+  }
+
+  .product-card-modern .card-chip {
+    font-size: 0.58rem !important;
+    padding: 1px 5px !important;
+  }
+}
