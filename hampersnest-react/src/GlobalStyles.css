@@ -1686,15 +1686,23 @@ header.scrolled {
 }
 
 .card-price-current {
-  font-family: var(--font-sans);
-  font-size: 1.05rem;
-  font-weight: 700;
-  color: var(--color-gold-dark);
-  letter-spacing: 0.3px;
+  font-family: var(--font-sans) !important;
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: var(--color-purple);
+  letter-spacing: 0.2px;
+  line-height: 1.2;
+  /* Serif fonts use old-style digits where 0 looks like a small "o" — force clear, even numerals */
+  font-variant-numeric: lining-nums tabular-nums;
+  font-feature-settings: "lnum" 1, "tnum" 1;
+  background: rgba(197, 160, 89, 0.14);
+  border-radius: 8px;
+  padding: 3px 10px;
 }
 
 .card-price-original {
   font-family: var(--font-sans);
+  font-variant-numeric: lining-nums;
   font-size: 0.82rem;
   font-weight: 400;
   color: #999;
@@ -3839,7 +3847,7 @@ footer {
 
   .collection-card .card-price-current,
   .gallery-item-info .card-price-current {
-    font-size: 0.95rem !important;
+    font-size: 1.15rem !important;
   }
 
   .collection-card .card-price-original,
