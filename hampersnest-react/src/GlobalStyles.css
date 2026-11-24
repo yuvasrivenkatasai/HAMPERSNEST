@@ -1676,6 +1676,42 @@ header.scrolled {
   margin-top: 0 !important;
 }
 
+.card-price-row {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+  margin-top: 0;
+}
+
+.card-price-current {
+  font-family: var(--font-sans);
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--color-gold-dark);
+  letter-spacing: 0.3px;
+}
+
+.card-price-original {
+  font-family: var(--font-sans);
+  font-size: 0.82rem;
+  font-weight: 400;
+  color: #999;
+  text-decoration: line-through;
+}
+
+.card-price-discount {
+  font-family: var(--font-sans);
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #16a34a;
+  background: #f0fdf4;
+  padding: 1px 6px;
+  border-radius: 4px;
+  letter-spacing: 0.2px;
+}
+
 .card-desc {
   font-family: var(--font-sans) !important;
   font-size: 0.78rem !important;
@@ -3793,6 +3829,22 @@ footer {
     margin-bottom: 6px !important;
     /* Reduced space below price */
     text-align: left !important;
+  }
+
+  .collection-card .card-price-row,
+  .gallery-item-info .card-price-row {
+    margin-top: 4px !important;
+    margin-bottom: 6px !important;
+  }
+
+  .collection-card .card-price-current,
+  .gallery-item-info .card-price-current {
+    font-size: 0.95rem !important;
+  }
+
+  .collection-card .card-price-original,
+  .gallery-item-info .card-price-original {
+    font-size: 0.75rem !important;
   }
 
   .collection-card .card-desc {
