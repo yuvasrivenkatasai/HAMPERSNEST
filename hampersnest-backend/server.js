@@ -15,6 +15,7 @@ if (!process.env.JWT_SECRET) {
 }
 
 import { connectDB } from './database/db.js';
+import { ensureExportsDir, resetOrphanedJobs } from './jobs/jobRunner.js';
 import authRoutes from './routes/auth.js';
 import productRoutes from './routes/products.js';
 import orderRoutes from './routes/orders.js';
@@ -27,6 +28,7 @@ import categoryRoutes from './routes/categories.js';
 import heroBannerRoutes from './routes/heroBanner.js';
 import testimonialRoutes from './routes/testimonials.js';
 import categoryShowcaseRoutes from './routes/categoryShowcase.js';
+import currencyRoutes from './routes/currency.js';
 
 dotenv.config();
 
@@ -35,7 +37,17 @@ app.set('trust proxy', 1);
 const PORT = process.env.PORT || 5000;
 
 // Connect to Database
-connectDB();
+connectDB().then(async () => {
+  // Prepare background job state after DB is ready.
+  ensureExportsDir();
+  try {
+    const { ExportJob } = await import('./database/models.js');
+    await ExportJob.sync(); // Create export_jobs table if missing (no destructive alter).
+  } catch (e) {
+    console.error('ExportJob.sync failed:', e.message);
+  }
+  resetOrphanedJobs().catch((e) => console.error('resetOrphanedJobs:', e));
+}).catch(() => { /* connectDB logs its own errors */ });
 
 // Global Middlewares
 app.use(cors());
@@ -72,6 +84,7 @@ app.use('/api/categories', categoryRoutes);
 app.use('/api/hero-banner', heroBannerRoutes);
 app.use('/api/testimonials', testimonialRoutes);
 app.use('/api/category-showcase', categoryShowcaseRoutes);
+app.use('/api/currency', currencyRoutes);
 
 
 // Static files and uploads configuration

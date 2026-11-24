@@ -7,9 +7,14 @@ import csvParser from 'csv-parser';
 import { createRequire } from 'module';
 const require = createRequire(import.meta.url);
 const archiver = require('archiver');
+// archiver v8 ships as pure ESM with no callable default export; import the
+// ZipArchive class directly for new code paths.
+import { ZipArchive } from 'archiver';
 import path from 'path';
-import { Product, Order, Inquiry, Category, ProductCategory } from '../database/models.js';
+import { Product, Order, Inquiry, Category, ProductCategory, ExportJob } from '../database/models.js';
 import { generateProductMediaPath } from '../utils/pathHelper.js';
+import { enqueue, ensureExportsDir } from '../jobs/jobRunner.js';
+import { fetchImageBuffer } from '../services/imageFetcher.js';
 
 export const exportProductsExcel = async (req, res) => {
   try {
@@ -38,6 +43,123 @@ export const exportProductsExcel = async (req, res) => {
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
+};
+
+const PRODUCT_CSV_FIELDS = [
+  'Schema Version',
+  'Product Name', 'Offer Price', 'Original Price', 'Product Rating', 'Category', 'Subcategory', 'Categories & Collections', 'Status', 'Featured', 'Show In Storefront', 'SKU',
+  'Stock Quantity', 'Reserved Quantity', 'Available Quantity', 'Low Stock Threshold', 'Minimum Order Quantity (MOQ)', 'Inventory Status',
+  'Primary Image', 'Additional Images', 'Video File', 'Image Folder', 'Image Count',
+  'Short Description', 'Full Description',
+  'Gift Tag Enabled', 'Gift Tag Placeholder', 'Customization Section Text',
+  'Add-ons Enabled', 'Add-ons',
+  'Delivery Information Text',
+  'Variants Enabled', 'Variants',
+  'Homepage Featured', 'Visibility Status',
+  'Product ID', 'Created Date', 'Updated Date', 'Created By', 'Last Modified By'
+];
+
+/**
+ * Build the products CSV string from product + category rows.
+ * `imageRewriter` (optional): (url, product) => string | null — returned value
+ * replaces the plain basename in the CSV cell. Return null/undefined to keep
+ * the default basename behavior.
+ */
+export const buildProductsCsv = (products, categories, { imageRewriter } = {}) => {
+  const catMap = {};
+  categories.forEach(c => { catMap[c.id] = c.name; });
+
+  const toBool = (val) => (val === true || val === 'true' || val === 1) ? 'TRUE' : 'FALSE';
+  const rewriteOrBasename = (url, product) => {
+    if (!url) return '';
+    if (imageRewriter) {
+      const r = imageRewriter(url, product);
+      if (r) return r;
+    }
+    return url.split('/').pop().split('?')[0];
+  };
+
+  const formattedData = products.map(p => {
+    const prod = typeof p.toJSON === 'function' ? p.toJSON() : p;
+
+    const catName = catMap[prod.category] || prod.category || '';
+    const subcatName = catMap[prod.subCategory] || prod.subCategory || '';
+
+    const allAssignments = Array.isArray(prod.categoryAssignments) && prod.categoryAssignments.length > 0
+      ? prod.categoryAssignments.map(a => `${catMap[a.categoryId] || a.categoryId}${a.subCategoryId ? ` > ${catMap[a.subCategoryId] || a.subCategoryId}` : ''}`).join('; ')
+      : (catName ? `${catName}${subcatName ? ` > ${subcatName}` : ''}` : '');
+
+    let variantsStr = '';
+    if (prod.variantsEnabled && Array.isArray(prod.variants)) {
+      variantsStr = prod.variants.map(v => {
+        return `${v.name}|${v.price}|${v.sku || ''}|${v.stock || 0}${v.isDefault ? '|Default' : ''}`;
+      }).join(';');
+    }
+
+    let addonsStr = '';
+    if (prod.addonsEnabled && Array.isArray(prod.customAddons)) {
+      addonsStr = prod.customAddons.map(a => `${a.name}|${a.price}`).join(';');
+    }
+
+    const coverImage = prod.image ? rewriteOrBasename(prod.image, prod) : '';
+    const additionalImages = Array.isArray(prod.images) && prod.images.length > 0
+      ? prod.images.map(img => rewriteOrBasename(img, prod)).join(';')
+      : '';
+    const videoFile = Array.isArray(prod.videoUrls) && prod.videoUrls.length > 0 && prod.videoUrls[0]
+      ? rewriteOrBasename(prod.videoUrls[0], prod)
+      : '';
+
+    const status = prod.isActive ? 'Active' : 'Inactive';
+    const stockQty = prod.stockQuantity || 0;
+    const reservedQty = prod.reservedQuantity || 0;
+    const availableQty = stockQty - reservedQty;
+
+    return {
+      'Schema Version': '1.0',
+      'Product Name': prod.name || '',
+      'Offer Price': prod.price || 0,
+      'Original Price': prod.originalPrice || 0,
+      'Product Rating': prod.rating || 4.5,
+      'Category': catName,
+      'Subcategory': subcatName,
+      'Categories & Collections': allAssignments,
+      'Status': status,
+      'Featured': toBool(prod.isFeatured),
+      'Show In Storefront': toBool(prod.isActive),
+      'SKU': prod.sku || '',
+      'Stock Quantity': stockQty,
+      'Reserved Quantity': reservedQty,
+      'Available Quantity': availableQty,
+      'Low Stock Threshold': prod.lowStockThreshold || 5,
+      'Minimum Order Quantity (MOQ)': prod.moq || 1,
+      'Inventory Status': availableQty > 0 ? 'In Stock' : 'Out of Stock',
+      'Primary Image': coverImage,
+      'Additional Images': additionalImages,
+      'Video File': videoFile,
+      'Image Folder': prod.name || '',
+      'Image Count': (coverImage ? 1 : 0) + (Array.isArray(prod.images) ? prod.images.length : 0),
+      'Short Description': prod.shortDescription || '',
+      'Full Description': prod.description || '',
+      'Gift Tag Enabled': toBool(prod.customGiftTagEnabled),
+      'Gift Tag Placeholder': '',
+      'Customization Section Text': prod.customizationText || '',
+      'Add-ons Enabled': toBool(prod.addonsEnabled),
+      'Add-ons': addonsStr,
+      'Delivery Information Text': prod.deliveryInfoText || '',
+      'Variants Enabled': toBool(prod.variantsEnabled),
+      'Variants': variantsStr,
+      'Homepage Featured': toBool(prod.isFeatured),
+      'Visibility Status': status,
+      'Product ID': prod.id,
+      'Created Date': prod.createdAt ? new Date(prod.createdAt).toISOString() : '',
+      'Updated Date': prod.updatedAt ? new Date(prod.updatedAt).toISOString() : '',
+      'Created By': 'System',
+      'Last Modified By': 'System'
+    };
+  });
+
+  const parser = new Parser({ fields: PRODUCT_CSV_FIELDS });
+  return parser.parse(formattedData);
 };
 
 export const exportProductsCsv = async (req, res) => {
@@ -582,6 +704,174 @@ export const importProductImagesZipPreview = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+// ---------- Combined products + images "Export All" (background job) ----------
+
+const sanitizeForPath = (s, fallback = 'item') => {
+  const cleaned = String(s || '').replace(/[^a-zA-Z0-9-_]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 60);
+  return cleaned || fallback;
+};
+
+export const enqueueProductsFullExport = async (req, res) => {
+  try {
+    const createdBy = req.user?.username || req.user?.id || null;
+    const job = await enqueue('products_full', runProductsFullExport, { createdBy });
+    res.status(202).json({ jobId: job.id });
+  } catch (error) {
+    console.error('enqueueProductsFullExport error:', error);
+    res.status(500).json({ message: error.message });
+  }
+};
+
+export const getExportJob = async (req, res) => {
+  try {
+    const job = await ExportJob.findByPk(req.params.id);
+    if (!job) return res.status(404).json({ message: 'Job not found' });
+    res.json({
+      id: job.id,
+      type: job.type,
+      status: job.status,
+      progress: job.progress,
+      message: job.message,
+      fileName: job.fileName,
+      fileSize: job.fileSize,
+      error: job.error,
+      createdAt: job.createdAt,
+      updatedAt: job.updatedAt
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+export const downloadExportJob = async (req, res) => {
+  try {
+    const job = await ExportJob.findByPk(req.params.id);
+    if (!job) return res.status(404).json({ message: 'Job not found' });
+    if (job.status !== 'done') {
+      return res.status(409).json({ message: `Job is ${job.status}, not ready to download.` });
+    }
+    if (!job.filePath || !fs.existsSync(job.filePath)) {
+      return res.status(410).json({ message: 'Export file is no longer available.' });
+    }
+    res.download(job.filePath, job.fileName || 'export.zip');
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Worker: builds a ZIP containing products.csv + images/<sku>/<file> + manifest.json
+async function runProductsFullExport(job, report) {
+  await report(1, 'Loading products');
+
+  const products = await Product.findAll({
+    include: [{ model: ProductCategory, as: 'categoryAssignments', required: false }]
+  });
+  const categories = await Category.findAll({ raw: true });
+
+  const total = products.length;
+  await report(5, `Found ${total} products`);
+
+  const exportsDir = ensureExportsDir();
+  const stamp = new Date().toISOString().replace(/[:.]/g, '-');
+  const fileName = `hampersnest-export-${stamp}.zip`;
+  const filePath = path.join(exportsDir, `${job.id}.zip`);
+
+  // Per-product URL -> archive-relative path, for CSV rewrite.
+  const urlToArchivePath = new Map();
+  const warnings = [];
+  const manifestProducts = [];
+
+  // Pre-plan all images so we can rewrite the CSV (write CSV first in archive).
+  // We'll fetch and append binaries while streaming.
+  const plan = []; // [{ url, archivePath, product }]
+  for (const p of products) {
+    const prod = p.toJSON();
+    const folder = `images/${sanitizeForPath(prod.sku || prod.id, prod.id)}`;
+    const files = [];
+    const take = (url) => {
+      if (!url || urlToArchivePath.has(url)) {
+        if (url && urlToArchivePath.has(url)) files.push(urlToArchivePath.get(url));
+        return;
+      }
+      const base = (url.split('?')[0].split('#')[0].split('/').pop() || 'file').replace(/[^a-zA-Z0-9._-]+/g, '_');
+      const archivePath = `${folder}/${base}`;
+      urlToArchivePath.set(url, archivePath);
+      plan.push({ url, archivePath, productId: prod.id });
+      files.push(archivePath);
+    };
+    if (prod.image) take(prod.image);
+    if (Array.isArray(prod.images)) prod.images.forEach(take);
+    if (Array.isArray(prod.videoUrls)) prod.videoUrls.forEach(take);
+    manifestProducts.push({ id: prod.id, name: prod.name, sku: prod.sku, folder, files });
+  }
+
+  await report(10, `Planned ${plan.length} media files`);
+
+  const csv = buildProductsCsv(products, categories, {
+    imageRewriter: (url) => urlToArchivePath.get(url) || null
+  });
+
+  // Create archive piped to disk.
+  const output = fs.createWriteStream(filePath);
+  const archive = new ZipArchive({ zlib: { level: 9 } });
+
+  const archivePromise = new Promise((resolve, reject) => {
+    output.on('close', resolve);
+    output.on('error', reject);
+    archive.on('error', reject);
+    archive.on('warning', (err) => {
+      if (err.code === 'ENOENT') warnings.push(`archive warning: ${err.message}`);
+      else reject(err);
+    });
+  });
+  archive.pipe(output);
+
+  // Add products.csv first so unzip tools show it at the top.
+  archive.append(csv, { name: 'products.csv' });
+
+  // Stream each binary.
+  let done = 0;
+  for (const item of plan) {
+    try {
+      const { buffer } = await fetchImageBuffer(item.url);
+      archive.append(buffer, { name: item.archivePath });
+    } catch (err) {
+      warnings.push(`Skipped ${item.url} (${err.message})`);
+    }
+    done++;
+    // Progress 10% -> 90% during binary fetch.
+    if (plan.length > 0) {
+      const pct = 10 + Math.floor((done / plan.length) * 80);
+      if (done % 5 === 0 || done === plan.length) {
+        await report(pct, `Packaged ${done}/${plan.length} files`);
+      }
+    }
+  }
+
+  const manifest = {
+    schemaVersion: '1.0',
+    generatedAt: new Date().toISOString(),
+    productCount: products.length,
+    fileCount: plan.length,
+    warnings,
+    products: manifestProducts
+  };
+  archive.append(JSON.stringify(manifest, null, 2), { name: 'manifest.json' });
+
+  await report(95, 'Finalizing archive');
+  archive.finalize();
+  await archivePromise;
+
+  const stat = fs.statSync(filePath);
+  job.filePath = filePath;
+  job.fileName = fileName;
+  job.fileSize = stat.size;
+  job.progress = 100;
+  job.status = 'done';
+  job.message = `Done (${warnings.length ? `${warnings.length} warning(s)` : 'no warnings'})`;
+  await job.save();
+}
 
 export const importProductImagesZipCommit = async (req, res) => {
   const { tempZipId, matches, applyWatermark } = req.body;

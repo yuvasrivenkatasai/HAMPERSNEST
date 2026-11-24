@@ -725,6 +725,57 @@ export const ProductCategory = sequelize.define('ProductCategory', {
   ]
 });
 
+// 13. Export Job Model (background jobs for long-running exports)
+export const ExportJob = sequelize.define('ExportJob', {
+  id: {
+    type: DataTypes.STRING,
+    primaryKey: true
+  },
+  type: {
+    type: DataTypes.STRING,
+    allowNull: false // 'products_full'
+  },
+  status: {
+    type: DataTypes.STRING,
+    defaultValue: 'pending' // pending | running | done | failed
+  },
+  progress: {
+    type: DataTypes.INTEGER,
+    defaultValue: 0
+  },
+  message: {
+    type: DataTypes.STRING,
+    defaultValue: ''
+  },
+  filePath: {
+    type: DataTypes.STRING,
+    allowNull: true
+  },
+  fileName: {
+    type: DataTypes.STRING,
+    allowNull: true
+  },
+  fileSize: {
+    type: DataTypes.INTEGER,
+    defaultValue: 0
+  },
+  error: {
+    type: DataTypes.TEXT,
+    allowNull: true
+  },
+  expiresAt: {
+    type: DataTypes.DATE,
+    allowNull: true
+  },
+  createdBy: {
+    type: DataTypes.STRING,
+    allowNull: true
+  }
+}, {
+  tableName: 'export_jobs',
+  timestamps: true
+});
+
 // Associations
 Category.hasMany(Product, { foreignKey: 'category', sourceKey: 'id', as: 'products' });
 Product.belongsTo(Category, { foreignKey: 'category', targetKey: 'id', as: 'categoryDetails' });

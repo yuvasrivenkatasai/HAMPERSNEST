@@ -28,6 +28,10 @@ export default function Products() {
   const [bulkImportOpen, setBulkImportOpen] = useState(false);
   const [bulkVariantModalOpen, setBulkVariantModalOpen] = useState(false);
   const [imageImportModalOpen, setImageImportModalOpen] = useState(false);
+
+  // "Export All" background job state
+  const [exportAllJob, setExportAllJob] = useState(null); // { id, status, progress, message, fileName, fileSize, error }
+  const exportPollRef = useRef(null);
   
   // Bulk selection states
   const [selectedIds, setSelectedIds] = useState([]);
@@ -72,6 +76,56 @@ export default function Products() {
   
   const [selectedImages, setSelectedImages] = useState([]);
   const [selectedVideos, setSelectedVideos] = useState([]);
+
+  // Clean up any running poll on unmount.
+  useEffect(() => () => {
+    if (exportPollRef.current) clearInterval(exportPollRef.current);
+  }, []);
+
+  const pollExportJob = (jobId) => {
+    if (exportPollRef.current) clearInterval(exportPollRef.current);
+    exportPollRef.current = setInterval(async () => {
+      try {
+        const data = await apiRequest(`/api/products/export/jobs/${jobId}`);
+        setExportAllJob(data);
+        if (data.status === 'done') {
+          clearInterval(exportPollRef.current);
+          exportPollRef.current = null;
+          // Auto-trigger download.
+          apiDownload(
+            `/api/products/export/jobs/${jobId}/download`,
+            data.fileName || 'hampersnest-export.zip'
+          ).catch(err => alert(`Download failed: ${err.message}`));
+        } else if (data.status === 'failed') {
+          clearInterval(exportPollRef.current);
+          exportPollRef.current = null;
+        }
+      } catch (err) {
+        clearInterval(exportPollRef.current);
+        exportPollRef.current = null;
+        setExportAllJob(prev => ({ ...(prev || {}), status: 'failed', error: err.message }));
+      }
+    }, 2000);
+  };
+
+  const handleExportAll = async () => {
+    try {
+      setExportAllJob({ status: 'pending', progress: 0, message: 'Starting…' });
+      const { jobId } = await apiRequest('/api/products/export/all', { method: 'POST' });
+      setExportAllJob({ id: jobId, status: 'pending', progress: 0, message: 'Queued' });
+      pollExportJob(jobId);
+    } catch (err) {
+      setExportAllJob({ status: 'failed', error: err.message });
+    }
+  };
+
+  const handleRedownloadExport = () => {
+    if (!exportAllJob?.id) return;
+    apiDownload(
+      `/api/products/export/jobs/${exportAllJob.id}/download`,
+      exportAllJob.fileName || 'hampersnest-export.zip'
+    ).catch(err => alert(`Download failed: ${err.message}`));
+  };
 
   const handleImagesSelected = (e) => {
     const files = Array.from(e.target.files);
@@ -915,6 +969,14 @@ Automatic discounts are applied at checkout:
               <button className="btn-admin-secondary" onClick={() => apiDownload('/api/products/export/images-zip', 'product_images.zip')}>
                 <i className="fa-solid fa-file-zipper"></i> Export Images (ZIP)
               </button>
+              <button
+                className="btn-admin-secondary"
+                onClick={handleExportAll}
+                disabled={exportAllJob && (exportAllJob.status === 'pending' || exportAllJob.status === 'running')}
+                title="Build a single ZIP containing products.csv + all images (runs in background)"
+              >
+                <i className="fa-solid fa-box-archive"></i> Export All (ZIP)
+              </button>
               <button className="btn-admin-secondary" onClick={() => setBulkImportOpen(true)}>
                 <i className="fa-solid fa-boxes-packing"></i> Bulk Import
               </button>
@@ -928,6 +990,66 @@ Automatic discounts are applied at checkout:
           )}
         </div>
       </div>
+
+      {/* Export All progress strip */}
+      {exportAllJob && (
+        <div style={{
+          border: '1px solid var(--color-border, #ddd)',
+          borderRadius: 6,
+          padding: '0.75rem 1rem',
+          marginBottom: '1rem',
+          background: 'var(--color-surface, #fafafa)',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '1rem',
+          flexWrap: 'wrap'
+        }}>
+          <div style={{ fontWeight: 600, minWidth: 140 }}>
+            <i className="fa-solid fa-box-archive" style={{ marginRight: 6 }}></i>
+            Export All (ZIP)
+          </div>
+          <div style={{ flex: 1, minWidth: 220 }}>
+            {exportAllJob.status === 'failed' ? (
+              <div style={{ color: '#b00020' }}>Failed: {exportAllJob.error || 'Unknown error'}</div>
+            ) : (
+              <>
+                <div style={{
+                  height: 8,
+                  borderRadius: 4,
+                  background: '#eee',
+                  overflow: 'hidden'
+                }}>
+                  <div style={{
+                    width: `${exportAllJob.progress || 0}%`,
+                    height: '100%',
+                    background: exportAllJob.status === 'done' ? '#28a745' : 'var(--color-gold, #c9a96a)',
+                    transition: 'width 0.4s ease'
+                  }} />
+                </div>
+                <div style={{ fontSize: '0.8rem', color: 'var(--color-gray-text, #666)', marginTop: 4 }}>
+                  {exportAllJob.status} · {exportAllJob.progress || 0}% · {exportAllJob.message || ''}
+                  {exportAllJob.fileSize ? ` · ${(exportAllJob.fileSize / (1024 * 1024)).toFixed(2)} MB` : ''}
+                </div>
+              </>
+            )}
+          </div>
+          {exportAllJob.status === 'done' && (
+            <button className="btn-admin-secondary" onClick={handleRedownloadExport}>
+              <i className="fa-solid fa-download"></i> Download again
+            </button>
+          )}
+          {(exportAllJob.status === 'done' || exportAllJob.status === 'failed') && (
+            <button
+              className="btn-admin-secondary"
+              style={{ padding: '0.3rem 0.6rem' }}
+              onClick={() => setExportAllJob(null)}
+              title="Dismiss"
+            >
+              <i className="fa-solid fa-xmark"></i>
+            </button>
+          )}
+        </div>
+      )}
 
       {/* Product Count Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '10px' }}>

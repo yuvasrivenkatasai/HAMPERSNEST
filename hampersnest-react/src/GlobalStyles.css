@@ -6996,6 +6996,8 @@ footer h4,
   align-items: center;
   justify-content: center;
   overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
   padding: 40px 16px;
   animation: quoteFadeIn 0.25s ease forwards;
 }
@@ -7275,6 +7277,8 @@ footer h4,
     width: 100% !important;
     max-width: 100% !important;
     max-height: 90vh !important;
+    max-height: 90dvh !important;
+    overscroll-behavior: contain !important;
     border-radius: 24px 24px 0 0 !important;
     margin: 0 !important;
     padding: 1rem 1.25rem 2.5rem !important;

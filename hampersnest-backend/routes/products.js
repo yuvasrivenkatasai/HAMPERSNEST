@@ -18,14 +18,17 @@ import {
 import { protect, requirePermission } from '../middleware/auth.js';
 
 import multer from 'multer';
-import { 
-  exportProductsCsv, 
-  exportProductsExcel, 
-  downloadProductsCsvTemplate, 
+import {
+  exportProductsCsv,
+  exportProductsExcel,
+  downloadProductsCsvTemplate,
   importProductsCsv,
   exportProductImagesZip,
   importProductImagesZipPreview,
-  importProductImagesZipCommit
+  importProductImagesZipCommit,
+  enqueueProductsFullExport,
+  getExportJob,
+  downloadExportJob
 } from '../controllers/exportImportController.js';
 
 const router = express.Router();
@@ -35,6 +38,9 @@ const upload = multer({ dest: 'uploads/' });
 router.get('/export/csv', protect, requirePermission('products'), exportProductsCsv);
 router.get('/export/excel', protect, requirePermission('products'), exportProductsExcel);
 router.get('/export/images-zip', protect, requirePermission('products'), exportProductImagesZip);
+router.post('/export/all', protect, requirePermission('products'), enqueueProductsFullExport);
+router.get('/export/jobs/:id', protect, requirePermission('products'), getExportJob);
+router.get('/export/jobs/:id/download', protect, requirePermission('products'), downloadExportJob);
 router.get('/template/csv', protect, requirePermission('products'), downloadProductsCsvTemplate);
 router.post('/import/csv', protect, requirePermission('products'), upload.single('file'), importProductsCsv);
 router.post('/import/images-zip/preview', protect, requirePermission('products'), upload.single('file'), importProductImagesZipPreview);

@@ -17,6 +17,7 @@ wallet/
 # Local storage and temporary uploads
 uploads/
 public/uploads/
+tmp/
 *.sqlite
 *.sqlite3
 *.db
