@@ -34,9 +34,14 @@ function AppInner() {
       {/* Header layout */}
       <Header />
 
-      {/* Page Routing */}
-      <main style={{ flex: '1 0 auto' }}>
-        <Suspense fallback={<div style={{ textAlign: 'center', padding: '10rem 2rem' }}><i className="fa-solid fa-spinner fa-spin" style={{ fontSize: '3rem', color: 'var(--color-gold)' }}></i></div>}>
+      {/* Page Routing & Bottom Sections wrapped in Suspense to prevent layout jump on refresh */}
+      <Suspense fallback={
+        <div style={{ flex: '1 0 auto', minHeight: '60vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+          <i className="fa-solid fa-spinner fa-spin" style={{ fontSize: '2.5rem', color: 'var(--color-gold)' }}></i>
+          <p style={{ marginTop: '1rem', color: 'var(--color-purple-dark)', fontWeight: 500 }}>Loading...</p>
+        </div>
+      }>
+        <main style={{ flex: '1 0 auto' }}>
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/collections" element={<Collections />} />
@@ -53,12 +58,12 @@ function AppInner() {
             {/* Universal 404 Catch-All Redirect */}
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
-        </Suspense>
-      </main>
+        </main>
 
-      {/* Visit Our Studio section & Follow Our Journey rendered on all pages */}
-      <StudioMap />
-      <FollowJourney />
+        {/* Visit Our Studio section & Follow Our Journey rendered on all pages */}
+        <StudioMap />
+        <FollowJourney />
+      </Suspense>
 
       {/* Main Footer */}
       <Footer />

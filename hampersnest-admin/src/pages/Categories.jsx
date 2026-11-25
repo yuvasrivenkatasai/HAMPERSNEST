@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { apiRequest } from '../utils/api';
 
 export default function Categories() {
@@ -8,6 +8,7 @@ export default function Categories() {
   const [success, setSuccess] = useState('');
   const [saving, setSaving] = useState(false);
   const [editingCategory, setEditingCategory] = useState(null); // null means "Add Category" mode
+  const formPanelRef = useRef(null);
   const [formData, setFormData] = useState({ name: '', parentId: '' });
 
   const fetchCategories = async () => {
@@ -37,6 +38,8 @@ export default function Categories() {
 
   const handleSelectEdit = (category) => {
     setEditingCategory(category);
+    // On stacked (mobile/tablet) layouts the form may be off-screen; bring it into view
+    requestAnimationFrame(() => formPanelRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }));
     setFormData({
       name: category.name,
       parentId: category.parentId || ''
@@ -138,7 +141,7 @@ export default function Categories() {
         </div>
       )}
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1.8fr) minmax(0, 1.2fr)', gap: '25px', alignItems: 'start' }}>
+      <div className="split-layout" style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1.8fr) minmax(0, 1.2fr)', gap: '25px', alignItems: 'start' }}>
 
         {/* Categories List Table */}
         <div className="dashboard-panel" style={{ margin: 0 }}>
@@ -217,7 +220,7 @@ export default function Categories() {
         </div>
 
         {/* Create / Edit Form */}
-        <div className="dashboard-panel" style={{ margin: 0 }}>
+        <div className="dashboard-panel split-aside" ref={formPanelRef} style={{ margin: 0 }}>
           <div className="panel-header" style={{ borderBottom: '1px solid var(--color-gray-border)', paddingBottom: '1rem', marginBottom: '1.5rem' }}>
             <h3 style={{ margin: 0 }}>
               <i className={editingCategory ? "fa-solid fa-pen" : "fa-solid fa-plus-circle"} style={{ color: 'var(--color-gold-dark)', marginRight: '10px' }}></i>

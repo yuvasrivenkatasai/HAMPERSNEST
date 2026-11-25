@@ -30,16 +30,31 @@ const DEFAULT_TESTIMONIALS = [
 ];
 
 export default function Home() {
+  console.log('[DEBUG-NAV] HOME PAGE MOUNTED/RENDERED at path:', window.location.pathname);
   const { products, addToCart, setQuoteModalOpen, settings } = useCart();
   const { formatPrice } = useCurrency();
   const navigate = useNavigate();
   const [activeSlide, setActiveSlide] = useState(0);
   const [testimonials, setTestimonials] = useState(DEFAULT_TESTIMONIALS);
-  const [heroBanner, setHeroBanner] = useState({
-    mainImage: '/assets/hero_banner.webp',
-    floatingImageTop: '/assets/wedding_gift.webp',
-    floatingImageBottom: '/assets/brass_cup.webp',
-    isActive: true
+  // Initialize hero banner with cached configuration to prevent flash of default images
+  const [heroBanner, setHeroBanner] = useState(() => {
+    try {
+      const cached = localStorage.getItem('cached_hero_banner');
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (parsed && (parsed.mainImage || parsed.floatingImageTop || parsed.floatingImageBottom)) {
+          return parsed;
+        }
+      }
+    } catch (e) {
+      // Ignore cache errors
+    }
+    return {
+      mainImage: '/assets/hero_banner.webp',
+      floatingImageTop: '/assets/wedding_gift.webp',
+      floatingImageBottom: '/assets/brass_cup.webp',
+      isActive: true
+    };
   });
 
   // Fetch Hero Banner Configuration
@@ -51,6 +66,9 @@ export default function Home() {
           const data = await response.json();
           if (data && data.isActive) {
             setHeroBanner(data);
+            try {
+              localStorage.setItem('cached_hero_banner', JSON.stringify(data));
+            } catch (e) {}
           }
         }
       } catch (error) {

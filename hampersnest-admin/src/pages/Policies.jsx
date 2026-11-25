@@ -134,12 +134,12 @@ export default function Policies() {
       {message && <div className="alert alert-success">{message}</div>}
       {error && <div className="alert alert-danger">{error}</div>}
 
-      <div style={{ display: 'flex', gap: '20px', minHeight: 'calc(100vh - 120px)' }}>
+      <div className="policies-layout" style={{ display: 'flex', gap: '20px', minHeight: 'calc(100vh - 120px)' }}>
         {/* Sidebar for Policies */}
-        <div style={{ width: '250px', background: 'var(--color-white)', borderRadius: '12px', padding: '15px', boxShadow: 'var(--shadow-premium)' }}>
+        <div className="policies-list" style={{ width: '250px', flexShrink: 0, background: 'var(--color-white)', borderRadius: '12px', padding: '15px', boxShadow: 'var(--shadow-premium)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
             <h3 style={{ fontSize: '1rem', margin: 0 }}>All Policies</h3>
-            <button onClick={handleAddNew} className="btn btn-primary" style={{ padding: '5px 10px', fontSize: '0.7rem' }}>
+            <button onClick={handleAddNew} className="btn-admin" style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem', minHeight: '36px' }}>
               <i className="fa-solid fa-plus"></i> Add
             </button>
           </div>
@@ -174,7 +174,7 @@ export default function Policies() {
         </div>
 
         {/* Editor Area */}
-        <div style={{ flex: 1, background: 'var(--color-white)', borderRadius: '12px', padding: '25px', boxShadow: 'var(--shadow-premium)' }}>
+        <div className="policies-editor" style={{ flex: 1, minWidth: 0, background: 'var(--color-white)', borderRadius: '12px', padding: '25px', boxShadow: 'var(--shadow-premium)' }}>
           {selectedPolicy ? (
             <div>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', paddingBottom: '15px', borderBottom: '1px solid #eee' }}>
@@ -184,16 +184,16 @@ export default function Policies() {
                     href={`http://localhost:5173/${selectedPolicy.isCustom ? 'policy/' : ''}${selectedPolicy.id}`} 
                     target="_blank" 
                     rel="noopener noreferrer" 
-                    className="btn btn-secondary"
+                    className="btn-admin-secondary"
                   >
                     <i className="fa-solid fa-eye"></i> Preview
                   </a>
-                  <button onClick={() => handleSaveAll()} disabled={saving} className="btn btn-primary">
+                  <button onClick={() => handleSaveAll()} disabled={saving} className="btn-admin">
                     {saving ? <i className="fa-solid fa-spinner fa-spin"></i> : <i className="fa-solid fa-floppy-disk"></i>} 
                     {saving ? 'Saving...' : 'Save & Publish'}
                   </button>
                   {selectedPolicy.isCustom && (
-                    <button onClick={() => handleDelete(selectedPolicyIndex)} className="btn btn-danger" style={{ background: '#dc3545', color: '#fff', border: 'none' }}>
+                    <button onClick={() => handleDelete(selectedPolicyIndex)} className="btn-admin" title="Delete policy" style={{ background: '#dc3545', color: '#fff', border: 'none' }}>
                       <i className="fa-solid fa-trash"></i>
                     </button>
                   )}

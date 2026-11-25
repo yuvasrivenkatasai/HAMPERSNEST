@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, useLocation, useNavigate, Navigate } from 'react-router-dom';
 import { apiRequest } from './utils/api';
 
@@ -85,7 +85,7 @@ function ProtectedRoute({ permissionKey, userPermissions, children }) {
   return children;
 }
 
-function NavigationMenu({ userPermissions }) {
+function NavigationMenu({ userPermissions, collapsed, mobileOpen, onClose }) {
   const location = useLocation();
 
   const handleLogout = () => {
@@ -100,33 +100,40 @@ function NavigationMenu({ userPermissions }) {
   const visibleAdminItems = ADMIN_SIDEBAR_ITEMS.filter(item => hasPermission(userPermissions, item.permission));
 
   return (
-    <aside className="admin-sidebar">
+    <aside
+      id="admin-sidebar"
+      className={`admin-sidebar${collapsed ? ' is-collapsed' : ''}${mobileOpen ? ' is-open' : ''}`}
+      aria-label="Main navigation"
+    >
       {/* Brand logo details */}
       <div className="sidebar-brand">
         <img src="/assets/logo.webp" alt="Hampers Nest Logo" className="brand-logo-img sidebar-logo" />
         <h1 style={{ display: 'none' }}>Hampers Nest Admin</h1>
+        <button type="button" className="sidebar-close" onClick={onClose} aria-label="Close menu">
+          <i className="fa-solid fa-xmark"></i>
+        </button>
       </div>
       
       {/* Sidebar Navigation */}
-      <ul className="sidebar-menu" style={{ overflowY: 'auto' }}>
+      <ul className="sidebar-menu">
         {visibleItems.map(item => (
           <li key={item.path}>
-            <Link to={item.path} className={`sidebar-link ${location.pathname === item.path ? 'active' : ''}`}>
-              <i className={item.icon}></i> {item.label}
+            <Link to={item.path} title={item.label} onClick={onClose} className={`sidebar-link ${location.pathname === item.path ? 'active' : ''}`}>
+              <i className={item.icon}></i> <span className="sidebar-label">{item.label}</span>
             </Link>
           </li>
         ))}
         
         {visibleAdminItems.length > 0 && (
           <>
-            <li style={{ marginTop: '1.5rem', marginBottom: '0.5rem', paddingLeft: '1rem', fontSize: '0.75rem', textTransform: 'uppercase', color: 'rgba(255,255,255,0.5)', fontWeight: 'bold' }}>
-              Administration
+            <li className="sidebar-section-label">
+              <span className="sidebar-label">Administration</span>
             </li>
             
             {visibleAdminItems.map(item => (
               <li key={item.path}>
-                <Link to={item.path} className={`sidebar-link ${location.pathname === item.path ? 'active' : ''}`}>
-                  <i className={item.icon}></i> {item.label}
+                <Link to={item.path} title={item.label} onClick={onClose} className={`sidebar-link ${location.pathname === item.path ? 'active' : ''}`}>
+                  <i className={item.icon}></i> <span className="sidebar-label">{item.label}</span>
                 </Link>
               </li>
             ))}
@@ -136,8 +143,8 @@ function NavigationMenu({ userPermissions }) {
       
       {/* Logout button */}
       <div className="sidebar-footer">
-        <button onClick={handleLogout} className="btn-logout">
-          <i className="fa-solid fa-arrow-right-from-bracket"></i> Logout
+        <button onClick={handleLogout} className="btn-logout" title="Logout">
+          <i className="fa-solid fa-arrow-right-from-bracket"></i> <span className="sidebar-label">Logout</span>
         </button>
       </div>
     </aside>
@@ -147,6 +154,42 @@ function NavigationMenu({ userPermissions }) {
 function AdminLayout({ children, userPermissions }) {
   const location = useLocation();
   const [userRole, setUserRole] = useState(localStorage.getItem('adminRole') || 'Admin');
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const [collapsed, setCollapsed] = useState(() => {
+    try { return localStorage.getItem('adminSidebarCollapsed') === '1'; } catch { return false; }
+  });
+  const contentRef = useRef(null);
+
+  // Start each page at the top of the scroll container
+  useEffect(() => {
+    if (contentRef.current) contentRef.current.scrollTop = 0;
+  }, [location.pathname]);
+
+  // Close the drawer with Escape, and if the window grows past the drawer breakpoint
+  useEffect(() => {
+    if (!mobileNavOpen) return undefined;
+    const onKey = (e) => { if (e.key === 'Escape') setMobileNavOpen(false); };
+    const mq = window.matchMedia('(min-width: 1025px)');
+    const onMq = (e) => { if (e.matches) setMobileNavOpen(false); };
+    window.addEventListener('keydown', onKey);
+    mq.addEventListener('change', onMq);
+    return () => {
+      window.removeEventListener('keydown', onKey);
+      mq.removeEventListener('change', onMq);
+    };
+  }, [mobileNavOpen]);
+
+  const toggleNav = () => {
+    if (window.matchMedia('(max-width: 1024px)').matches) {
+      setMobileNavOpen(open => !open);
+    } else {
+      setCollapsed(c => {
+        const next = !c;
+        try { localStorage.setItem('adminSidebarCollapsed', next ? '1' : '0'); } catch { /* noop */ }
+        return next;
+      });
+    }
+  };
   
   useEffect(() => {
     const fetchProfile = async () => {
@@ -175,22 +218,43 @@ function AdminLayout({ children, userPermissions }) {
       case '/settings': return 'System Settings';
       case '/users': return 'User Access Control';
       case '/hero-banner': return 'Homepage Hero Images';
+      case '/category-showcase': return 'Category Showcase';
       default: return 'Hampers Nest Admin';
     }
   };
 
   return (
-    <div className="admin-shell">
-      <NavigationMenu userPermissions={userPermissions} />
+    <div className={`admin-shell${collapsed ? ' sidebar-collapsed' : ''}`}>
+      <NavigationMenu
+        userPermissions={userPermissions}
+        collapsed={collapsed}
+        mobileOpen={mobileNavOpen}
+        onClose={() => setMobileNavOpen(false)}
+      />
+      <div
+        className={`sidebar-backdrop${mobileNavOpen ? ' is-visible' : ''}`}
+        onClick={() => setMobileNavOpen(false)}
+        aria-hidden="true"
+      />
       
-      <main className="admin-main">
-        {/* Top bar header */}
+      <main className="admin-main" ref={contentRef}>
+        {/* Top bar header (sticky inside the single scroll container) */}
         <header className="admin-header">
           <div className="admin-header-title">
+            <button
+              type="button"
+              className="header-menu-btn"
+              onClick={toggleNav}
+              aria-label="Toggle navigation"
+              aria-controls="admin-sidebar"
+              aria-expanded={mobileNavOpen || !collapsed}
+            >
+              <i className="fa-solid fa-bars"></i>
+            </button>
             <h2>{getPageTitle()}</h2>
           </div>
           <div className="admin-header-profile">
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', marginRight: '5px' }}>
+            <div className="admin-header-profile-text">
               <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>Administrator</span>
               <span style={{ fontSize: '0.7rem', color: 'var(--color-purple)' }}>{userRole}</span>
             </div>

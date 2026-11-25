@@ -859,7 +859,7 @@ Automatic discounts are applied at checkout:
     <div>
       {/* Search and Action Bar */}
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '15px', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-        <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap', flex: 1 }}>
+        <div className="toolbar-filters" style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap', flex: 1 }}>
           
           {/* Category Selector */}
           <select
@@ -984,7 +984,7 @@ Automatic discounts are applied at checkout:
         </div>
 
         {/* Export / Import / Add Product Buttons */}
-        <div style={{ display: 'flex', gap: '10px' }}>
+        <div className="toolbar-actions" style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
           {(adminRole === 'Super Admin' || adminRole === 'Manager') && (
             <>
               <button className="btn-admin-secondary" onClick={() => apiDownload('/api/products/export/csv', 'products.csv')}>
@@ -1133,13 +1133,9 @@ Automatic discounts are applied at checkout:
 
       {/* Floating Bulk Action Bar */}
       {selectedIds.length > 0 && (
-        <div style={{
-          position: 'fixed', bottom: '20px', left: '50%', transform: 'translateX(-50%)',
-          background: '#fff', padding: '15px 25px', borderRadius: '8px', boxShadow: '0 10px 25px rgba(0,0,0,0.15)',
-          display: 'flex', gap: '15px', alignItems: 'center', zIndex: 1000, border: '1px solid var(--color-purple)'
-        }}>
+        <div className="bulk-action-bar">
           <span style={{ fontWeight: 'bold', color: 'var(--color-purple)' }}>{selectedIds.length} Selected</span>
-          <div style={{ height: '24px', width: '1px', background: '#ccc' }}></div>
+          <div className="bulk-divider" style={{ height: '24px', width: '1px', background: '#ccc' }}></div>
           <button className="btn-admin-secondary" onClick={() => executeBulkUpdate({ isActive: true })}>Activate</button>
           <button className="btn-admin-secondary" onClick={() => executeBulkUpdate({ isActive: false })}>Deactivate</button>
           <button className="btn-admin-secondary" onClick={() => executeBulkUpdate({ isFeatured: true })}>Feature</button>
@@ -1153,7 +1149,7 @@ Automatic discounts are applied at checkout:
             </select>
             <button className="btn-admin-secondary" disabled={!bulkCategory} onClick={() => executeBulkUpdate({ category: bulkCategory })}>Apply</button>
           </div>
-          <div style={{ height: '24px', width: '1px', background: '#ccc' }}></div>
+          <div className="bulk-divider" style={{ height: '24px', width: '1px', background: '#ccc' }}></div>
           {adminRole === 'Super Admin' && (
             <button className="btn-admin" style={{ background: '#dc3545', color: '#fff' }} onClick={executeBulkDelete}><i className="fa-solid fa-trash"></i> Delete</button>
           )}
@@ -1922,7 +1918,7 @@ Automatic discounts are applied at checkout:
                     <div className="form-group" style={{ marginBottom: '20px', padding: '15px', background: '#fff', border: '1px solid #e0e0e0', borderRadius: '8px' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
                         <label className="form-label" style={{ margin: 0 }}>Custom Add-ons Options</label>
-                        <button type="button" className="btn btn-secondary" onClick={handleAddCustomAddon} style={{ padding: '4px 10px', fontSize: '0.8rem' }}>
+                        <button type="button" className="btn-admin-secondary" onClick={handleAddCustomAddon} style={{ padding: '4px 10px', fontSize: '0.8rem' }}>
                           <i className="fa-solid fa-plus"></i> Add Option
                         </button>
                       </div>
@@ -1951,9 +1947,10 @@ Automatic discounts are applied at checkout:
                               />
                               <button 
                                 type="button" 
-                                className="btn btn-danger" 
+                                className="btn-admin-secondary" 
                                 onClick={() => handleRemoveCustomAddon(index)}
-                                style={{ padding: '8px', minWidth: '40px', flexShrink: 0 }}
+                                title="Remove option"
+                                style={{ padding: '8px', minWidth: '40px', flexShrink: 0, color: '#dc3545', borderColor: '#dc3545' }}
                               >
                                 <i className="fa-solid fa-trash"></i>
                               </button>

@@ -8,6 +8,7 @@ import { API_BASE } from '../config.js';
 import Breadcrumbs from '../components/Breadcrumbs';
 
 export default function ProductDetail() {
+  console.log('[DEBUG-NAV] PRODUCT DETAIL PAGE MOUNTED/RENDERED at path:', window.location.pathname);
   const { id } = useParams();
   const navigate = useNavigate();
   const { products, addToCart, toggleWishlist, isInWishlist, settings } = useCart();
@@ -56,7 +57,7 @@ export default function ProductDetail() {
     faqs: false,
   });
 
-    // Scroll to top on product change
+  // Scroll to top on product change
   useEffect(() => {
 
     // Track product view in backend database
@@ -79,7 +80,7 @@ export default function ProductDetail() {
     const revealElements = document.querySelectorAll(
       '.reveal, .reveal-heading, .reveal-category'
     );
-    
+
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -102,9 +103,32 @@ export default function ProductDetail() {
 
   if (loadingLocal) {
     return (
-      <div className="page-container" style={{ textAlign: 'center', padding: '10rem 2rem' }}>
-        <i className="fa-solid fa-spinner fa-spin" style={{ fontSize: '3rem', color: 'var(--color-gold)' }}></i>
-        <p style={{ marginTop: '1rem', color: 'var(--color-gray-text)' }}>Loading product details...</p>
+      <div className="page-container" style={{ minHeight: '80vh', padding: '3rem 2rem', maxWidth: '1200px', margin: '0 auto' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '3rem', alignItems: 'center' }}>
+          {/* Product Gallery Skeleton */}
+          <div style={{
+            width: '100%',
+            height: '480px',
+            background: 'linear-gradient(135deg, rgba(200,169,107,0.08) 0%, rgba(74,29,95,0.04) 100%)',
+            border: '1px solid var(--color-gold-light)',
+            borderRadius: '20px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            boxShadow: '0 8px 30px rgba(74,29,95,0.05)'
+          }}>
+            <i className="fa-solid fa-spinner fa-spin" style={{ fontSize: '2.5rem', color: 'var(--color-gold)' }}></i>
+          </div>
+
+          {/* Product Info Skeleton */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
+            <div style={{ width: '35%', height: '20px', background: 'var(--color-beige)', borderRadius: '4px' }}></div>
+            <div style={{ width: '90%', height: '36px', background: 'var(--color-beige)', borderRadius: '8px' }}></div>
+            <div style={{ width: '30%', height: '28px', background: 'var(--color-beige)', borderRadius: '6px' }}></div>
+            <div style={{ width: '100%', height: '90px', background: 'var(--color-beige)', borderRadius: '10px' }}></div>
+            <div style={{ width: '50%', height: '48px', background: 'var(--color-gold-light)', borderRadius: '30px' }}></div>
+          </div>
+        </div>
       </div>
     );
   }
@@ -137,8 +161,8 @@ export default function ProductDetail() {
     .slice(0, 3) : [];
 
   // Fallback to featured products if no same-category items
-  const displayRelated = relatedProducts.length > 0 
-    ? relatedProducts 
+  const displayRelated = relatedProducts.length > 0
+    ? relatedProducts
     : (products ? products.filter((p) => p.id !== product.id).slice(0, 3) : []);
 
   const productSchema = {
@@ -175,17 +199,17 @@ export default function ProductDetail() {
   return (
     <div className="page-container">
 
-      <SEO 
+      <SEO
         title={`${product.name} | Customized Gift Hampers Hyderabad | ${settings?.storeName || 'Hampers Nest'}`}
         description={`${product.description} Customizable packaging, ribbons, and gift tags available. Order directly via WhatsApp.`}
         keywords={`${product.name.toLowerCase()}, custom gift box hyderabad, return gift hampers, hampersnest product, hampersnest ${product.id}`}
         ogImage={product.image}
         schema={productSchema}
       />
-      
+
 
       <ProductDetailTemplate product={product} displayRelated={displayRelated} />
-      
+
       <SeoKeywordsSection />
     </div>
   );

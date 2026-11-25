@@ -491,7 +491,7 @@ export default function Orders() {
                   {editFormData.items.length === 0 ? (
                     <div className="empty-state" style={{ padding: '20px' }}>Please add at least one product to create the order.</div>
                   ) : (
-                    <table className="data-table" style={{ fontSize: '0.85rem' }}>
+                    <div className="table-responsive"><table className="data-table" style={{ fontSize: '0.85rem' }}>
                       <thead>
                         <tr>
                           <th style={{ width: '40%' }}>Product</th>
@@ -526,7 +526,7 @@ export default function Orders() {
                           </tr>
                         ))}
                       </tbody>
-                    </table>
+                    </table></div>
                   )}
                 </div>
               </div>
@@ -582,7 +582,7 @@ export default function Orders() {
 
               {/* Order Items Summary */}
               <h4 style={{ marginBottom: '0.5rem', color: 'var(--color-purple)' }}>Ordered Hampers</h4>
-              <div style={{ border: '1px solid var(--color-gray-border)', borderRadius: '8px', overflow: 'hidden', marginBottom: '1.5rem' }}>
+              <div style={{ border: '1px solid var(--color-gray-border)', borderRadius: '8px', overflowX: 'auto', marginBottom: '1.5rem' }}>
                 <table className="data-table" style={{ fontSize: '0.8rem' }}>
                   <thead style={{ background: 'var(--color-gray-light)' }}>
                     <tr>

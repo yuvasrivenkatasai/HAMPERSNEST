@@ -29,9 +29,27 @@ function getDefaultImage(categoryName) {
 }
 
 export default function ShopByCategory() {
-  const [showcases, setShowcases] = useState([]);
+  const [showcases, setShowcases] = useState(() => {
+    try {
+      const cached = localStorage.getItem('cached_category_showcase');
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch (e) {}
+    return [];
+  });
   const [animationEnabled, setAnimationEnabled] = useState(true);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(() => {
+    try {
+      const cached = localStorage.getItem('cached_category_showcase');
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (Array.isArray(parsed) && parsed.length > 0) return false;
+      }
+    } catch (e) {}
+    return true;
+  });
   const [isVisible, setIsVisible] = useState(false);
   const sectionRef = useRef(null);
   const scrollRef = useRef(null);
@@ -43,8 +61,12 @@ export default function ShopByCategory() {
         const response = await fetch(`${API_BASE}/api/category-showcase`);
         if (response.ok) {
           const data = await response.json();
-          setShowcases(data.showcases || []);
+          const items = data.showcases || [];
+          setShowcases(items);
           setAnimationEnabled(data.animationEnabled);
+          try {
+            localStorage.setItem('cached_category_showcase', JSON.stringify(items));
+          } catch (e) {}
         }
       } catch (error) {
         console.error('Error fetching category showcases:', error);

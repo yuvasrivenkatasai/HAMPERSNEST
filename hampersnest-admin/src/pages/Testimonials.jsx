@@ -169,7 +169,7 @@ export default function Testimonials() {
                   <th>Client Name</th>
                   <th>Occasion/Event</th>
                   <th>Rating</th>
-                  <th style={{ width: '45%' }}>Review Quote</th>
+                  <th style={{ width: '45%', minWidth: '280px' }}>Review Quote</th>
                   <th>Status</th>
                   <th>Actions</th>
                 </tr>
