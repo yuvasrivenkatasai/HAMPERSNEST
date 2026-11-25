@@ -57,7 +57,7 @@ export default function ProductDetail() {
     faqs: false,
   });
 
-  // Scroll to top on product change
+    // Scroll to top on product change
   useEffect(() => {
 
     // Track product view in backend database
@@ -80,7 +80,7 @@ export default function ProductDetail() {
     const revealElements = document.querySelectorAll(
       '.reveal, .reveal-heading, .reveal-category'
     );
-
+    
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -161,8 +161,8 @@ export default function ProductDetail() {
     .slice(0, 3) : [];
 
   // Fallback to featured products if no same-category items
-  const displayRelated = relatedProducts.length > 0
-    ? relatedProducts
+  const displayRelated = relatedProducts.length > 0 
+    ? relatedProducts 
     : (products ? products.filter((p) => p.id !== product.id).slice(0, 3) : []);
 
   const productSchema = {
@@ -199,17 +199,17 @@ export default function ProductDetail() {
   return (
     <div className="page-container">
 
-      <SEO
+      <SEO 
         title={`${product.name} | Customized Gift Hampers Hyderabad | ${settings?.storeName || 'Hampers Nest'}`}
         description={`${product.description} Customizable packaging, ribbons, and gift tags available. Order directly via WhatsApp.`}
         keywords={`${product.name.toLowerCase()}, custom gift box hyderabad, return gift hampers, hampersnest product, hampersnest ${product.id}`}
         ogImage={product.image}
         schema={productSchema}
       />
-
+      
 
       <ProductDetailTemplate product={product} displayRelated={displayRelated} />
-
+      
       <SeoKeywordsSection />
     </div>
   );
