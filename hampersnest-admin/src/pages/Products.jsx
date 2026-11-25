@@ -77,9 +77,35 @@ export default function Products() {
   const [selectedImages, setSelectedImages] = useState([]);
   const [selectedVideos, setSelectedVideos] = useState([]);
 
-  // Clean up any running poll on unmount.
-  useEffect(() => () => {
-    if (exportPollRef.current) clearInterval(exportPollRef.current);
+  // Warn before refresh/close/navigation-away while an export is running.
+  const exportRunning = !!exportAllJob && (exportAllJob.status === 'pending' || exportAllJob.status === 'running');
+  useEffect(() => {
+    if (!exportRunning) return undefined;
+    const warn = (e) => {
+      e.preventDefault();
+      e.returnValue = '';
+    };
+    window.addEventListener('beforeunload', warn);
+    return () => window.removeEventListener('beforeunload', warn);
+  }, [exportRunning]);
+
+  // Resume an in-flight (or finished) Export All job after a page refresh.
+  useEffect(() => {
+    let savedId = null;
+    try { savedId = localStorage.getItem('exportAllJobId'); } catch { /* noop */ }
+    if (savedId) {
+      apiRequest(`/api/products/export/jobs/${savedId}`)
+        .then((data) => {
+          setExportAllJob(data);
+          if (data.status === 'pending' || data.status === 'running') pollExportJob(savedId);
+        })
+        .catch(() => {
+          try { localStorage.removeItem('exportAllJobId'); } catch { /* noop */ }
+        });
+    }
+    return () => {
+      if (exportPollRef.current) clearInterval(exportPollRef.current);
+    };
   }, []);
 
   const pollExportJob = (jobId) => {
@@ -113,6 +139,7 @@ export default function Products() {
       setExportAllJob({ status: 'pending', progress: 0, message: 'Starting…' });
       const { jobId } = await apiRequest('/api/products/export/all', { method: 'POST' });
       setExportAllJob({ id: jobId, status: 'pending', progress: 0, message: 'Queued' });
+      try { localStorage.setItem('exportAllJobId', jobId); } catch { /* noop */ }
       pollExportJob(jobId);
     } catch (err) {
       setExportAllJob({ status: 'failed', error: err.message });
@@ -1030,6 +1057,12 @@ Automatic discounts are applied at checkout:
                   {exportAllJob.status} · {exportAllJob.progress || 0}% · {exportAllJob.message || ''}
                   {exportAllJob.fileSize ? ` · ${(exportAllJob.fileSize / (1024 * 1024)).toFixed(2)} MB` : ''}
                 </div>
+                {(exportAllJob.status === 'pending' || exportAllJob.status === 'running') && (
+                  <div style={{ fontSize: '0.8rem', color: '#8a5a00', background: '#fff6e0', border: '1px solid #f0d9a0', borderRadius: 4, padding: '0.4rem 0.6rem', marginTop: 8 }}>
+                    <i className="fa-solid fa-triangle-exclamation" style={{ marginRight: 6 }}></i>
+                    Export in progress. Please don't refresh, close or leave this page until it finishes. The download starts automatically.
+                  </div>
+                )}
               </>
             )}
           </div>
@@ -1042,7 +1075,10 @@ Automatic discounts are applied at checkout:
             <button
               className="btn-admin-secondary"
               style={{ padding: '0.3rem 0.6rem' }}
-              onClick={() => setExportAllJob(null)}
+              onClick={() => {
+                setExportAllJob(null);
+                try { localStorage.removeItem('exportAllJobId'); } catch { /* noop */ }
+              }}
               title="Dismiss"
             >
               <i className="fa-solid fa-xmark"></i>
